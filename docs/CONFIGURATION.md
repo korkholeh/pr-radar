@@ -11,7 +11,7 @@ and edit it. `manage.py` defaults `DJANGO_SETTINGS_MODULE` to `config.settings.l
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated list. `e2e.py` overrides this to `127.0.0.1,localhost` regardless of `.env`. |
 | `DATABASE_URL` | `sqlite:///data/db.sqlite3` (derived from `DATA_DIR`) | Any URL `django-environ` understands. Only the ORM is used anywhere in the codebase (ADR 0001), so pointing this at `postgres://…` needs no code change. Left unset, it always tracks `DATA_DIR`. |
 | `DATA_DIR` | `data` (repository-relative) | Holds `db.sqlite3`, `huey.sqlite3`, `logs/`, `cache/`, `exports/`, `repos/`, `staticfiles/`. Created on settings import if missing. `e2e.py` ignores this and always uses `.e2e/data`, so an e2e run never touches your own `DATA_DIR`. |
-| `REPORT_TIMEZONE` | `Europe/Kyiv` | The timezone dashboards, rollups and reports use for day boundaries. Storage stays UTC (`TIME_ZONE = "UTC"`, `USE_TZ = True`); this setting is only consumed by the day-boundary helper phase 7 adds. |
+| `REPORT_TIMEZONE` | `Europe/Kyiv` | The timezone dashboards, rollups and reports use for day boundaries. Storage stays UTC (`TIME_ZONE = "UTC"`, `USE_TZ = True`); consumed by the day-boundary helper `apps/metrics/timeframe.py`. |
 | `FIELD_ENCRYPTION_KEYS` | empty list | Comma-separated Fernet keys for encrypting GitHub connection tokens at rest. The first key encrypts; every key in the list can decrypt, which is how `manage.py rotate_encryption_key` rotates without downtime. Required before creating a connection — see `docs/GITHUB_CONNECTIONS.md`. |
 | `STORE_RAW_PAYLOADS` | `False` | When true, sync stores the raw GitHub GraphQL response alongside the derived fields (more disk, easier debugging). |
 | `GITHUB_API_BASE_URL` | `https://api.github.com` | REST/GraphQL host GitHub sync talks to; `GITHUB_GRAPHQL_URL` is derived by appending `/graphql`. Deployment wiring (not operator policy, see `docs/GITHUB_CONNECTIONS.md`) — the one thing to change for GitHub Enterprise Server. |
@@ -63,6 +63,9 @@ missing.
 | metrics | `FOLLOWUP_FIX_WINDOW_DAYS` | int | `14` | Days after merge in which a follow-up fix is attributed. |
 | metrics | `FOLLOWUP_FIX_FILE_OVERLAP` | float | `0.5` | Minimum file overlap ratio to attribute a follow-up fix to a PR. |
 | policy | `NO_TESTS_MIN_LINES` | int | `20` | Minimum changed lines before a missing-tests violation applies. |
+| policy | `POLICY_DISABLED_RULES` | list | `[]` | Rule codes switched off entirely; an open violation for a disabled code auto-resolves on the next run. An unrecognised code is ignored with a logged warning. See `docs/POLICY.md`. |
+| policy | `POLICY_VIOLATION_PATHS_IN_PARAMS` | int | `20` | Maximum file paths stored in a sensitive-path violation's `details_params`; the real total is kept separately as `path_count` so a large PR can't write an oversized row. |
+| policy | `VIOLATIONS_PAGE_SIZE` | int | `50` | Rows per page on the Policy console's violation table. |
 | churn | `CHURN_WINDOW_DAYS` | int | `21` | Days after merge over which churn is measured. |
 | churn | `CHURN_MAX_FILES` | int | `50` | Maximum files in a PR before churn analysis is skipped. |
 | ui | `DEFAULT_UI_LANGUAGE` | str | `en` | Default UI language for a new user. Kept in sync with `UserPreference.language`'s field default by a test. |

@@ -12,11 +12,14 @@ from apps.activity.models import AIDisclosure, AIStatus
 from apps.ai_detection.disclosure import load_config, parse_disclosure
 from apps.ai_detection.models import Detector
 from apps.connections.check_codes import CHECK_CODES
+from apps.policy.models import PolicyViolation, SensitivePathRule
+from apps.policy.rules import SEVERITY
 
 DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
 GITHUB_CONNECTIONS_DOCS_PATH = DOCS_ROOT / "GITHUB_CONNECTIONS.md"
 DECISIONS_DOCS_PATH = DOCS_ROOT / "DECISIONS.md"
 PR_TEMPLATE_PATH = DOCS_ROOT / "pull_request_template.md"
+POLICY_DOCS_PATH = DOCS_ROOT / "POLICY.md"
 
 # Fields that are bookkeeping (row identity, internal linkage) rather than a metric-facing rule and so
 # aren't expected to appear in the prose definition table.
@@ -38,6 +41,24 @@ def test_every_derived_field_is_documented():
     text = DECISIONS_DOCS_PATH.read_text(encoding="utf-8")
     missing = [name for name in sorted(field_names) if f"`{name}`" not in text]
     assert not missing, f"docs/DECISIONS.md is missing derived field(s): {missing}"
+
+
+def test_every_rule_code_status_and_ai_mode_is_documented():
+    text = POLICY_DOCS_PATH.read_text(encoding="utf-8")
+    values = (
+        *PolicyViolation.RuleCode.values,
+        *PolicyViolation.Status.values,
+        *SensitivePathRule.AiMode.values,
+    )
+    missing = [value for value in values if f"`{value}`" not in text]
+    assert not missing, f"docs/POLICY.md is missing value(s): {missing}"
+
+
+def test_policy_severity_table_matches_the_code():
+    text = POLICY_DOCS_PATH.read_text(encoding="utf-8")
+    rows = re.findall(r"^\| `([A-Z_]+)` \| (\w+) \|", text, re.MULTILINE)
+    documented = {code: severity for code, severity in rows if code in PolicyViolation.RuleCode.values}
+    assert documented == dict(SEVERITY)
 
 
 def _extract_template_markdown() -> str:

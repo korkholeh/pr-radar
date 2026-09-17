@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 import apps.github_sync.services as services_module
@@ -10,6 +12,8 @@ from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
 from apps.github_sync.services import run_sync
 from apps.github_sync.tests.conftest import mock_graphql_sequence
+from apps.policy.factories import AIPolicyFactory
+from apps.policy.models import PolicyViolation
 
 TOKEN = "ghp_secrettokenvalue0123456789"
 
@@ -117,6 +121,59 @@ def test_raising_hook_does_not_roll_back_the_pull_requests_rows_but_is_recorded(
     assert run.stats["errors"] == 1
     assert "acme/widget" in run.error_log
     assert "post-processing hook failed" in run.error_log
+
+
+def _policy_before_fixture_prs(**kwargs):
+    return AIPolicyFactory(effective_from=datetime.datetime(2025, 1, 1, tzinfo=datetime.UTC), **kwargs)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_hook_evaluates_policy_and_leaves_the_violation_on_the_pull_request():
+    _policy_before_fixture_prs(require_disclosure=True)
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    pull_request = PullRequest.objects.get(repository=repository)
+    violation = PolicyViolation.objects.get(
+        pull_request=pull_request, rule_code=PolicyViolation.RuleCode.DISCLOSURE_MISSING
+    )
+    assert violation.status == PolicyViolation.Status.OPEN
+
+
+@pytest.mark.django_db(transaction=True)
+def test_second_sync_creates_no_duplicate_violation():
+    _policy_before_fixture_prs(require_disclosure=True)
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    mock_graphql_sequence(*_one_pr_sequence())
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    pull_request = PullRequest.objects.get(repository=repository)
+    assert PolicyViolation.objects.filter(pull_request=pull_request).count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_evaluate_failure_inside_the_hook_is_still_contained(monkeypatch):
+    import apps.github_sync.pipeline as pipeline_module
+
+    def _boom(pk):
+        raise RuntimeError("evaluate boom")
+
+    monkeypatch.setattr(pipeline_module, "evaluate_pull_request", _boom)
+    monkeypatch.setattr(services_module, "process_pull_request", pipeline_module.process_pull_request)
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+
+    run = run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    run.refresh_from_db()
+    assert PullRequest.objects.filter(repository=repository).exists()
+    assert run.status == SyncRun.Status.PARTIAL
+    assert run.stats["errors"] == 1
 
 
 @pytest.mark.django_db(transaction=True)

@@ -9,6 +9,8 @@ from apps.activity.models import AIStatus
 from apps.ai_detection.factories import DetectionRuleFactory
 from apps.ai_detection.models import AISignal, Confidence, Detector, Tool
 from apps.catalog.factories import ProjectFactory, RepositoryFactory
+from apps.policy.factories import AIPolicyFactory
+from apps.policy.models import PolicyViolation
 
 
 @pytest.mark.django_db
@@ -120,3 +122,31 @@ def test_running_it_twice_is_a_noop_on_row_counts():
     call_command("recompute")
 
     assert AISignal.objects.count() == count_after_first
+
+
+@pytest.mark.django_db
+def test_recompute_evaluates_a_policy_added_after_the_pr_was_synced():
+    pr = PullRequestFactory(created_at=timezone.now() - datetime.timedelta(days=10), body="")
+    call_command("recompute")
+    assert PolicyViolation.objects.filter(pull_request=pr).count() == 0
+
+    AIPolicyFactory(require_disclosure=True, effective_from=timezone.now() - datetime.timedelta(days=30))
+    call_command("recompute")
+
+    violation = PolicyViolation.objects.get(
+        pull_request=pr, rule_code=PolicyViolation.RuleCode.DISCLOSURE_MISSING
+    )
+    assert violation.status == PolicyViolation.Status.OPEN
+
+
+@pytest.mark.django_db
+def test_second_recompute_changes_no_policy_violation_row_counts():
+    AIPolicyFactory(require_disclosure=True, effective_from=timezone.now() - datetime.timedelta(days=30))
+    PullRequestFactory(created_at=timezone.now() - datetime.timedelta(days=10), body="")
+
+    call_command("recompute")
+    count_after_first = PolicyViolation.objects.count()
+
+    call_command("recompute")
+
+    assert PolicyViolation.objects.count() == count_after_first

@@ -1,6 +1,10 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+from apps.catalog.globs import compile_globs
 
 
 class AIPolicy(models.Model):
@@ -12,7 +16,7 @@ class AIPolicy(models.Model):
     ai_pr_max_effective_lines = models.PositiveIntegerField(
         _("maximum effective lines for an AI PR"), null=True, blank=True
     )
-    effective_from = models.DateTimeField(_("effective from"))
+    effective_from = models.DateTimeField(_("effective from"), unique=True)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
@@ -46,10 +50,26 @@ class SensitivePathRule(models.Model):
     class Meta:
         verbose_name = _("sensitive path rule")
         verbose_name_plural = _("sensitive path rules")
+        ordering = ["project_id", "glob"]
         indexes = [models.Index(fields=["project", "is_active"])]
+        constraints = [
+            models.UniqueConstraint(fields=["project", "glob"], name="uniq_sensitive_path_project_glob"),
+            models.UniqueConstraint(
+                fields=["glob"],
+                condition=Q(project__isnull=True),
+                name="uniq_sensitive_path_global_glob",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.glob
+
+    def clean(self) -> None:
+        super().clean()
+        if not self.glob or not self.glob.strip():
+            raise ValidationError({"glob": _("A path glob is required.")})
+        if not compile_globs([self.glob]):
+            raise ValidationError({"glob": _("This glob could not be compiled.")})
 
 
 class PolicyViolation(models.Model):
@@ -110,6 +130,7 @@ class PolicyViolation(models.Model):
         indexes = [
             models.Index(fields=["status", "severity"]),
             models.Index(fields=["rule_code", "created_at"]),
+            models.Index(fields=["pull_request", "status"]),
         ]
 
     def __str__(self) -> str:

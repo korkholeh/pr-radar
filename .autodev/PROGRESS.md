@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 5/11 · step `commit`
+- **Current:** phase 6/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 40% (reset 18.09 01:40) · 7d 33%
-- **Totals:** 69 sessions · 7.7 h agent time · ≈$156.66 API-equivalent
-- **Clock:** 14.8 h since the run was created · 7.7 h working · 3.4 h paused on the usage limit · 3.7 h not running
-- **Updated:** 2026-09-17 21:59:56
+- **Usage:** 5h 16% (reset 18.09 06:40) · 7d 36%
+- **Totals:** 84 sessions · 9.9 h agent time · ≈$198.25 API-equivalent
+- **Clock:** 19.2 h since the run was created · 9.9 h working · 5.6 h paused on the usage limit · 3.7 h not running
+- **Updated:** 2026-09-18 02:26:29
 
 ## Run warnings
 
@@ -22,8 +22,8 @@
 | 2 | Domain models, migrations and Django admin | no | ✅ done | abc20ee | not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 3 | GitHub connections and incremental sync | yes | ✅ done | d9e0077 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 4 | Identity resolution and derived PR fields | yes | ✅ done | ed2d2c8 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 5 | AI detection | yes | 🔨 in_progress |  |  |
-| 6 | AI policy engine and violations console | yes | ⏳ pending |  |  |
+| 5 | AI detection | yes | ✅ done | 66f9dc6 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 6 | AI policy engine and violations console | yes | 🔨 in_progress |  |  |
 | 7 | Metrics registry, rollups and recompute | no | ⏳ pending |  |  |
 | 8 | Dashboards, charts, themes and table export | yes | ⏳ pending |  |  |
 | 9 | People, PRs, Reviews, scoped access and reports | yes | ⏳ pending |  |  |
@@ -162,6 +162,34 @@
 - `2026-09-17 21:58:57` **p05-tests** — pass: exit 0: ............................... [100%]
 - `2026-09-17 21:59:56` **p05-docs** — done (0m, $0.44): Checked phase 5 docs against PLAN.md/code/DECISIONS.md — all already true, no edits needed. CLAUDE.md lists `ai_detection` app + `recompute`/`seed_detection_rules` commands. docs/CONFIGURATION.md has both new `ai` settings (DETECTION_DRY_RUN_PR_COUNT, DISCLOSURE_TOOL_ALIASES). docs/DECISIONS.md Pha…
 - `2026-09-17 21:59:56` **p05-docs** — no changes: the documentation was already true for this phase
+- `2026-09-17 21:59:56` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-17 21:59:56` **p05-commit** — done: 66f9dc6
+- `2026-09-17 21:59:59` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-17 22:00:04` **p05-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p05-ai-detection
+- `2026-09-17 22:00:08` **p05-pr** — draft: https://github.com/korkholeh/pr-radar/pull/6
+- `2026-09-17 22:00:18` **p05-merge** — done: https://github.com/korkholeh/pr-radar/pull/6
+- `2026-09-17 22:09:31` **p06-plan** — done (9m, $3.42): Explored the existing policy app, pipeline, audit and settings machinery, then wrote .autodev/phases/06-policy-engine/PLAN.md with Context, Design, 20 ordered tasks, a verification table mapping all seven acceptance criteria to named tests, the RISKS rows touched, and out-of-scope boundaries. Appen…
+- `2026-09-17 22:23:37` **p06-implement** — handover: context reached 200,817 tokens — checkpointing for a fresh session
+- `2026-09-17 22:25:01` **p06-implement** — partial (15m, $4.93): Session 1 of phase 6 (AI policy engine and violations console). Done and green: T1 (three new `policy` AppSettings + migration 0005), T2 (`apps/metrics/timeframe.py` shared day-boundary helper, `recompute.py` switched to it), T3 (`SensitivePathRule`/`AIPolicy`/`PolicyViolation` model hardening + mi…
+- `2026-09-17 22:37:01` **p06-implement** — handover: context reached 200,598 tokens — checkpointing for a fresh session
+- `2026-09-17 22:38:31` **p06-implement** — partial (13m, $4.68): Continued phase 6 from T8. Implemented and tested: T8 (merge/test/size evaluator tests), T9 (evaluate_pull_request/evaluate_pull_requests wanted-vs-existing diff + auto-resolve, services.py), T10 (pipeline.py + recompute.py wiring, extended test_pipeline.py/test_recompute_command.py), T11 (selector…
+- `2026-09-17 22:51:20` **p06-implement** — handover: context reached 200,521 tokens — checkpointing for a fresh session
+- `2026-09-17 22:52:16` **p06-implement** — partial (13m, $3.68): Session 3 built T14-T18 in full (Policy console with KPIs/chart/mismatch list/filters/pagination, bulk acknowledge/waive, Settings→AI policy, Settings→Sensitive paths, and the details_params prose-safety tests), all with passing tests, plus views.py/urls.py/templates/templatetags and nav/config wir…
+- `2026-09-17 23:10:09` **p06-implement** — done (17m, $4.3): Finished phase 6 (T19-T20, the remaining work from prior sessions). T19: wrote docs/CONFIGURATION.md's three new policy settings rows (and fixed a stale "phase 7 adds" REPORT_TIMEZONE note), docs/user/handle-policy-violations.md, the docs/DECISIONS.md phase 6 section, and a CHANGELOG.md entry. T20:…
+- `2026-09-17 23:10:30` **p06-tests** — pass: exit 0: ........................................................................ [100%]
+- `2026-09-17 23:16:08` **p06-review1** — changes_requested (5m, $3.27): Phase 6 is well-built and well-tested: the nine evaluators match spec §7 verbatim, the wanted-vs-existing diff is idempotent and parametrized over all nine codes, auto-resolve is filtered to status=OPEN with an AuditEntry, details_params carries only data, every selector starts from a ScopeFilter, …
+- `2026-09-17 23:24:04` **p06-review_fix1** — done (7m, $2.19): Applied review round-1 fixes for phase 6 (policy engine).\n\nFixed:\n- [BLOCKER] evaluate_pull_request/evaluate_pull_requests now judge each PR under the AIPolicy version in effect at that PR's own created_at (new _policy_at() over all versions loaded once), not the newest version overall — saving …
+- `2026-09-17 23:24:25` **p06-tests** — pass: exit 0: .. [100%]
+- `2026-09-17 23:29:15` **p06-review2** — changes_requested (4m, $2.89): Round 2 fixes all six round-1 findings, and the phase is otherwise strong: nine evaluators match spec §7 verbatim, the wanted-vs-existing diff is idempotent and parametrized over all nine codes, auto-resolve is filtered to status=OPEN with a null-actor AuditEntry, details_params carries only data, …
+- `2026-09-17 23:29:16` **usage** — paused: 5h usage 88% ≥ 85%; sleeping until ≈18.09 01:42
+- `2026-09-18 01:42:01` **usage** — resumed: 5h 0% (reset ?) · 7d 36%
+- `2026-09-18 01:52:42` **p06-review_fix2** — done (10m, $3.38): Applied all round-2 review fixes for phase 6 (policy engine). Fixed: - MAJOR: save_policy_version() now stamps the first-ever AIPolicy version at the earliest synced PR's created_at (falling back to now() with no PRs), so it actually governs existing history instead of only PRs created after the sa…
+- `2026-09-18 01:53:03` **p06-tests** — pass: exit 0: ........ [100%]
+- `2026-09-18 01:56:56` **p06-review_audit2** — approve (3m, $1.67): Every round-2 finding is fixed in the product by this diff, each with a test that fails without the fix. The major (a Settings-saved policy governing no existing PR) is fixed in save_policy_version by stamping only the first-ever version at the earliest synced PullRequest.created_at and keeping now…
+- `2026-09-18 02:24:50` **p06-e2e** — done (27m, $6.67): Built 3 new e2e plans (policy_console, ai_policy_settings, sensitive_paths_settings; 20 cases) and specs against the running e2e surface, extending manage.py seed_e2e with real, pipeline-evaluated PolicyViolation/AIPolicy/SensitivePathRule/Project fixtures (`_seed_policy`, idempotent across reseeds…
+- `2026-09-18 02:25:12` **p06-e2e** — pass: exit 0: ..................................................... [100%]
+- `2026-09-18 02:26:29` **p06-docs** — done (1m, $0.53): Docs already true — no edits made. Checked CLAUDE.md (commands/conventions match, no new mgmt command this phase), docs/POLICY.md (nine-rule table matches apps.policy.rules.SEVERITY exactly, effective_from/auto-resolve/ack-vs-waive sections match the review-fixed behavior), docs/CONFIGURATION.md (t…
+- `2026-09-18 02:26:29` **p06-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

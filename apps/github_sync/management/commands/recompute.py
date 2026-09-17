@@ -1,33 +1,19 @@
 import datetime
-from zoneinfo import ZoneInfo
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Coalesce
 
 from apps.activity.derive import derive_pull_requests
 from apps.activity.models import PullRequest
 from apps.ai_detection.services import detect_pull_requests
-
-
-def _as_date(date: datetime.date | str) -> datetime.date:
-    """`call_command(..., **{"from": "2026-01-01"})` bypasses argparse's `type=` conversion, so
-    `date` may still be an ISO string here."""
-    return datetime.date.fromisoformat(date) if isinstance(date, str) else date
-
-
-def _day_start(date: datetime.date | str) -> datetime.datetime:
-    """Midnight of `date` in REPORT_TIMEZONE (spec: day boundaries are Kyiv days, not UTC ones).
-    Phase 7's shared rollup day-boundary helper replaces this local conversion."""
-    return datetime.datetime.combine(
-        _as_date(date), datetime.time.min, tzinfo=ZoneInfo(settings.REPORT_TIMEZONE)
-    )
+from apps.metrics.timeframe import day_end_exclusive, day_start
+from apps.policy.services import evaluate_pull_requests
 
 
 class Command(BaseCommand):
     help = (
-        "Re-runs derive() then detect() over stored PRs (spec §5.5), without any GitHub call. "
-        "Phase 6 adds policy evaluation and phase 7 adds rollup rebuilding to this command."
+        "Re-runs derive(), detect() then evaluate() over stored PRs (spec §5.5), without any "
+        "GitHub call. Phase 7 adds rollup rebuilding to this command."
     )
 
     def add_arguments(self, parser) -> None:
@@ -47,10 +33,9 @@ class Command(BaseCommand):
             effective_updated_at=Coalesce("updated_at_github", "created_at")
         )
         if options["date_from"] is not None:
-            queryset = queryset.filter(effective_updated_at__gte=_day_start(options["date_from"]))
+            queryset = queryset.filter(effective_updated_at__gte=day_start(options["date_from"]))
         if options["date_to"] is not None:
-            next_day = _as_date(options["date_to"]) + datetime.timedelta(days=1)
-            queryset = queryset.filter(effective_updated_at__lt=_day_start(next_day))
+            queryset = queryset.filter(effective_updated_at__lt=day_end_exclusive(options["date_to"]))
         if options["repos"]:
             queryset = queryset.filter(repository__full_name__in=options["repos"])
         if options["project"]:
@@ -59,4 +44,8 @@ class Command(BaseCommand):
 
         derived = derive_pull_requests(queryset)
         detected = detect_pull_requests(queryset)
-        self.stdout.write(f"Recomputed {derived} pull request(s) (derive={derived}, detect={detected}).")
+        evaluated = evaluate_pull_requests(queryset)
+        self.stdout.write(
+            f"Recomputed {derived} pull request(s) "
+            f"(derive={derived}, detect={detected}, evaluate={evaluated})."
+        )

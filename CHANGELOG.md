@@ -36,3 +36,14 @@
   signal with its evidence.
 - `manage.py recompute` and `manage.py seed_detection_rules` management commands.
 - `docs/pull_request_template.md`, a recommended PR template matching the disclosure parser's defaults.
+- AI policy engine: nine configurable rules (missing/mismatched disclosure, a disallowed tool, a forbidden or
+  extra-review sensitive path, missing human approval, self-merge, missing tests, an oversized AI PR) evaluated
+  idempotently after every sync, with results that auto-resolve when the condition clears without ever
+  overwriting a lead's own judgement. See `docs/POLICY.md`.
+- Policy console (`/policy/`): compliance KPIs, a by-rule violation distribution, a disclosure-mismatch PR list,
+  and a filterable, paginated violation table with bulk acknowledge/waive (a reason is required); every status
+  change is recorded in the audit trail. See `docs/user/handle-policy-violations.md`.
+- Settings → AI policy: a versioned, append-only AI policy (allowed tools, disclosure/approval/test requirements,
+  size limit) — saving creates a new version rather than editing history.
+- Settings → Sensitive paths: list, create, edit and activate/deactivate a path glob marked `forbidden` or
+  `needs_extra_review`, globally or per project.

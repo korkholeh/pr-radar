@@ -185,6 +185,27 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         _("Minimum changed lines before a missing-tests violation applies."),
         "policy",
     ),
+    SettingDef(
+        "POLICY_DISABLED_RULES",
+        "list",
+        [],
+        _("Rule codes switched off; an open violation for a disabled rule auto-resolves."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_VIOLATION_PATHS_IN_PARAMS",
+        "int",
+        20,
+        _("Maximum sensitive paths stored in a violation's details; the total is kept separately."),
+        "policy",
+    ),
+    SettingDef(
+        "VIOLATIONS_PAGE_SIZE",
+        "int",
+        50,
+        _("Rows per page on the policy violations console."),
+        "policy",
+    ),
     SettingDef("CHURN_WINDOW_DAYS", "int", 21, _("Days after merge over which churn is measured."), "churn"),
     SettingDef(
         "CHURN_MAX_FILES", "int", 50, _("Maximum files in a PR before churn analysis is skipped."), "churn"

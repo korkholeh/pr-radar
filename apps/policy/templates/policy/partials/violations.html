@@ -1,0 +1,113 @@
+{% load i18n policy_extras %}
+{% if notice %}
+  <div class="mb-4 text-[var(--good)]" role="status">{{ notice }}</div>
+{% endif %}
+{% if action_errors %}
+  <div class="mb-4 text-[var(--bad)]" role="alert">
+    {% for field, errors in action_errors.items %}
+      {% for error in errors %}<p>{{ error }}</p>{% endfor %}
+    {% endfor %}
+  </div>
+{% endif %}
+<form
+  method="post"
+  action="{% url 'policy:violation_bulk_action' %}?{{ querystring }}"
+  hx-post="{% url 'policy:violation_bulk_action' %}?{{ querystring }}"
+  hx-target="#violations"
+  hx-swap="innerHTML"
+  id="violation-bulk-form"
+>
+  {% csrf_token %}
+  <table class="w-full text-sm mb-4" id="violations-table">
+    <caption class="sr-only">{% translate "Policy violations" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col"><span class="sr-only">{% translate "Select" %}</span></th>
+        <th scope="col">{% translate "Pull request" %}</th>
+        <th scope="col">{% translate "Rule" %}</th>
+        <th scope="col">{% translate "Severity" %}</th>
+        <th scope="col">{% translate "Status" %}</th>
+        <th scope="col">{% translate "Age" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for violation in page_obj %}
+        <tr class="border-t border-[var(--border)]" id="violation-row-{{ violation.pk }}">
+          <td>
+            <input
+              type="checkbox"
+              name="violation_ids"
+              value="{{ violation.pk }}"
+              aria-label="{% translate 'Select this violation' %}"
+            >
+          </td>
+          <td>
+            <a href="{% url 'dashboards:pull_request_detail' violation.pull_request_id %}">
+              {{ violation.pull_request.repository.full_name }}#{{ violation.pull_request.number }}
+            </a>
+          </td>
+          <td>
+            <div class="text-[var(--text)]">{{ violation.rule_code|rule_label }}</div>
+            <div class="text-[var(--text-muted)]">
+              {% render_violation_message violation.rule_code violation.details_params %}
+            </div>
+          </td>
+          <td>{{ violation.get_severity_display }}</td>
+          <td>{{ violation.get_status_display }}</td>
+          <td>{{ violation.created_at|timesince }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-[var(--text-muted)] py-4">
+            {% translate "No policy violations match these filters." %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if page_obj.paginator.count %}
+    <div class="flex items-center gap-3 mb-4" id="violation-action-bar">
+      <select name="action" aria-label="{% translate 'Action' %}">
+        <option value="acknowledge">{% translate "Acknowledge" %}</option>
+        <option value="waive">{% translate "Waive" %}</option>
+      </select>
+      <textarea
+        name="comment"
+        aria-label="{% translate 'Comment' %}"
+        placeholder="{% translate 'Comment (required)' %}"
+      ></textarea>
+      <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+        {% translate "Apply" %}
+      </button>
+    </div>
+  {% endif %}
+</form>
+
+<nav class="flex items-center gap-3" aria-label="{% translate 'Pagination' %}">
+  {% if page_obj.has_previous %}
+    <a
+      href="?{{ querystring }}&page={{ page_obj.previous_page_number }}"
+      hx-get="{% url 'policy:console' %}?{{ querystring }}&page={{ page_obj.previous_page_number }}"
+      hx-target="#violations"
+      hx-swap="innerHTML"
+    >
+      {% translate "Previous" %}
+    </a>
+  {% endif %}
+  <span class="text-[var(--text-muted)]">
+    {% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}
+      Page {{ number }} of {{ total }}
+    {% endblocktranslate %}
+  </span>
+  {% if page_obj.has_next %}
+    <a
+      href="?{{ querystring }}&page={{ page_obj.next_page_number }}"
+      hx-get="{% url 'policy:console' %}?{{ querystring }}&page={{ page_obj.next_page_number }}"
+      hx-target="#violations"
+      hx-swap="innerHTML"
+    >
+      {% translate "Next" %}
+    </a>
+  {% endif %}
+</nav>

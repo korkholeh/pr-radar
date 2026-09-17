@@ -56,6 +56,8 @@ files = [
     "apps/ai_detection/detectors.py",
     "apps/ai_detection/disclosure.py",
     "apps/ai_detection/rules.py",
+    "apps/policy/rules.py",
+    "apps/policy/messages.py",
 ]
 ignore_missing_imports = true
 
