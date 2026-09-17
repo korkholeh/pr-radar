@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if person %}{% translate "Edit person" %}{% else %}{% translate "New person" %}{% endif %}{% endblock %}
+{% block content %}
+{% include "catalog/partials/person_form.html" %}
+{% endblock %}

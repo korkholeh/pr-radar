@@ -156,6 +156,14 @@ class Commit(models.Model):
         related_name="authored_commits",
         verbose_name=_("author identity"),
     )
+    author_email_identity = models.ForeignKey(
+        "catalog.Identity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="authored_commits_by_email",
+        verbose_name=_("author email identity"),
+    )
     committer_identity = models.ForeignKey(
         "catalog.Identity",
         on_delete=models.SET_NULL,

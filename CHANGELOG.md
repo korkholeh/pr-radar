@@ -19,3 +19,11 @@
   checks and files incrementally, with per-connection rate limiting and retry handling. See
   `docs/GITHUB_CONNECTIONS.md` and `docs/user/connect-github.md`.
 - `manage.py bootstrap_connection` and `manage.py rotate_encryption_key` management commands.
+- Automatic identity resolution: a synced GitHub login is mapped to a person immediately, a git email only when
+  GitHub itself links it to a login; bot accounts are detected from a configurable login list.
+- People management (Settings → People): list every person with their identities, team, role and PR count; edit
+  a person's details, bot flag and metrics exclusion; merge two people into one. See `docs/user/map-people.md`.
+- The unmapped-identity queue (Settings → People → Unmapped identities): assign an email to an existing person,
+  create a new person from it, mark it as a bot, or exclude it from metrics.
+- Every pull request now carries its derived fields (size bucket, effective lines, test-file flag, rubber-stamp,
+  self-merge, hotfix, revert, review timing and counts), recomputed idempotently after each sync.

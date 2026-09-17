@@ -48,7 +48,12 @@ select = ["E", "F", "I", "UP", "B", "DJ"]
 [tool.mypy]
 python_version = "3.12"
 plugins = ["mypy_django_plugin.main"]
-files = ["apps/*/services.py", "apps/*/selectors.py"]
+files = [
+    "apps/*/services.py",
+    "apps/*/selectors.py",
+    "apps/catalog/identity.py",
+    "apps/activity/derive.py",
+]
 ignore_missing_imports = true
 
 [tool.django-stubs]

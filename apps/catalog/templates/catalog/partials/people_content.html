@@ -1,0 +1,59 @@
+{% load i18n %}
+<div class="py-6 max-w-5xl mx-auto" id="people-page">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "People" %}</h1>
+    <div class="flex gap-2">
+      <a href="{% url 'catalog:identity_queue' %}" class="text-[var(--text-muted)]">
+        {% blocktranslate trimmed count counter=unmapped_count %}
+          {{ counter }} unmapped identity
+        {% plural %}
+          {{ counter }} unmapped identities
+        {% endblocktranslate %}
+      </a>
+      <a href="{% url 'catalog:person_merge' %}" class="text-[var(--text-muted)]">{% translate "Merge people" %}</a>
+      <a href="{% url 'catalog:person_create' %}" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+        {% translate "New person" %}
+      </a>
+    </div>
+  </div>
+  <p class="text-[var(--text-muted)] mb-4">
+    {% blocktranslate trimmed count counter=bot_count %}
+      {{ counter }} bot, excluded from metrics automatically
+    {% plural %}
+      {{ counter }} bots, excluded from metrics automatically
+    {% endblocktranslate %}
+  </p>
+  <table class="w-full text-sm" id="people-table">
+    <caption class="sr-only">{% translate "People" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Name" %}</th>
+        <th scope="col">{% translate "Team" %}</th>
+        <th scope="col">{% translate "Identities" %}</th>
+        <th scope="col">{% translate "Bot" %}</th>
+        <th scope="col">{% translate "Excluded" %}</th>
+        <th scope="col">{% translate "PRs" %}</th>
+        <th scope="col">{% translate "Actions" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for person in people %}
+      <tr class="border-t border-[var(--border)]">
+        <td>{{ person.display_name }}</td>
+        <td>{{ person.team }}</td>
+        <td>
+          {% for identity in person.identities.all %}{{ identity.value }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </td>
+        <td>{% if person.is_bot %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+        <td>{% if person.exclude_from_metrics %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+        <td>{{ person.pr_count }}</td>
+        <td><a href="{% url 'catalog:person_edit' person.pk %}">{% translate "Edit" %}</a></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No people yet." %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

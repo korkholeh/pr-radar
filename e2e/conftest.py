@@ -4,6 +4,8 @@
 import json
 import os
 import socket
+import subprocess
+import sys
 import tomllib
 from pathlib import Path
 from urllib.parse import urlparse
@@ -11,6 +13,7 @@ from urllib.parse import urlparse
 import pytest
 
 SURFACES = tomllib.loads((Path(__file__).parent / "surfaces.toml").read_text())
+REPO_ROOT = Path(__file__).parent.parent
 
 
 def _resolve_base_url() -> str:
@@ -42,6 +45,27 @@ def e2e_base_url() -> str:
 def base_url(e2e_base_url: str) -> str:
     """Overrides pytest-playwright's own `base_url` fixture with the resolved surface address."""
     return e2e_base_url
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _reseed_e2e_data(e2e_base_url: str) -> None:
+    """`make e2e-up` seeds once when it starts the surface, but the orchestrator is allowed to
+    re-run `pytest e2e` against that same, still-running surface without tearing it down and
+    re-upping in between. `manage.py seed_e2e` is written to be idempotent against its own past
+    UI-driven mutations (see its docstring), so re-running it here -- a plain data reset, no
+    server/worker process touched -- keeps every spec's fixture rows (unmapped identities, the
+    merge-source person, etc.) in their pristine starting state regardless of how many times this
+    session runs against an unrestarted surface."""
+    del e2e_base_url  # ensures the surface is reachable before we touch its database
+    env = {**os.environ, "DJANGO_SETTINGS_MODULE": "config.settings.e2e"}
+    subprocess.run(
+        [sys.executable, "manage.py", "seed_e2e"],
+        cwd=REPO_ROOT,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
 
 @pytest.fixture(scope="session")

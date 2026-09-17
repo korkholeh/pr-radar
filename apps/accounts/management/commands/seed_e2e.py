@@ -6,13 +6,18 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.catalog.models import Organization, Repository
+from apps.activity.models import PullRequest
+from apps.catalog.models import Identity, Organization, Person, Repository
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
 
 USER_ADMIN = "e2e-admin"
 USER_LEAD = "e2e-lead"
+
+# apps.catalog.views.IDENTITY_PAGE_SIZE; duplicated here (rather than imported) because seeding
+# is data, not behaviour, and the queue-pagination e2e case needs to seed one page and a bit more.
+IDENTITY_QUEUE_PAGE_SIZE = 50
 
 
 class Command(BaseCommand):
@@ -42,6 +47,7 @@ class Command(BaseCommand):
         lead_user.groups.add(lead_group)
 
         self._seed_github_connections_and_sync()
+        self._seed_people_and_identities()
 
         self.stdout.write(self.style.SUCCESS(f"e2e personas ready: {USER_ADMIN}, {USER_LEAD}"))
 
@@ -109,3 +115,82 @@ class Command(BaseCommand):
                 },
             )
             run.repositories.add(repository)
+
+    def _seed_people_and_identities(self) -> None:
+        """Rows for Settings -> People and the unmapped-identity queue. Each mutating queue
+        action (assign/mark-bot/exclude/create-person) gets its own dedicated identity so the
+        e2e specs that click those buttons stay independent of run order; the queue-pagination
+        rows are never acted on, only listed, so they are stable across the whole suite."""
+        repository = Repository.objects.get(full_name="e2e-org/widget")
+
+        mapped_person, _ = Person.objects.get_or_create(display_name="E2E Ada", defaults={"team": "Platform"})
+        ada_identity, _ = Identity.objects.get_or_create(
+            kind=Identity.Kind.GITHUB_LOGIN, value="e2e-ada", defaults={"person": mapped_person}
+        )
+        PullRequest.objects.get_or_create(
+            repository=repository,
+            number=901,
+            defaults={
+                "github_id": "e2e-pr-ada",
+                "author": ada_identity,
+                "title": "E2E seeded PR",
+                "state": PullRequest.State.MERGED,
+                "created_at": timezone.now() - datetime.timedelta(days=1),
+                "merged_at": timezone.now(),
+            },
+        )
+
+        bot_person, _ = Person.objects.get_or_create(display_name="e2e-ci[bot]", defaults={"is_bot": True})
+        Identity.objects.get_or_create(
+            kind=Identity.Kind.GITHUB_LOGIN, value="e2e-ci[bot]", defaults={"person": bot_person}
+        )
+
+        Person.objects.get_or_create(display_name="E2E Editable")
+        Person.objects.get_or_create(display_name="E2E Assign Target")
+
+        # The Playwright suite mutates these rows as a side effect of the cases it drives
+        # (assign/mark-bot/exclude/create-person/merge), and the orchestrator is allowed to
+        # re-run `pytest e2e` against a surface it did not tear down and re-seed in between. So
+        # this command must be idempotent in truth, not just in the get_or_create sense: it has
+        # to undo whatever the previous run's UI actions did, every time it runs, or a second
+        # pass finds an already-consumed queue and fails for reasons that have nothing to do with
+        # the product. "E2E UI Created Person" is never seeded, only created by that spec's own
+        # form submit, so a stale one from a previous run must be cleared, not merely ignored.
+        Person.objects.filter(display_name="E2E UI Created Person").delete()
+
+        for suffix in ["assign", "mark-bot", "exclude", "create-person"]:
+            value = f"e2e-{suffix}-target@example.com"
+            identity, _ = Identity.objects.get_or_create(kind=Identity.Kind.GIT_EMAIL, value=value)
+            if identity.person_id is None:
+                continue
+            # mark-bot/exclude/create-person attach a fresh Person named after the identity's own
+            # value (apps.catalog.identity.create_person_from_identity); "assign" attaches the
+            # pre-existing "E2E Assign Target" fixture instead, which must survive the reset.
+            auto_created_person = identity.person if identity.person.display_name == value else None
+            identity.person = None
+            identity.save(update_fields=["person"])
+            if auto_created_person is not None:
+                auto_created_person.delete()
+
+        merge_source, _ = Person.objects.get_or_create(display_name="E2E Merge Source")
+        merge_source_identity, _ = Identity.objects.get_or_create(
+            kind=Identity.Kind.GITHUB_LOGIN, value="e2e-merge-source-login"
+        )
+        if merge_source_identity.person_id != merge_source.pk:
+            merge_source_identity.person = merge_source
+            merge_source_identity.save(update_fields=["person"])
+        Person.objects.get_or_create(display_name="E2E Merge Target")
+        Person.objects.get_or_create(display_name="E2E Self Merge Guard")
+
+        # One page and a bit more, so the queue-pagination case exercises a real second page
+        # rather than the single-page case every other seeded row lands on. The "zzz-" segment
+        # sorts after every dedicated action-target identity above (unmapped_identities() orders
+        # by kind, value: "assign"/"create-person"/"exclude"/"mark-bot" all precede "zzz"), so
+        # regardless of which of those four other specs have since consumed, these 55 rows are
+        # always the *last* 55 in the queue -- always split 50/5 (or more on page 2, never fewer)
+        # across exactly two pages, with item 000 always on page 1 and item 054 always on page 2.
+        queue_row_count = IDENTITY_QUEUE_PAGE_SIZE + 5
+        for i in range(queue_row_count):
+            Identity.objects.get_or_create(
+                kind=Identity.Kind.GIT_EMAIL, value=f"e2e-zzz-queue-item-{i:03d}@example.com"
+            )

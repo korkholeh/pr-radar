@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 3/11 · step `commit`
+- **Current:** phase 4/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 10% (reset 17.09 20:20) · 7d 29%
-- **Totals:** 43 sessions · 4.9 h agent time · ≈$102.51 API-equivalent
-- **Clock:** 8.3 h since the run was created · 4.9 h working · 3.4 h paused on the usage limit · 0.0 h not running
-- **Updated:** 2026-09-17 15:33:59
+- **Usage:** 5h 70% (reset 17.09 20:20) · 7d 31%
+- **Totals:** 55 sessions · 6.3 h agent time · ≈$125.45 API-equivalent
+- **Clock:** 9.8 h since the run was created · 6.3 h working · 3.4 h paused on the usage limit · 0.2 h not running
+- **Updated:** 2026-09-17 17:04:14
 
 ## Run warnings
 
@@ -20,8 +20,8 @@
 |---|---|---|---|---|---|
 | 1 | Skeleton, auth, i18n and design tokens | yes | ✅ done | e8a30ee | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/01-skeleton/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 2 | Domain models, migrations and Django admin | no | ✅ done | abc20ee | not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 3 | GitHub connections and incremental sync | yes | 🔨 in_progress |  |  |
-| 4 | Identity resolution and derived PR fields | yes | ⏳ pending |  |  |
+| 3 | GitHub connections and incremental sync | yes | ✅ done | d9e0077 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 4 | Identity resolution and derived PR fields | yes | 🔨 in_progress |  |  |
 | 5 | AI detection | yes | ⏳ pending |  |  |
 | 6 | AI policy engine and violations console | yes | ⏳ pending |  |  |
 | 7 | Metrics registry, rollups and recompute | no | ⏳ pending |  |  |
@@ -107,6 +107,32 @@
 - `2026-09-17 15:33:06` **p03-e2e** — pass: exit 0: ........... [100%]
 - `2026-09-17 15:33:59` **p03-docs** — done (0m, $0.35): Verified documentation for phase 3 against the diff, PLAN.md, ARCHITECTURE.md, ADR 0003/0004 and actual code (check codes, nav labels, template copy, settings, migrations). Everything was already true and current — no edits made: CLAUDE.md (commands/management commands list already includes sync/bo…
 - `2026-09-17 15:33:59` **p03-docs** — no changes: the documentation was already true for this phase
+- `2026-09-17 15:33:59` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-17 15:33:59` **p03-commit** — done: d9e0077
+- `2026-09-17 15:34:02` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-17 15:34:06` **p03-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p03-connections-and-sync
+- `2026-09-17 15:34:09` **p03-pr** — draft: https://github.com/korkholeh/pr-radar/pull/4
+- `2026-09-17 15:34:18` **p03-merge** — done: https://github.com/korkholeh/pr-radar/pull/4
+- `2026-09-17 15:41:35` **p04-plan** — done (7m, $2.69): Wrote .autodev/phases/04-identity-and-derived-fields/PLAN.md with Context/Design/Tasks/Verification/Risks/Out-of-scope: identity auto-mapping (login auto-creates a Person, only bare emails queue), bot detection from AppSettings, merge_people, a shared glob matcher, activity.derive for every cached …
+- `2026-09-17 15:54:52` **p04-implement** — handover: context reached 204,437 tokens — checkpointing for a fresh session
+- `2026-09-17 15:56:16` **p04-implement** — partial (14m, $4.0): Backend half of phase 4 is done: apps/catalog/globs.py (path glob matcher), apps/catalog/identity.py (is_bot_login, login_from_noreply_email, resolve_identity, resolve_identities_for_pull_request, merge_people), Commit.author_email_identity FK+migration and upserts.py wiring, apps/activity/derive.p…
+- `2026-09-17 16:06:45` **p04-implement** — done (10m, $3.79): Finished the remaining phase-4 tasks (T13–T17): Settings → People UI in apps/catalog (forms.py, views.py, urls.py, templates for people list/CRUD, unmapped-identity queue with assign/create-person/mark-bot/exclude actions, and person merge), wired into config/urls.py and the nav. Added apps/catalog…
+- `2026-09-17 16:07:02` **p04-tests** — pass: exit 0: .......................... [100%]
+- `2026-09-17 16:12:53` **p04-review1** — changes_requested (5m, $3.03): Phase 4 delivers the goal: logins auto-map to people, bare emails queue, bots are flagged and counted separately, and every derived PR field is computed by a pure, idempotent `activity.derive`. The full suite passes (exit 0) and the whole CLAUDE.md lint gate is clean; Ukrainian parity, the user doc…
+- `2026-09-17 16:16:44` **p04-review_fix1** — done (3m, $1.25): Applied all 3 MAJOR + 4 MINOR + 1 NIT fixes from REVIEW-r1. Fixed: - N+1 on identity queue (MAJOR): `_queue_context` now materialises `AssignIdentityForm`'s person choices once instead of re-querying per row; `test_queue_query_count` now asserts query count is identical for 5 vs 25 rows (was a loos…
+- `2026-09-17 16:17:00` **p04-tests** — pass: exit 0: .............................. [100%]
+- `2026-09-17 16:22:11` **p04-review2** — approve (5m, $2.33): Phase 4 hits its goal and every acceptance criterion has a test that actually proves it: logins auto-map to people, bare emails queue with a rendered-row-count-equals-model-count assertion, bots leave the metric population and land in a separate counter, and all 16 derived PR fields plus the PRFile…
+- `2026-09-17 16:40:19` **p04-e2e** — done (18m, $3.15): Built e2e/plans/people.plan.yaml and e2e/web/test_people.py (12 cases) covering Settings > People: list (mapped person + bot row), lead 403/nav gating, person create/edit, invalid-form error, the unmapped-identity queue's real pagination (55 seeded rows, exactly 2 pages, nothing dropped/duplicated)…
+- `2026-09-17 16:43:01` **p04-e2e** — fail: exit 1: FAILED e2e/web/test_people.py::test_merge_people_repoints_identity_and_deletes_source[chromium]
+- `2026-09-17 16:48:48` **p04-e2e_fix1** — done (5m, $1.03): Root cause: `.e2e/db.sqlite3` had accumulated mutations from earlier review passes (identities already assigned/bot/excluded, an already-completed merge, a duplicate "E2E UI Created Person") because seed_e2e used get_or_create-only seeding, which never undoes what a prior pass's UI actions already …
+- `2026-09-17 16:51:30` **p04-e2e** — fail: exit 1: FAILED e2e/web/test_people.py::test_merge_people_repoints_identity_and_deletes_source[chromium]
+- `2026-09-17 16:56:27` **p04-e2e_fix2** — partial (4m, $0.62): Root cause found: not product bug. E2E_OUTPUT.txt failures came from a state/race issue in the e2e harness — multiple overlapping `make e2e-up` invocations (evidence: 3 stacked run_huey processes at 16:22/16:43/16:51, and web.log showing "Error: That port is already in use" for the latest attempt w…
+- `2026-09-17 16:59:08` **p04-e2e** — fail: exit 1: FAILED e2e/web/test_people.py::test_merge_people_repoints_identity_and_deletes_source[chromium]
+- `2026-09-17 17:02:35` **p04-e2e_fix3** — done (3m, $0.62): Root cause: earlier fix (attempt 2) made `seed_e2e` idempotent and reseeded the db once by hand, but nothing reseeds automatically between pytest sessions — the orchestrator reruns `pytest e2e -q` against the same, never-restarted surface, so every rerun re-mutates the shared sqlite db (duplicate "…
+- `2026-09-17 17:02:46` **p04-e2e** — pass: exit 0: ....................... [100%]
+- `2026-09-17 17:03:03` **p04-tests** — pass: exit 0: ............................... [100%] (after e2e fixes)
+- `2026-09-17 17:04:14` **p04-docs** — done (1m, $0.44): Verified phase-4 docs against code, no edits needed. CLAUDE.md: commands/management-command list unchanged this phase, still accurate. docs/DECISIONS.md Phase 4 section documents every DerivedFields/FileDerivedFields field (tests/test_docs.py::test_every_derived_field_is_documented passes). docs/us…
+- `2026-09-17 17:04:14` **p04-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

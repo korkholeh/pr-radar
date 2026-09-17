@@ -1,0 +1,42 @@
+{% load i18n %}
+<div class="py-6 max-w-4xl mx-auto" id="identities-page">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Unmapped identities" %}</h1>
+    <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
+  </div>
+  {% if error %}
+    <p class="text-[var(--bad)] mb-4" role="alert">{{ error }}</p>
+  {% endif %}
+  <table class="w-full text-sm" id="identities-table">
+    <caption class="sr-only">{% translate "Unmapped identities" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Kind" %}</th>
+        <th scope="col">{% translate "Value" %}</th>
+        <th scope="col">{% translate "Actions" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for identity in identities %}
+        {% include "catalog/partials/identity_row.html" %}
+      {% empty %}
+      <tr>
+        <td colspan="3" class="text-[var(--text-muted)] py-4">
+          {% translate "No unmapped identities. Everyone is accounted for." %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if page.has_other_pages %}
+  <nav class="flex gap-2 mt-4 text-[var(--text-muted)]" aria-label="{% translate 'Pagination' %}">
+    {% if page.has_previous %}
+      <a href="?page={{ page.previous_page_number }}">{% translate "Previous" %}</a>
+    {% endif %}
+    <span>{% blocktranslate trimmed with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+    {% if page.has_next %}
+      <a href="?page={{ page.next_page_number }}">{% translate "Next" %}</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</div>
