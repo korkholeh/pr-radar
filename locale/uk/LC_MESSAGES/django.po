@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 05:59+0000\n"
+"POT-Creation-Date: 2026-09-17 06:31+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -35,7 +35,7 @@ msgstr "Англійська"
 msgid "Ukrainian"
 msgstr "Українська"
 
-#: apps/accounts/models.py:20
+#: apps/accounts/models.py:20 apps/accounts/models.py:38
 msgid "user"
 msgstr "користувач"
 
@@ -55,35 +55,51 @@ msgstr "налаштування користувача"
 msgid "user preferences"
 msgstr "налаштування користувачів"
 
-#: apps/accounts/models.py:41
-msgid "actor"
-msgstr "виконавець"
+#: apps/accounts/models.py:44 apps/catalog/models.py:82
+#: apps/policy/models.py:38
+msgid "project"
+msgstr "проєкт"
 
-#: apps/accounts/models.py:43
+#: apps/accounts/models.py:46 apps/accounts/models.py:69
+#: apps/activity/models.py:64 apps/activity/models.py:292
+#: apps/ai_detection/models.py:43 apps/connections/models.py:43
+#: apps/policy/models.py:16 apps/policy/models.py:99
 msgid "created at"
 msgstr "створено"
 
-#: apps/accounts/models.py:44
+#: apps/accounts/models.py:49
+msgid "user project access"
+msgstr "право доступу користувача до проєкту"
+
+#: apps/accounts/models.py:50
+msgid "user project access grants"
+msgstr "права доступу користувачів до проєктів"
+
+#: apps/accounts/models.py:67
+msgid "actor"
+msgstr "виконавець"
+
+#: apps/accounts/models.py:70
 msgid "action"
 msgstr "дія"
 
-#: apps/accounts/models.py:45
+#: apps/accounts/models.py:71
 msgid "object type"
 msgstr "тип об'єкта"
 
-#: apps/accounts/models.py:46
+#: apps/accounts/models.py:72
 msgid "object id"
 msgstr "ідентифікатор об'єкта"
 
-#: apps/accounts/models.py:47
+#: apps/accounts/models.py:73
 msgid "changes"
 msgstr "зміни"
 
-#: apps/accounts/models.py:50
+#: apps/accounts/models.py:76
 msgid "audit entry"
 msgstr "запис аудиту"
 
-#: apps/accounts/models.py:51
+#: apps/accounts/models.py:77
 msgid "audit entries"
 msgstr "записи аудиту"
 
@@ -104,6 +120,1030 @@ msgstr "Некоректне значення теми."
 #: apps/accounts/views.py:57
 msgid "Invalid language value."
 msgstr "Некоректне значення мови."
+
+#: apps/activity/models.py:6
+msgid "AI explicit"
+msgstr "ШІ явно"
+
+#: apps/activity/models.py:7
+msgid "AI disclosed"
+msgstr "ШІ розкрито"
+
+#: apps/activity/models.py:8
+msgid "AI suspected"
+msgstr "ШІ підозрюється"
+
+#: apps/activity/models.py:9
+msgid "No AI"
+msgstr "Без ШІ"
+
+#: apps/activity/models.py:10 apps/activity/models.py:39
+msgid "Unknown"
+msgstr "Невідомо"
+
+#: apps/activity/models.py:14 apps/activity/models.py:311
+msgid "None"
+msgstr "Немає"
+
+#: apps/activity/models.py:15 apps/github_sync/models.py:14
+msgid "Partial"
+msgstr "Частково"
+
+#: apps/activity/models.py:16
+msgid "Substantial"
+msgstr "Суттєво"
+
+#: apps/activity/models.py:17
+msgid "Missing"
+msgstr "Відсутнє"
+
+#: apps/activity/models.py:18
+msgid "Ambiguous"
+msgstr "Неоднозначне"
+
+#: apps/activity/models.py:22
+msgid "XS"
+msgstr "XS"
+
+#: apps/activity/models.py:23
+msgid "S"
+msgstr "S"
+
+#: apps/activity/models.py:24
+msgid "M"
+msgstr "M"
+
+#: apps/activity/models.py:25
+msgid "L"
+msgstr "L"
+
+#: apps/activity/models.py:26
+msgid "XL"
+msgstr "XL"
+
+#: apps/activity/models.py:31 apps/policy/models.py:73
+msgid "Open"
+msgstr "Відкрито"
+
+#: apps/activity/models.py:32
+msgid "Closed"
+msgstr "Закрито"
+
+#: apps/activity/models.py:33
+msgid "Merged"
+msgstr "Змерджено"
+
+#: apps/activity/models.py:36
+msgid "Merge"
+msgstr "Merge"
+
+#: apps/activity/models.py:37
+msgid "Squash"
+msgstr "Squash"
+
+#: apps/activity/models.py:38
+msgid "Rebase"
+msgstr "Rebase"
+
+#: apps/activity/models.py:45 apps/activity/models.py:147
+#: apps/catalog/models.py:55
+msgid "repository"
+msgstr "репозиторій"
+
+#: apps/activity/models.py:47
+msgid "number"
+msgstr "номер"
+
+#: apps/activity/models.py:48 apps/activity/models.py:150
+#: apps/activity/models.py:266 apps/activity/models.py:295
+#: apps/catalog/models.py:16 apps/catalog/models.py:43
+#: apps/catalog/models.py:129
+msgid "GitHub node id"
+msgstr "GitHub node id"
+
+#: apps/activity/models.py:55 apps/activity/models.py:290
+msgid "author"
+msgstr "автор"
+
+#: apps/activity/models.py:57
+msgid "title"
+msgstr "заголовок"
+
+#: apps/activity/models.py:58
+msgid "body"
+msgstr "текст"
+
+#: apps/activity/models.py:59 apps/activity/models.py:262
+msgid "state"
+msgstr "стан"
+
+#: apps/activity/models.py:60
+msgid "is draft"
+msgstr "чернетка"
+
+#: apps/activity/models.py:61
+msgid "base ref"
+msgstr "базова гілка"
+
+#: apps/activity/models.py:62
+msgid "head ref"
+msgstr "гілка джерела"
+
+#: apps/activity/models.py:65
+msgid "ready for review at"
+msgstr "готовий до ревʼю о"
+
+#: apps/activity/models.py:66
+msgid "first commit at"
+msgstr "перший коміт о"
+
+#: apps/activity/models.py:67
+msgid "first review at"
+msgstr "перше ревʼю о"
+
+#: apps/activity/models.py:68
+msgid "first approval at"
+msgstr "перший апрув о"
+
+#: apps/activity/models.py:69
+msgid "merged at"
+msgstr "змерджено о"
+
+#: apps/activity/models.py:70
+msgid "closed at"
+msgstr "закрито о"
+
+#: apps/activity/models.py:71
+msgid "last activity at"
+msgstr "остання активність о"
+
+#: apps/activity/models.py:72
+msgid "updated at (GitHub)"
+msgstr "оновлено (GitHub)"
+
+#: apps/activity/models.py:80
+msgid "merged by"
+msgstr "змерджено ким"
+
+#: apps/activity/models.py:82
+msgid "merge commit sha"
+msgstr "sha merge-коміту"
+
+#: apps/activity/models.py:84
+msgid "merge method"
+msgstr "спосіб мерджу"
+
+#: apps/activity/models.py:87 apps/activity/models.py:170
+#: apps/activity/models.py:219
+msgid "additions"
+msgstr "додавання"
+
+#: apps/activity/models.py:88 apps/activity/models.py:171
+#: apps/activity/models.py:220
+msgid "deletions"
+msgstr "видалення"
+
+#: apps/activity/models.py:89
+msgid "changed files"
+msgstr "змінені файли"
+
+#: apps/activity/models.py:90
+msgid "effective additions"
+msgstr "ефективні додавання"
+
+#: apps/activity/models.py:91
+msgid "effective deletions"
+msgstr "ефективні видалення"
+
+#: apps/activity/models.py:92
+msgid "labels"
+msgstr "лейбли"
+
+#: apps/activity/models.py:93
+msgid "review rounds"
+msgstr "раунди ревʼю"
+
+#: apps/activity/models.py:95
+msgid "commits after first review"
+msgstr "коміти після першого ревʼю"
+
+#: apps/activity/models.py:98 apps/catalog/models.py:18
+#: apps/catalog/models.py:52
+msgid "raw payload"
+msgstr "сирі дані"
+
+#: apps/activity/models.py:102
+msgid "size bucket"
+msgstr "розмірна категорія"
+
+#: apps/activity/models.py:104
+msgid "is revert"
+msgstr "це revert"
+
+#: apps/activity/models.py:111
+msgid "reverts PR"
+msgstr "скасовує PR"
+
+#: apps/activity/models.py:113
+msgid "is hotfix"
+msgstr "це hotfix"
+
+#: apps/activity/models.py:114
+msgid "has test changes"
+msgstr "має зміни в тестах"
+
+#: apps/activity/models.py:116
+msgid "AI status"
+msgstr "статус ШІ"
+
+#: apps/activity/models.py:118
+msgid "AI tools"
+msgstr "інструменти ШІ"
+
+#: apps/activity/models.py:120
+msgid "AI disclosure"
+msgstr "розкриття ШІ"
+
+#: apps/activity/models.py:122
+msgid "is rubber stamp"
+msgstr "формальне ревʼю"
+
+#: apps/activity/models.py:123
+msgid "is self-merged"
+msgstr "самостійний мердж"
+
+#: apps/activity/models.py:126 apps/activity/models.py:192
+#: apps/activity/models.py:215 apps/activity/models.py:252
+#: apps/activity/models.py:282 apps/activity/models.py:314
+#: apps/ai_detection/models.py:60 apps/churn/models.py:16
+#: apps/policy/models.py:82
+msgid "pull request"
+msgstr "pull request"
+
+#: apps/activity/models.py:127
+msgid "pull requests"
+msgstr "pull requests"
+
+#: apps/activity/models.py:149
+msgid "sha"
+msgstr "sha"
+
+#: apps/activity/models.py:157
+msgid "author identity"
+msgstr "ідентичність автора"
+
+#: apps/activity/models.py:165
+msgid "committer identity"
+msgstr "ідентичність коммітера"
+
+#: apps/activity/models.py:167
+msgid "authored at"
+msgstr "дата авторства"
+
+#: apps/activity/models.py:168
+msgid "committed at"
+msgstr "закомічено о"
+
+#: apps/activity/models.py:169
+msgid "message"
+msgstr "повідомлення"
+
+#: apps/activity/models.py:172
+msgid "co-authors"
+msgstr "співавтори"
+
+#: apps/activity/models.py:173
+msgid "trailers"
+msgstr "трейлери"
+
+#: apps/activity/models.py:176 apps/activity/models.py:195
+#: apps/ai_detection/models.py:68
+msgid "commit"
+msgstr "коміт"
+
+#: apps/activity/models.py:177
+msgid "commits"
+msgstr "коміти"
+
+#: apps/activity/models.py:197
+msgid "position"
+msgstr "позиція"
+
+#: apps/activity/models.py:200
+msgid "pull request commit"
+msgstr "коміт pull request-у"
+
+#: apps/activity/models.py:201
+msgid "pull request commits"
+msgstr "коміти pull request-у"
+
+#: apps/activity/models.py:217
+msgid "path"
+msgstr "шлях"
+
+#: apps/activity/models.py:218 apps/churn/models.py:24
+#: apps/connections/models.py:28 apps/github_sync/models.py:20
+#: apps/policy/models.py:88
+msgid "status"
+msgstr "статус"
+
+#: apps/activity/models.py:221
+msgid "is test"
+msgstr "тестовий файл"
+
+#: apps/activity/models.py:222
+msgid "is excluded"
+msgstr "виключено"
+
+#: apps/activity/models.py:229
+msgid "matched sensitive rule"
+msgstr "відповідне чутливе правило"
+
+#: apps/activity/models.py:233
+msgid "PR file"
+msgstr "файл PR"
+
+#: apps/activity/models.py:234
+msgid "PR files"
+msgstr "файли PR"
+
+#: apps/activity/models.py:246
+msgid "Approved"
+msgstr "Затверджено"
+
+#: apps/activity/models.py:247
+msgid "Changes requested"
+msgstr "Запитано зміни"
+
+#: apps/activity/models.py:248
+msgid "Commented"
+msgstr "Прокоментовано"
+
+#: apps/activity/models.py:249
+msgid "Dismissed"
+msgstr "Відхилено"
+
+#: apps/activity/models.py:260
+msgid "reviewer"
+msgstr "ревʼюер"
+
+#: apps/activity/models.py:263
+msgid "submitted at"
+msgstr "надіслано о"
+
+#: apps/activity/models.py:264 apps/activity/models.py:294
+msgid "body length"
+msgstr "довжина тексту"
+
+#: apps/activity/models.py:265
+msgid "comments count"
+msgstr "кількість коментарів"
+
+#: apps/activity/models.py:269
+msgid "review"
+msgstr "ревʼю"
+
+#: apps/activity/models.py:270
+msgid "reviews"
+msgstr "ревʼю"
+
+#: apps/activity/models.py:293
+msgid "is review thread"
+msgstr "це нитка ревʼю"
+
+#: apps/activity/models.py:298
+msgid "review comment"
+msgstr "коментар ревʼю"
+
+#: apps/activity/models.py:299
+msgid "review comments"
+msgstr "коментарі ревʼю"
+
+#: apps/activity/models.py:307 apps/github_sync/models.py:13
+msgid "Success"
+msgstr "Успіх"
+
+#: apps/activity/models.py:308
+msgid "Failure"
+msgstr "Помилка"
+
+#: apps/activity/models.py:309 apps/churn/models.py:10
+msgid "Error"
+msgstr "Помилка виконання"
+
+#: apps/activity/models.py:310
+msgid "Pending"
+msgstr "Очікує"
+
+#: apps/activity/models.py:316
+msgid "commit sha"
+msgstr "sha коміту"
+
+#: apps/activity/models.py:317
+msgid "is first CI commit"
+msgstr "перший CI-коміт"
+
+#: apps/activity/models.py:318
+msgid "rollup state"
+msgstr "підсумковий стан"
+
+#: apps/activity/models.py:319
+msgid "observed at"
+msgstr "спостережено о"
+
+#: apps/activity/models.py:322
+msgid "check status"
+msgstr "статус перевірки"
+
+#: apps/activity/models.py:323
+msgid "check statuses"
+msgstr "статуси перевірок"
+
+#: apps/ai_detection/models.py:6
+msgid "Commit trailer"
+msgstr "Трейлер коміту"
+
+#: apps/ai_detection/models.py:7
+msgid "Commit author"
+msgstr "Автор коміту"
+
+#: apps/ai_detection/models.py:8
+msgid "PR author"
+msgstr "Автор PR"
+
+#: apps/ai_detection/models.py:9
+msgid "PR body footer"
+msgstr "Підвал опису PR"
+
+#: apps/ai_detection/models.py:10
+msgid "HTML comment"
+msgstr "HTML-коментар"
+
+#: apps/ai_detection/models.py:11
+msgid "Label"
+msgstr "Лейбл"
+
+#: apps/ai_detection/models.py:12
+msgid "Branch pattern"
+msgstr "Шаблон гілки"
+
+#: apps/ai_detection/models.py:13
+msgid "Commit message"
+msgstr "Повідомлення коміту"
+
+#: apps/ai_detection/models.py:17
+msgid "Claude Code"
+msgstr "Claude Code"
+
+#: apps/ai_detection/models.py:18
+msgid "Copilot"
+msgstr "Copilot"
+
+#: apps/ai_detection/models.py:19
+msgid "Cursor"
+msgstr "Cursor"
+
+#: apps/ai_detection/models.py:20
+msgid "Codex"
+msgstr "Codex"
+
+#: apps/ai_detection/models.py:21
+msgid "Devin"
+msgstr "Devin"
+
+#: apps/ai_detection/models.py:22
+msgid "Gemini"
+msgstr "Gemini"
+
+#: apps/ai_detection/models.py:23
+msgid "Aider"
+msgstr "Aider"
+
+#: apps/ai_detection/models.py:24
+msgid "Windsurf"
+msgstr "Windsurf"
+
+#: apps/ai_detection/models.py:25
+msgid "ChatGPT"
+msgstr "ChatGPT"
+
+#: apps/ai_detection/models.py:26 apps/catalog/models.py:94
+msgid "Other"
+msgstr "Інше"
+
+#: apps/ai_detection/models.py:30 apps/policy/models.py:68
+msgid "High"
+msgstr "Високий"
+
+#: apps/ai_detection/models.py:31 apps/policy/models.py:69
+msgid "Medium"
+msgstr "Середній"
+
+#: apps/ai_detection/models.py:32 apps/policy/models.py:70
+msgid "Low"
+msgstr "Низький"
+
+#: apps/ai_detection/models.py:36 apps/catalog/models.py:41
+#: apps/catalog/models.py:64 apps/connections/models.py:19
+msgid "name"
+msgstr "назва"
+
+#: apps/ai_detection/models.py:37
+msgid "detector"
+msgstr "детектор"
+
+#: apps/ai_detection/models.py:38
+msgid "pattern"
+msgstr "патерн"
+
+#: apps/ai_detection/models.py:39 apps/ai_detection/models.py:73
+msgid "tool"
+msgstr "інструмент"
+
+#: apps/ai_detection/models.py:40 apps/ai_detection/models.py:74
+msgid "confidence"
+msgstr "впевненість"
+
+#: apps/ai_detection/models.py:41 apps/catalog/models.py:17
+#: apps/catalog/models.py:47 apps/catalog/models.py:73
+#: apps/catalog/models.py:97 apps/connections/models.py:34
+#: apps/policy/models.py:44
+msgid "is active"
+msgstr "активний"
+
+#: apps/ai_detection/models.py:42 apps/catalog/models.py:102
+msgid "notes"
+msgstr "нотатки"
+
+#: apps/ai_detection/models.py:44 apps/connections/models.py:44
+#: apps/policy/models.py:100
+msgid "updated at"
+msgstr "оновлено о"
+
+#: apps/ai_detection/models.py:47
+msgid "detection rule"
+msgstr "правило детекції"
+
+#: apps/ai_detection/models.py:48
+msgid "detection rules"
+msgstr "правила детекції"
+
+#: apps/ai_detection/models.py:71
+msgid "rule"
+msgstr "правило"
+
+#: apps/ai_detection/models.py:75
+msgid "evidence"
+msgstr "доказ"
+
+#: apps/ai_detection/models.py:76
+msgid "detected at"
+msgstr "виявлено о"
+
+#: apps/ai_detection/models.py:79
+msgid "AI signal"
+msgstr "сигнал ШІ"
+
+#: apps/ai_detection/models.py:80
+msgid "AI signals"
+msgstr "сигнали ШІ"
+
+#: apps/catalog/models.py:11
+msgid "Organization"
+msgstr "Організація"
+
+#: apps/catalog/models.py:12
+msgid "User"
+msgstr "Користувач"
+
+#: apps/catalog/models.py:14
+msgid "login"
+msgstr "логін"
+
+#: apps/catalog/models.py:15
+msgid "type"
+msgstr "тип"
+
+#: apps/catalog/models.py:21 apps/catalog/models.py:33
+msgid "organization"
+msgstr "організація"
+
+#: apps/catalog/models.py:22
+msgid "organizations"
+msgstr "організації"
+
+#: apps/catalog/models.py:39
+msgid "connection"
+msgstr "підключення"
+
+#: apps/catalog/models.py:42
+msgid "full name"
+msgstr "повна назва"
+
+#: apps/catalog/models.py:44
+msgid "default branch"
+msgstr "гілка за замовчуванням"
+
+#: apps/catalog/models.py:45
+msgid "is private"
+msgstr "приватний"
+
+#: apps/catalog/models.py:46
+msgid "is archived"
+msgstr "заархівовано"
+
+#: apps/catalog/models.py:48
+msgid "sync since"
+msgstr "синхронізація з дати"
+
+#: apps/catalog/models.py:49
+msgid "last synced at"
+msgstr "остання синхронізація о"
+
+#: apps/catalog/models.py:50
+msgid "sync cursor"
+msgstr "курсор синхронізації"
+
+#: apps/catalog/models.py:51
+msgid "merge strategy hint"
+msgstr "підказка стратегії мерджу"
+
+#: apps/catalog/models.py:56 apps/catalog/models.py:71
+#: apps/github_sync/models.py:22
+msgid "repositories"
+msgstr "репозиторії"
+
+#: apps/catalog/models.py:65
+msgid "slug"
+msgstr "slug"
+
+#: apps/catalog/models.py:66 apps/catalog/models.py:153
+#: apps/policy/models.py:43
+msgid "description"
+msgstr "опис"
+
+#: apps/catalog/models.py:75
+msgid "color"
+msgstr "колір"
+
+#: apps/catalog/models.py:83
+msgid "projects"
+msgstr "проєкти"
+
+#: apps/catalog/models.py:91
+msgid "Developer"
+msgstr "Розробник"
+
+#: apps/catalog/models.py:92
+msgid "QA"
+msgstr "QA"
+
+#: apps/catalog/models.py:93
+msgid "Design"
+msgstr "Дизайн"
+
+#: apps/catalog/models.py:96
+msgid "display name"
+msgstr "відображуване імʼя"
+
+#: apps/catalog/models.py:98
+msgid "is bot"
+msgstr "бот"
+
+#: apps/catalog/models.py:99
+msgid "exclude from metrics"
+msgstr "виключити з метрик"
+
+#: apps/catalog/models.py:100
+msgid "team"
+msgstr "команда"
+
+#: apps/catalog/models.py:101
+msgid "role hint"
+msgstr "підказка ролі"
+
+#: apps/catalog/models.py:105 apps/catalog/models.py:124
+msgid "person"
+msgstr "людина"
+
+#: apps/catalog/models.py:106
+msgid "people"
+msgstr "люди"
+
+#: apps/catalog/models.py:115
+msgid "GitHub login"
+msgstr "логін GitHub"
+
+#: apps/catalog/models.py:116
+msgid "Git email"
+msgstr "email Git"
+
+#: apps/catalog/models.py:126 apps/connections/models.py:20
+msgid "kind"
+msgstr "вид"
+
+#: apps/catalog/models.py:127 apps/catalog/models.py:152
+#: apps/metrics/models.py:24
+msgid "value"
+msgstr "значення"
+
+#: apps/catalog/models.py:131
+msgid "first seen at"
+msgstr "вперше побачено о"
+
+#: apps/catalog/models.py:134
+msgid "identity"
+msgstr "ідентичність"
+
+#: apps/catalog/models.py:135
+msgid "identities"
+msgstr "ідентичності"
+
+#: apps/catalog/models.py:150
+msgid "key"
+msgstr "ключ"
+
+#: apps/catalog/models.py:151
+msgid "value type"
+msgstr "тип значення"
+
+#: apps/catalog/models.py:156
+msgid "app setting"
+msgstr "налаштування застосунку"
+
+#: apps/catalog/models.py:157
+msgid "app settings"
+msgstr "налаштування застосунку"
+
+#: apps/catalog/models.py:158
+msgid "Can manage settings"
+msgstr "Може керувати налаштуваннями"
+
+#: apps/catalog/setting_defs.py:17
+msgid "How many days of history a first sync pulls in."
+msgstr "Скільки днів історії тягне перша синхронізація."
+
+#: apps/catalog/setting_defs.py:22
+msgid "Connection kind preselected when creating a new GitHub connection."
+msgstr ""
+"Вид підключення, обраний за замовчуванням під час створення нового "
+"підключення GitHub."
+
+#: apps/catalog/setting_defs.py:29
+msgid "How often a connection's health is re-checked."
+msgstr "Як часто перевіряється стан підключення."
+
+#: apps/catalog/setting_defs.py:36
+msgid "Whether PRs with a merely suspected AI status count in the AI cohort."
+msgstr "Чи враховуються PR зі статусом «ШІ підозрюється» в когорті ШІ."
+
+#: apps/catalog/setting_defs.py:40
+msgid "Login suffixes that mark an account as a bot."
+msgstr "Суфікси логіну, що позначають акаунт як бота."
+
+#: apps/catalog/setting_defs.py:46
+msgid "Exact logins that mark an account as a bot."
+msgstr "Точні логіни, що позначають акаунт як бота."
+
+#: apps/catalog/setting_defs.py:53
+msgid "PR template section headings that hold the AI disclosure."
+msgstr "Заголовки секцій шаблону PR, що містять розкриття ШІ."
+
+#: apps/catalog/setting_defs.py:57
+msgid "Disclosure values meaning no AI assistance."
+msgstr "Значення розкриття, що означають відсутність допомоги ШІ."
+
+#: apps/catalog/setting_defs.py:63
+msgid "Disclosure values meaning partial AI assistance."
+msgstr "Значення розкриття, що означають часткову допомогу ШІ."
+
+#: apps/catalog/setting_defs.py:70
+msgid "Disclosure values meaning substantial AI assistance."
+msgstr "Значення розкриття, що означають суттєву допомогу ШІ."
+
+#: apps/catalog/setting_defs.py:77
+msgid "PR template section headings that list the AI tools used."
+msgstr ""
+"Заголовки секцій шаблону PR, що перелічують використані інструменти ШІ."
+
+#: apps/catalog/setting_defs.py:81
+msgid "Minimum sample size below which a metric is greyed out."
+msgstr "Мінімальний розмір вибірки, нижче якого метрика сіріє."
+
+#: apps/catalog/setting_defs.py:84
+msgid "Days of inactivity after which an open PR is considered stale."
+msgstr "Дні бездіяльності, після яких відкритий PR вважається застарілим."
+
+#: apps/catalog/setting_defs.py:90
+msgid "Hours after which a PR waiting for review is flagged."
+msgstr "Години, після яких PR, що чекає на ревʼю, позначається."
+
+#: apps/catalog/setting_defs.py:93
+msgid "How PR durations are computed."
+msgstr "Як обчислюється тривалість PR."
+
+#: apps/catalog/setting_defs.py:98
+msgid "Upper line-count boundary for each PR size bucket."
+msgstr "Верхня межа кількості рядків для кожної розмірної категорії PR."
+
+#: apps/catalog/setting_defs.py:113
+msgid "File path globs excluded from size and churn calculations."
+msgstr "Glob-шаблони шляхів, виключені з обчислення розміру та churn."
+
+#: apps/catalog/setting_defs.py:130
+msgid "File path globs recognised as test files."
+msgstr "Glob-шаблони шляхів, що розпізнаються як тестові файли."
+
+#: apps/catalog/setting_defs.py:137
+msgid ""
+"Maximum minutes between review request and approval to call a review a "
+"rubber stamp."
+msgstr ""
+"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
+"формальним."
+
+#: apps/catalog/setting_defs.py:141
+msgid "How many top reviewers count toward review load."
+msgstr "Скільки провідних ревʼюерів враховується в навантаженні на ревʼю."
+
+#: apps/catalog/setting_defs.py:147
+msgid "Days after merge in which a follow-up fix is attributed."
+msgstr "Дні після мерджу, протягом яких виправлення відносять до PR."
+
+#: apps/catalog/setting_defs.py:154
+msgid "Minimum file overlap ratio to attribute a follow-up fix to a PR."
+msgstr "Мінімальна частка перетину файлів для віднесення виправлення до PR."
+
+#: apps/catalog/setting_defs.py:161
+msgid "Minimum changed lines before a missing-tests violation applies."
+msgstr ""
+"Мінімальна кількість змінених рядків для застосування порушення «немає "
+"тестів»."
+
+#: apps/catalog/setting_defs.py:164
+msgid "Days after merge over which churn is measured."
+msgstr "Дні після мерджу, за які вимірюється churn."
+
+#: apps/catalog/setting_defs.py:166
+msgid "Maximum files in a PR before churn analysis is skipped."
+msgstr ""
+"Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
+
+#: apps/catalog/setting_defs.py:168
+msgid "Default UI language for a new user."
+msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
+
+#: apps/catalog/setting_defs.py:173
+msgid "Whether to derive the initial UI language from the browser."
+msgstr "Чи визначати початкову мову інтерфейсу з браузера."
+
+#: apps/catalog/setting_defs.py:176
+msgid "Default UI theme for a new user."
+msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
+
+#: apps/catalog/setting_defs.py:181
+msgid "Unit durations are rendered in for CSV/XLSX exports."
+msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
+
+#: apps/catalog/setting_defs.py:185
+msgid "Maximum rows a synchronous export may return."
+msgstr "Максимальна кількість рядків для синхронного експорту."
+
+#: apps/churn/models.py:7 apps/connections/models.py:14
+msgid "OK"
+msgstr "OK"
+
+#: apps/churn/models.py:8
+msgid "Unsupported merge method"
+msgstr "Непідтримуваний спосіб мерджу"
+
+#: apps/churn/models.py:9
+msgid "Too large"
+msgstr "Занадто великий"
+
+#: apps/churn/models.py:18
+msgid "window days"
+msgstr "вікно (днів)"
+
+#: apps/churn/models.py:19
+msgid "lines at merge"
+msgstr "рядків на момент мерджу"
+
+#: apps/churn/models.py:20
+msgid "lines surviving"
+msgstr "рядків, що вижили"
+
+#: apps/churn/models.py:21
+msgid "churn ratio"
+msgstr "коефіцієнт churn"
+
+#: apps/churn/models.py:22
+msgid "snapshot sha"
+msgstr "sha знімка"
+
+#: apps/churn/models.py:23 apps/metrics/models.py:26
+msgid "computed at"
+msgstr "обчислено о"
+
+#: apps/churn/models.py:25
+msgid "error"
+msgstr "помилка"
+
+#: apps/churn/models.py:28
+msgid "churn result"
+msgstr "результат churn"
+
+#: apps/churn/models.py:29
+msgid "churn results"
+msgstr "результати churn"
+
+#: apps/connections/models.py:8
+msgid "Fine-grained personal access token"
+msgstr "Fine-grained персональний токен доступу"
+
+#: apps/connections/models.py:9
+msgid "Classic personal access token"
+msgstr "Класичний персональний токен доступу"
+
+#: apps/connections/models.py:10
+msgid "GitHub App"
+msgstr "GitHub App"
+
+#: apps/connections/models.py:13
+msgid "Unverified"
+msgstr "Не перевірено"
+
+#: apps/connections/models.py:15
+msgid "Degraded"
+msgstr "Погіршено"
+
+#: apps/connections/models.py:16
+msgid "Invalid"
+msgstr "Недійсний"
+
+#: apps/connections/models.py:17
+msgid "Expired"
+msgstr "Прострочений"
+
+#: apps/connections/models.py:21
+msgid "owner login"
+msgstr "логін власника"
+
+#: apps/connections/models.py:23
+msgid "encrypted token"
+msgstr "зашифрований токен"
+
+#: apps/connections/models.py:24
+msgid "token last 4 characters"
+msgstr "останні 4 символи токена"
+
+#: apps/connections/models.py:25
+msgid "token login"
+msgstr "логін токена"
+
+#: apps/connections/models.py:26
+msgid "expires at"
+msgstr "закінчується о"
+
+#: apps/connections/models.py:29
+msgid "last checked at"
+msgstr "остання перевірка о"
+
+#: apps/connections/models.py:30
+msgid "last check result"
+msgstr "результат останньої перевірки"
+
+#: apps/connections/models.py:31
+msgid "rate limit remaining"
+msgstr "залишок ліміту запитів"
+
+#: apps/connections/models.py:32
+msgid "rate limit reset at"
+msgstr "скидання ліміту запитів о"
+
+#: apps/connections/models.py:41
+msgid "created by"
+msgstr "створено ким"
+
+#: apps/connections/models.py:47
+msgid "app id"
+msgstr "app id"
+
+#: apps/connections/models.py:49
+msgid "installation id"
+msgstr "installation id"
+
+#: apps/connections/models.py:51
+msgid "encrypted private key"
+msgstr "зашифрований приватний ключ"
+
+#: apps/connections/models.py:54
+msgid "GitHub connection"
+msgstr "Підключення GitHub"
+
+#: apps/connections/models.py:55
+msgid "GitHub connections"
+msgstr "Підключення GitHub"
 
 #: apps/dashboards/formatting.py:19
 #, python-format
@@ -142,9 +1182,265 @@ msgstr "Огляд"
 msgid "Dashboards will appear here as they are built."
 msgstr "Панелі з'являтимуться тут у міру їх створення."
 
-#: templates/403.html:3
+#: apps/github_sync/models.py:7
+msgid "CLI"
+msgstr "CLI"
+
+#: apps/github_sync/models.py:8
+msgid "UI"
+msgstr "Інтерфейс"
+
+#: apps/github_sync/models.py:9
+msgid "Schedule"
+msgstr "Розклад"
+
+#: apps/github_sync/models.py:12
+msgid "Running"
+msgstr "Виконується"
+
+#: apps/github_sync/models.py:15
+msgid "Failed"
+msgstr "Помилка"
+
+#: apps/github_sync/models.py:17
+msgid "started at"
+msgstr "розпочато о"
+
+#: apps/github_sync/models.py:18
+msgid "finished at"
+msgstr "завершено о"
+
+#: apps/github_sync/models.py:19
+msgid "trigger"
+msgstr "тригер"
+
+#: apps/github_sync/models.py:24
+msgid "stats"
+msgstr "статистика"
+
+#: apps/github_sync/models.py:25
+msgid "stats by connection"
+msgstr "статистика за підключенням"
+
+#: apps/github_sync/models.py:26
+msgid "error log"
+msgstr "журнал помилок"
+
+#: apps/github_sync/models.py:29
+msgid "sync run"
+msgstr "запуск синхронізації"
+
+#: apps/github_sync/models.py:30
+msgid "sync runs"
+msgstr "запуски синхронізації"
+
+#: apps/metrics/models.py:6
+msgid "Global"
+msgstr "Глобально"
+
+#: apps/metrics/models.py:7
+msgid "Project"
+msgstr "Проєкт"
+
+#: apps/metrics/models.py:8
+msgid "Repository"
+msgstr "Репозиторій"
+
+#: apps/metrics/models.py:9
+msgid "Person"
+msgstr "Людина"
+
+#: apps/metrics/models.py:13
+msgid "All"
+msgstr "Усі"
+
+#: apps/metrics/models.py:14
+msgid "AI"
+msgstr "ШІ"
+
+#: apps/metrics/models.py:15
+msgid "Non-AI"
+msgstr "Без ШІ"
+
+#: apps/metrics/models.py:19
+msgid "date"
+msgstr "дата"
+
+#: apps/metrics/models.py:20
+msgid "scope type"
+msgstr "тип охоплення"
+
+#: apps/metrics/models.py:21
+msgid "scope id"
+msgstr "id обʼєкта охоплення"
+
+#: apps/metrics/models.py:22
+msgid "cohort"
+msgstr "когорта"
+
+#: apps/metrics/models.py:23
+msgid "metric key"
+msgstr "ключ метрики"
+
+#: apps/metrics/models.py:25
+msgid "sample size"
+msgstr "розмір вибірки"
+
+#: apps/metrics/models.py:29
+msgid "daily rollup"
+msgstr "денний зведений показник"
+
+#: apps/metrics/models.py:30
+msgid "daily rollups"
+msgstr "денні зведені показники"
+
+#: apps/policy/models.py:7
+msgid "allowed tools"
+msgstr "дозволені інструменти"
+
+#: apps/policy/models.py:8
+msgid "require disclosure"
+msgstr "вимагати розкриття"
+
+#: apps/policy/models.py:9
+msgid "require human approval"
+msgstr "вимагати апрув людини"
+
+#: apps/policy/models.py:10
+msgid "minimum human approvals"
+msgstr "мінімум апрувів людей"
+
+#: apps/policy/models.py:11
+msgid "require tests for AI PRs"
+msgstr "вимагати тести для AI PR"
+
+#: apps/policy/models.py:13
+msgid "maximum effective lines for an AI PR"
+msgstr "максимум ефективних рядків для AI PR"
+
+#: apps/policy/models.py:15
+msgid "effective from"
+msgstr "діє з"
+
+#: apps/policy/models.py:19
+msgid "AI policy"
+msgstr "Політика ШІ"
+
+#: apps/policy/models.py:20
+msgid "AI policies"
+msgstr "Політики ШІ"
+
+#: apps/policy/models.py:29 templates/403.html:3
 msgid "Forbidden"
 msgstr "Заборонено"
+
+#: apps/policy/models.py:30
+msgid "Needs extra review"
+msgstr "Потребує додаткового ревʼю"
+
+#: apps/policy/models.py:39
+msgid "Empty means the rule applies globally."
+msgstr "Порожнє значення означає, що правило діє глобально."
+
+#: apps/policy/models.py:41
+msgid "path glob"
+msgstr "glob-шаблон шляху"
+
+#: apps/policy/models.py:42
+msgid "AI mode"
+msgstr "режим ШІ"
+
+#: apps/policy/models.py:47
+msgid "sensitive path rule"
+msgstr "правило чутливого шляху"
+
+#: apps/policy/models.py:48
+msgid "sensitive path rules"
+msgstr "правила чутливих шляхів"
+
+#: apps/policy/models.py:57
+msgid "Disclosure missing"
+msgstr "Розкриття відсутнє"
+
+#: apps/policy/models.py:58
+msgid "Disclosure mismatch"
+msgstr "Невідповідність розкриття"
+
+#: apps/policy/models.py:59
+msgid "Tool not allowed"
+msgstr "Інструмент не дозволено"
+
+#: apps/policy/models.py:60
+msgid "Sensitive path forbidden"
+msgstr "Чутливий шлях заборонено"
+
+#: apps/policy/models.py:61
+msgid "Sensitive path needs review"
+msgstr "Чутливий шлях потребує ревʼю"
+
+#: apps/policy/models.py:62
+msgid "No human approval"
+msgstr "Немає апруву людини"
+
+#: apps/policy/models.py:63
+msgid "Self-merge"
+msgstr "Самомердж"
+
+#: apps/policy/models.py:64
+msgid "No tests"
+msgstr "Немає тестів"
+
+#: apps/policy/models.py:65
+msgid "AI PR too large"
+msgstr "AI PR занадто великий"
+
+#: apps/policy/models.py:74
+msgid "Acknowledged"
+msgstr "Взято до відома"
+
+#: apps/policy/models.py:75
+msgid "Waived"
+msgstr "Знято вимогу"
+
+#: apps/policy/models.py:76
+msgid "Resolved"
+msgstr "Вирішено"
+
+#: apps/policy/models.py:84
+msgid "rule code"
+msgstr "код правила"
+
+#: apps/policy/models.py:85
+msgid "severity"
+msgstr "серйозність"
+
+#: apps/policy/models.py:86
+msgid "details params"
+msgstr "параметри деталей"
+
+#: apps/policy/models.py:87
+msgid "details hash"
+msgstr "хеш деталей"
+
+#: apps/policy/models.py:95
+msgid "resolved by"
+msgstr "вирішено ким"
+
+#: apps/policy/models.py:97
+msgid "resolution comment"
+msgstr "коментар до вирішення"
+
+#: apps/policy/models.py:98
+msgid "resolved automatically"
+msgstr "вирішено автоматично"
+
+#: apps/policy/models.py:103
+msgid "policy violation"
+msgstr "порушення політики"
+
+#: apps/policy/models.py:104
+msgid "policy violations"
+msgstr "порушення політики"
 
 #: templates/403.html:6
 msgid "You do not have access to this page."

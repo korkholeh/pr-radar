@@ -1,0 +1,36 @@
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+
+class SyncRun(models.Model):
+    class Trigger(models.TextChoices):
+        CLI = "cli", _("CLI")
+        UI = "ui", _("UI")
+        SCHEDULE = "schedule", _("Schedule")
+
+    class Status(models.TextChoices):
+        RUNNING = "running", _("Running")
+        SUCCESS = "success", _("Success")
+        PARTIAL = "partial", _("Partial")
+        FAILED = "failed", _("Failed")
+
+    started_at = models.DateTimeField(_("started at"), default=timezone.now)
+    finished_at = models.DateTimeField(_("finished at"), null=True, blank=True)
+    trigger = models.CharField(_("trigger"), max_length=10, choices=Trigger.choices)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.RUNNING)
+    repositories = models.ManyToManyField(
+        "catalog.Repository", related_name="sync_runs", blank=True, verbose_name=_("repositories")
+    )
+    stats = models.JSONField(_("stats"), default=dict, blank=True)
+    stats_by_connection = models.JSONField(_("stats by connection"), default=dict, blank=True)
+    error_log = models.TextField(_("error log"), blank=True)
+
+    class Meta:
+        verbose_name = _("sync run")
+        verbose_name_plural = _("sync runs")
+        ordering = ["-started_at"]
+        indexes = [models.Index(fields=["started_at"])]
+
+    def __str__(self) -> str:
+        return f"sync {self.started_at:%Y-%m-%d %H:%M} ({self.status})"
