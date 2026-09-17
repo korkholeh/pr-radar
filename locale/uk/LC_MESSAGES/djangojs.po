@@ -1,0 +1,40 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PR Radar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-17 05:26+0000\n"
+"PO-Revision-Date: 2026-09-17 04:48+0000\n"
+"Last-Translator: PR Radar\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+#: static/js/formatting.js:13
+msgid "%(count)s second"
+msgid_plural "%(count)s seconds"
+msgstr[0] "%(count)s секунда"
+msgstr[1] "%(count)s секунди"
+msgstr[2] "%(count)s секунд"
+msgstr[3] "%(count)s секунди"
+
+#: static/js/formatting.js:18
+msgid "%(count)s minute"
+msgid_plural "%(count)s minutes"
+msgstr[0] "%(count)s хвилина"
+msgstr[1] "%(count)s хвилини"
+msgstr[2] "%(count)s хвилин"
+msgstr[3] "%(count)s хвилини"
+
+#: static/js/formatting.js:27
+msgid "%(days)sd %(hours)sh"
+msgstr "%(days)sд %(hours)sг"
+
+#: static/js/formatting.js:29
+msgid "%(hours)sh %(minutes)sm"
+msgstr "%(hours)sг %(minutes)sхв"

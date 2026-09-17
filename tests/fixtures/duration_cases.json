@@ -1,0 +1,14 @@
+[
+  {"seconds": null, "en": "—", "uk": "—"},
+  {"seconds": 0, "en": "0 seconds", "uk": "0 секунд"},
+  {"seconds": 1, "en": "1 second", "uk": "1 секунда"},
+  {"seconds": 45, "en": "45 seconds", "uk": "45 секунд"},
+  {"seconds": 61, "en": "1 minute", "uk": "1 хвилина"},
+  {"seconds": 120, "en": "2 minutes", "uk": "2 хвилини"},
+  {"seconds": 150, "en": "3 minutes", "uk": "3 хвилини"},
+  {"seconds": 300, "en": "5 minutes", "uk": "5 хвилин"},
+  {"seconds": 3599, "en": "1h 0m", "uk": "1г 0хв"},
+  {"seconds": 3600, "en": "1h 0m", "uk": "1г 0хв"},
+  {"seconds": 12000, "en": "3h 20m", "uk": "3г 20хв"},
+  {"seconds": 187200, "en": "2d 4h", "uk": "2д 4г"}
+]

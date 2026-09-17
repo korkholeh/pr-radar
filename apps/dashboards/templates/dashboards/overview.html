@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Overview" %}{% endblock %}
+
+{% block content %}
+<div class="py-8">
+  <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Overview" %}</h1>
+  <p class="text-[var(--text-muted)] mt-2">{% translate "Dashboards will appear here as they are built." %}</p>
+</div>
+{% endblock %}

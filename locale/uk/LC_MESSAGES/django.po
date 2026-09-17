@@ -1,0 +1,260 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PR Radar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-17 05:59+0000\n"
+"PO-Revision-Date: 2026-09-17 04:48+0000\n"
+"Last-Translator: PR Radar\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+#: apps/accounts/models.py:8 templates/partials/theme_switcher.html:7
+msgid "System"
+msgstr "Системна"
+
+#: apps/accounts/models.py:9 templates/partials/theme_switcher.html:8
+msgid "Light"
+msgstr "Світла"
+
+#: apps/accounts/models.py:10 templates/partials/theme_switcher.html:9
+msgid "Dark"
+msgstr "Темна"
+
+#: apps/accounts/models.py:13
+msgid "English"
+msgstr "Англійська"
+
+#: apps/accounts/models.py:14
+msgid "Ukrainian"
+msgstr "Українська"
+
+#: apps/accounts/models.py:20
+msgid "user"
+msgstr "користувач"
+
+#: apps/accounts/models.py:22
+msgid "theme"
+msgstr "тема"
+
+#: apps/accounts/models.py:23
+msgid "language"
+msgstr "мова"
+
+#: apps/accounts/models.py:26
+msgid "user preference"
+msgstr "налаштування користувача"
+
+#: apps/accounts/models.py:27
+msgid "user preferences"
+msgstr "налаштування користувачів"
+
+#: apps/accounts/models.py:41
+msgid "actor"
+msgstr "виконавець"
+
+#: apps/accounts/models.py:43
+msgid "created at"
+msgstr "створено"
+
+#: apps/accounts/models.py:44
+msgid "action"
+msgstr "дія"
+
+#: apps/accounts/models.py:45
+msgid "object type"
+msgstr "тип об'єкта"
+
+#: apps/accounts/models.py:46
+msgid "object id"
+msgstr "ідентифікатор об'єкта"
+
+#: apps/accounts/models.py:47
+msgid "changes"
+msgstr "зміни"
+
+#: apps/accounts/models.py:50
+msgid "audit entry"
+msgstr "запис аудиту"
+
+#: apps/accounts/models.py:51
+msgid "audit entries"
+msgstr "записи аудиту"
+
+#: apps/accounts/services.py:28
+#, python-format
+msgid "Unknown theme: %(value)s"
+msgstr "Невідома тема: %(value)s"
+
+#: apps/accounts/services.py:37
+#, python-format
+msgid "Unknown language: %(value)s"
+msgstr "Невідома мова: %(value)s"
+
+#: apps/accounts/views.py:39
+msgid "Invalid theme value."
+msgstr "Некоректне значення теми."
+
+#: apps/accounts/views.py:57
+msgid "Invalid language value."
+msgstr "Некоректне значення мови."
+
+#: apps/dashboards/formatting.py:19
+#, python-format
+msgid "%(count)s second"
+msgid_plural "%(count)s seconds"
+msgstr[0] "%(count)s секунда"
+msgstr[1] "%(count)s секунди"
+msgstr[2] "%(count)s секунд"
+msgstr[3] "%(count)s секунди"
+
+#: apps/dashboards/formatting.py:24
+#, python-format
+msgid "%(count)s minute"
+msgid_plural "%(count)s minutes"
+msgstr[0] "%(count)s хвилина"
+msgstr[1] "%(count)s хвилини"
+msgstr[2] "%(count)s хвилин"
+msgstr[3] "%(count)s хвилини"
+
+#: apps/dashboards/formatting.py:30
+#, python-format
+msgid "%(days)dd %(hours)dh"
+msgstr "%(days)dд %(hours)dг"
+
+#: apps/dashboards/formatting.py:31
+#, python-format
+msgid "%(hours)dh %(minutes)dm"
+msgstr "%(hours)dг %(minutes)dхв"
+
+#: apps/dashboards/templates/dashboards/overview.html:4
+#: apps/dashboards/templates/dashboards/overview.html:8
+msgid "Overview"
+msgstr "Огляд"
+
+#: apps/dashboards/templates/dashboards/overview.html:9
+msgid "Dashboards will appear here as they are built."
+msgstr "Панелі з'являтимуться тут у міру їх створення."
+
+#: templates/403.html:3
+msgid "Forbidden"
+msgstr "Заборонено"
+
+#: templates/403.html:6
+msgid "You do not have access to this page."
+msgstr "У вас немає доступу до цієї сторінки."
+
+#: templates/404.html:3
+msgid "Not found"
+msgstr "Не знайдено"
+
+#: templates/404.html:6
+msgid "Page not found"
+msgstr "Сторінку не знайдено"
+
+#: templates/500.html:5
+msgid "Server error"
+msgstr "Помилка сервера"
+
+#: templates/500.html:11
+msgid "Something went wrong."
+msgstr "Щось пішло не так."
+
+#: templates/base.html:15 templates/partials/nav.html:3
+msgid "PR Radar"
+msgstr "PR Radar"
+
+#: templates/partials/language_switcher.html:5
+msgid "Language"
+msgstr "Мова"
+
+#: templates/partials/nav.html:10
+msgid "Log out"
+msgstr "Вийти"
+
+#: templates/partials/theme_switcher.html:5
+msgid "Theme"
+msgstr "Тема"
+
+#: templates/registration/logged_out.html:4
+msgid "Logged out"
+msgstr "Вихід виконано"
+
+#: templates/registration/logged_out.html:8
+msgid "You have been logged out."
+msgstr "Ви вийшли з системи."
+
+#: templates/registration/logged_out.html:9
+msgid "Log in again"
+msgstr "Увійти знову"
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/registration/login.html:27
+#: templates/registration/password_reset_complete.html:9
+msgid "Log in"
+msgstr "Увійти"
+
+#: templates/registration/login.html:17
+msgid "Username"
+msgstr "Ім'я користувача"
+
+#: templates/registration/login.html:22
+msgid "Password"
+msgstr "Пароль"
+
+#: templates/registration/password_reset_complete.html:4
+msgid "Password reset complete"
+msgstr "Пароль відновлено"
+
+#: templates/registration/password_reset_complete.html:8
+msgid "Your password has been set. You can log in now."
+msgstr "Пароль встановлено. Тепер ви можете увійти."
+
+#: templates/registration/password_reset_confirm.html:4
+#: templates/registration/password_reset_confirm.html:8
+msgid "Set new password"
+msgstr "Встановити новий пароль"
+
+#: templates/registration/password_reset_confirm.html:13
+msgid "New password"
+msgstr "Новий пароль"
+
+#: templates/registration/password_reset_confirm.html:18
+msgid "Confirm password"
+msgstr "Підтвердження пароля"
+
+#: templates/registration/password_reset_confirm.html:22
+msgid "Change password"
+msgstr "Змінити пароль"
+
+#: templates/registration/password_reset_confirm.html:25
+msgid ""
+"The password reset link is invalid, possibly because it has already been "
+"used."
+msgstr ""
+"Посилання для відновлення пароля недійсне, можливо, воно вже було "
+"використане."
+
+#: templates/registration/password_reset_done.html:4
+#: templates/registration/password_reset_form.html:4
+#: templates/registration/password_reset_form.html:8
+msgid "Reset password"
+msgstr "Відновити пароль"
+
+#: templates/registration/password_reset_done.html:8
+msgid "If that email exists, a reset link has been sent."
+msgstr "Якщо ця електронна адреса існує, посилання для відновлення надіслано."
+
+#: templates/registration/password_reset_form.html:12
+msgid "Email"
+msgstr "Електронна пошта"
+
+#: templates/registration/password_reset_form.html:16
+msgid "Send reset link"
+msgstr "Надіслати посилання"

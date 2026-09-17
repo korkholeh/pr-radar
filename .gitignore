@@ -1,0 +1,14 @@
+.env
+data/
+.e2e/
+.tools/
+__pycache__/
+*.pyc
+e2e/artifacts/
+e2e/RESULTS.md
+.venv/
+staticfiles/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

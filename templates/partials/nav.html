@@ -1,0 +1,14 @@
+{% load i18n %}
+<nav class="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+  <a href="{% url 'dashboards:overview' %}" class="font-semibold text-[var(--text)]">{% translate "PR Radar" %}</a>
+  <div class="flex items-center gap-4">
+    {% if request.user.is_authenticated %}
+      {% include "partials/theme_switcher.html" %}
+      {% include "partials/language_switcher.html" %}
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="text-[var(--text-muted)]">{% translate "Log out" %}</button>
+      </form>
+    {% endif %}
+  </div>
+</nav>
