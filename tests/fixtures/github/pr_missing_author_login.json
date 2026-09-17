@@ -1,0 +1,33 @@
+{
+  "data": {
+    "repository": {
+      "pullRequests": {
+        "pageInfo": { "hasNextPage": false, "endCursor": null },
+        "nodes": [
+          {
+            "id": "PR_kwDOBadAuthor",
+            "number": 200,
+            "title": "Malformed author",
+            "body": "",
+            "state": "OPEN",
+            "isDraft": false,
+            "baseRefName": "main",
+            "headRefName": "weird/branch",
+            "createdAt": "2026-01-05T09:00:00Z",
+            "updatedAt": "2026-01-05T09:00:00Z",
+            "mergedAt": null,
+            "closedAt": null,
+            "additions": 1,
+            "deletions": 0,
+            "changedFiles": 1,
+            "mergeCommit": null,
+            "labels": { "nodes": [] },
+            "author": {},
+            "mergedBy": null
+          }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4900, "resetAt": "2026-01-01T01:00:00Z", "cost": 1 }
+  }
+}

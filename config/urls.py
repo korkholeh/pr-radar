@@ -8,5 +8,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
     path("jsi18n/", js_catalog, name="javascript-catalog"),
+    path("", include("apps.connections.urls")),
+    path("", include("apps.github_sync.urls")),
     path("", include("apps.dashboards.urls")),
 ]

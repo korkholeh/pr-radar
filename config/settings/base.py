@@ -23,6 +23,9 @@ REPORT_TIMEZONE = env.str("REPORT_TIMEZONE", default="Europe/Kyiv")
 FIELD_ENCRYPTION_KEYS = env.list("FIELD_ENCRYPTION_KEYS", default=[])
 STORE_RAW_PAYLOADS = env.bool("STORE_RAW_PAYLOADS", default=False)
 
+GITHUB_API_BASE_URL = env.str("GITHUB_API_BASE_URL", default="https://api.github.com")
+GITHUB_GRAPHQL_URL = f"{GITHUB_API_BASE_URL}/graphql"
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -74,6 +77,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.accounts.context_processors.theme_preference",
+                "apps.connections.context_processors.connection_alerts",
             ],
         },
     },

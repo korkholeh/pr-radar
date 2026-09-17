@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if connection %}{% translate "Edit connection" %}{% else %}{% translate "New connection" %}{% endif %}{% endblock %}
+{% block content %}
+{% include "connections/partials/form.html" %}
+{% endblock %}

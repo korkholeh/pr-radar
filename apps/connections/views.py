@@ -1,0 +1,303 @@
+from typing import Any
+
+import httpx
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+
+from apps.accounts.services import record_audit
+from apps.catalog.models import Project, Repository
+from apps.catalog.services import create_repositories_from_discovery, rebind_repository
+from apps.connections.auth import ConnectionNotUsableError
+from apps.connections.forms import ConnectionForm
+from apps.connections.models import GitHubConnection
+from apps.connections.services import set_token, verify_connection
+from apps.github_sync.errors import GitHubError, require
+from config.htmx import is_htmx
+
+PERMISSION = "catalog.manage_settings"
+DISCOVERY_PAGE_SIZE = 100
+
+
+def _connections_context() -> dict:
+    return {"connections": list(GitHubConnection.objects.order_by("name"))}
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def connection_list(request: HttpRequest) -> HttpResponse:
+    template = "connections/partials/list_content.html" if is_htmx(request) else "connections/list.html"
+    return render(request, template, _connections_context())
+
+
+def _save_connection(
+    request: HttpRequest, form: ConnectionForm, connection: GitHubConnection, *, creating: bool
+) -> None:
+    """Writes name/kind/owner_login, replaces the token when one was submitted, then verifies
+    unless the admin opted out — refusing to persist an invalid token unless they explicitly
+    asked to save it unverified. Runs inside one transaction so a refused save leaves nothing."""
+    connection.name = form.cleaned_data["name"]
+    connection.kind = form.cleaned_data["kind"]
+    connection.owner_login = form.cleaned_data["owner_login"]
+    connection.created_by = connection.created_by or request.user
+    connection.save()
+
+    token = form.cleaned_data["token"]
+    if token:
+        set_token(connection, token, actor=request.user)
+
+    save_unverified = form.cleaned_data["save_unverified"]
+    if token and not save_unverified:
+        try:
+            verify_connection(connection, force=True)
+        except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+            transaction.set_rollback(True)
+            form.add_error(
+                None,
+                _(
+                    "Could not reach GitHub to verify this token. Try again, or tick "
+                    "“save without verifying”."
+                ),
+            )
+            return
+        if connection.status == GitHubConnection.Status.INVALID:
+            transaction.set_rollback(True)
+            form.add_error(
+                None,
+                _("GitHub rejected this token. Fix it and try again, or tick “save without verifying”."),
+            )
+            return
+
+    action = "connection.create" if creating else "connection.update"
+    record_audit(request.user, action, connection, after={"name": connection.name})
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def connection_create(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = ConnectionForm(request.POST, require_token=True)
+        if form.is_valid():
+            with transaction.atomic():
+                connection = GitHubConnection(created_by=request.user)
+                _save_connection(request, form, connection, creating=True)
+            if not form.errors:
+                return redirect("connections:list")
+    else:
+        form = ConnectionForm(require_token=True)
+
+    template = "connections/partials/form.html" if is_htmx(request) else "connections/form.html"
+    return render(request, template, {"form": form, "connection": None})
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def connection_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    connection = get_object_or_404(GitHubConnection, pk=pk)
+
+    if request.method == "POST":
+        form = ConnectionForm(request.POST, require_token=False)
+        if form.is_valid():
+            with transaction.atomic():
+                _save_connection(request, form, connection, creating=False)
+            if not form.errors:
+                return redirect("connections:list")
+    else:
+        form = ConnectionForm(
+            require_token=False,
+            initial={
+                "name": connection.name,
+                "kind": connection.kind,
+                "owner_login": connection.owner_login,
+            },
+        )
+
+    template = "connections/partials/form.html" if is_htmx(request) else "connections/form.html"
+    return render(request, template, {"form": form, "connection": connection})
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+@require_POST
+def connection_check(request: HttpRequest, pk: int) -> HttpResponse:
+    connection = get_object_or_404(GitHubConnection, pk=pk)
+    check_error = None
+    try:
+        verify_connection(connection, force=True)
+    except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+        check_error = _("Could not reach GitHub to check this connection. Check your network and try again.")
+    if is_htmx(request):
+        return render(
+            request, "connections/partials/row.html", {"connection": connection, "check_error": check_error}
+        )
+    return redirect("connections:list")
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+@require_POST
+def connection_deactivate(request: HttpRequest, pk: int) -> HttpResponse:
+    connection = get_object_or_404(GitHubConnection, pk=pk)
+    connection.is_active = not connection.is_active
+    connection.save(update_fields=["is_active"])
+    record_audit(
+        request.user,
+        "connection.deactivate" if not connection.is_active else "connection.activate",
+        connection,
+        after={"is_active": connection.is_active},
+    )
+    if is_htmx(request):
+        return render(request, "connections/partials/row.html", {"connection": connection})
+    return redirect("connections:list")
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+@require_POST
+def connection_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    connection = get_object_or_404(GitHubConnection, pk=pk)
+    try:
+        connection.delete()
+    except ProtectedError:
+        context = {
+            **_connections_context(),
+            "blocked_connection": connection,
+            "blocking_repositories": list(connection.repositories.order_by("full_name")),
+        }
+    else:
+        context = _connections_context()
+    template = "connections/partials/list_content.html" if is_htmx(request) else "connections/list.html"
+    return render(request, template, context)
+
+
+def _discover_nodes(connection: GitHubConnection) -> list[dict[str, Any]]:
+    from apps.connections.auth import auth_for_connection
+    from apps.github_sync.client import GitHubClient
+    from apps.github_sync.queries import REPOSITORIES_BY_OWNER_QUERY, VIEWER_REPOSITORIES_QUERY
+    from apps.github_sync.rate_limit import RateBudget
+
+    auth = auth_for_connection(connection)
+    client = GitHubClient(auth, RateBudget(key=auth.rate_limit_key))
+    if connection.owner_login:
+        document, page_path, variables = (
+            REPOSITORIES_BY_OWNER_QUERY,
+            "repositoryOwner.repositories",
+            {"login": connection.owner_login},
+        )
+    else:
+        document, page_path, variables = VIEWER_REPOSITORIES_QUERY, "viewer.repositories", {}
+    return list(client.paginate(document, variables, page_path=page_path, page_size=DISCOVERY_PAGE_SIZE))
+
+
+def _discovery_rows(
+    nodes: list[dict[str, Any]], connection: GitHubConnection, *, show_archived: bool
+) -> list[tuple[str, list[dict[str, Any]]]]:
+    if not show_archived:
+        nodes = [node for node in nodes if not require(node, "isArchived")]
+    github_ids = [require(node, "id") for node in nodes]
+    bound_elsewhere = {
+        github_id: {"connection_name": connection_name, "repository_pk": repository_pk}
+        for github_id, connection_name, repository_pk in Repository.objects.filter(github_id__in=github_ids)
+        .exclude(connection=connection)
+        .values_list("github_id", "connection__name", "pk")
+    }
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for node in nodes:
+        grouped.setdefault(require(node, "owner.login"), []).append(
+            {"node": node, "bound_to": bound_elsewhere.get(require(node, "id"))}
+        )
+    return sorted(grouped.items())
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def repository_discover(request: HttpRequest) -> HttpResponse:
+    params = request.POST if request.method == "POST" else request.GET
+    connection_id = params.get("connection")
+    connection = get_object_or_404(GitHubConnection, pk=connection_id) if connection_id else None
+    show_archived = params.get("show_archived") == "1"
+    projects = Project.objects.order_by("name")
+    created = None
+
+    nodes: list[dict[str, Any]] = []
+    error = None
+    if connection is not None:
+        try:
+            nodes = _discover_nodes(connection)
+            if request.method == "POST":
+                selected_ids = set(request.POST.getlist("repo"))
+                project_slug = request.POST.get("project", "")
+                project = projects.filter(slug=project_slug).first() if project_slug else None
+                chosen = [node for node in nodes if require(node, "id") in selected_ids]
+                created = create_repositories_from_discovery(chosen, connection=connection, project=project)
+                record_audit(
+                    request.user,
+                    "repository.discover_add",
+                    connection,
+                    after={"count": len(chosen)},
+                )
+        except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+            error = _(
+                "Could not reach GitHub to list repositories for this connection. Try again in a moment."
+            )
+
+    context = {
+        "connections": GitHubConnection.objects.filter(is_active=True).order_by("name"),
+        "connection": connection,
+        "rows": _discovery_rows(nodes, connection, show_archived=show_archived) if connection else [],
+        "show_archived": show_archived,
+        "projects": projects,
+        "created": created,
+        "error": error,
+    }
+    template = (
+        "connections/partials/discovery_content.html" if is_htmx(request) else "connections/discovery.html"
+    )
+    return render(request, template, context)
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+@require_POST
+def repository_rebind(request: HttpRequest, pk: int) -> HttpResponse:
+    repository = get_object_or_404(Repository, pk=pk)
+    connection_id = request.POST.get("connection")
+    confirm = request.POST.get("confirm") == "1"
+    connection = get_object_or_404(GitHubConnection, pk=connection_id) if connection_id else None
+
+    error = None
+    if connection is None:
+        error = _("Choose a connection to rebind to.")
+    elif not confirm:
+        error = _("Tick the confirmation box to rebind this repository.")
+    else:
+        rebind_repository(repository, connection, actor=request.user)
+
+    if connection is None:
+        return redirect("connections:discover")
+
+    nodes: list[dict[str, Any]] = []
+    try:
+        nodes = _discover_nodes(connection)
+    except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+        error = error or _(
+            "Could not reach GitHub to list repositories for this connection. Try again in a moment."
+        )
+
+    context = {
+        "connections": GitHubConnection.objects.filter(is_active=True).order_by("name"),
+        "connection": connection,
+        "rows": _discovery_rows(nodes, connection, show_archived=False),
+        "show_archived": False,
+        "projects": Project.objects.order_by("name"),
+        "created": None,
+        "error": error,
+    }
+    template = (
+        "connections/partials/discovery_content.html" if is_htmx(request) else "connections/discovery.html"
+    )
+    return render(request, template, context)

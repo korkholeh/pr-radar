@@ -88,3 +88,61 @@ policy evaluators and the violations console, the `MetricDef` registry and `comp
 `compute_churn`, every dashboard page/chart/table/export, and narrowing `scope_for_user()` by
 `UserProjectAccess`. See `.autodev/phases/02-data-model/PLAN.md`'s "Out of scope" section for which later phase
 owns each.
+
+## Phase 3 — GitHub connections and incremental sync
+
+Everything between a token in an admin's hands and rows in `activity`. No live GitHub call anywhere — the whole
+phase is built and tested against fixtures in `tests/fixtures/github/`, mocked with `respx`; `conftest.py` fails
+the suite on any unmocked outbound request.
+
+- **Credentials at rest** (`connections/crypto.py`, ADR 0004): `MultiFernet` encryption keyed by
+  `FIELD_ENCRYPTION_KEYS`, `services.py::set_token`/`plaintext_token` as the only two callers of
+  `encrypt_token`/`decrypt_token` (enforced by a grep test), `manage.py rotate_encryption_key` (`--dry-run`
+  supported) to re-encrypt every row under key #0 after a key rotation.
+- **The `GitHubAuth` protocol** (`connections/auth.py`): `PATAuth` for `fine_grained_pat`/`classic_pat`, with a
+  `__repr__`/`__str__` override so a token can never reach a traceback's rendered locals.
+- **The GraphQL/REST client** (`github_sync/client.py`, `errors.py`, `rate_limit.py`, `queries.py`): typed
+  errors (`GitHubAuthError`, `GitHubSSOError`, `GitHubSchemaError` naming the full JSON path, …),
+  `errors.require`/`optional` (missing optional fields map to `None`, never `0`), per-connection `RateBudget`,
+  retries with jittered exponential backoff honouring `Retry-After`, and pagination that also follows **nested**
+  connections (reviews, commits, files, review threads) past their first page — a truncated nested page raises
+  rather than silently under-counting.
+- **Connection verification** (`connections/services.py::verify_connection`, `check_codes.py`): stores codes +
+  parameters only, never a rendered message, so `last_check_result` renders in the reader's language forever;
+  throttled to once an hour unless `force=True`. The expiry/invalid banner
+  (`connections/context_processors.py::connection_alerts`) is admin-only and costs one query.
+- **Sync** (`github_sync/services.py::run_sync`, `sync_repository`, `mappers.py`, `upserts.py`,
+  `pipeline.py::process_pull_request`): a per-repository watermark with `SYNC_OVERLAP_MINUTES` overlap, one
+  `transaction.atomic()` per pull request, a round-robin scheduler across connections so one connection waiting
+  on its rate limit doesn't stall the others, a `SyncLock` (unique-row mutex with a stale-lock steal — SQLite
+  doesn't honour `select_for_update`) guaranteeing one sync at a time, and per-connection quarantine: a 401
+  marks a connection `invalid` and skips only its repositories, a 403+SSO marks it `degraded`, and the run
+  continues for every other connection either way. `process_pull_request()` is defined, called exactly once per
+  synced PR after its transaction commits, and does nothing yet — phases 4–6 fill it in without reopening the
+  orchestrator.
+- **Surfaces**: Settings → Connections (list/create/edit/check/deactivate/delete), Settings → Repositories
+  (discovery grouped by owner, archived hidden by default, rebind-with-confirm), and the Sync page (manual
+  "Sync now" via huey, a polled status fragment, the run history with masked per-connection stats). Every one of
+  these returns a fragment for `HX-Request` and a full page otherwise; mutations are POST; a failed check or an
+  attempted delete of a connection with repositories renders a visible message, never a blank page.
+  `manage.py sync` exposes the same orchestrator with `--repo`/`--project`/`--since`/`--full`.
+- **`bootstrap_connection`**: creates a `"Default (.env)"` connection from `GITHUB_TOKEN` on first run, status
+  `unverified`, no GitHub call unless `--verify` is passed explicitly.
+- **The leak test** (`tests/test_token_leak.py`, spec §12): after a sync that fails partway, walks every table
+  via DB introspection, greps the raw on-disk SQLite file, the log file, `SyncRun.error_log` and three rendered
+  pages, asserting the token (beyond its last 4 characters) is nowhere.
+- **i18n**: every string this phase added has a Ukrainian translation in the same phase (`tests/test_translations.py`
+  and a canary-string render test are the gate).
+- **Docs**: `docs/GITHUB_CONNECTIONS.md` (token types/scopes, first-run checklist, every verification code and
+  what to do about it, rotation, recovery from a lost `FIELD_ENCRYPTION_KEYS`, rebinding), `docs/user/connect-github.md`.
+
+### Out of scope for phase 3
+
+Identity → `Person` mapping, bot detection, the unmapped-identity queue (`activity.derive`) → phase 4. AI
+detection, policy evaluation, dirty-day marking and rollups → phases 5–7 (all four are stages of
+`process_pull_request()`, which ships empty here by design). `manage.py recompute`/`compute_churn`/`seed_demo`/
+`metrics_doc`/`seed_detection_rules`, the PR/repository/person detail pages, tables, filters, CSV/XLSX export,
+`GitHubAuth` for GitHub Apps, scoped selectors and `UserProjectAccess` enforcement (`scope_for_user()` stays
+unrestricted), `git` credential handling via `GIT_ASKPASS`, webhooks and scheduled daily verification as a cron
+entry. See `.autodev/phases/03-connections-and-sync/PLAN.md`'s "Out of scope" section for which later phase
+owns each.

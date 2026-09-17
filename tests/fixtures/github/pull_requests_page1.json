@@ -1,0 +1,54 @@
+{
+  "data": {
+    "repository": {
+      "pullRequests": {
+        "pageInfo": { "hasNextPage": true, "endCursor": "cursor-pr-page-1" },
+        "nodes": [
+          {
+            "id": "PR_kwDOA1",
+            "number": 101,
+            "title": "Add widget export",
+            "body": "Adds the widget export flow.",
+            "state": "MERGED",
+            "isDraft": false,
+            "baseRefName": "main",
+            "headRefName": "feature/widget-export",
+            "createdAt": "2026-01-01T09:00:00Z",
+            "updatedAt": "2026-01-02T15:00:00Z",
+            "mergedAt": "2026-01-02T15:00:00Z",
+            "closedAt": "2026-01-02T15:00:00Z",
+            "additions": 42,
+            "deletions": 10,
+            "changedFiles": 3,
+            "mergeCommit": { "oid": "abc123def456" },
+            "labels": { "nodes": [{ "name": "enhancement" }] },
+            "author": { "login": "octocat" },
+            "mergedBy": { "login": "octocat" }
+          },
+          {
+            "id": "PR_kwDOA2",
+            "number": 102,
+            "title": "Fix gadget crash",
+            "body": "Fixes a crash in the gadget module.",
+            "state": "OPEN",
+            "isDraft": false,
+            "baseRefName": "main",
+            "headRefName": "fix/gadget-crash",
+            "createdAt": "2026-01-03T09:00:00Z",
+            "updatedAt": "2026-01-03T12:00:00Z",
+            "mergedAt": null,
+            "closedAt": null,
+            "additions": 5,
+            "deletions": 1,
+            "changedFiles": 1,
+            "mergeCommit": null,
+            "labels": { "nodes": [] },
+            "author": { "login": "hubot" },
+            "mergedBy": null
+          }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4950, "resetAt": "2026-01-01T01:00:00Z", "cost": 1 }
+  }
+}

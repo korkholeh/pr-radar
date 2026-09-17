@@ -1,0 +1,16 @@
+{% load i18n %}
+<div
+  id="sync-status"
+  class="rounded border border-[var(--border)] p-4 mb-4"
+  {% if running %}hx-get="{% url 'github_sync:status' %}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}
+>
+  {% if running %}
+    <p class="text-[var(--text)]">
+      {% blocktranslate trimmed with repositories=running.stats.repositories pull_requests=running.stats.pull_requests %}
+        Sync in progress: {{ repositories }} repositories, {{ pull_requests }} pull requests synced so far.
+      {% endblocktranslate %}
+    </p>
+  {% else %}
+    <p class="text-[var(--text-muted)]">{% translate "No sync is currently running." %}</p>
+  {% endif %}
+</div>

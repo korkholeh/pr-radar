@@ -1,0 +1,47 @@
+# Review — phase 3 round 2
+
+**Verdict:** changes_requested
+
+Phase 3 is a strong, well-tested slice and every r1 blocker/major is genuinely fixed: the SyncRun-before-lock ordering, repository-level and hook error containment, the failed-PR watermark clamp, the silent discovery rebind and sync_since reset, the nested rebind form, the check/discover 500s, the tautological schema test, the PERM_CONTENTS code split, the owner-scoped lock release, and the sync_run permission gate. The project gate passes as claimed (I re-ran ruff, ruff format --check, mypy, makemigrations --check, manage.py check and pytest -q: all green). All 24 PLAN tasks are checked, none marked [~], and no environment claim is made without proof. All seven acceptance criteria have tests that actually exercise production code. Two majors remain, both on error paths: run_sync still has no terminal-status write, so any crash or kill leaves a permanently running SyncRun that makes the Sync page poll every 2s and disables its own button forever (reachable without a crash via a lost FIELD_ENCRYPTION_KEYS, which docs/GITHUB_CONNECTIONS.md documents recovery for); and the connection create/edit form and the rebind view still return 500 on a recoverable GitHub error, the same class r1 flagged for check/discover, deferred in DECISIONS.md on a rationale that does not hold.
+
+## [MAJOR] A crashed, killed or stale sync leaves SyncRun.status=running forever, wedging the Sync page
+`apps/github_sync/services.py`
+
+run_sync (line 242) creates the SyncRun with status=running and never writes a terminal status on any path except the normal return; its only cleanup is `finally: _release_lock(run)` (line 381). Anything that escapes the try block leaves status=running with finished_at=None. The phase's own test apps/github_sync/tests/test_sync.py::test_lock_is_released_after_a_crashing_run creates exactly that row and asserts only that the lock is gone. _acquire_lock (lines 63-65) steals a stale lock but never touches the stolen run, so a killed worker also leaves one. github_sync/views.py::_sync_context picks the first running run out of the latest 20, partials/status.html attaches hx-trigger="every 2s" whenever `running` is truthy, and partials/content.html renders the "Sync now" button `disabled` for the same condition — so one crashed or killed run permanently shows "Sync in progress", polls every two seconds, and makes the UI sync button unusable with no in-app recovery. This is reachable without any crash: the grouping loop catches only ConnectionNotUsableError around auth_for_connection (line 283), but plaintext_token -> decrypt_token raises cryptography.fernet.InvalidToken when FIELD_ENCRYPTION_KEYS was rotated or lost, and ImproperlyConfigured when it is empty — the exact recovery scenario docs/GITHUB_CONNECTIONS.md documents. Both escape run_sync.
+
+**Fix:** Wrap run_sync's body in `except Exception as exc:` that sets run.status = FAILED, run.finished_at = timezone.now() and appends mask_secrets(str(exc)) to run.error_log before re-raising. In _acquire_lock, when a stale lock is deleted, also mark its sync_run failed with a finished_at. Catch the crypto failures beside ConnectionNotUsableError at line 283 and record them as a per-connection skip with an error line. Extend test_lock_is_released_after_a_crashing_run and test_stale_lock_is_stolen to assert SyncRun.objects.filter(status=RUNNING).count() == 0 afterwards.
+
+## [MAJOR] Connection create/edit and rebind return 500 instead of a visible fragment on a recoverable GitHub error
+`apps/connections/views.py`
+
+r1 fixed connection_check and repository_discover but the same unguarded GitHub calls remain in two places. _save_connection calls verify_connection(connection, force=True) at line 55 (reached from connection_create and from connection_edit at line 119); connections/services.py::verify_connection catches only GitHubAuthError around rest_get("/user") (line 77) and around the repository query (line 128), so GitHubServerError (502 after retries), SecondaryRateLimitError, a plain GitHubError, GitHubSSOError raised from rest_get("/user") and httpx.TransportError all propagate out of the view — a 500 on the primary onboarding path, with the atomic block rolling the connection back so the admin loses the form. repository_rebind calls _discover_nodes(connection) unguarded at line 275 (and calls it even when the request already failed validation for a missing confirm), so a flaky GitHub turns a rebind into a 500 as well. This violates CLAUDE.md's "Errors return a visible fragment, never an empty 400 body". .autodev/DECISIONS.md line 207 explicitly defers this, arguing _save_connection "has its own, different error-surfacing path via form errors" — it does not; nothing converts these exceptions into form errors.
+
+**Fix:** In _save_connection, wrap verify_connection in `try/except (GitHubError, ConnectionNotUsableError, httpx.TransportError)` and call form.add_error(None, <translated message>) plus transaction.set_rollback(True), matching the existing invalid-token branch. In repository_rebind, guard _discover_nodes with the same except clause used in repository_discover and render the discovery fragment with the alert, and skip the discovery call entirely when `error` is already set. Add tests: a 502 during connection create re-renders the form with a visible error and creates nothing; a 502 during rebind returns 200 with a visible alert.
+
+## [MINOR] A 403 + X-GitHub-SSO on /user escapes verify_connection, so SSO is misdiagnosed as a network failure
+`apps/connections/services.py`
+
+verify_connection catches GitHubSSOError only around the repositories GraphQL query (line 128). The rest_get("/user") call at line 77 catches GitHubAuthError only, so a token that is valid but not SSO-authorized — which GitHub answers with 403 + X-GitHub-SSO on REST too — propagates out of verify_connection entirely. From the Check button the view's generic handler then renders "Could not reach GitHub to check this connection", and last_check_result is never written, so the admin is told it is a network problem instead of getting SSO_AUTHORIZATION_REQUIRED with the org and the authorization URL that check_codes.py already has ready.
+
+**Fix:** Add `except GitHubSSOError as exc:` to the /user try block, append the SSO_AUTHORIZATION_REQUIRED check with exc.org/exc.url, and fall through to the status resolution (degraded) instead of propagating. Add a test_verify.py case for a 403 + SSO on /user.
+
+## [MINOR] The expiry banner is gated on is_staff, which nothing ties to the admin group
+`apps/connections/context_processors.py`
+
+connection_alerts returns {} for any user where user.is_staff is false (line 21), and the module docstring asserts is_staff "is true only for the admin group in this app". Nothing enforces that: no code links group membership to is_staff (the only writers are seed_e2e.py), and docs/SETUP.md tells the operator to create a superuser and then add users to the admin group from /admin/. A non-superuser added to the admin group therefore gets the Connections and Repositories nav links and passes every permission_required check, but silently never sees the invalid/expired/expiring banner — the one surface that tells them a token has died and syncs have stopped. The test suite only uses the staff admin_user fixture, so nothing pins this.
+
+**Fix:** Drop the is_staff short-circuit and rely on user.has_perm("catalog.manage_settings") alone (the query-count test's ceiling already allows it), or keep it only as `if user.is_staff or user.has_perm(...)`. Add a test for a non-staff user in the admin group seeing the banner.
+
+## [MINOR] GitHubSchemaError from paginate() names a bare segment, so error_log cannot identify the drifted query
+`apps/github_sync/client.py`
+
+paginate() calls require_path against already-unwrapped sub-dicts: require_path(connection, "nodes"), require_path(page_info, "hasNextPage"), require_path(page_info, "endCursor"). The resulting GitHubSchemaError.path is "nodes" or "endCursor", so SyncRun.error_log records "acme/widget#101: Missing or malformed field at path: endCursor" with no indication of which connection (commits, reviews, files, timeline) or which page drifted. Acceptance criterion 8 asks for the JSON path; test_errors.py and test_mappers.py prove the full-path behaviour, but the client's own raises do not have it. DECISIONS.md line 210 knowingly left this as out of scope for an r1 finding about the test.
+
+**Fix:** Prefix the path with page_path in paginate(), e.g. require_path(data, f"{page_path}.pageInfo.endCursor") against the full payload rather than the unwrapped sub-dict, and assert the qualified path in test_missing_end_cursor_on_a_further_page_raises_schema_error.
+
+## [MINOR] Raw dict indexing on a discovery node bypasses the GitHubSchemaError contract
+`apps/connections/views.py`
+
+repository_discover line 231 does `chosen = [node for node in nodes if node["id"] in selected_ids]`. Every other reader of these nodes (_discovery_rows, catalog.services.create_repositories_from_discovery) was converted to errors.require() in the r1 fixes, but this one was missed: schema drift here raises a bare KeyError, which the surrounding try does not catch (it only wraps _discover_nodes), so it surfaces as a 500 rather than the visible fragment the page already knows how to render.
+
+**Fix:** Use require(node, "id") here as the sibling call sites do, and move the POST branch inside the same try/except that guards _discover_nodes.

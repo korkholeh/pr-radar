@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 06:31+0000\n"
+"POT-Creation-Date: 2026-09-17 09:35+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -61,7 +61,7 @@ msgid "project"
 msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
-#: apps/activity/models.py:64 apps/activity/models.py:292
+#: apps/activity/models.py:64 apps/activity/models.py:294
 #: apps/ai_detection/models.py:43 apps/connections/models.py:43
 #: apps/policy/models.py:16 apps/policy/models.py:99
 msgid "created at"
@@ -141,11 +141,11 @@ msgstr "Без ШІ"
 msgid "Unknown"
 msgstr "Невідомо"
 
-#: apps/activity/models.py:14 apps/activity/models.py:311
+#: apps/activity/models.py:14 apps/activity/models.py:314
 msgid "None"
 msgstr "Немає"
 
-#: apps/activity/models.py:15 apps/github_sync/models.py:14
+#: apps/activity/models.py:15 apps/github_sync/models.py:15
 msgid "Partial"
 msgstr "Частково"
 
@@ -215,13 +215,13 @@ msgid "number"
 msgstr "номер"
 
 #: apps/activity/models.py:48 apps/activity/models.py:150
-#: apps/activity/models.py:266 apps/activity/models.py:295
+#: apps/activity/models.py:267 apps/activity/models.py:297
 #: apps/catalog/models.py:16 apps/catalog/models.py:43
 #: apps/catalog/models.py:129
 msgid "GitHub node id"
 msgstr "GitHub node id"
 
-#: apps/activity/models.py:55 apps/activity/models.py:290
+#: apps/activity/models.py:55 apps/activity/models.py:292
 msgid "author"
 msgstr "автор"
 
@@ -233,7 +233,7 @@ msgstr "заголовок"
 msgid "body"
 msgstr "текст"
 
-#: apps/activity/models.py:59 apps/activity/models.py:262
+#: apps/activity/models.py:59 apps/activity/models.py:263
 msgid "state"
 msgstr "стан"
 
@@ -294,12 +294,12 @@ msgid "merge method"
 msgstr "спосіб мерджу"
 
 #: apps/activity/models.py:87 apps/activity/models.py:170
-#: apps/activity/models.py:219
+#: apps/activity/models.py:220
 msgid "additions"
 msgstr "додавання"
 
 #: apps/activity/models.py:88 apps/activity/models.py:171
-#: apps/activity/models.py:220
+#: apps/activity/models.py:221
 msgid "deletions"
 msgstr "видалення"
 
@@ -327,8 +327,9 @@ msgstr "раунди ревʼю"
 msgid "commits after first review"
 msgstr "коміти після першого ревʼю"
 
-#: apps/activity/models.py:98 apps/catalog/models.py:18
-#: apps/catalog/models.py:52
+#: apps/activity/models.py:98 apps/activity/models.py:174
+#: apps/activity/models.py:268 apps/activity/models.py:298
+#: apps/catalog/models.py:18 apps/catalog/models.py:52
 msgid "raw payload"
 msgstr "сирі дані"
 
@@ -372,9 +373,9 @@ msgstr "формальне ревʼю"
 msgid "is self-merged"
 msgstr "самостійний мердж"
 
-#: apps/activity/models.py:126 apps/activity/models.py:192
-#: apps/activity/models.py:215 apps/activity/models.py:252
-#: apps/activity/models.py:282 apps/activity/models.py:314
+#: apps/activity/models.py:126 apps/activity/models.py:193
+#: apps/activity/models.py:216 apps/activity/models.py:253
+#: apps/activity/models.py:284 apps/activity/models.py:317
 #: apps/ai_detection/models.py:60 apps/churn/models.py:16
 #: apps/policy/models.py:82
 msgid "pull request"
@@ -416,146 +417,146 @@ msgstr "співавтори"
 msgid "trailers"
 msgstr "трейлери"
 
-#: apps/activity/models.py:176 apps/activity/models.py:195
+#: apps/activity/models.py:177 apps/activity/models.py:196
 #: apps/ai_detection/models.py:68
 msgid "commit"
 msgstr "коміт"
 
-#: apps/activity/models.py:177
+#: apps/activity/models.py:178
 msgid "commits"
 msgstr "коміти"
 
-#: apps/activity/models.py:197
+#: apps/activity/models.py:198
 msgid "position"
 msgstr "позиція"
 
-#: apps/activity/models.py:200
+#: apps/activity/models.py:201
 msgid "pull request commit"
 msgstr "коміт pull request-у"
 
-#: apps/activity/models.py:201
+#: apps/activity/models.py:202
 msgid "pull request commits"
 msgstr "коміти pull request-у"
 
-#: apps/activity/models.py:217
+#: apps/activity/models.py:218
 msgid "path"
 msgstr "шлях"
 
-#: apps/activity/models.py:218 apps/churn/models.py:24
-#: apps/connections/models.py:28 apps/github_sync/models.py:20
+#: apps/activity/models.py:219 apps/churn/models.py:24
+#: apps/connections/models.py:28 apps/github_sync/models.py:21
 #: apps/policy/models.py:88
 msgid "status"
 msgstr "статус"
 
-#: apps/activity/models.py:221
+#: apps/activity/models.py:222
 msgid "is test"
 msgstr "тестовий файл"
 
-#: apps/activity/models.py:222
+#: apps/activity/models.py:223
 msgid "is excluded"
 msgstr "виключено"
 
-#: apps/activity/models.py:229
+#: apps/activity/models.py:230
 msgid "matched sensitive rule"
 msgstr "відповідне чутливе правило"
 
-#: apps/activity/models.py:233
+#: apps/activity/models.py:234
 msgid "PR file"
 msgstr "файл PR"
 
-#: apps/activity/models.py:234
+#: apps/activity/models.py:235
 msgid "PR files"
 msgstr "файли PR"
 
-#: apps/activity/models.py:246
+#: apps/activity/models.py:247
 msgid "Approved"
 msgstr "Затверджено"
 
-#: apps/activity/models.py:247
+#: apps/activity/models.py:248
 msgid "Changes requested"
 msgstr "Запитано зміни"
 
-#: apps/activity/models.py:248
+#: apps/activity/models.py:249
 msgid "Commented"
 msgstr "Прокоментовано"
 
-#: apps/activity/models.py:249
+#: apps/activity/models.py:250
 msgid "Dismissed"
 msgstr "Відхилено"
 
-#: apps/activity/models.py:260
+#: apps/activity/models.py:261
 msgid "reviewer"
 msgstr "ревʼюер"
 
-#: apps/activity/models.py:263
+#: apps/activity/models.py:264
 msgid "submitted at"
 msgstr "надіслано о"
 
-#: apps/activity/models.py:264 apps/activity/models.py:294
+#: apps/activity/models.py:265 apps/activity/models.py:296
 msgid "body length"
 msgstr "довжина тексту"
 
-#: apps/activity/models.py:265
+#: apps/activity/models.py:266
 msgid "comments count"
 msgstr "кількість коментарів"
 
-#: apps/activity/models.py:269
+#: apps/activity/models.py:271
 msgid "review"
 msgstr "ревʼю"
 
-#: apps/activity/models.py:270
+#: apps/activity/models.py:272
 msgid "reviews"
 msgstr "ревʼю"
 
-#: apps/activity/models.py:293
+#: apps/activity/models.py:295
 msgid "is review thread"
 msgstr "це нитка ревʼю"
 
-#: apps/activity/models.py:298
+#: apps/activity/models.py:301
 msgid "review comment"
 msgstr "коментар ревʼю"
 
-#: apps/activity/models.py:299
+#: apps/activity/models.py:302
 msgid "review comments"
 msgstr "коментарі ревʼю"
 
-#: apps/activity/models.py:307 apps/github_sync/models.py:13
+#: apps/activity/models.py:310 apps/github_sync/models.py:14
 msgid "Success"
 msgstr "Успіх"
 
-#: apps/activity/models.py:308
+#: apps/activity/models.py:311
 msgid "Failure"
 msgstr "Помилка"
 
-#: apps/activity/models.py:309 apps/churn/models.py:10
+#: apps/activity/models.py:312 apps/churn/models.py:10
 msgid "Error"
 msgstr "Помилка виконання"
 
-#: apps/activity/models.py:310
+#: apps/activity/models.py:313
 msgid "Pending"
 msgstr "Очікує"
 
-#: apps/activity/models.py:316
+#: apps/activity/models.py:319
 msgid "commit sha"
 msgstr "sha коміту"
 
-#: apps/activity/models.py:317
+#: apps/activity/models.py:320
 msgid "is first CI commit"
 msgstr "перший CI-коміт"
 
-#: apps/activity/models.py:318
+#: apps/activity/models.py:321
 msgid "rollup state"
 msgstr "підсумковий стан"
 
-#: apps/activity/models.py:319
+#: apps/activity/models.py:322
 msgid "observed at"
 msgstr "спостережено о"
 
-#: apps/activity/models.py:322
+#: apps/activity/models.py:325
 msgid "check status"
 msgstr "статус перевірки"
 
-#: apps/activity/models.py:323
+#: apps/activity/models.py:326
 msgid "check statuses"
 msgstr "статуси перевірок"
 
@@ -645,6 +646,7 @@ msgstr "Низький"
 
 #: apps/ai_detection/models.py:36 apps/catalog/models.py:41
 #: apps/catalog/models.py:64 apps/connections/models.py:19
+#: apps/github_sync/models.py:44
 msgid "name"
 msgstr "назва"
 
@@ -708,6 +710,11 @@ msgstr "сигнал ШІ"
 msgid "AI signals"
 msgstr "сигнали ШІ"
 
+#: apps/catalog/admin.py:58 apps/catalog/models.py:66
+#: apps/catalog/models.py:158 apps/policy/models.py:43
+msgid "description"
+msgstr "опис"
+
 #: apps/catalog/models.py:11
 msgid "Organization"
 msgstr "Організація"
@@ -769,18 +776,13 @@ msgid "merge strategy hint"
 msgstr "підказка стратегії мерджу"
 
 #: apps/catalog/models.py:56 apps/catalog/models.py:71
-#: apps/github_sync/models.py:22
+#: apps/github_sync/models.py:23
 msgid "repositories"
 msgstr "репозиторії"
 
 #: apps/catalog/models.py:65
 msgid "slug"
 msgstr "slug"
-
-#: apps/catalog/models.py:66 apps/catalog/models.py:153
-#: apps/policy/models.py:43
-msgid "description"
-msgstr "опис"
 
 #: apps/catalog/models.py:75
 msgid "color"
@@ -842,7 +844,7 @@ msgstr "email Git"
 msgid "kind"
 msgstr "вид"
 
-#: apps/catalog/models.py:127 apps/catalog/models.py:152
+#: apps/catalog/models.py:127 apps/catalog/models.py:157
 #: apps/metrics/models.py:24
 msgid "value"
 msgstr "значення"
@@ -859,23 +861,23 @@ msgstr "ідентичність"
 msgid "identities"
 msgstr "ідентичності"
 
-#: apps/catalog/models.py:150
+#: apps/catalog/models.py:155
 msgid "key"
 msgstr "ключ"
 
-#: apps/catalog/models.py:151
+#: apps/catalog/models.py:156
 msgid "value type"
 msgstr "тип значення"
 
-#: apps/catalog/models.py:156
+#: apps/catalog/models.py:161
 msgid "app setting"
 msgstr "налаштування застосунку"
 
-#: apps/catalog/models.py:157
+#: apps/catalog/models.py:162
 msgid "app settings"
 msgstr "налаштування застосунку"
 
-#: apps/catalog/models.py:158
+#: apps/catalog/models.py:163
 msgid "Can manage settings"
 msgstr "Може керувати налаштуваннями"
 
@@ -1009,6 +1011,55 @@ msgstr "Одиниця, в якій відображається тривалі�
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
+#: apps/catalog/setting_defs.py:191
+msgid ""
+"Minutes a sync re-reads before the last watermark, to absorb late-arriving "
+"updates."
+msgstr ""
+"Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
+"запізнілі оновлення."
+
+#: apps/catalog/setting_defs.py:194
+msgid "Pull requests fetched per GraphQL page."
+msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
+
+#: apps/catalog/setting_defs.py:199
+msgid "Items fetched per page for a pull request's nested connections."
+msgstr ""
+"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
+
+#: apps/catalog/setting_defs.py:206
+msgid "Primary rate-limit remaining below which the client waits for reset."
+msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
+
+#: apps/catalog/setting_defs.py:210
+msgid "Maximum retry attempts for a transient request failure."
+msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
+
+#: apps/catalog/setting_defs.py:213
+msgid "Maximum backoff delay between retry attempts."
+msgstr "Максимальна затримка між повторними спробами."
+
+#: apps/catalog/setting_defs.py:219
+msgid ""
+"Minutes after which an unreleased sync lock is considered stale and stolen."
+msgstr ""
+"Хвилини, після яких незвільнене блокування синхронізації вважається "
+"застарілим і перехоплюється."
+
+#: apps/catalog/setting_defs.py:226
+msgid "Days before token expiry at which the admin banner starts warning."
+msgstr ""
+"Дні до закінчення терміну дії токена, з яких банер починає попереджати "
+"адміністратора."
+
+#: apps/catalog/setting_defs.py:233
+msgid ""
+"Minimum minutes between two non-forced verifications of the same connection."
+msgstr ""
+"Мінімальна кількість хвилин між двома незмушеними перевірками того самого "
+"підключення."
+
 #: apps/churn/models.py:7 apps/connections/models.py:14
 msgid "OK"
 msgstr "OK"
@@ -1056,6 +1107,117 @@ msgstr "результат churn"
 #: apps/churn/models.py:29
 msgid "churn results"
 msgstr "результати churn"
+
+#: apps/connections/check_codes.py:19
+#, python-format
+msgid "The token authenticates as %(login)s."
+msgstr "Токен автентифікується як %(login)s."
+
+#: apps/connections/check_codes.py:20 apps/connections/check_codes.py:28
+#: apps/connections/check_codes.py:32 apps/connections/check_codes.py:36
+#: apps/connections/check_codes.py:56
+msgid "No action needed."
+msgstr "Дія не потрібна."
+
+#: apps/connections/check_codes.py:23
+msgid "GitHub rejected this token."
+msgstr "GitHub відхилив цей токен."
+
+#: apps/connections/check_codes.py:24
+msgid "Generate a new token and replace it on this connection."
+msgstr "Створіть новий токен і замініть його в цьому підключенні."
+
+#: apps/connections/check_codes.py:27
+#, python-format
+msgid "The token can see %(count)s repositories."
+msgstr "Токен бачить %(count)s репозиторіїв."
+
+#: apps/connections/check_codes.py:31
+msgid "The token can read pull requests."
+msgstr "Токен може читати PR."
+
+#: apps/connections/check_codes.py:35
+msgid "The token can read repository contents."
+msgstr "Токен може читати вміст репозиторію."
+
+#: apps/connections/check_codes.py:39
+msgid "The token cannot read repository contents."
+msgstr "Токен не може читати вміст репозиторію."
+
+#: apps/connections/check_codes.py:40
+msgid "Grant the token read access to repository contents and re-check."
+msgstr "Надайте токену доступ на читання вмісту репозиторію і перевірте ще раз."
+
+#: apps/connections/check_codes.py:43
+msgid "Repository contents access was not checked."
+msgstr "Доступ до вмісту репозиторію не перевірявся."
+
+#: apps/connections/check_codes.py:44
+msgid "Add a repository to this connection, then re-check."
+msgstr "Додайте репозиторій до цього підключення, потім перевірте ще раз."
+
+#: apps/connections/check_codes.py:47
+#, python-format
+msgid "Organization %(org)s requires SSO authorization for this token."
+msgstr "Організація %(org)s вимагає авторизації SSO для цього токена."
+
+#: apps/connections/check_codes.py:48
+#, python-format
+msgid "Authorize the token for single sign-on at %(url)s."
+msgstr "Авторизуйте токен для єдиного входу (SSO) за адресою %(url)s."
+
+#: apps/connections/check_codes.py:51
+msgid ""
+"The classic token carries the full 'repo' scope, which grants write access."
+msgstr "Класичний токен має повний скоуп 'repo', що надає доступ на запис."
+
+#: apps/connections/check_codes.py:52
+msgid ""
+"Replace it with a fine-grained token limited to the repositories PR Radar "
+"reads."
+msgstr ""
+"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR "
+"Radar."
+
+#: apps/connections/check_codes.py:55
+#, python-format
+msgid "%(remaining)s API requests remain until %(reset_at)s."
+msgstr "Залишилося %(remaining)s запитів API до %(reset_at)s."
+
+#: apps/connections/forms.py:8
+#: apps/connections/templates/connections/partials/list_content.html:25
+msgid "Name"
+msgstr "Назва"
+
+#: apps/connections/forms.py:9
+#: apps/connections/templates/connections/partials/list_content.html:26
+msgid "Kind"
+msgstr "Вид"
+
+#: apps/connections/forms.py:10
+msgid "Owner login"
+msgstr "Логін власника"
+
+#: apps/connections/forms.py:12
+#: apps/connections/templates/connections/partials/list_content.html:27
+msgid "Token"
+msgstr "Токен"
+
+#: apps/connections/forms.py:15
+msgid "Leave blank to keep the current token."
+msgstr "Залиште порожнім, щоб зберегти поточний токен."
+
+#: apps/connections/forms.py:18
+msgid "Save without verifying"
+msgstr "Зберегти без перевірки"
+
+#: apps/connections/forms.py:20
+msgid "Skip the GitHub check and store this token as unverified."
+msgstr "Пропустити перевірку GitHub і зберегти цей токен як неперевірений."
+
+#: apps/connections/forms.py:30
+msgid "A token is required."
+msgstr "Токен обов'язковий."
 
 #: apps/connections/models.py:8
 msgid "Fine-grained personal access token"
@@ -1142,8 +1304,216 @@ msgid "GitHub connection"
 msgstr "Підключення GitHub"
 
 #: apps/connections/models.py:55
+#: apps/connections/templates/connections/partials/list_content.html:4
+#: apps/connections/templates/connections/partials/list_content.html:22
 msgid "GitHub connections"
 msgstr "Підключення GitHub"
+
+#: apps/connections/templates/connections/discovery.html:3
+#: apps/connections/templates/connections/partials/discovery_content.html:3
+msgid "Discover repositories"
+msgstr "Знайти репозиторії"
+
+#: apps/connections/templates/connections/form.html:3
+#: apps/connections/templates/connections/partials/form.html:4
+msgid "Edit connection"
+msgstr "Редагувати підключення"
+
+#: apps/connections/templates/connections/form.html:3
+#: apps/connections/templates/connections/partials/form.html:4
+#: apps/connections/templates/connections/partials/list_content.html:6
+msgid "New connection"
+msgstr "Нове підключення"
+
+#: apps/connections/templates/connections/list.html:3
+#: templates/partials/nav.html:8
+msgid "Connections"
+msgstr "Підключення"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:6
+#: apps/connections/templates/connections/partials/discovery_content.html:60
+msgid "Connection"
+msgstr "Підключення"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:8
+msgid "Choose a connection…"
+msgstr "Виберіть підключення…"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:17
+msgid "Show archived"
+msgstr "Показати архівовані"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:26
+#, python-format
+msgid "Added %(created)s repository."
+msgid_plural "Added %(created)s repositories."
+msgstr[0] "Додано %(created)s репозиторій."
+msgstr[1] "Додано %(created)s репозиторії."
+msgstr[2] "Додано %(created)s репозиторіїв."
+msgstr[3] "Додано %(created)s репозиторії."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:41
+msgid "Add to project"
+msgstr "Додати до проєкту"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:43
+msgid "No project"
+msgstr "Без проєкту"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:57
+#: apps/metrics/models.py:8
+msgid "Repository"
+msgstr "Репозиторій"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:58
+msgid "Visibility"
+msgstr "Видимість"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:59
+msgid "Archived"
+msgstr "Заархівовано"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:75
+msgid "Private"
+msgstr "Приватний"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:75
+msgid "Public"
+msgstr "Публічний"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:76
+#: apps/connections/templates/connections/partials/row.html:18
+msgid "Yes"
+msgstr "Так"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:76
+#: apps/connections/templates/connections/partials/row.html:18
+msgid "No"
+msgstr "Ні"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:80
+#, python-format
+msgid "Bound to %(name)s"
+msgstr "Прив'язано до %(name)s"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:84
+msgid "Confirm"
+msgstr "Підтвердити"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:86
+msgid "Rebind here"
+msgstr "Прив'язати сюди"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:88
+msgid "unbound"
+msgstr "не прив'язано"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:96
+msgid "No repositories found for this connection."
+msgstr "Для цього підключення не знайдено репозиторіїв."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:100
+msgid "Add selected repositories"
+msgstr "Додати вибрані репозиторії"
+
+#: apps/connections/templates/connections/partials/form.html:30
+#, python-format
+msgid "Current token ends in %(last4)s."
+msgstr "Поточний токен закінчується на %(last4)s."
+
+#: apps/connections/templates/connections/partials/form.html:44
+msgid "Save"
+msgstr "Зберегти"
+
+#: apps/connections/templates/connections/partials/form.html:50
+msgid "Last check"
+msgstr "Остання перевірка"
+
+#: apps/connections/templates/connections/partials/form.html:58
+msgid "This connection has not been checked yet."
+msgstr "Це підключення ще не перевірялося."
+
+#: apps/connections/templates/connections/partials/list_content.html:11
+#, python-format
+msgid ""
+"“%(name)s” has repositories and cannot be deleted. Rebind or deactivate "
+"these first:"
+msgstr ""
+"«%(name)s» має репозиторії і не може бути видалене. Спершу прив'яжіть їх до "
+"іншого підключення або деактивуйте:"
+
+#: apps/connections/templates/connections/partials/list_content.html:28
+#: apps/github_sync/templates/github_sync/partials/runs.html:8
+msgid "Status"
+msgstr "Статус"
+
+#: apps/connections/templates/connections/partials/list_content.html:29
+msgid "Active"
+msgstr "Активний"
+
+#: apps/connections/templates/connections/partials/list_content.html:30
+msgid "Actions"
+msgstr "Дії"
+
+#: apps/connections/templates/connections/partials/list_content.html:39
+msgid "No GitHub connections yet."
+msgstr "Ще немає підключень GitHub."
+
+#: apps/connections/templates/connections/partials/row.html:14
+msgid "none"
+msgstr "немає"
+
+#: apps/connections/templates/connections/partials/row.html:20
+msgid "Edit"
+msgstr "Редагувати"
+
+#: apps/connections/templates/connections/partials/row.html:27
+msgid "Check"
+msgstr "Перевірити"
+
+#: apps/connections/templates/connections/partials/row.html:36
+msgid "Deactivate"
+msgstr "Деактивувати"
+
+#: apps/connections/templates/connections/partials/row.html:36
+msgid "Activate"
+msgstr "Активувати"
+
+#: apps/connections/templates/connections/partials/row.html:45
+msgid "Delete"
+msgstr "Видалити"
+
+#: apps/connections/views.py:60
+msgid ""
+"GitHub rejected this token. Fix it and try again, or tick “save without "
+"verifying”."
+msgstr ""
+"GitHub відхилив цей токен. Виправте його і спробуйте ще раз, або позначте "
+"«зберегти без перевірки»."
+
+#: apps/connections/views.py:121
+msgid ""
+"Could not reach GitHub to check this connection. Check your network and try "
+"again."
+msgstr ""
+"Не вдалося з'єднатися з GitHub, щоб перевірити це підключення. Перевірте "
+"мережу і спробуйте ще раз."
+
+#: apps/connections/views.py:224
+msgid ""
+"Could not reach GitHub to list repositories for this connection. Try again "
+"in a moment."
+msgstr ""
+"Не вдалося з'єднатися з GitHub, щоб отримати список репозиторіїв для цього "
+"підключення. Спробуйте ще раз за мить."
+
+#: apps/connections/views.py:266
+msgid "Choose a connection to rebind to."
+msgstr "Виберіть підключення, до якого прив'язати."
+
+#: apps/connections/views.py:268
+msgid "Tick the confirmation box to rebind this repository."
+msgstr "Позначте підтвердження, щоб прив'язати цей репозиторій."
 
 #: apps/dashboards/formatting.py:19
 #, python-format
@@ -1182,57 +1552,133 @@ msgstr "Огляд"
 msgid "Dashboards will appear here as they are built."
 msgstr "Панелі з'являтимуться тут у міру їх створення."
 
-#: apps/github_sync/models.py:7
+#: apps/github_sync/models.py:8
 msgid "CLI"
 msgstr "CLI"
 
-#: apps/github_sync/models.py:8
+#: apps/github_sync/models.py:9
 msgid "UI"
 msgstr "Інтерфейс"
 
-#: apps/github_sync/models.py:9
+#: apps/github_sync/models.py:10
 msgid "Schedule"
 msgstr "Розклад"
 
-#: apps/github_sync/models.py:12
+#: apps/github_sync/models.py:13
 msgid "Running"
 msgstr "Виконується"
 
-#: apps/github_sync/models.py:15
+#: apps/github_sync/models.py:16
 msgid "Failed"
 msgstr "Помилка"
 
-#: apps/github_sync/models.py:17
+#: apps/github_sync/models.py:18
 msgid "started at"
 msgstr "розпочато о"
 
-#: apps/github_sync/models.py:18
+#: apps/github_sync/models.py:19
 msgid "finished at"
 msgstr "завершено о"
 
-#: apps/github_sync/models.py:19
+#: apps/github_sync/models.py:20
 msgid "trigger"
 msgstr "тригер"
 
-#: apps/github_sync/models.py:24
+#: apps/github_sync/models.py:25
 msgid "stats"
 msgstr "статистика"
 
-#: apps/github_sync/models.py:25
+#: apps/github_sync/models.py:26
 msgid "stats by connection"
 msgstr "статистика за підключенням"
 
-#: apps/github_sync/models.py:26
+#: apps/github_sync/models.py:27
 msgid "error log"
 msgstr "журнал помилок"
 
-#: apps/github_sync/models.py:29
+#: apps/github_sync/models.py:30 apps/github_sync/models.py:47
 msgid "sync run"
 msgstr "запуск синхронізації"
 
-#: apps/github_sync/models.py:30
+#: apps/github_sync/models.py:31
 msgid "sync runs"
 msgstr "запуски синхронізації"
+
+#: apps/github_sync/models.py:45
+msgid "acquired at"
+msgstr "отримано о"
+
+#: apps/github_sync/models.py:51
+msgid "sync lock"
+msgstr "блокування синхронізації"
+
+#: apps/github_sync/models.py:52
+msgid "sync locks"
+msgstr "блокування синхронізації"
+
+#: apps/github_sync/templates/github_sync/partials/content.html:4
+#: apps/github_sync/templates/github_sync/sync.html:3
+#: templates/partials/nav.html:6
+msgid "Sync"
+msgstr "Синхронізація"
+
+#: apps/github_sync/templates/github_sync/partials/content.html:12
+msgid "Sync now"
+msgstr "Синхронізувати зараз"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:3
+msgid "Past sync runs"
+msgstr "Минулі запуски синхронізації"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:6
+msgid "Started"
+msgstr "Розпочато"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:7
+msgid "Trigger"
+msgstr "Тригер"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:9
+#: templates/partials/nav.html:9
+msgid "Repositories"
+msgstr "Репозиторії"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:10
+msgid "Pull requests"
+msgstr "Pull requests"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:11
+msgid "Errors"
+msgstr "Помилки"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:12
+msgid "By connection"
+msgstr "За підключенням"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:28
+#, python-format
+msgid ""
+"%(name)s: %(repositories)s synced, %(skipped)s skipped, %(errors)s errors"
+msgstr ""
+"%(name)s: синхронізовано %(repositories)s, пропущено %(skipped)s, помилок "
+"%(errors)s"
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:45
+msgid "No sync has run yet."
+msgstr "Синхронізація ще не запускалася."
+
+#: apps/github_sync/templates/github_sync/partials/status.html:9
+#, python-format
+msgid ""
+"Sync in progress: %(repositories)s repositories, %(pull_requests)s pull "
+"requests synced so far."
+msgstr ""
+"Синхронізація триває: наразі синхронізовано %(repositories)s репозиторіїв, "
+"%(pull_requests)s PR."
+
+#: apps/github_sync/templates/github_sync/partials/status.html:14
+msgid "No sync is currently running."
+msgstr "Наразі синхронізація не виконується."
 
 #: apps/metrics/models.py:6
 msgid "Global"
@@ -1241,10 +1687,6 @@ msgstr "Глобально"
 #: apps/metrics/models.py:7
 msgid "Project"
 msgstr "Проєкт"
-
-#: apps/metrics/models.py:8
-msgid "Repository"
-msgstr "Репозиторій"
 
 #: apps/metrics/models.py:9
 msgid "Person"
@@ -1466,11 +1908,31 @@ msgstr "Щось пішло не так."
 msgid "PR Radar"
 msgstr "PR Radar"
 
+#: templates/partials/connection_alerts.html:8
+#, python-format
+msgid "%(name)s: this connection's token is invalid."
+msgstr "%(name)s: токен цього підключення недійсний."
+
+#: templates/partials/connection_alerts.html:12
+#, python-format
+msgid "%(name)s: this connection's token has expired."
+msgstr "%(name)s: термін дії токена цього підключення закінчився."
+
+#: templates/partials/connection_alerts.html:16
+#, python-format
+msgid "%(name)s: this connection's token expires on %(expires_at)s."
+msgstr ""
+"%(name)s: термін дії токена цього підключення закінчується %(expires_at)s."
+
+#: templates/partials/connection_alerts.html:20
+msgid "Review"
+msgstr "Переглянути"
+
 #: templates/partials/language_switcher.html:5
 msgid "Language"
 msgstr "Мова"
 
-#: templates/partials/nav.html:10
+#: templates/partials/nav.html:15
 msgid "Log out"
 msgstr "Вийти"
 

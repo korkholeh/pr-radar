@@ -29,7 +29,7 @@ from apps.churn.factories import ChurnResultFactory
 from apps.churn.models import ChurnResult
 from apps.connections.admin import GitHubConnectionAdmin
 from apps.connections.models import GitHubConnection
-from apps.github_sync.models import SyncRun
+from apps.github_sync.models import SyncLock, SyncRun
 from apps.metrics.models import DailyRollup
 from apps.policy.factories import PolicyViolationFactory
 from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
@@ -48,6 +48,7 @@ READ_ONLY_MODELS = {
     DailyRollup,
     ChurnResult,
     SyncRun,
+    SyncLock,
     AuditEntry,
     GitHubConnection,
 }

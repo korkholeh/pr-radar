@@ -12,8 +12,9 @@ and edit it. `manage.py` defaults `DJANGO_SETTINGS_MODULE` to `config.settings.l
 | `DATABASE_URL` | `sqlite:///data/db.sqlite3` (derived from `DATA_DIR`) | Any URL `django-environ` understands. Only the ORM is used anywhere in the codebase (ADR 0001), so pointing this at `postgres://…` needs no code change. Left unset, it always tracks `DATA_DIR`. |
 | `DATA_DIR` | `data` (repository-relative) | Holds `db.sqlite3`, `huey.sqlite3`, `logs/`, `cache/`, `exports/`, `repos/`, `staticfiles/`. Created on settings import if missing. `e2e.py` ignores this and always uses `.e2e/data`, so an e2e run never touches your own `DATA_DIR`. |
 | `REPORT_TIMEZONE` | `Europe/Kyiv` | The timezone dashboards, rollups and reports use for day boundaries. Storage stays UTC (`TIME_ZONE = "UTC"`, `USE_TZ = True`); this setting is only consumed by the day-boundary helper phase 7 adds. |
-| `FIELD_ENCRYPTION_KEYS` | empty list | Comma-separated Fernet keys for encrypting GitHub connection tokens at rest (phase 3). The first key encrypts; every key in the list can decrypt, which is how `manage.py rotate_encryption_key` rotates without downtime. Unused until phase 3 creates `connections`. |
-| `STORE_RAW_PAYLOADS` | `False` | When true, sync stores the raw GitHub GraphQL response alongside the derived fields (more disk, easier debugging). Unused until phase 3. |
+| `FIELD_ENCRYPTION_KEYS` | empty list | Comma-separated Fernet keys for encrypting GitHub connection tokens at rest. The first key encrypts; every key in the list can decrypt, which is how `manage.py rotate_encryption_key` rotates without downtime. Required before creating a connection — see `docs/GITHUB_CONNECTIONS.md`. |
+| `STORE_RAW_PAYLOADS` | `False` | When true, sync stores the raw GitHub GraphQL response alongside the derived fields (more disk, easier debugging). |
+| `GITHUB_API_BASE_URL` | `https://api.github.com` | REST/GraphQL host GitHub sync talks to; `GITHUB_GRAPHQL_URL` is derived by appending `/graphql`. Deployment wiring (not operator policy, see `docs/GITHUB_CONNECTIONS.md`) — the one thing to change for GitHub Enterprise Server. |
 | `E2E_ADMIN_PASSWORD` | `admin-password-change-me` | Password `manage.py seed_e2e` sets for the `e2e-admin` persona. Only read by that command, under `config.settings.e2e`. |
 | `E2E_LEAD_PASSWORD` | `lead-password-change-me` | Password `manage.py seed_e2e` sets for the `e2e-lead` persona. |
 
@@ -31,6 +32,15 @@ missing.
 | sync | `BACKFILL_DAYS` | int | `180` | How many days of history a first sync pulls in. |
 | sync | `DEFAULT_CONNECTION_KIND` | str | `fine_grained_pat` | Connection kind preselected when creating a new GitHub connection. |
 | sync | `CONNECTION_CHECK_INTERVAL_HOURS` | int | `24` | How often a connection's health is re-checked. |
+| sync | `SYNC_OVERLAP_MINUTES` | int | `60` | Minutes a sync re-reads before the last watermark, to absorb late-arriving updates. |
+| sync | `SYNC_PR_PAGE_SIZE` | int | `50` | Pull requests fetched per GraphQL page. |
+| sync | `SYNC_NESTED_PAGE_SIZE` | int | `100` | Items fetched per page for a pull request's nested connections (reviews, commits, files, …). |
+| sync | `RATE_LIMIT_MIN_REMAINING` | int | `200` | Primary rate-limit remaining below which the client waits for reset. |
+| sync | `SYNC_MAX_RETRIES` | int | `5` | Maximum retry attempts for a transient request failure. |
+| sync | `SYNC_RETRY_MAX_SECONDS` | int | `60` | Maximum backoff delay between retry attempts. |
+| sync | `SYNC_LOCK_STALE_MINUTES` | int | `360` | Minutes after which an unreleased sync lock is considered stale and stolen. |
+| sync | `TOKEN_EXPIRY_WARNING_DAYS` | int | `14` | Days before token expiry at which the admin banner starts warning. |
+| sync | `CONNECTION_RECHECK_MIN_MINUTES` | int | `60` | Minimum minutes between two non-forced verifications of the same connection. |
 | ai | `AI_COHORT_INCLUDE_SUSPECTED` | bool | `False` | Whether PRs with a merely suspected AI status count in the AI cohort. |
 | ai | `BOT_LOGIN_SUFFIXES` | list | `["[bot]"]` | Login suffixes that mark an account as a bot. |
 | ai | `BOT_LOGINS` | list | `["dependabot", "renovate", "github-actions"]` | Exact logins that mark an account as a bot. |

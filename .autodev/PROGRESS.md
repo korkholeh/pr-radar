@@ -1,22 +1,26 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 2/11 · step `commit`
+- **Current:** phase 3/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h ? (reset 17.09 15:20) · 7d 23%
-- **Totals:** 25 sessions · 2.7 h agent time · ≈$52.30 API-equivalent
-- **Clock:** 3.5 h since the run was created · 2.7 h working · 0.8 h paused on the usage limit · 0.0 h not running
-- **Updated:** 2026-09-17 10:46:37
+- **Usage:** 5h 10% (reset 17.09 20:20) · 7d 29%
+- **Totals:** 43 sessions · 4.9 h agent time · ≈$102.51 API-equivalent
+- **Clock:** 8.3 h since the run was created · 4.9 h working · 3.4 h paused on the usage limit · 0.0 h not running
+- **Updated:** 2026-09-17 15:33:59
+
+## Run warnings
+
+- 2026-09-17 10:46:47 — GitHub stack not registered: Checking existing stacks... Looking up PRs for 2 branches... ✗ PR #2 (https://github.com/korkholeh/pr-radar/pull/2) cannot be added to a stack: it has been merged. The pull requests are still chained and still merge bottom-up.
 
 ## Phases
 
 | # | Phase | User-facing | Status | Commit | Warnings |
 |---|---|---|---|---|---|
 | 1 | Skeleton, auth, i18n and design tokens | yes | ✅ done | e8a30ee | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/01-skeleton/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 2 | Domain models, migrations and Django admin | no | 🔨 in_progress |  |  |
-| 3 | GitHub connections and incremental sync | yes | ⏳ pending |  |  |
+| 2 | Domain models, migrations and Django admin | no | ✅ done | abc20ee | not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 3 | GitHub connections and incremental sync | yes | 🔨 in_progress |  |  |
 | 4 | Identity resolution and derived PR fields | yes | ⏳ pending |  |  |
 | 5 | AI detection | yes | ⏳ pending |  |  |
 | 6 | AI policy engine and violations console | yes | ⏳ pending |  |  |
@@ -73,6 +77,36 @@
 - `2026-09-17 10:42:40` **p02-tests** — pass: exit 0: ...................................................................... [100%]
 - `2026-09-17 10:45:08` **p02-review_audit2** — approve (2m, $0.98): All three r2 findings (one major, two minors) are fixed in the product, each with a test that fails without the fix. I re-ran the whole gate myself: pytest passed (286), ruff, ruff format --check, mypy, makemigrations --check --dry-run, manage.py check, plus migrate from an empty SQLite file — `raw…
 - `2026-09-17 10:46:37` **p02-docs** — done (1m, $0.68): Verified phase-2 docs against actual code (models, migrations, admin, permissions). Most already true: CLAUDE.md, docs/CONFIGURATION.md (AppSetting table), docs/PROGRESS.md (phase-2 entry), docs/dev/adr/0002 (admin holds catalog.manage_settings — already correct), CHANGELOG.md (no entry, correct pe…
+- `2026-09-17 10:46:37` **commit** — held back: tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-17 10:46:37` **p02-commit** — done: abc20ee
+- `2026-09-17 10:46:39` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-17 10:46:43` **p02-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p02-data-model
+- `2026-09-17 10:46:46` **p02-pr** — draft: https://github.com/korkholeh/pr-radar/pull/3
+- `2026-09-17 10:46:54` **p02-merge** — done: https://github.com/korkholeh/pr-radar/pull/3
+- `2026-09-17 10:54:03` **p03-plan** — done (7m, $2.7): Wrote `.autodev/phases/03-connections-and-sync/PLAN.md` (Context/Design/Tasks/Verification/Risks/Out of scope) with 24 ordered tasks covering Fernet token storage plus rotation, the GitHubAuth protocol, a fixture-tested httpx GraphQL/REST client with per-connection rate budgeting and retries, conne…
+- `2026-09-17 11:09:32` **p03-implement** — handover: context reached 203,379 tokens — checkpointing for a fresh session
+- `2026-09-17 11:12:45` **p03-implement** — partial (18m, $5.96): Phase 3 session 1: implemented and gated T1–T7 of PLAN.md — sync/connection AppSetting keys + migration (T1), MultiFernet token encryption with set_token/plaintext_token and rotate_encryption_key (T2), the GitHubAuth protocol + PATAuth + auth_for_connection (T3), the GitHubSchemaError/require/optio…
+- `2026-09-17 11:26:27` **p03-implement** — handover: context reached 203,347 tokens — checkpointing for a fresh session
+- `2026-09-17 11:27:37` **p03-implement** — partial (14m, $4.02): Session 2 completed T8 (connection verification: check_codes.py + verify_connection), T13 (mappers.py), T14 (upserts.py), T15 (pipeline hook), and T16 (SyncLock model + run_sync/sync_repository orchestrator), each with passing tests. PLAN.md checkboxes now accurately reflect T1-T8 and T13-T16 done;…
+- `2026-09-17 11:41:34` **p03-implement** — handover: context reached 200,546 tokens — checkpointing for a fresh session
+- `2026-09-17 11:43:15` **p03-implement** — partial (15m, $5.94): Session 3 of phase 3. Completed T9 (connections UI: forms/views/urls/templates, edit page doubles as detail view), T10 (expiry/invalid banner context processor + partial), T17 (round-robin rate-budget scheduler in run_sync + isolation tests), T18 (manage.py sync), T19 (huey task + Sync page with po…
+- `2026-09-17 11:55:36` **p03-implement** — handover: context reached 202,288 tokens — checkpointing for a fresh session
+- `2026-09-17 11:57:21` **p03-implement** — partial (14m, $5.12): Session 4 completed T11 (bootstrap_connection), T12 (repository discovery + rebinding + connection delete-with-ProtectedError UI), T20 (token-leak test with a real on-disk SQLite dump), and T21 (docs: GITHUB_CONNECTIONS.md, user/connect-github.md, CHANGELOG, config cross-links, check-code doc-fresh…
+- `2026-09-17 12:09:05` **p03-implement** — done (11m, $4.96): Finished phase 3 (GitHub connections and incremental sync). This session completed the three remaining tasks: T22 (Ukrainian parity — translated the 57 empty msgids plus fixed 34 pre-existing fuzzy entries carrying wrong guessed text, recompiled .mo, reran `make css`, added uk canary-string render …
+- `2026-09-17 12:09:15` **p03-tests** — pass: exit 0: ............................... [100%]
+- `2026-09-17 12:16:41` **p03-review1** — changes_requested (7m, $3.98): Phase 3 lands a large, mostly well-built slice: token encryption with a grep-enforced single decrypt accessor, a fixture-only GraphQL client with real nested pagination and Retry-After handling, per-connection rate budgets with round-robin yielding, idempotent upserts, a thorough leak test (introsp…
+- `2026-09-17 12:38:32` **p03-review_fix1** — done (21m, $7.76): Applied review fixes for phase 3 round 1 (.autodev/phases/03-connections-and-sync/REVIEW-r1.md). Fixed all 7 majors and all minors except one nit skipped as covered by another fix. Fixed (with new/updated tests each): 1. SyncRun-before-lock ordering: `_acquire_lock` now creates the lock inside its …
+- `2026-09-17 12:38:44` **p03-tests** — pass: exit 0: ......................................... [100%]
+- `2026-09-17 12:44:14` **p03-review2** — changes_requested (5m, $3.27): Phase 3 is a strong, well-tested slice and every r1 blocker/major is genuinely fixed: the SyncRun-before-lock ordering, repository-level and hook error containment, the failed-PR watermark clamp, the silent discovery rebind and sync_since reset, the nested rebind form, the check/discover 500s, the …
+- `2026-09-17 12:49:16` **usage** — paused: 5h usage 86% ≥ 85%; sleeping until ≈17.09 15:22
+- `2026-09-17 15:22:01` **usage** — resumed: 5h 0% (reset ?) · 7d 28%
+- `2026-09-17 15:24:33` **p03-review_fix2** — done (7m, $3.51): Applied all REVIEW-r2 blocker/major/minor fixes for phase 3. Fixed: - [MAJOR] SyncRun stuck at status=running forever on crash/kill/stale-lock/undecryptable-token: run_sync() now wraps its body in except Exception -> marks FAILED+finished_at+masked error before re-raising; stale-lock steal now also…
+- `2026-09-17 15:24:44` **p03-tests** — pass: exit 0: ............................................... [100%]
+- `2026-09-17 15:28:03` **p03-review_audit2** — approve (3m, $1.24): Both r2 majors are genuinely fixed in the product, not just in the summary, and each has a test that fails without the fix: run_sync now guarantees a terminal SyncRun status on every escape path (generic `except Exception`, stale-lock steal marking the killed run FAILED, and InvalidToken/Improperly…
+- `2026-09-17 15:32:59` **p03-e2e** — done (4m, $1.39): e2e/ harness pre-existed (phase 1). Ran uv run pytest e2e -q against the live make e2e-up surface: baseline 8 cases green. Added 3 new connections/sync cases (7 total for this feature, 11 overall) covering real user-facing paths not previously exercised in-browser: "Sync now" button visible to admi…
+- `2026-09-17 15:33:06` **p03-e2e** — pass: exit 0: ........... [100%]
+- `2026-09-17 15:33:59` **p03-docs** — done (0m, $0.35): Verified documentation for phase 3 against the diff, PLAN.md, ARCHITECTURE.md, ADR 0003/0004 and actual code (check codes, nav labels, template copy, settings, migrations). Everything was already true and current — no edits made: CLAUDE.md (commands/management commands list already includes sync/bo…
+- `2026-09-17 15:33:59` **p03-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

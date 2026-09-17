@@ -15,6 +15,11 @@ from config.settings.prod import BASE_DIR  # noqa: E402
 DEBUG = False
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+# e2e is a disposable localhost surface, not a deployment: same rationale as the SECRET_KEY
+# default above — seed_e2e needs a working encryption key to store a connection token.
+if not FIELD_ENCRYPTION_KEYS:  # noqa: F405
+    FIELD_ENCRYPTION_KEYS = ["e2e-not-a-production-encryption-key"]
+
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False

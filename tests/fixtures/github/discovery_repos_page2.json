@@ -1,0 +1,35 @@
+{
+  "data": {
+    "repositoryOwner": {
+      "repositories": {
+        "totalCount": 3,
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "nodes": [
+          {
+            "id": "R_kgDOA3",
+            "name": "archived-tool",
+            "nameWithOwner": "acme/archived-tool",
+            "isPrivate": false,
+            "isArchived": true,
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "owner": {
+              "login": "acme",
+              "__typename": "Organization",
+              "id": "O_kgDOacme"
+            }
+          }
+        ]
+      }
+    },
+    "rateLimit": {
+      "remaining": 4960,
+      "resetAt": "2026-01-01T01:00:00Z",
+      "cost": 1
+    }
+  }
+}

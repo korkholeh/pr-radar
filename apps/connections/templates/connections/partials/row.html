@@ -1,0 +1,48 @@
+{% load i18n %}
+{% if check_error %}
+  <tr>
+    <td colspan="6" role="alert" class="text-[var(--bad)]">{{ check_error }}</td>
+  </tr>
+{% endif %}
+<tr id="connection-row-{{ connection.pk }}" class="border-t border-[var(--border)]">
+  <td>{{ connection.name }}</td>
+  <td>{{ connection.get_kind_display }}</td>
+  <td>
+    {% if connection.token_last4 %}
+      &bull;&bull;&bull;&bull;{{ connection.token_last4 }}
+    {% else %}
+      {% translate "none" %}
+    {% endif %}
+  </td>
+  <td>{{ connection.get_status_display }}</td>
+  <td>{% if connection.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+  <td class="flex gap-2">
+    <a href="{% url 'connections:edit' connection.pk %}">{% translate "Edit" %}</a>
+    <form
+      hx-post="{% url 'connections:check' connection.pk %}"
+      hx-target="#connection-row-{{ connection.pk }}"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit">{% translate "Check" %}</button>
+    </form>
+    <form
+      hx-post="{% url 'connections:deactivate' connection.pk %}"
+      hx-target="#connection-row-{{ connection.pk }}"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit">
+        {% if connection.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
+      </button>
+    </form>
+    <form
+      hx-post="{% url 'connections:delete' connection.pk %}"
+      hx-target="#connections-page"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit">{% translate "Delete" %}</button>
+    </form>
+  </td>
+</tr>

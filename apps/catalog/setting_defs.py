@@ -184,4 +184,53 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
     SettingDef(
         "EXPORT_SYNC_MAX_ROWS", "int", 20000, _("Maximum rows a synchronous export may return."), "export"
     ),
+    SettingDef(
+        "SYNC_OVERLAP_MINUTES",
+        "int",
+        60,
+        _("Minutes a sync re-reads before the last watermark, to absorb late-arriving updates."),
+        "sync",
+    ),
+    SettingDef("SYNC_PR_PAGE_SIZE", "int", 50, _("Pull requests fetched per GraphQL page."), "sync"),
+    SettingDef(
+        "SYNC_NESTED_PAGE_SIZE",
+        "int",
+        100,
+        _("Items fetched per page for a pull request's nested connections."),
+        "sync",
+    ),
+    SettingDef(
+        "RATE_LIMIT_MIN_REMAINING",
+        "int",
+        200,
+        _("Primary rate-limit remaining below which the client waits for reset."),
+        "sync",
+    ),
+    SettingDef(
+        "SYNC_MAX_RETRIES", "int", 5, _("Maximum retry attempts for a transient request failure."), "sync"
+    ),
+    SettingDef(
+        "SYNC_RETRY_MAX_SECONDS", "int", 60, _("Maximum backoff delay between retry attempts."), "sync"
+    ),
+    SettingDef(
+        "SYNC_LOCK_STALE_MINUTES",
+        "int",
+        360,
+        _("Minutes after which an unreleased sync lock is considered stale and stolen."),
+        "sync",
+    ),
+    SettingDef(
+        "TOKEN_EXPIRY_WARNING_DAYS",
+        "int",
+        14,
+        _("Days before token expiry at which the admin banner starts warning."),
+        "sync",
+    ),
+    SettingDef(
+        "CONNECTION_RECHECK_MIN_MINUTES",
+        "int",
+        60,
+        _("Minimum minutes between two non-forced verifications of the same connection."),
+        "sync",
+    ),
 )

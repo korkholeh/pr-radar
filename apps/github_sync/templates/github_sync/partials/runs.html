@@ -1,0 +1,49 @@
+{% load i18n %}
+<table class="w-full text-sm" id="sync-runs">
+  <caption class="sr-only">{% translate "Past sync runs" %}</caption>
+  <thead>
+    <tr class="text-left text-[var(--text-muted)]">
+      <th scope="col">{% translate "Started" %}</th>
+      <th scope="col">{% translate "Trigger" %}</th>
+      <th scope="col">{% translate "Status" %}</th>
+      <th scope="col">{% translate "Repositories" %}</th>
+      <th scope="col">{% translate "Pull requests" %}</th>
+      <th scope="col">{% translate "Errors" %}</th>
+      <th scope="col">{% translate "By connection" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for run in runs %}
+    <tr class="border-t border-[var(--border)]" data-run-status="{{ run.status }}">
+      <td>{{ run.started_at }}</td>
+      <td>{{ run.get_trigger_display }}</td>
+      <td>{{ run.get_status_display }}</td>
+      <td>{{ run.stats.repositories|default:0 }}</td>
+      <td>{{ run.stats.pull_requests|default:0 }}</td>
+      <td>{{ run.stats.errors|default:0 }}</td>
+      <td>
+        <ul class="list-disc pl-4">
+          {% for connection_id, connection_stats in run.stats_by_connection.items %}
+          <li>
+            {% blocktranslate trimmed with name=connection_stats.name repositories=connection_stats.repositories skipped=connection_stats.skipped errors=connection_stats.errors %}
+              {{ name }}: {{ repositories }} synced, {{ skipped }} skipped, {{ errors }} errors
+            {% endblocktranslate %}
+          </li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    {% if run.error_log %}
+    <tr class="border-t border-[var(--border)]">
+      <td colspan="7">
+        <pre class="whitespace-pre-wrap text-[var(--text-muted)] text-xs">{{ run.error_log }}</pre>
+      </td>
+    </tr>
+    {% endif %}
+    {% empty %}
+    <tr>
+      <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No sync has run yet." %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
