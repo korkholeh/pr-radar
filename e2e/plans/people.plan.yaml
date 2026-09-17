@@ -1,0 +1,173 @@
+feature: people
+surfaces: [app]
+entry: "/settings/people/ — Settings > People, admin-only; the unmapped-identity queue is Settings > People > Unmapped identities"
+
+under_test:
+  - apps/catalog/views.py (people_list, person_create, person_edit, person_merge, identity_queue,
+    identity_assign, identity_create_person, identity_mark_bot, identity_exclude)
+  - apps/catalog/identity.py (person_for_login, create_person_from_identity, merge_people)
+  - apps/catalog/selectors.py (people_for_settings, unmapped_identities, unmapped_identity_count, bot_person_count)
+  - apps/catalog/templates/catalog/*.html, apps/catalog/templates/catalog/partials/*.html
+  - templates/partials/nav.html (the People link, admin-only)
+
+oracle: >
+  PLAN.md phase 4 (Settings -> People UI, §6) and its acceptance criteria: (2) merging two Person records
+  re-points every Identity and leaves no orphan; (3) a bot-authored identity is flagged is_bot and counted
+  separately, never as an ordinary person; (4) the unmapped-identity queue lists a seeded unmatched email and
+  nothing is lost across pagination. A GitHub login is always auto-mapped (a person exists for it); a bare git
+  email that GitHub never linked to a login stays in the queue until a lead assigns it, creates a person from it,
+  marks it a bot, or excludes it (identity.py::resolve_identity, apps/catalog/identity.py docstring). Every
+  mutation is POST-only and permission-gated to catalog.manage_settings (CLAUDE.md's htmx/permission conventions);
+  a lead sees neither the nav link nor the pages. Acceptance criteria (1) "each derived field has a test" and (5)
+  "re-running derive produces identical values" are about apps/activity/derive.py fields (size_bucket, is_revert,
+  first_review_at, etc.) that no page in this phase displays yet -- dashboards.compute() and the dashboard UI that
+  would show them ship in phase 7/8 (PLAN.md "Out of scope"). They have no observable surface here and are fully
+  covered by apps/activity/tests/test_derive.py; see deferred_not_authored.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with rows `manage.py seed_e2e` creates
+  (apps/accounts/management/commands/seed_e2e.py::_seed_people_and_identities): a mapped person "E2E Ada"
+  (identity "e2e-ada", one merged PR so the People list's PR-count column is non-zero), a bot person
+  "e2e-ci[bot]" (is_bot=True), an untouched "E2E Editable" person for the edit case, an untouched
+  "E2E Assign Target" person as the assign case's destination, a source/target pair "E2E Merge Source" /
+  "E2E Merge Target" (source carries identity "e2e-merge-source-login") for the merge case, a standalone
+  "E2E Self Merge Guard" person for the self-merge-refusal case, four dedicated unmapped git_email identities
+  ("e2e-assign-target@…", "e2e-mark-bot-target@…", "e2e-exclude-target@…", "e2e-create-person-target@…"), one
+  per mutating queue action so no two specs race over the same row, and 55 unmapped git_email identities
+  named "e2e-zzz-queue-item-000@example.com".."054@example.com" for the pagination case -- the "zzz-" prefix
+  sorts after every dedicated action-target identity above (unmapped_identities() orders by kind, value: "a" <
+  "c" < "e" < "m" < "z"), so these 55 rows are always the *last* 55 in the queue regardless of which of the four
+  action-target identities earlier specs in the file have already consumed; total unmapped rows is always in
+  [55, 59], i.e. always exactly two pages at IDENTITY_PAGE_SIZE=50, page 1 always has exactly 50 rows, item 000
+  is always on page 1 and item 054 is always on page 2.
+  Each mutating case (assign/mark-bot/exclude/create-person/merge) uses its own dedicated seed row and is not
+  reordered or repeated, so specs stay independent per e2e-authoring.md; nothing here is re-run twice.
+
+cases:
+  - id: admin-sees-people-list-with-mapped-and-bot-rows
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/people/"]
+    expected: >
+      "E2E Ada" row shows identity "e2e-ada", Bot=No, PRs >= 1; "e2e-ci[bot]" row shows Bot=Yes; the unmapped
+      and bot counters both link/describe non-zero state
+
+  - id: lead-cannot-reach-people
+    priority: high
+    steps: ["log in as e2e-lead", "open /"]
+    expected: >
+      no "People" link in the nav; a direct GET to /settings/people/ renders the "You do not have access to
+      this page." refusal, not the list
+
+  - id: create-person-persists-and-appears-in-list
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/", "click New person", "fill Display name = 'E2E UI
+      Created Person', Team = 'Growth'", "submit"]
+    expected: "redirected back to the people list; a row for 'E2E UI Created Person' with Team 'Growth' is visible"
+
+  - id: edit-person-updates-and-persists
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/", "click Edit on 'E2E Editable'", "change Team to
+      'Platform Edited'", "submit"]
+    expected: "redirected back to the people list; the 'E2E Editable' row now shows Team 'Platform Edited'"
+
+  - id: invalid-person-form-shows-visible-error-in-browser
+    priority: medium
+    steps: ["log in as e2e-admin", "open /settings/people/new/", "leave Display name empty", "submit"]
+    expected: "the form re-renders in place with a visible role=alert error; no redirect, no new person created"
+
+  - id: queue-pagination-lists-every-identity-without-loss
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/identities/", "count rows and check boundary items",
+      "click Next", "count rows and check boundary items"]
+    expected: >
+      page 1 shows exactly 50 rows, includes e2e-zzz-queue-item-000, excludes -050 and -054; footer reads
+      "Page 1 of 2"; after Next, page 2 includes e2e-zzz-queue-item-054 and excludes -000; footer reads
+      "Page 2 of 2" -- nothing from the seeded 55 is dropped or duplicated across the two pages
+
+  - id: assign-identity-attaches-and-leaves-the-queue
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/identities/", "in the e2e-assign-target row, choose
+      'E2E Assign Target' and click Assign", "open /settings/people/"]
+    expected: >
+      the queue no longer lists e2e-assign-target@example.com; the People list's "E2E Assign Target" row now
+      includes identity "e2e-assign-target@example.com"
+
+  - id: mark-bot-creates-a-bot-person-visible-in-the-list
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/identities/", "in the e2e-mark-bot-target row click
+      'Mark as bot'", "open /settings/people/"]
+    expected: >
+      the queue no longer lists e2e-mark-bot-target@example.com; a People row named
+      "e2e-mark-bot-target@example.com" shows Bot=Yes
+
+  - id: exclude-sets-exclude-from-metrics-visible-in-the-list
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/identities/", "in the e2e-exclude-target row click
+      Exclude", "open /settings/people/"]
+    expected: >
+      the queue no longer lists e2e-exclude-target@example.com; a People row named
+      "e2e-exclude-target@example.com" shows Excluded=Yes, Bot=No
+
+  - id: create-person-from-identity-visible-in-the-list
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/identities/", "in the e2e-create-person-target row click
+      'New person'", "open /settings/people/"]
+    expected: >
+      the queue no longer lists e2e-create-person-target@example.com; a People row named
+      "e2e-create-person-target@example.com" shows Bot=No, Excluded=No
+
+  - id: merge-people-repoints-identity-and-deletes-source
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/merge/", "choose 'E2E Merge Source' as source,
+      'E2E Merge Target' as target", "submit"]
+    expected: >
+      redirected to the people list; no "E2E Merge Source" row remains; the "E2E Merge Target" row's
+      Identities cell now includes "e2e-merge-source-login"
+
+  - id: merge-into-self-shows-visible-error
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/people/merge/", "choose 'E2E Self Merge Guard' as both source
+      and target", "submit"]
+    expected: >
+      the form re-renders with a visible role=alert error naming the refusal; "E2E Self Merge Guard" still
+      exists on the people list afterwards
+
+findings: []
+
+deferred_not_authored:
+  - id: derived-pr-fields-on-a-dashboard
+    reason: >
+      Acceptance criteria (1) and (5) are about apps/activity/derive.py's cached PR fields (size_bucket,
+      is_revert, ready_for_review_at, rubber-stamp boundary, idempotent re-derive, etc). No page in this phase
+      renders any of them -- the People page only shows pr_count -- so there is no user-observable surface to
+      drive from a browser yet. PLAN.md "Out of scope" explicitly defers metric aggregation and the dashboard
+      UI to phase 7/8. Fully covered by apps/activity/tests/test_derive.py (one test per field, including the
+      never-drafted PR, the revert chain, the excluded-path-only PR and the 10-minute rubber-stamp boundary)
+      and apps/github_sync/tests/test_pipeline.py (second-sync idempotency).
+  - id: identity-resolution-from-a-sync
+    reason: >
+      Auto-mapping (noreply emails, GitHub-linked commit emails, bot-login detection) happens inside
+      github_sync's post-processing hook, never from a page a lead operates -- there is no "run a sync" case in
+      this suite at all (intake forbids any live GitHub call, and the e2e surface has no real credentials; see
+      e2e/plans/connections.plan.yaml's own deferred_not_authored for the same constraint). Covered by
+      apps/catalog/tests/test_identity.py and apps/github_sync/tests/test_pipeline.py.
+  - id: people-and-queue-a11y-and-dark-mode-sweep
+    reason: >
+      Same deferral as e2e/plans/connections.plan.yaml: accessibility and platform-sanity cases for settings
+      pages are swept together in phase 10/11, not page-by-page.
+  - id: double-submitted-assign
+    reason: >
+      Not reachable from the UI as a genuine double-submit: the assign form's row is removed from the queue
+      (htmx swap) the instant the first submit succeeds, so there is no second button left to click. The
+      underlying operation (set Identity.person) is naturally idempotent by construction (a plain FK write),
+      and a lead re-assigning the same identity to the same person through two separate page loads is a
+      deliberate correction, not a duplicate-creation risk.

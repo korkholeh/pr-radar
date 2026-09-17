@@ -73,12 +73,16 @@ def upsert_pull_request(
         commit_fields.pop("check_rollup_state")
         sha = commit_fields.pop("sha")
 
+        author_login_identity = _identity_for_login(author_login)
+        author_email_identity = _identity_for_email(author_email)
+
         commit, _ = Commit.objects.update_or_create(
             repository=repository,
             sha=sha,
             defaults={
                 **commit_fields,
-                "author_identity": _identity_for_login(author_login) or _identity_for_email(author_email),
+                "author_identity": author_login_identity or author_email_identity,
+                "author_email_identity": author_email_identity,
                 "committer_identity": _identity_for_login(committer_login)
                 or _identity_for_email(committer_email),
             },

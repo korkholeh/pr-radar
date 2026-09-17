@@ -10,6 +10,7 @@ from apps.activity.models import (
     ReviewComment,
 )
 from apps.catalog.factories import RepositoryFactory
+from apps.catalog.models import Identity
 from apps.github_sync.errors import GitHubSchemaError
 from apps.github_sync.upserts import upsert_pull_request
 
@@ -93,6 +94,48 @@ def test_changed_title_updates_in_place(full_pr_kwargs):
     assert PullRequest.objects.count() == 1
     updated.refresh_from_db()
     assert updated.title == "A new title"
+
+
+@pytest.mark.django_db
+def test_commit_email_identity_is_written_alongside_the_login(full_pr_kwargs):
+    repository = RepositoryFactory()
+    upsert_pull_request(repository, **full_pr_kwargs)
+
+    commit = Commit.objects.filter(repository=repository, sha="commit0100").get()
+    assert commit.author_identity.kind == Identity.Kind.GITHUB_LOGIN
+    assert commit.author_identity.value == "octocat"
+    assert commit.author_email_identity.kind == Identity.Kind.GIT_EMAIL
+    assert commit.author_email_identity.value == "octocat@example.com"
+
+
+@pytest.mark.django_db
+def test_author_identity_falls_back_to_email_when_there_is_no_login(full_pr_kwargs):
+    repository = RepositoryFactory()
+    kwargs = dict(full_pr_kwargs)
+    commit_nodes = [dict(n) for n in full_pr_kwargs["commit_nodes"]]
+    commit_nodes[0] = {
+        **commit_nodes[0],
+        "commit": {**commit_nodes[0]["commit"], "author": {"user": None, "email": "noone@example.com"}},
+    }
+    kwargs["commit_nodes"] = commit_nodes
+
+    upsert_pull_request(repository, **kwargs)
+
+    commit = Commit.objects.filter(repository=repository, sha="commit0100").get()
+    assert commit.author_identity.kind == Identity.Kind.GIT_EMAIL
+    assert commit.author_identity.value == "noone@example.com"
+    assert commit.author_email_identity == commit.author_identity
+
+
+@pytest.mark.django_db
+def test_second_upsert_creates_no_extra_identity_row(full_pr_kwargs):
+    repository = RepositoryFactory()
+    upsert_pull_request(repository, **full_pr_kwargs)
+    count_before = Identity.objects.count()
+
+    upsert_pull_request(repository, **full_pr_kwargs)
+
+    assert Identity.objects.count() == count_before
 
 
 @pytest.mark.django_db
