@@ -18,6 +18,13 @@ def _scoped(scope: ScopeFilter) -> QuerySet[PullRequest]:
     return queryset.filter(repository__in=scoped_repositories)
 
 
+def pull_requests_in_scope(scope: ScopeFilter) -> QuerySet[PullRequest]:
+    """Every PR a user may see, bots and excluded people included — the base a non-metrics
+    reader (a PR page, an AI-detection selector) narrows further, as opposed to
+    `pull_requests_for_metrics()`'s denominator."""
+    return _scoped(scope)
+
+
 def pull_requests_for_metrics(scope: ScopeFilter) -> QuerySet[PullRequest]:
     """A PR with an unmapped author stays in the population — only a known bot or a person a
     lead has explicitly excluded leaves it."""

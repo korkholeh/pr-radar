@@ -7,6 +7,7 @@ once-per-PR contract."""
 import logging
 
 from apps.activity.derive import derive_pull_request
+from apps.ai_detection.services import detect_pull_request
 from apps.catalog.identity import resolve_identities_for_pull_request
 
 logger = logging.getLogger(__name__)
@@ -16,3 +17,4 @@ def process_pull_request(pull_request_id: int) -> None:
     logger.debug("process_pull_request: pull_request_id=%s", pull_request_id)
     resolve_identities_for_pull_request(pull_request_id)
     derive_pull_request(pull_request_id)
+    detect_pull_request(pull_request_id)

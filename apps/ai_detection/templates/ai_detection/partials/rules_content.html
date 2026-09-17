@@ -1,0 +1,59 @@
+{% load i18n %}
+<div class="py-6 max-w-5xl mx-auto" id="rules-page">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Detection rules" %}</h1>
+    <a href="{% url 'ai_detection:rule_create' %}" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+      {% translate "New rule" %}
+    </a>
+  </div>
+  <table class="w-full text-sm mb-8" id="rules-table">
+    <caption class="sr-only">{% translate "Detection rules" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Name" %}</th>
+        <th scope="col">{% translate "Detector" %}</th>
+        <th scope="col">{% translate "Tool" %}</th>
+        <th scope="col">{% translate "Confidence" %}</th>
+        <th scope="col">{% translate "Is active" %}</th>
+        <th scope="col">{% translate "Notes" %}</th>
+        <th scope="col">{% translate "Actions" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rule in rules %}
+        {% include "ai_detection/partials/rule_row.html" %}
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No detection rules yet." %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="dry-run" class="max-w-lg">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Dry run" %}</h2>
+    <p class="text-[var(--text-muted)] mb-4">
+      {% translate "Test a pattern against recently stored pull requests before saving it as a rule." %}
+    </p>
+    <form
+      method="post"
+      action="{% url 'ai_detection:rule_dry_run' %}"
+      hx-post="{% url 'ai_detection:rule_dry_run' %}"
+      hx-target="#dry-run-result"
+      hx-swap="innerHTML"
+    >
+      {% csrf_token %}
+      {% for field in dry_run_form %}
+        <div class="mb-4">
+          <label class="block mb-1 text-[var(--text)]" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<p class="text-[var(--bad)]" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+        {% translate "Run" %}
+      </button>
+    </form>
+    <div id="dry-run-result" class="mt-4"></div>
+  </div>
+</div>

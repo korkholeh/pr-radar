@@ -1,3 +1,5 @@
+import hashlib
+
 import factory
 from factory.django import DjangoModelFactory
 
@@ -25,3 +27,4 @@ class AISignalFactory(DjangoModelFactory):
     tool = Tool.CLAUDE_CODE
     confidence = Confidence.HIGH
     evidence = "Co-Authored-By: Claude <noreply@anthropic.com>"
+    evidence_hash = factory.LazyAttribute(lambda o: hashlib.sha256(o.evidence.encode()).hexdigest())

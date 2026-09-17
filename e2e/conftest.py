@@ -48,17 +48,22 @@ def base_url(e2e_base_url: str) -> str:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _reseed_e2e_data(e2e_base_url: str) -> None:
+def seed_ids(e2e_base_url: str) -> dict:
     """`make e2e-up` seeds once when it starts the surface, but the orchestrator is allowed to
     re-run `pytest e2e` against that same, still-running surface without tearing it down and
     re-upping in between. `manage.py seed_e2e` is written to be idempotent against its own past
     UI-driven mutations (see its docstring), so re-running it here -- a plain data reset, no
     server/worker process touched -- keeps every spec's fixture rows (unmapped identities, the
     merge-source person, etc.) in their pristine starting state regardless of how many times this
-    session runs against an unrestarted surface."""
+    session runs against an unrestarted surface.
+
+    Also returns whatever row ids the seed command printed on its `E2E_SEED_IDS=` line (a phase
+    whose feature has no page yet that links to a seeded row -- e.g. ai_detection's PR detail page
+    before phase 9 ships a PR list -- reads the pk from here instead of querying the database
+    behind the app's back)."""
     del e2e_base_url  # ensures the surface is reachable before we touch its database
     env = {**os.environ, "DJANGO_SETTINGS_MODULE": "config.settings.e2e"}
-    subprocess.run(
+    result = subprocess.run(
         [sys.executable, "manage.py", "seed_e2e"],
         cwd=REPO_ROOT,
         env=env,
@@ -66,6 +71,10 @@ def _reseed_e2e_data(e2e_base_url: str) -> None:
         capture_output=True,
         text=True,
     )
+    for line in result.stdout.splitlines():
+        if line.startswith("E2E_SEED_IDS="):
+            return json.loads(line.removeprefix("E2E_SEED_IDS="))
+    return {}
 
 
 @pytest.fixture(scope="session")

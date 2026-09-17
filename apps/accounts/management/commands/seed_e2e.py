@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 
 from django.contrib.auth import get_user_model
@@ -7,6 +8,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from apps.activity.models import PullRequest
+from apps.ai_detection.models import Confidence, DetectionRule, Detector, Tool
+from apps.ai_detection.services import detect_pull_request
 from apps.catalog.models import Identity, Organization, Person, Repository
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token
@@ -48,8 +51,13 @@ class Command(BaseCommand):
 
         self._seed_github_connections_and_sync()
         self._seed_people_and_identities()
+        seed_ids = self._seed_ai_detection()
 
         self.stdout.write(self.style.SUCCESS(f"e2e personas ready: {USER_ADMIN}, {USER_LEAD}"))
+        # Machine-readable line for e2e/conftest.py's `seed_ids` fixture: this phase's PR detail
+        # page has no list view yet to click through to it from (phase 9), so a spec that needs
+        # its URL reads the pk from here instead of querying the database behind the app's back.
+        self.stdout.write(f"E2E_SEED_IDS={json.dumps(seed_ids)}")
 
     def _seed_github_connections_and_sync(self) -> None:
         """Rows for the Settings -> Connections and Sync pages, with no live GitHub call:
@@ -194,3 +202,92 @@ class Command(BaseCommand):
             Identity.objects.get_or_create(
                 kind=Identity.Kind.GIT_EMAIL, value=f"e2e-zzz-queue-item-{i:03d}@example.com"
             )
+
+    def _seed_ai_detection(self) -> dict[str, int]:
+        """Rows for Settings -> Detection rules and the PR detail AI section (phase 5's own
+        deferral: 'seed_e2e gains detection rows in the e2e step, not here'). The two PRs below
+        are run through the real `detect_pull_request()` -- the same function the sync pipeline
+        calls -- so the PR page shows a genuinely computed status/evidence/disclosure, not values
+        hand-picked to match what the template expects."""
+        repository = Repository.objects.get(full_name="e2e-org/widget")
+
+        # "E2E UI Created Rule" is never seeded, only created by that spec's own form submit, so a
+        # stale one from a previous unrestarted-surface run must be cleared first (see the People
+        # seeding's identical note above about "E2E UI Created Person").
+        DetectionRule.objects.filter(name="E2E UI created rule").delete()
+
+        DetectionRule.objects.get_or_create(
+            name="E2E footer rule",
+            defaults={
+                "detector": Detector.PR_BODY_FOOTER,
+                "pattern": "Generated with E2E Bot",
+                "tool": Tool.CLAUDE_CODE,
+                "confidence": Confidence.HIGH,
+                "notes": "e2e seed rule -- matches the seeded 'E2E AI-assisted PR' body footer",
+            },
+        )
+        DetectionRule.objects.get_or_create(
+            name="E2E editable rule",
+            defaults={
+                "detector": Detector.LABEL,
+                "pattern": "^e2e-editable$",
+                "tool": Tool.CURSOR,
+                "confidence": Confidence.MEDIUM,
+                "notes": "e2e seed rule for the rule-edit case",
+            },
+        )
+        toggle_rule, _ = DetectionRule.objects.get_or_create(
+            name="E2E toggle rule",
+            defaults={
+                "detector": Detector.LABEL,
+                "pattern": "^e2e-toggle$",
+                "tool": Tool.DEVIN,
+                "confidence": Confidence.LOW,
+                "notes": "e2e seed rule for the activate/deactivate case",
+            },
+        )
+        if not toggle_rule.is_active:
+            # Undoes a previous run's own "Deactivate" click so the toggle case always starts
+            # from the same "Yes" state, the same way the identity queue resets above.
+            toggle_rule.is_active = True
+            toggle_rule.save(update_fields=["is_active"])
+
+        signal_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=910,
+            defaults={
+                "github_id": "e2e-pr-ai-signal",
+                "title": "E2E AI-assisted PR",
+                "state": PullRequest.State.OPEN,
+                "created_at": timezone.now() - datetime.timedelta(hours=2),
+                "body": (
+                    "### AI assistance\n"
+                    "- [ ] None\n"
+                    "- [ ] Partial\n"
+                    "- [x] Substantial\n"
+                    "### AI tools used\n"
+                    "Claude Code\n"
+                    "Generated with E2E Bot\n"
+                    "Dry-run marker: e2e-dryrun-target\n"
+                ),
+            },
+        )
+        no_signal_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=911,
+            defaults={
+                "github_id": "e2e-pr-ai-empty",
+                "title": "E2E PR without AI signals",
+                "state": PullRequest.State.OPEN,
+                "created_at": timezone.now() - datetime.timedelta(hours=1),
+                "body": "A plain change with no AI assistance section.",
+            },
+        )
+
+        detect_pull_request(signal_pr.pk)
+        detect_pull_request(no_signal_pr.pk)
+
+        return {
+            "ai_detection_signal_pr_pk": signal_pr.pk,
+            "ai_detection_no_signal_pr_pk": no_signal_pr.pk,
+        }

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if rule %}{% translate "Edit detection rule" %}{% else %}{% translate "New detection rule" %}{% endif %}{% endblock %}
+{% block content %}
+{% include "ai_detection/partials/rule_form.html" %}
+{% endblock %}

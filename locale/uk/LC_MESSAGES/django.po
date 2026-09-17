@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 13:05+0000\n"
+"POT-Creation-Date: 2026-09-17 18:28+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -63,7 +63,7 @@ msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:302
-#: apps/ai_detection/models.py:43 apps/connections/models.py:43
+#: apps/ai_detection/models.py:46 apps/connections/models.py:43
 #: apps/policy/models.py:16 apps/policy/models.py:99
 msgid "created at"
 msgstr "створено"
@@ -143,6 +143,7 @@ msgid "Unknown"
 msgstr "Невідомо"
 
 #: apps/activity/models.py:14 apps/activity/models.py:322
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:32
 msgid "None"
 msgstr "Немає"
 
@@ -378,7 +379,7 @@ msgstr "самостійний мердж"
 #: apps/activity/models.py:126 apps/activity/models.py:201
 #: apps/activity/models.py:224 apps/activity/models.py:261
 #: apps/activity/models.py:292 apps/activity/models.py:325
-#: apps/ai_detection/models.py:60 apps/churn/models.py:16
+#: apps/ai_detection/models.py:72 apps/churn/models.py:16
 #: apps/policy/models.py:82
 msgid "pull request"
 msgstr "pull request"
@@ -424,7 +425,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:185 apps/activity/models.py:204
-#: apps/ai_detection/models.py:68
+#: apps/ai_detection/models.py:80
 msgid "commit"
 msgstr "коміт"
 
@@ -566,155 +567,306 @@ msgstr "статус перевірки"
 msgid "check statuses"
 msgstr "статуси перевірок"
 
-#: apps/ai_detection/models.py:6
+#: apps/ai_detection/forms.py:12
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:13
+#: apps/catalog/templates/catalog/partials/people_content.html:30
+#: apps/connections/forms.py:8
+#: apps/connections/templates/connections/partials/list_content.html:25
+msgid "Name"
+msgstr "Назва"
+
+#: apps/ai_detection/forms.py:13 apps/ai_detection/forms.py:38
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:14
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:41
+msgid "Detector"
+msgstr "Детектор"
+
+#: apps/ai_detection/forms.py:14 apps/ai_detection/forms.py:39
+msgid "Pattern"
+msgstr "Патерн"
+
+#: apps/ai_detection/forms.py:15 apps/ai_detection/forms.py:40
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:15
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
+msgid "Tool"
+msgstr "Інструмент"
+
+#: apps/ai_detection/forms.py:16 apps/ai_detection/forms.py:41
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:16
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:43
+msgid "Confidence"
+msgstr "Впевненість"
+
+#: apps/ai_detection/forms.py:17
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:17
+msgid "Is active"
+msgstr "Активне"
+
+#: apps/ai_detection/forms.py:18
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:18
+#: apps/catalog/forms.py:15
+msgid "Notes"
+msgstr "Нотатки"
+
+#: apps/ai_detection/models.py:9
 msgid "Commit trailer"
 msgstr "Трейлер коміту"
 
-#: apps/ai_detection/models.py:7
+#: apps/ai_detection/models.py:10
 msgid "Commit author"
 msgstr "Автор коміту"
 
-#: apps/ai_detection/models.py:8
+#: apps/ai_detection/models.py:11
 msgid "PR author"
 msgstr "Автор PR"
 
-#: apps/ai_detection/models.py:9
+#: apps/ai_detection/models.py:12
 msgid "PR body footer"
 msgstr "Підвал опису PR"
 
-#: apps/ai_detection/models.py:10
+#: apps/ai_detection/models.py:13
 msgid "HTML comment"
 msgstr "HTML-коментар"
 
-#: apps/ai_detection/models.py:11
+#: apps/ai_detection/models.py:14
 msgid "Label"
 msgstr "Лейбл"
 
-#: apps/ai_detection/models.py:12
+#: apps/ai_detection/models.py:15
 msgid "Branch pattern"
 msgstr "Шаблон гілки"
 
-#: apps/ai_detection/models.py:13
+#: apps/ai_detection/models.py:16
 msgid "Commit message"
 msgstr "Повідомлення коміту"
 
-#: apps/ai_detection/models.py:17
+#: apps/ai_detection/models.py:20
 msgid "Claude Code"
 msgstr "Claude Code"
 
-#: apps/ai_detection/models.py:18
+#: apps/ai_detection/models.py:21
 msgid "Copilot"
 msgstr "Copilot"
 
-#: apps/ai_detection/models.py:19
+#: apps/ai_detection/models.py:22
 msgid "Cursor"
 msgstr "Cursor"
 
-#: apps/ai_detection/models.py:20
+#: apps/ai_detection/models.py:23
 msgid "Codex"
 msgstr "Codex"
 
-#: apps/ai_detection/models.py:21
+#: apps/ai_detection/models.py:24
 msgid "Devin"
 msgstr "Devin"
 
-#: apps/ai_detection/models.py:22
+#: apps/ai_detection/models.py:25
 msgid "Gemini"
 msgstr "Gemini"
 
-#: apps/ai_detection/models.py:23
+#: apps/ai_detection/models.py:26
 msgid "Aider"
 msgstr "Aider"
 
-#: apps/ai_detection/models.py:24
+#: apps/ai_detection/models.py:27
 msgid "Windsurf"
 msgstr "Windsurf"
 
-#: apps/ai_detection/models.py:25
+#: apps/ai_detection/models.py:28
 msgid "ChatGPT"
 msgstr "ChatGPT"
 
-#: apps/ai_detection/models.py:26 apps/catalog/models.py:94
+#: apps/ai_detection/models.py:29 apps/catalog/models.py:94
 msgid "Other"
 msgstr "Інше"
 
-#: apps/ai_detection/models.py:30 apps/policy/models.py:68
+#: apps/ai_detection/models.py:33 apps/policy/models.py:68
 msgid "High"
 msgstr "Високий"
 
-#: apps/ai_detection/models.py:31 apps/policy/models.py:69
+#: apps/ai_detection/models.py:34 apps/policy/models.py:69
 msgid "Medium"
 msgstr "Середній"
 
-#: apps/ai_detection/models.py:32 apps/policy/models.py:70
+#: apps/ai_detection/models.py:35 apps/policy/models.py:70
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:36 apps/catalog/models.py:41
+#: apps/ai_detection/models.py:39 apps/catalog/models.py:41
 #: apps/catalog/models.py:64 apps/connections/models.py:19
 #: apps/github_sync/models.py:44
 msgid "name"
 msgstr "назва"
 
-#: apps/ai_detection/models.py:37
+#: apps/ai_detection/models.py:40
 msgid "detector"
 msgstr "детектор"
 
-#: apps/ai_detection/models.py:38
+#: apps/ai_detection/models.py:41
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:39 apps/ai_detection/models.py:73
+#: apps/ai_detection/models.py:42 apps/ai_detection/models.py:85
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:40 apps/ai_detection/models.py:74
+#: apps/ai_detection/models.py:43 apps/ai_detection/models.py:86
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:41 apps/catalog/models.py:17
+#: apps/ai_detection/models.py:44 apps/catalog/models.py:17
 #: apps/catalog/models.py:47 apps/catalog/models.py:73
 #: apps/catalog/models.py:97 apps/connections/models.py:34
 #: apps/policy/models.py:44
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:42 apps/catalog/models.py:102
+#: apps/ai_detection/models.py:45 apps/catalog/models.py:102
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:44 apps/connections/models.py:44
+#: apps/ai_detection/models.py:47 apps/connections/models.py:44
 #: apps/policy/models.py:100
 msgid "updated at"
 msgstr "оновлено о"
 
-#: apps/ai_detection/models.py:47
+#: apps/ai_detection/models.py:50
 msgid "detection rule"
 msgstr "правило детекції"
 
-#: apps/ai_detection/models.py:48
+#: apps/ai_detection/models.py:51
 msgid "detection rules"
 msgstr "правила детекції"
 
-#: apps/ai_detection/models.py:71
+#: apps/ai_detection/models.py:63
+#, python-format
+msgid "Not a valid regular expression: %(error)s"
+msgstr "Не є коректним регулярним виразом: %(error)s"
+
+#: apps/ai_detection/models.py:83
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:75
+#: apps/ai_detection/models.py:87
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:76
+#: apps/ai_detection/models.py:88
+msgid "evidence hash"
+msgstr "хеш доказу"
+
+#: apps/ai_detection/models.py:89
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:79
+#: apps/ai_detection/models.py:92
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:80
+#: apps/ai_detection/models.py:93
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:21
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:38
 msgid "AI signals"
 msgstr "сигнали ШІ"
+
+#: apps/ai_detection/templates/ai_detection/partials/dry_run_result.html:11
+#, python-format
+msgid "%(counter)s match in the last %(limit)s PRs"
+msgid_plural "%(counter)s matches in the last %(limit)s PRs"
+msgstr[0] "%(counter)s збіг серед останніх %(limit)s PR"
+msgstr[1] "%(counter)s збіги серед останніх %(limit)s PR"
+msgstr[2] "%(counter)s збігів серед останніх %(limit)s PR"
+msgstr[3] "%(counter)s збігу серед останніх %(limit)s PR"
+
+#: apps/ai_detection/templates/ai_detection/partials/dry_run_result.html:27
+msgid "No matches."
+msgstr "Немає збігів."
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_form.html:4
+#: apps/ai_detection/templates/ai_detection/rule_form.html:3
+msgid "Edit detection rule"
+msgstr "Редагувати правило детекції"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_form.html:4
+#: apps/ai_detection/templates/ai_detection/rule_form.html:3
+msgid "New detection rule"
+msgstr "Нове правило детекції"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_form.html:29
+#: apps/catalog/templates/catalog/partials/person_form.html:29
+#: apps/connections/templates/connections/partials/form.html:44
+msgid "Save"
+msgstr "Зберегти"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_row.html:7
+#: apps/catalog/templates/catalog/partials/people_content.html:47
+#: apps/catalog/templates/catalog/partials/people_content.html:48
+#: apps/connections/templates/connections/partials/discovery_content.html:76
+#: apps/connections/templates/connections/partials/row.html:18
+msgid "Yes"
+msgstr "Так"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_row.html:7
+#: apps/catalog/templates/catalog/partials/people_content.html:47
+#: apps/catalog/templates/catalog/partials/people_content.html:48
+#: apps/connections/templates/connections/partials/discovery_content.html:76
+#: apps/connections/templates/connections/partials/row.html:18
+msgid "No"
+msgstr "Ні"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_row.html:10
+#: apps/catalog/templates/catalog/partials/people_content.html:50
+#: apps/connections/templates/connections/partials/row.html:20
+msgid "Edit"
+msgstr "Редагувати"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_row.html:20
+#: apps/connections/templates/connections/partials/row.html:36
+msgid "Deactivate"
+msgstr "Деактивувати"
+
+#: apps/ai_detection/templates/ai_detection/partials/rule_row.html:20
+#: apps/connections/templates/connections/partials/row.html:36
+msgid "Activate"
+msgstr "Активувати"
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:4
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:10
+#: apps/ai_detection/templates/ai_detection/rules.html:3
+#: templates/partials/nav.html:11
+msgid "Detection rules"
+msgstr "Правила детекції"
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:6
+msgid "New rule"
+msgstr "Нове правило"
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:19
+#: apps/catalog/templates/catalog/partials/identities_content.html:16
+#: apps/catalog/templates/catalog/partials/people_content.html:36
+#: apps/connections/templates/connections/partials/list_content.html:30
+msgid "Actions"
+msgstr "Дії"
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:27
+msgid "No detection rules yet."
+msgstr "Ще немає правил детекції."
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:34
+msgid "Dry run"
+msgstr "Пробний запуск"
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:36
+msgid ""
+"Test a pattern against recently stored pull requests before saving it as a "
+"rule."
+msgstr ""
+"Перевірте патерн на нещодавно збережених PR, перш ніж зберегти його як "
+"правило."
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:54
+msgid "Run"
+msgstr "Запустити"
 
 #: apps/catalog/admin.py:58 apps/catalog/models.py:66
 #: apps/catalog/models.py:158 apps/policy/models.py:43
@@ -733,10 +885,6 @@ msgstr "Команда"
 #: apps/catalog/forms.py:14
 msgid "Role"
 msgstr "Роль"
-
-#: apps/catalog/forms.py:15
-msgid "Notes"
-msgstr "Нотатки"
 
 #: apps/catalog/forms.py:16
 msgid "Is bot"
@@ -975,35 +1123,46 @@ msgid "PR template section headings that list the AI tools used."
 msgstr ""
 "Заголовки секцій шаблону PR, що перелічують використані інструменти ШІ."
 
-#: apps/catalog/setting_defs.py:81
+#: apps/catalog/setting_defs.py:84
+msgid "How many of the most recent PRs a detection rule dry run scans."
+msgstr "Скільки останніх PR переглядає пробний запуск правила детекції."
+
+#: apps/catalog/setting_defs.py:101
+msgid ""
+"Free text in the disclosed-tools line mapped onto a canonical Tool value."
+msgstr ""
+"Довільний текст у рядку розкритих інструментів, який відображається на "
+"канонічне значення Tool."
+
+#: apps/catalog/setting_defs.py:105
 msgid "Minimum sample size below which a metric is greyed out."
 msgstr "Мінімальний розмір вибірки, нижче якого метрика сіріє."
 
-#: apps/catalog/setting_defs.py:84
+#: apps/catalog/setting_defs.py:108
 msgid "Days of inactivity after which an open PR is considered stale."
 msgstr "Дні бездіяльності, після яких відкритий PR вважається застарілим."
 
-#: apps/catalog/setting_defs.py:90
+#: apps/catalog/setting_defs.py:114
 msgid "Hours after which a PR waiting for review is flagged."
 msgstr "Години, після яких PR, що чекає на ревʼю, позначається."
 
-#: apps/catalog/setting_defs.py:93
+#: apps/catalog/setting_defs.py:117
 msgid "How PR durations are computed."
 msgstr "Як обчислюється тривалість PR."
 
-#: apps/catalog/setting_defs.py:98
+#: apps/catalog/setting_defs.py:122
 msgid "Upper line-count boundary for each PR size bucket."
 msgstr "Верхня межа кількості рядків для кожної розмірної категорії PR."
 
-#: apps/catalog/setting_defs.py:113
+#: apps/catalog/setting_defs.py:137
 msgid "File path globs excluded from size and churn calculations."
 msgstr "Glob-шаблони шляхів, виключені з обчислення розміру та churn."
 
-#: apps/catalog/setting_defs.py:130
+#: apps/catalog/setting_defs.py:154
 msgid "File path globs recognised as test files."
 msgstr "Glob-шаблони шляхів, що розпізнаються як тестові файли."
 
-#: apps/catalog/setting_defs.py:137
+#: apps/catalog/setting_defs.py:161
 msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
@@ -1011,54 +1170,54 @@ msgstr ""
 "Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
 "формальним."
 
-#: apps/catalog/setting_defs.py:141
+#: apps/catalog/setting_defs.py:165
 msgid "How many top reviewers count toward review load."
 msgstr "Скільки провідних ревʼюерів враховується в навантаженні на ревʼю."
 
-#: apps/catalog/setting_defs.py:147
+#: apps/catalog/setting_defs.py:171
 msgid "Days after merge in which a follow-up fix is attributed."
 msgstr "Дні після мерджу, протягом яких виправлення відносять до PR."
 
-#: apps/catalog/setting_defs.py:154
+#: apps/catalog/setting_defs.py:178
 msgid "Minimum file overlap ratio to attribute a follow-up fix to a PR."
 msgstr "Мінімальна частка перетину файлів для віднесення виправлення до PR."
 
-#: apps/catalog/setting_defs.py:161
+#: apps/catalog/setting_defs.py:185
 msgid "Minimum changed lines before a missing-tests violation applies."
 msgstr ""
 "Мінімальна кількість змінених рядків для застосування порушення «немає "
 "тестів»."
 
-#: apps/catalog/setting_defs.py:164
+#: apps/catalog/setting_defs.py:188
 msgid "Days after merge over which churn is measured."
 msgstr "Дні після мерджу, за які вимірюється churn."
 
-#: apps/catalog/setting_defs.py:166
+#: apps/catalog/setting_defs.py:190
 msgid "Maximum files in a PR before churn analysis is skipped."
 msgstr ""
 "Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
 
-#: apps/catalog/setting_defs.py:168
+#: apps/catalog/setting_defs.py:192
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:173
+#: apps/catalog/setting_defs.py:197
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:176
+#: apps/catalog/setting_defs.py:200
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:181
+#: apps/catalog/setting_defs.py:205
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:185
+#: apps/catalog/setting_defs.py:209
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:191
+#: apps/catalog/setting_defs.py:215
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1066,41 +1225,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:194
+#: apps/catalog/setting_defs.py:218
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:199
+#: apps/catalog/setting_defs.py:223
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:206
+#: apps/catalog/setting_defs.py:230
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:210
+#: apps/catalog/setting_defs.py:234
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:213
+#: apps/catalog/setting_defs.py:237
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:219
+#: apps/catalog/setting_defs.py:243
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:226
+#: apps/catalog/setting_defs.py:250
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:233
+#: apps/catalog/setting_defs.py:257
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -1135,12 +1294,6 @@ msgstr "Вид"
 #: apps/catalog/templates/catalog/partials/identities_content.html:15
 msgid "Value"
 msgstr "Значення"
-
-#: apps/catalog/templates/catalog/partials/identities_content.html:16
-#: apps/catalog/templates/catalog/partials/people_content.html:36
-#: apps/connections/templates/connections/partials/list_content.html:30
-msgid "Actions"
-msgstr "Дії"
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:25
 msgid "No unmapped identities. Everyone is accounted for."
@@ -1208,12 +1361,6 @@ msgstr[1] "%(counter)s боти, автоматично виключені з м
 msgstr[2] "%(counter)s ботів, автоматично виключених з метрик"
 msgstr[3] "%(counter)s бота, автоматично виключеного з метрик"
 
-#: apps/catalog/templates/catalog/partials/people_content.html:30
-#: apps/connections/forms.py:8
-#: apps/connections/templates/connections/partials/list_content.html:25
-msgid "Name"
-msgstr "Назва"
-
 #: apps/catalog/templates/catalog/partials/people_content.html:32
 msgid "Identities"
 msgstr "Ідентичності"
@@ -1230,25 +1377,6 @@ msgstr "Виключено"
 msgid "PRs"
 msgstr "PR"
 
-#: apps/catalog/templates/catalog/partials/people_content.html:47
-#: apps/catalog/templates/catalog/partials/people_content.html:48
-#: apps/connections/templates/connections/partials/discovery_content.html:76
-#: apps/connections/templates/connections/partials/row.html:18
-msgid "Yes"
-msgstr "Так"
-
-#: apps/catalog/templates/catalog/partials/people_content.html:47
-#: apps/catalog/templates/catalog/partials/people_content.html:48
-#: apps/connections/templates/connections/partials/discovery_content.html:76
-#: apps/connections/templates/connections/partials/row.html:18
-msgid "No"
-msgstr "Ні"
-
-#: apps/catalog/templates/catalog/partials/people_content.html:50
-#: apps/connections/templates/connections/partials/row.html:20
-msgid "Edit"
-msgstr "Редагувати"
-
 #: apps/catalog/templates/catalog/partials/people_content.html:54
 msgid "No people yet."
 msgstr "Ще немає людей."
@@ -1258,12 +1386,7 @@ msgstr "Ще немає людей."
 msgid "Edit person"
 msgstr "Редагувати людину"
 
-#: apps/catalog/templates/catalog/partials/person_form.html:29
-#: apps/connections/templates/connections/partials/form.html:44
-msgid "Save"
-msgstr "Зберегти"
-
-#: apps/catalog/views.py:115
+#: apps/catalog/views.py:120
 msgid "Choose a person to assign this identity to."
 msgstr "Виберіть людину, якій призначити цю ідентичність."
 
@@ -1627,6 +1750,7 @@ msgstr ""
 "іншого підключення або деактивуйте:"
 
 #: apps/connections/templates/connections/partials/list_content.html:28
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:23
 #: apps/github_sync/templates/github_sync/partials/runs.html:8
 msgid "Status"
 msgstr "Статус"
@@ -1646,14 +1770,6 @@ msgstr "немає"
 #: apps/connections/templates/connections/partials/row.html:27
 msgid "Check"
 msgstr "Перевірити"
-
-#: apps/connections/templates/connections/partials/row.html:36
-msgid "Deactivate"
-msgstr "Деактивувати"
-
-#: apps/connections/templates/connections/partials/row.html:36
-msgid "Activate"
-msgstr "Активувати"
 
 #: apps/connections/templates/connections/partials/row.html:45
 msgid "Delete"
@@ -1735,6 +1851,30 @@ msgstr "Огляд"
 #: apps/dashboards/templates/dashboards/overview.html:9
 msgid "Dashboards will appear here as they are built."
 msgstr "Панелі з'являтимуться тут у міру їх створення."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:16
+msgid "View on GitHub"
+msgstr "Переглянути на GitHub"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:25
+msgid "Disclosure"
+msgstr "Розкриття"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:27
+msgid "Tools"
+msgstr "Інструменти"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:44
+msgid "Evidence"
+msgstr "Доказ"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:45
+msgid "Commit"
+msgstr "Коміт"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:59
+msgid "No AI signals detected."
+msgstr "Сигналів ШІ не виявлено."
 
 #: apps/github_sync/models.py:8
 msgid "CLI"
@@ -2112,7 +2252,7 @@ msgstr "Переглянути"
 msgid "Language"
 msgstr "Мова"
 
-#: templates/partials/nav.html:16
+#: templates/partials/nav.html:17
 msgid "Log out"
 msgstr "Вийти"
 
