@@ -145,7 +145,7 @@ ExportColumn(key, title, type, width, number_format)
 | Git working data | `DATA_DIR/repos/<owner>/<name>.git` | Bare clones, re-creatable. Never in the repository |
 | Generated exports | `DATA_DIR/exports/` | Deleted after 7 days by a scheduled task |
 | Compiled CSS + vendored JS | `static/` **committed** | So neither running nor testing needs Node or a network fetch |
-| `.mo` translation files | built by `compilemessages`, **not committed** | `.po` files are committed |
+| `.mo` translation files | committed alongside `.po` sources | covered by `tests/test_translations.py::test_mo_catalog_matches_committed_po_source` |
 | Metric cache | Django `FileBasedCache` under `DATA_DIR/cache/` | Keyed by `last_data_version`; safe to delete at any time |
 | UI filter state | The query string | Spec §10.1 — every dashboard view must be a shareable link |
 
@@ -430,7 +430,7 @@ choose either.
 `DATA_DIR` from the environment, no SQLite-specific SQL, and `whitenoise` for static. `docs/SETUP.md` carries a
 "Future deployment" section sketching web + worker + postgres compose, unimplemented.
 
-**Release and upgrade.** `git pull && uv sync && uv run python manage.py migrate && uv run python manage.py compilemessages`.
+**Release and upgrade.** `git pull && uv sync && uv run python manage.py migrate`.
 `docs/SETUP.md` states plainly: **stop both processes, copy `DATA_DIR`, then upgrade.** User data survives because
 every schema change ships as a Django migration and because everything the operator typed by hand lives in tables
 that migrations only ever add to. Data migrations are forward-only; a migration that would drop an operator-owned

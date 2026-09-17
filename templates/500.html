@@ -1,0 +1,15 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="en" data-theme="{% if request.COOKIES.pr_radar_theme %}{{ request.COOKIES.pr_radar_theme }}{% else %}light{% endif %}">
+<head>
+<meta charset="utf-8">
+<title>{% translate "Server error" %} — PR Radar</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen">
+<main class="px-4">
+<div class="mx-auto max-w-sm py-16">
+  <h1 class="text-xl font-semibold mb-4">{% translate "Something went wrong." %}</h1>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Logged out" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-sm py-16 text-[var(--text)]">
+  <h1 class="text-xl font-semibold mb-4">{% translate "You have been logged out." %}</h1>
+  <a class="text-[var(--accent)]" href="{% url 'accounts:login' %}">{% translate "Log in again" %}</a>
+</div>
+{% endblock %}

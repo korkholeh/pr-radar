@@ -1,0 +1,74 @@
+feature: auth-i18n-theme
+surfaces: [app]
+entry: "/accounts/login/ — the only page an anonymous visitor can reach"
+
+under_test:
+  - apps/accounts/urls.py (LoginRequiredMiddleware gate, django.contrib.auth views)
+  - apps/accounts/views.py::set_theme_view, set_language_view
+  - apps/accounts/context_processors.py (theme_preference / theme_resolved)
+  - apps/accounts/middleware.py::UserLanguageMiddleware
+  - templates/base.html (pre-paint theme script), templates/partials/{theme_switcher,language_switcher}.html
+  - static/js/formatting.js::window.prRadar.formatDuration
+
+oracle: >
+  Spec §10.5 and §10.7: a lead logs in and lands on Overview; the theme and language they choose are stored on
+  their UserPreference, apply immediately with no flash of the other theme, and survive a reload and a brand new
+  browser session (another device signing in as the same person sees the same preference). Duration values must
+  read identically, in each locale, between the server-rendered text and the client-side JS formatter — the two
+  implementations exist only because one runs in the browser and one on the server, not because they may disagree.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e, DEBUG=False) with the seeded e2e-lead persona. "New browser
+  session" is modelled as a fresh Playwright browser context (no shared storage state) that logs in again — the
+  persistence being tested lives in the database (UserPreference), not in a cookie carried between contexts.
+
+cases:
+  - id: login-reaches-overview
+    priority: high
+    steps: ["open /accounts/login/", "submit the e2e-lead credentials"]
+    expected: "redirected to / and the Overview heading is visible"
+
+  - id: theme-switch-persists
+    priority: high
+    steps:
+      - "log in as e2e-lead"
+      - "select Dark in the theme switcher"
+      - "reload the page"
+      - "open a brand new browser context and log in as e2e-lead again"
+    expected: >
+      after the switch <html data-theme=\"dark\"> with no flash of light; the attribute is already correct at
+      domcontentloaded; the reload keeps it; the fresh context/session shows dark too because it is stored on
+      UserPreference
+
+  - id: language-switch-persists
+    priority: high
+    steps: ["log in as e2e-lead", "select Ukrainian in the language switcher", "reload the page"]
+    expected: "the page renders Ukrainian nav/heading text and keeps doing so after the reload"
+
+  - id: duration-formatter-matches-fixture
+    priority: medium
+    steps:
+      - "log in as e2e-lead"
+      - "for each row of tests/fixtures/duration_cases.json, call window.prRadar.formatDuration(seconds, locale) in the page"
+    expected: "the JS result equals the fixture's en/uk expectation for every row, including the None → em dash case"
+
+findings:
+  - id: registration-templates-were-shadowed-by-admin
+    detail: >
+      django.contrib.admin ships its own registration/{logged_out,password_reset_*}.html templates and, being
+      listed before apps.accounts in INSTALLED_APPS, shadowed all five of ours except login.html (admin's login
+      lives at admin/login.html, a different name) — these five pages were rendering unthemed, non-translated
+      Django admin chrome instead of the app's own base.html. Confirmed with curl/Playwright against the running
+      e2e surface and fixed by moving the accounts registration templates into the project's own
+      templates/registration/, which the filesystem loader checks before APP_DIRS regardless of INSTALLED_APPS
+      order. Pinned with apps/accounts/tests/test_registration_templates.py.
+
+deferred_not_authored:
+  - id: password-reset-page-not-admin-branded
+    reason: >
+      Would prove the same fix at the browser level, but config.settings.e2e runs with DEBUG=False, which makes
+      Django wrap the template loader in cached.Loader — the already-running e2e surface (started before this
+      fix) has the pre-fix admin template cached in that process's memory for its lifetime, and this session is
+      instructed not to restart the surface. Verified stale: `curl .../accounts/password_reset/` still returns
+      the admin-branded page against the live surface after the template move, while a fresh process (pytest,
+      new interpreter) resolves correctly. Add this case on the next surface restart.

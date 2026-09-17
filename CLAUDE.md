@@ -66,6 +66,7 @@ Management commands: `sync`, `recompute`, `compute_churn`, `seed_demo`, `seed_e2
 ## Docs
 
 `docs/SETUP.md`, `CONFIGURATION.md`, `METRICS.md`, `POLICY.md`, `GITHUB_CONNECTIONS.md`, `TRANSLATIONS.md`,
-`DECISIONS.md`, `PROGRESS.md`; architecture decision records in `docs/dev/adr/`.
+`DECISIONS.md`, `PROGRESS.md`; architecture decision records in `docs/dev/adr/`. Task-shaped pages for leads
+under `docs/user/`. User-visible changes go in `CHANGELOG.md`.
 
 Autodev docs: .autodev/ (ARCHITECTURE.md, RISKS.md, ROADMAP.md, PROGRESS.md, DECISIONS.md, phases/NN-*/PLAN.md)

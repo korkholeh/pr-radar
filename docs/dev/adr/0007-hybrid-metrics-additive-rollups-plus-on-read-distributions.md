@@ -28,8 +28,7 @@ person.
 **One registry.** `apps/metrics/registry.py` holds a `MetricDef` per metric:
 
 ```python
-MetricDef(key, title, description, unit, direction, kind, levels,
-          supports_cohorts, calculator, params)
+MetricDef(key, title, description, unit, direction, kind, levels, supports_cohorts, calculator, params)
 ```
 
 `title` and `description` are lazy translations. `kind` is `counter | ratio | distribution | state` and it decides

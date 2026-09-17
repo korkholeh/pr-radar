@@ -1,0 +1,57 @@
+/* The only file in this project allowed to contain a colour literal (#hex, rgb(), hsl()).
+   tests/test_no_hardcoded_colors.py enforces this by grepping everywhere else. */
+
+:root,
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f5f6f8;
+  --surface-2: #eceef2;
+  --border: #d7dbe2;
+  --text: #16181d;
+  --text-muted: #5b6270;
+  --accent: #2f6feb;
+  --on-accent: #ffffff;
+  --good: #1a7f37;
+  --bad: #cf222e;
+  --neutral: #6e7681;
+  --warning: #9a6700;
+  --series-ai: #2f6feb;
+  --series-non-ai: #8250df;
+  --series-1: #1a7f37;
+  --series-2: #cf222e;
+  --series-3: #9a6700;
+  --series-4: #0969da;
+  --series-5: #bf3989;
+  --series-6: #953800;
+  --series-7: #1b7c83;
+  --series-8: #57606a;
+  --grid: #e2e5e9;
+  --tooltip-bg: #24292f;
+}
+
+[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #161a20;
+  --surface-2: #1c212a;
+  --border: #2c333d;
+  --text: #e6e8eb;
+  --text-muted: #9aa4b2;
+  --accent: #6ea8fe;
+  --on-accent: #0f1115;
+  --good: #3fb950;
+  --bad: #f85149;
+  --neutral: #8b949e;
+  --warning: #d29922;
+  --series-ai: #6ea8fe;
+  --series-non-ai: #bc8cff;
+  --series-1: #3fb950;
+  --series-2: #f85149;
+  --series-3: #d29922;
+  --series-4: #79c0ff;
+  --series-5: #ff9bce;
+  --series-6: #ffa657;
+  --series-7: #56d4dd;
+  --series-8: #b1bac4;
+  --grid: #2c333d;
+  --tooltip-bg: #e6e8eb;
+}

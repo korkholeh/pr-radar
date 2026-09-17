@@ -285,12 +285,15 @@ AI tools used: <!-- e.g. Claude Code, Copilot -->
 Кожна метрика — обʼєкт у `metrics/registry.py`:
 ```python
 MetricDef(
-  key="lead_time_p50", title=_("Lead time (median)"),
-  description=_("From ready for review to merge."),
-  unit="duration", direction="lower_is_better",
-  kind="distribution",          # counter | ratio | distribution | state
-  levels={"global","project","repo","person"},
-  supports_cohorts=True, calculator=...,
+    key="lead_time_p50",
+    title=_("Lead time (median)"),
+    description=_("From ready for review to merge."),
+    unit="duration",
+    direction="lower_is_better",
+    kind="distribution",  # counter | ratio | distribution | state
+    levels={"global", "project", "repo", "person"},
+    supports_cohorts=True,
+    calculator=...,
 )
 ```
 `title` і `description` — lazy-переклади. `docs/METRICS.md` (англійською) генерується з реєстру командою `manage.py metrics_doc`; CI-тест перевіряє, що файл актуальний. В UI біля кожної метрики є іконка ⓘ з `description` і формулою.
