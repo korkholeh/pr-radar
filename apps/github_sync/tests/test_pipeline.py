@@ -1,7 +1,9 @@
 import pytest
 
 import apps.github_sync.services as services_module
-from apps.activity.models import PullRequest
+from apps.activity.models import AIStatus, PullRequest
+from apps.ai_detection.factories import DetectionRuleFactory
+from apps.ai_detection.models import AISignal, Confidence, Detector, Tool
 from apps.catalog.factories import RepositoryFactory
 from apps.connections.factories import GitHubConnectionFactory
 from apps.connections.services import set_token
@@ -166,3 +168,60 @@ def test_second_sync_leaves_derived_fields_identical():
     pull_request.refresh_from_db()
     after = {field: getattr(pull_request, field) for field in fields}
     assert before == after
+
+
+@pytest.mark.django_db(transaction=True)
+def test_hook_resolves_ai_status_and_writes_signals():
+    DetectionRuleFactory(
+        detector=Detector.PR_AUTHOR,
+        pattern="octocat",
+        tool=Tool.OTHER,
+        confidence=Confidence.HIGH,
+    )
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    pull_request = PullRequest.objects.get(repository=repository)
+    assert pull_request.ai_status == AIStatus.AI_EXPLICIT
+    assert AISignal.objects.filter(pull_request=pull_request).count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_second_sync_creates_no_duplicate_ai_signal():
+    DetectionRuleFactory(
+        detector=Detector.PR_AUTHOR,
+        pattern="octocat",
+        tool=Tool.OTHER,
+        confidence=Confidence.HIGH,
+    )
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    mock_graphql_sequence(*_one_pr_sequence())
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    pull_request = PullRequest.objects.get(repository=repository)
+    assert AISignal.objects.filter(pull_request=pull_request).count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_detect_failure_inside_the_hook_is_still_contained(monkeypatch):
+    import apps.github_sync.pipeline as pipeline_module
+
+    def _boom(pk):
+        raise RuntimeError("detect boom")
+
+    monkeypatch.setattr(pipeline_module, "detect_pull_request", _boom)
+    monkeypatch.setattr(services_module, "process_pull_request", pipeline_module.process_pull_request)
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+
+    run = run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    run.refresh_from_db()
+    assert PullRequest.objects.filter(repository=repository).exists()
+    assert run.status == SyncRun.Status.PARTIAL
+    assert run.stats["errors"] == 1

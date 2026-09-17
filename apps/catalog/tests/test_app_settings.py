@@ -55,6 +55,22 @@ def test_sync_settings_migration_is_idempotent():
 
 
 @pytest.mark.django_db
+def test_ai_detection_settings_migration_is_idempotent():
+    import importlib
+
+    from django.apps import apps as apps_registry
+
+    migration_module = importlib.import_module("apps.catalog.migrations.0004_ai_detection_settings")
+    migration_module.seed_defaults(apps_registry, None)
+    row = AppSetting.objects.get(key="DETECTION_DRY_RUN_PR_COUNT")
+    row.value = 7
+    row.save()
+    migration_module.seed_defaults(apps_registry, None)
+    row.refresh_from_db()
+    assert row.value == 7
+
+
+@pytest.mark.django_db
 def test_get_setting_unknown_key_raises():
     with pytest.raises(UnknownSettingError):
         get_setting("NOT_A_REAL_KEY")
@@ -97,6 +113,8 @@ def test_typed_accessors_return_python_types():
     assert isinstance(get_str("DURATION_MODE"), str)
     assert isinstance(get_list("BOT_LOGINS"), list)
     assert isinstance(get_dict("PR_SIZE_BUCKETS"), dict)
+    assert isinstance(get_int("DETECTION_DRY_RUN_PR_COUNT"), int)
+    assert isinstance(get_dict("DISCLOSURE_TOOL_ALIASES"), dict)
 
 
 @pytest.mark.django_db

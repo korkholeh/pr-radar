@@ -78,6 +78,30 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "ai",
     ),
     SettingDef(
+        "DETECTION_DRY_RUN_PR_COUNT",
+        "int",
+        50,
+        _("How many of the most recent PRs a detection rule dry run scans."),
+        "ai",
+    ),
+    SettingDef(
+        "DISCLOSURE_TOOL_ALIASES",
+        "dict",
+        {
+            "claude_code": ["claude code", "claude"],
+            "copilot": ["copilot", "github copilot"],
+            "cursor": ["cursor"],
+            "codex": ["codex"],
+            "devin": ["devin"],
+            "gemini": ["gemini"],
+            "aider": ["aider"],
+            "windsurf": ["windsurf"],
+            "chatgpt": ["chatgpt", "gpt"],
+        },
+        _("Free text in the disclosed-tools line mapped onto a canonical Tool value."),
+        "ai",
+    ),
+    SettingDef(
         "MIN_SAMPLE", "int", 5, _("Minimum sample size below which a metric is greyed out."), "metrics"
     ),
     SettingDef(

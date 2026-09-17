@@ -27,3 +27,12 @@
   create a new person from it, mark it as a bot, or exclude it from metrics.
 - Every pull request now carries its derived fields (size bucket, effective lines, test-file flag, rubber-stamp,
   self-merge, hotfix, revert, review timing and counts), recomputed idempotently after each sync.
+- AI detection: eight regex-based signal detectors, a tolerant PR-template disclosure parser and a resolved
+  `ai_status`/`ai_disclosure`/`ai_tools` per PR, recomputed idempotently after each sync alongside derive. See
+  `docs/user/tune-ai-detection.md`.
+- Settings → Detection rules: list, create, edit and activate/deactivate a detection rule, with a dry run against
+  recently stored PRs before saving.
+- A minimal PR detail page (`/prs/<id>/`) showing the resolved AI status, disclosure, tools and every matched
+  signal with its evidence.
+- `manage.py recompute` and `manage.py seed_detection_rules` management commands.
+- `docs/pull_request_template.md`, a recommended PR template matching the disclosure parser's defaults.

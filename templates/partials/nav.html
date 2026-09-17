@@ -8,6 +8,7 @@
         <a href="{% url 'connections:list' %}" class="text-[var(--text-muted)]">{% translate "Connections" %}</a>
         <a href="{% url 'connections:discover' %}" class="text-[var(--text-muted)]">{% translate "Repositories" %}</a>
         <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
+        <a href="{% url 'ai_detection:rules' %}" class="text-[var(--text-muted)]">{% translate "Detection rules" %}</a>
       {% endif %}
       {% include "partials/theme_switcher.html" %}
       {% include "partials/language_switcher.html" %}

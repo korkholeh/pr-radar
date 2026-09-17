@@ -49,6 +49,8 @@ missing.
 | ai | `DISCLOSURE_LABELS_PARTIAL` | list | `["Partial"]` | Disclosure values meaning partial AI assistance. |
 | ai | `DISCLOSURE_LABELS_SUBSTANTIAL` | list | `["Substantial"]` | Disclosure values meaning substantial AI assistance. |
 | ai | `DISCLOSURE_TOOLS_LABELS` | list | `["AI tools used"]` | PR template section headings that list the AI tools used. |
+| ai | `DETECTION_DRY_RUN_PR_COUNT` | int | `50` | How many of the most recent PRs a detection rule dry run scans. |
+| ai | `DISCLOSURE_TOOL_ALIASES` | dict | `{"claude_code": ["claude code", "claude"], "copilot": ["copilot", "github copilot"], "cursor": ["cursor"], "codex": ["codex"], "devin": ["devin"], "gemini": ["gemini"], "aider": ["aider"], "windsurf": ["windsurf"], "chatgpt": ["chatgpt", "gpt"]}` | Maps free text in the PR template's "AI tools used" line onto canonical `Tool` values; anything unmatched is kept as lowercased raw text. |
 | metrics | `MIN_SAMPLE` | int | `5` | Minimum sample size below which a metric is greyed out. |
 | metrics | `STALE_DAYS` | int | `5` | Days of inactivity after which an open PR is considered stale. |
 | metrics | `WAITING_REVIEW_HOURS` | int | `24` | Hours after which a PR waiting for review is flagged. |

@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 4/11 · step `commit`
+- **Current:** phase 5/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 70% (reset 17.09 20:20) · 7d 31%
-- **Totals:** 55 sessions · 6.3 h agent time · ≈$125.45 API-equivalent
-- **Clock:** 9.8 h since the run was created · 6.3 h working · 3.4 h paused on the usage limit · 0.2 h not running
-- **Updated:** 2026-09-17 17:04:14
+- **Usage:** 5h 40% (reset 18.09 01:40) · 7d 33%
+- **Totals:** 69 sessions · 7.7 h agent time · ≈$156.66 API-equivalent
+- **Clock:** 14.8 h since the run was created · 7.7 h working · 3.4 h paused on the usage limit · 3.7 h not running
+- **Updated:** 2026-09-17 21:59:56
 
 ## Run warnings
 
@@ -21,8 +21,8 @@
 | 1 | Skeleton, auth, i18n and design tokens | yes | ✅ done | e8a30ee | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/01-skeleton/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 2 | Domain models, migrations and Django admin | no | ✅ done | abc20ee | not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 3 | GitHub connections and incremental sync | yes | ✅ done | d9e0077 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 4 | Identity resolution and derived PR fields | yes | 🔨 in_progress |  |  |
-| 5 | AI detection | yes | ⏳ pending |  |  |
+| 4 | Identity resolution and derived PR fields | yes | ✅ done | ed2d2c8 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 5 | AI detection | yes | 🔨 in_progress |  |  |
 | 6 | AI policy engine and violations console | yes | ⏳ pending |  |  |
 | 7 | Metrics registry, rollups and recompute | no | ⏳ pending |  |  |
 | 8 | Dashboards, charts, themes and table export | yes | ⏳ pending |  |  |
@@ -133,6 +133,35 @@
 - `2026-09-17 17:03:03` **p04-tests** — pass: exit 0: ............................... [100%] (after e2e fixes)
 - `2026-09-17 17:04:14` **p04-docs** — done (1m, $0.44): Verified phase-4 docs against code, no edits needed. CLAUDE.md: commands/management-command list unchanged this phase, still accurate. docs/DECISIONS.md Phase 4 section documents every DerivedFields/FileDerivedFields field (tests/test_docs.py::test_every_derived_field_is_documented passes). docs/us…
 - `2026-09-17 17:04:14` **p04-docs** — no changes: the documentation was already true for this phase
+- `2026-09-17 17:04:14` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-17 17:04:14` **p04-commit** — done: ed2d2c8
+- `2026-09-17 17:04:17` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-17 17:04:23` **p04-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p04-identity-and-derived-fields
+- `2026-09-17 17:04:26` **p04-pr** — draft: https://github.com/korkholeh/pr-radar/pull/5
+- `2026-09-17 17:04:36` **p04-merge** — done: https://github.com/korkholeh/pr-radar/pull/5
+- `2026-09-17 17:11:10` **p05-plan** — done (6m, $2.48): Wrote .autodev/phases/05-ai-detection/PLAN.md (Context/Design/Tasks/Verification/Risks/Out of scope): eight detectors over a preloaded DetectionContext, a pure tolerant disclosure parser driven by the existing AppSetting synonyms, ai_status per §6.3, YAML-seeded editable DetectionRules with a non-w…
+- `2026-09-17 17:21:14` **run** — stopped: 5h usage 86% ≥ 85%, and waiting until ≈17.09 20:22 would run past --max-hours 10 — stopping instead of sleeping
+- `2026-09-17 17:21:15` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-17 20:49:41` **p05-implement** — handover: context reached 202,454 tokens — checkpointing for a fresh session
+- `2026-09-17 20:51:44` **p05-implement** — partial (4m, $3.16): Phase 5 (AI detection) session 1: implemented and fully tested T1-T13 of 19 — AI settings (DETECTION_DRY_RUN_PR_COUNT, DISCLOSURE_TOOL_ALIASES), AISignal.evidence_hash + uniqueness constraint, DetectionRule.name unique + clean() pattern validation, apps/ai_detection/detectors.py (DetectionContext, …
+- `2026-09-17 21:04:41` **p05-implement** — done (12m, $5.3): Session 3 finished phase 5 (AI detection), completing T14-T19 on top of session 1's T1-T13: Settings → Detection rules page (list/create/edit/toggle, htmx fragments, AuditEntry per mutation, permission-gated); dry-run (services.dry_run_rule + view + result partial, writes no AISignal); minimal PR d…
+- `2026-09-17 21:04:58` **p05-tests** — pass: exit 0: ............ [100%]
+- `2026-09-17 21:11:04` **p05-review1** — changes_requested (6m, $2.9): Phase 5 delivers what it promised: eight detectors with paired positive/negative tests, a resolved ai_status with all five outcomes tested, an idempotent wanted-vs-existing diff backed by a real unique constraint, YAML-seeded operator-owned rules, a non-writing dry run, and a minimal PR page showin…
+- `2026-09-17 21:19:31` **p05-review_fix1** — done (8m, $2.53): Applied all review-r1 fixes for phase 5 (AI detection), no findings rejected: MAJOR (fixed): disclosure section end predicate now stops at ATX heading, bold-only line, horizontal rule, or setext underline (not only ATX) — a following **Checklist**/---/setext section no longer leaks ticks into the A…
+- `2026-09-17 21:19:48` **p05-tests** — pass: exit 0: ......................... [100%]
+- `2026-09-17 21:26:52` **p05-review2** — changes_requested (7m, $2.97): Phase 5 delivers the eight detectors, the tolerant parser, the resolved ai_status, YAML-seeded operator-owned rules, a non-writing dry run and a minimal PR page; all seven acceptance criteria have a test that really proves them, `uv run pytest -q` and the whole lint gate are green, and every blocke…
+- `2026-09-17 21:35:06` **p05-review_fix2** — done (8m, $2.35): All findings from REVIEW-r2.md addressed. Fixed: - [MAJOR] Bold lead-in / `---` divider above checkboxes truncating the AI-assistance section to zero lines (disclosure.py): split `_is_boundary_line` into `_is_hard_boundary_line` (ATX/setext, unconditional) and `_is_soft_boundary_line` (bold/HR, onl…
+- `2026-09-17 21:35:23` **p05-tests** — pass: exit 0: ............................... [100%]
+- `2026-09-17 21:39:09` **p05-review_audit2** — approve (3m, $1.38): Every finding from REVIEW-r2 is fixed in the product by this diff, each with a test that fails without the fix: the disclosure section-end predicate is split into hard (ATX/setext) and checkbox-gated soft (bold/HR) boundaries and all three r2 repro bodies now parse correctly while r1's three cases …
+- `2026-09-17 21:56:23` **p05-e2e** — done (17m, $4.1): Added 10 e2e cases for phase 5 (AI detection) in e2e/web/test_ai_detection.py + e2e/plans/ai_detection.plan.yaml: rules-list permission split, create/edit/toggle a rule, invalid-pattern errors on both the rule form and the dry run, the dry run's matches/zero-matches states and its "writes no AISign…
+- `2026-09-17 21:56:24` **p05-e2e** — fail: exit 1: ERROR e2e/web/test_theme.py::test_theme_switch_persists_across_reload_and_new_context[chromium]
+- `2026-09-17 21:57:26` **p05-e2e_fix1** — done (1m, $0.22): Not a product bug. Surface at 127.0.0.1:8100 was mid-startup when orchestrator's earlier e2e run fired (race: runserver PID start time matches E2E_OUTPUT.txt failure timestamp exactly). Verified reachable via curl (302) and lsof (LISTEN), then re-ran `uv run pytest e2e -q` twice with zero changes —…
+- `2026-09-17 21:57:39` **p05-e2e** — pass: exit 0: ................................. [100%]
+- `2026-09-17 21:57:57` **p05-tests** — fail: exit 1: FAILED tests/test_css_tokens.py::test_app_css_is_not_stale - AssertionError: ... (after e2e fixes)
+- `2026-09-17 21:58:39` **p05-test_fix1** — done (0m, $0.2): Only failure was `test_app_css_is_not_stale`: phase 5 added new .py/template files that changed Tailwind's content scan, but app.css/manifest weren't regenerated. Ran `make css` to regenerate static/css/app.css + .build-manifest.sha256. Full `uv run pytest -q` now passes (no failures). Logged decis…
+- `2026-09-17 21:58:57` **p05-tests** — pass: exit 0: ............................... [100%]
+- `2026-09-17 21:59:56` **p05-docs** — done (0m, $0.44): Checked phase 5 docs against PLAN.md/code/DECISIONS.md — all already true, no edits needed. CLAUDE.md lists `ai_detection` app + `recompute`/`seed_detection_rules` commands. docs/CONFIGURATION.md has both new `ai` settings (DETECTION_DRY_RUN_PR_COUNT, DISCLOSURE_TOOL_ALIASES). docs/DECISIONS.md Pha…
+- `2026-09-17 21:59:56` **p05-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

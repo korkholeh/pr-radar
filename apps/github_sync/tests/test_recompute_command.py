@@ -1,0 +1,122 @@
+import datetime
+
+import pytest
+from django.core.management import call_command
+from django.utils import timezone
+
+from apps.activity.factories import PullRequestFactory
+from apps.activity.models import AIStatus
+from apps.ai_detection.factories import DetectionRuleFactory
+from apps.ai_detection.models import AISignal, Confidence, Detector, Tool
+from apps.catalog.factories import ProjectFactory, RepositoryFactory
+
+
+@pytest.mark.django_db
+def test_recompute_re_detects_after_a_rule_is_added():
+    pr = PullRequestFactory(body="Generated with Claude Code")
+    call_command("recompute")
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.UNKNOWN
+
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    call_command("recompute")
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_EXPLICIT
+    assert AISignal.objects.filter(pull_request=pr).count() == 1
+
+
+@pytest.mark.django_db
+def test_from_to_narrows_the_set():
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    now = timezone.now()
+    in_range = PullRequestFactory(
+        created_at=now - datetime.timedelta(days=1), body="Generated with Claude Code"
+    )
+    out_of_range = PullRequestFactory(
+        created_at=now - datetime.timedelta(days=30), body="Generated with Claude Code"
+    )
+
+    call_command(
+        "recompute",
+        **{"from": (now - datetime.timedelta(days=5)).date().isoformat(), "to": now.date().isoformat()},
+    )
+
+    in_range.refresh_from_db()
+    out_of_range.refresh_from_db()
+    assert in_range.ai_status == AIStatus.AI_EXPLICIT
+    assert out_of_range.ai_status == AIStatus.UNKNOWN
+    assert AISignal.objects.filter(pull_request=out_of_range).count() == 0
+
+
+@pytest.mark.django_db
+def test_from_boundary_uses_report_timezone_not_utc():
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    # 2025-12-31T23:00Z is 2026-01-01T01:00 in Europe/Kyiv (UTC+2 in January) — inside the Kyiv
+    # day named by --from 2026-01-01, even though it falls on the previous UTC calendar day.
+    early_kyiv_day = PullRequestFactory(
+        created_at=datetime.datetime(2025, 12, 31, 23, 0, tzinfo=datetime.UTC),
+        body="Generated with Claude Code",
+    )
+
+    call_command("recompute", **{"from": "2026-01-01"})
+
+    early_kyiv_day.refresh_from_db()
+    assert early_kyiv_day.ai_status == AIStatus.AI_EXPLICIT
+
+
+@pytest.mark.django_db
+def test_repo_and_project_filters_narrow_the_set():
+    project = ProjectFactory()
+    in_repo = RepositoryFactory()
+    project.repositories.add(in_repo)
+    other_repo = RepositoryFactory()
+
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    in_pr = PullRequestFactory(repository=in_repo, body="Generated with Claude Code")
+    out_pr = PullRequestFactory(repository=other_repo, body="Generated with Claude Code")
+
+    call_command("recompute", project=project.slug)
+
+    in_pr.refresh_from_db()
+    out_pr.refresh_from_db()
+    assert in_pr.ai_status == AIStatus.AI_EXPLICIT
+    assert out_pr.ai_status == AIStatus.UNKNOWN
+
+
+@pytest.mark.django_db
+def test_running_it_twice_is_a_noop_on_row_counts():
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    PullRequestFactory(body="Generated with Claude Code")
+
+    call_command("recompute")
+    count_after_first = AISignal.objects.count()
+
+    call_command("recompute")
+
+    assert AISignal.objects.count() == count_after_first

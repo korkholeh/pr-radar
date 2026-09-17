@@ -88,3 +88,71 @@ that changes a row causes the next derive pass to update the field, and nothing 
 which owns the git-clone evidence (commit parent counts) needed to tell a merge commit from a squash or a
 rebase. No metric before then reads it, and guessing it from the GraphQL payload alone would write a wrong value
 into a cached field.
+
+## Phase 5
+
+**Detection is a third pipeline step, in the same idempotent shape as `derive`.** After `derive_pull_request()`,
+`apps.ai_detection.services.detect_pull_request()` matches every active, admin-editable `DetectionRule` against
+the PR's stored rows and writes/deletes `AISignal` rows so the stored set equals the wanted set exactly — a
+wanted-vs-existing diff, not an append. `AISignal` carries `evidence_hash` (a sha256 of the evidence text) under
+`UniqueConstraint(pull_request, rule, evidence_hash)`, so re-running detection twice never duplicates a row and
+deactivating a rule (or editing its pattern so it no longer matches) removes its signals on the very next run.
+
+**Eight detectors, each a pure function of `(compiled pattern, DetectionContext)`:** `commit_trailer`,
+`commit_author`, `pr_author`, `pr_body_footer`, `html_comment`, `label`, `branch_pattern`, `commit_message`
+(`apps/ai_detection/detectors.py`, keyed by `Detector`'s exact values, one detector per `Detector.choices`
+entry, checked by test so the registry can't silently fall short). `pr_body_footer` and `html_comment` read the
+same PR body through two different lenses on purpose: a marker inside an HTML comment is invisible to a human
+reviewer and must be attributable to its own rule and confidence rather than merged into the visible-text
+detector. Every `AISignal.evidence` is truncated to `EVIDENCE_MAX_LENGTH` (200 chars), centred on the match, so
+it always fits the field and is still readable on the PR page.
+
+**The disclosure parser (`apps/ai_detection/disclosure.py`) is deliberately tolerant, not strict**, because it
+reads free-form Markdown a human filled in, not a fixed form: the heading, the three checkbox labels and the
+tools-line label are all configurable settings (`DISCLOSURE_SECTION_HEADINGS`, `DISCLOSURE_LABELS_NONE`/
+`_PARTIAL`/`_SUBSTANTIAL`, `DISCLOSURE_TOOLS_LABELS`, `DISCLOSURE_TOOL_ALIASES`; see `docs/CONFIGURATION.md`),
+matched case-insensitively and by label prefix. Two ticked boxes resolve to `ambiguous` even if they happen to
+agree, because two ticks means the author did not answer the question as asked. No matching section at all, or
+an empty PR body, resolves to `missing` — never silently to "no AI used". `docs/pull_request_template.md` ships
+the recommended template matching these defaults verbatim, and a test parses it both unticked and with the
+`Substantial` box ticked so the doc and the parser can never drift apart.
+
+**`resolve_ai_status()` implements spec §6.3 as a pure function of two arguments** (the set of signal
+confidences and the resolved disclosure), so all five outcomes are unit-tested without touching the database:
+`ai_explicit` (any `high`-confidence signal, regardless of what disclosure says — the mismatch case phase 6
+turns into a `DISCLOSURE_MISMATCH` violation), `ai_disclosed` (disclosure `partial`/`substantial`, no high
+signal), `ai_suspected` (any signal at all, lower confidence, no disclosure), `no_ai` (no signal, disclosure
+`none`), `unknown` (nothing rules it either way — including an `ambiguous` disclosure with no signals). A
+missing/ambiguous disclosure is `unknown`, never `no_ai`, so a lead never sees a false negative on the AI
+cohort. `ai_suspected` is excluded from the AI cohort by default (`AI_COHORT_INCLUDE_SUSPECTED=False`).
+
+**`DetectionRule` is operator-owned runtime data, not a release artefact.** `notes` carries a mandatory source
+comment; `name` is unique so `manage.py seed_detection_rules` can `get_or_create` by name without shadowing; a
+non-compiling `pattern` is rejected at the model's `clean()` — surfaced as a visible form error in the settings
+UI — rather than silently skipped at detection time (a rule already saved with a bad pattern, e.g. edited
+outside the UI, is skipped with a `logger.warning` naming the rule, so one broken rule never stops every other
+rule from running). `AISignal.rule` is `PROTECT`, so a rule with signals cannot be deleted — the UI offers
+**deactivate**, which removes its signals on the next `detect`/`recompute` run, instead. The seed set
+(`fixtures/detection_rules.yaml`, loaded by `apps/ai_detection/rules.py`) covers all eight non-`other` `Tool`
+values (Claude Code, Copilot, Cursor, Codex, Devin, Gemini, Aider, Windsurf), each with a sourced `notes` field;
+disputed rules ship at `confidence: low` rather than `high`, since only `high` can push a PR to `ai_explicit`.
+
+**The settings page's dry run never touches `AISignal`.** `services.dry_run_rule(rule, scope, limit)` runs the
+rule's single detector over the last `DETECTION_DRY_RUN_PR_COUNT` PRs in the caller's scope and returns matches
+in memory; it accepts an unsaved `DetectionRule` instance so an admin can test a pattern before saving it, and
+raises `ValueError` for a pattern that fails to compile (the settings form also validates this itself, so the
+common path is a visible field error, not an exception).
+
+**`manage.py recompute` and a minimal PR detail page land in this phase instead of their originally planned
+phases** (7 and 9 respectively) — both were the smallest concrete way to satisfy this phase's own acceptance
+criteria ("re-running detection over stored PRs", "evidence visible on the PR page") without inventing a
+throwaway harness. `recompute` runs `derive_pull_requests()` then `detect_pull_requests()` over a
+`--from`/`--to`/`--repo`/`--project`-filtered queryset and makes no GitHub call, asserted by the same
+unmocked-request guard every other test runs under; policy evaluation (phase 6) and rollup rebuilding (phase 7)
+extend the same command later. The PR detail page (`dashboards:pull_request_detail`) shows only the AI section
+(status, disclosure, tools, the signal list with evidence); phase 9 extends the same URL and template with the
+timeline, metrics, violations and churn.
+
+`Detector` values: `commit_trailer`, `commit_author`, `pr_author`, `pr_body_footer`, `html_comment`, `label`,
+`branch_pattern`, `commit_message`. `AIStatus` values: `ai_explicit`, `ai_disclosed`, `ai_suspected`, `no_ai`,
+`unknown`. `AIDisclosure` values: `none`, `partial`, `substantial`, `missing`, `ambiguous`.

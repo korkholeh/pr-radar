@@ -1,5 +1,18 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+# Cheapest useful guard against catastrophic backtracking (spec/RISKS row 5's "wrong in both
+# directions" also covers "never finishes"): a quantified group nested directly inside another
+# quantifier, e.g. `(a+)+` or `(a*)*`, is the classic ReDoS shape. This is a heuristic, not a
+# parser — it does not catch every pathological pattern (deeper nesting, alternation-based blowup)
+# — but it rejects the shape an admin is most likely to type by accident, at the point of entry,
+# before the pattern ever reaches `re.search` on a PR body. A durable fix would run matching under
+# a timeout (e.g. the `regex` module's `timeout=`); deferred as this phase makes no live regex
+# call outside the request/task thread that already has to finish quickly.
+_NESTED_QUANTIFIER_RE = re.compile(r"\([^()]*[+*][^()]*\)[+*]")
 
 
 class Detector(models.TextChoices):
@@ -33,7 +46,7 @@ class Confidence(models.TextChoices):
 
 
 class DetectionRule(models.Model):
-    name = models.CharField(_("name"), max_length=200)
+    name = models.CharField(_("name"), max_length=200, unique=True)
     detector = models.CharField(_("detector"), max_length=20, choices=Detector.choices)
     pattern = models.CharField(_("pattern"), max_length=500)
     tool = models.CharField(_("tool"), max_length=20, choices=Tool.choices)
@@ -50,6 +63,25 @@ class DetectionRule(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def clean(self) -> None:
+        super().clean()
+        try:
+            re.compile(self.pattern)
+        except re.error as exc:
+            raise ValidationError(
+                {"pattern": _("Not a valid regular expression: %(error)s") % {"error": exc}}
+            ) from exc
+        if _NESTED_QUANTIFIER_RE.search(self.pattern):
+            raise ValidationError(
+                {
+                    "pattern": _(
+                        "This pattern nests a repeated group inside another repetition "
+                        "(e.g. (a+)+), which can hang on a normal PR body. Rewrite it "
+                        "without the nested quantifier."
+                    )
+                }
+            )
 
 
 class AISignal(models.Model):
@@ -73,12 +105,18 @@ class AISignal(models.Model):
     tool = models.CharField(_("tool"), max_length=20, choices=Tool.choices)
     confidence = models.CharField(_("confidence"), max_length=10, choices=Confidence.choices)
     evidence = models.CharField(_("evidence"), max_length=200)
+    evidence_hash = models.CharField(_("evidence hash"), max_length=64)
     detected_at = models.DateTimeField(_("detected at"), auto_now_add=True)
 
     class Meta:
         verbose_name = _("AI signal")
         verbose_name_plural = _("AI signals")
         indexes = [models.Index(fields=["pull_request", "confidence"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["pull_request", "rule", "evidence_hash"], name="uniq_aisignal_pr_rule_evidence"
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.rule} on {self.pull_request}"

@@ -1,0 +1,96 @@
+# Seed set for `manage.py seed_detection_rules` (spec §6.1). Each rule names its source in `notes`;
+# a rule whose signal is genuinely disputed (a convention rather than something the tool itself
+# writes) ships at `confidence: low` so it never alone yields `ai_explicit`.
+rules:
+  - name: "Claude Code co-authored-by trailer"
+    detector: commit_trailer
+    pattern: "Co-Authored-By: Claude"
+    tool: claude_code
+    confidence: high
+    notes: >
+      Claude Code appends this trailer to every commit it makes by default.
+      https://docs.claude.com/en/docs/claude-code/overview
+
+  - name: "Claude Code PR description footer"
+    detector: pr_body_footer
+    pattern: "Generated with \\[Claude Code\\]"
+    tool: claude_code
+    confidence: high
+    notes: >
+      Claude Code's default PR description footer.
+      https://docs.claude.com/en/docs/claude-code/overview
+
+  - name: "GitHub Copilot coding agent bot author"
+    detector: commit_author
+    pattern: "copilot-swe-agent\\[bot\\]"
+    tool: copilot
+    confidence: high
+    notes: >
+      GitHub's Copilot coding agent commits and opens PRs as this bot login.
+      https://docs.github.com/en/copilot/using-github-copilot/coding-agent
+
+  - name: "GitHub Copilot coding agent branch prefix"
+    detector: branch_pattern
+    pattern: "^copilot/"
+    tool: copilot
+    confidence: medium
+    notes: >
+      GitHub's Copilot coding agent uses this branch naming convention by default; a human can
+      also name a branch this way, so it is not treated as high confidence on its own.
+      https://docs.github.com/en/copilot/using-github-copilot/coding-agent
+
+  - name: "Devin bot PR author"
+    detector: pr_author
+    pattern: "devin-ai-integration"
+    tool: devin
+    confidence: high
+    notes: >
+      Devin opens PRs under the devin-ai-integration[bot] GitHub App login.
+      https://docs.devin.ai/
+
+  - name: "Gemini Code Assist hidden review marker"
+    detector: html_comment
+    pattern: "gemini-code-assist"
+    tool: gemini
+    confidence: medium
+    notes: >
+      Gemini Code Assist embeds this marker in an HTML comment inside its review summaries.
+      https://developers.google.com/gemini-code-assist
+
+  - name: "Cursor convention label"
+    detector: label
+    pattern: "^cursor$"
+    tool: cursor
+    confidence: low
+    disputed: true
+    notes: >
+      Some teams tag Cursor-authored PRs with a manual "cursor" label. Disputed: this is a team
+      convention, not something Cursor itself writes, so it stays low confidence.
+
+  - name: "OpenAI Codex branch prefix"
+    detector: branch_pattern
+    pattern: "^codex/"
+    tool: codex
+    confidence: medium
+    notes: >
+      Codex's default branch naming convention when it opens a PR from the CLI or cloud agent.
+      https://developers.openai.com/codex/
+
+  - name: "Aider commit message marker"
+    detector: commit_message
+    pattern: "^aider:"
+    tool: aider
+    confidence: high
+    notes: >
+      Aider prefixes commit messages it writes with "aider:" by default.
+      https://aider.chat/docs/git.html
+
+  - name: "Windsurf branch prefix"
+    detector: branch_pattern
+    pattern: "^windsurf/"
+    tool: windsurf
+    confidence: low
+    disputed: true
+    notes: >
+      Windsurf's Cascade agent branch naming is not officially documented; disputed heuristic
+      based on observed team conventions.

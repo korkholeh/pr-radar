@@ -1,0 +1,163 @@
+feature: ai_detection
+surfaces: [app]
+entry: "Settings → Detection rules (/settings/detection-rules/, admin-only); a PR's AI section at /prs/<pk>/"
+
+under_test:
+  - apps/ai_detection/views.py (rules_list, rule_create, rule_edit, rule_toggle, rule_dry_run)
+  - apps/ai_detection/services.py (detect_pull_request, dry_run_rule, resolve_ai_status)
+  - apps/ai_detection/forms.py (DetectionRuleForm, DryRunForm)
+  - apps/ai_detection/templates/ai_detection/*.html, apps/ai_detection/templates/ai_detection/partials/*.html
+  - apps/dashboards/views.py::pull_request_detail, apps/dashboards/templates/dashboards/pull_request_detail.html
+  - templates/partials/nav.html (the "Detection rules" link, admin-only)
+
+oracle: >
+  .autodev/phases/05-ai-detection/PLAN.md's acceptance criteria: (6) every AISignal carries an evidence
+  fragment of at most 200 chars, shown on the PR page; (7) the rule dry-run page reports matches against
+  the last N stored PRs without writing AISignal rows. Plus the phase's "Settings UI" design: rules are
+  admin-only (catalog.manage_settings) behind the same permission pattern as Settings > People
+  (CLAUDE.md: "views are thin", "every htmx endpoint returns a fragment", "anything that mutates is
+  POST"), an invalid regex renders a visible field error rather than an empty 400 body
+  (DetectionRule.clean() / PLAN.md "Error handling"), and a rule is deactivated, never deleted
+  (AISignal.rule is PROTECT). The dry run tests the *form's* unsaved rule, not a saved row, so an admin
+  can preview a pattern before committing to it.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with rows `manage.py seed_e2e` adds in
+  `_seed_ai_detection`: three DetectionRule rows dedicated one-per-case ("E2E footer rule" active,
+  matching the seeded AI PR's body footer; "E2E editable rule" for the edit case; "E2E toggle rule",
+  always reset to is_active=True on reseed, for the activate/deactivate case) and two PullRequest rows
+  run through the real `detect_pull_request()` at seed time (the exact function the sync pipeline calls,
+  not hand-picked field values): "E2E AI-assisted PR" (#910), whose body ticks "Substantial" under an
+  "AI assistance" heading, lists "Claude Code" under "AI tools used", and ends with the footer text
+  "Generated with E2E Bot" plus a distinct, otherwise-unmatched marker line "Dry-run marker:
+  e2e-dryrun-target" used only by the dry-run case; and "E2E PR without AI signals" (#911), a plain body
+  with no AI-assistance section at all, for the PR-detail empty state. "E2E UI created rule" is cleared on
+  every reseed the same way "E2E UI Created Person" is in the people plan, since it is created only by
+  its own spec's form submit.
+
+cases:
+  - id: admin-sees-rules-list-lead-403
+    priority: high
+    steps: ["log in as e2e-lead", "open /", "open /settings/detection-rules/ directly", "log in as e2e-admin", "open /settings/detection-rules/"]
+    expected: >
+      lead: no "Detection rules" nav link; a direct GET renders "You do not have access to this page.",
+      not the rules table. admin, same page: 200 with the rules table showing "E2E footer rule".
+
+  - id: create-rule-persists-and-appears-in-list
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/", "click New rule", "fill Name = 'E2E UI
+      created rule', Detector = 'Label', Pattern = '^e2e-ui-created$', Tool = 'Windsurf', Confidence =
+      'Medium'", "submit"]
+    expected: "redirected to the rules list; a row for 'E2E UI created rule' shows Detector=Label, Tool=Windsurf, Confidence=Medium, Is active=Yes"
+
+  - id: invalid-pattern-shows-visible-error
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/new/", "fill Name, Detector, Tool,
+      Confidence with valid values, Pattern = '[unclosed'", "submit"]
+    expected: >
+      the form re-renders in place with a visible role=alert naming the pattern as invalid; no redirect;
+      no new rule named this way appears back on the rules list
+
+  - id: edit-rule-persists-and-appears-in-list
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/", "click Edit on 'E2E editable rule'",
+      "change Notes to 'Edited via e2e'", "submit"]
+    expected: "redirected to the rules list; the 'E2E editable rule' row's Notes column now reads 'Edited via e2e'"
+
+  - id: toggle-rule-deactivates-and-reactivates
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/", "confirm 'E2E toggle rule' shows Is
+      active=Yes", "click its Deactivate button", "confirm Is active=No and the button now reads
+      Activate", "click Activate"]
+    expected: "Is active flips Yes -> No -> Yes in place (htmx swap of #rules-page), matching the button's own label at each step"
+
+  - id: dry-run-reports-matches-without-writing-signals
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /prs/<E2E AI-assisted PR pk>/", "record the AI-signals row count",
+      "open /settings/detection-rules/", "fill the dry-run form: Detector = 'PR body footer', Pattern =
+      'e2e-dryrun-target', Tool/Confidence = any valid value", "click Run", "reopen the same PR detail page"]
+    expected: >
+      the dry-run result reports exactly 1 match in the last N PRs, naming the PR
+      ('e2e-org/widget#910') and an evidence snippet containing 'e2e-dryrun-target'; the PR detail
+      page's AI-signals row count is unchanged before and after (no AISignal was written for the unsaved
+      dry-run pattern) and its Status/Disclosure/Tools are unchanged
+
+  - id: dry-run-zero-matches-shows-empty-state
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/", "fill the dry-run form with a pattern
+      that matches nothing seeded, e.g. 'e2e-nonexistent-marker-zzz'", "click Run"]
+    expected: "'0 matches in the last N PRs' and an explicit 'No matches.' line, not a blank result"
+
+  - id: dry-run-invalid-pattern-shows-visible-error
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/detection-rules/", "fill the dry-run form with Pattern =
+      '[unclosed'", "click Run"]
+    expected: "a visible role=alert naming the pattern as invalid; no match count is shown"
+
+  - id: pr-detail-shows-signal-evidence-status-disclosure-tools
+    priority: high
+    steps: ["log in as e2e-admin", "open /prs/<E2E AI-assisted PR pk>/"]
+    expected: >
+      Status = 'AI explicit', Disclosure = 'Substantial', Tools includes 'Claude Code'; the signals
+      table has one row for 'E2E footer rule' (Detector='PR body footer', Tool='Claude Code',
+      Confidence='High') whose Evidence cell is non-empty and at most 200 characters and contains
+      'Generated with E2E Bot'
+
+  - id: pr-detail-empty-state-for-pr-without-signals
+    priority: medium
+    steps: ["log in as e2e-admin", "open /prs/<E2E PR without AI signals pk>/"]
+    expected: "Status = 'Unknown', Disclosure = 'Missing', Tools = 'None', and the signals table shows 'No AI signals detected.' instead of any row"
+
+findings: []
+
+deferred_not_authored:
+  - id: rerun-detection-creates-no-duplicate-signal
+    reason: >
+      `detect_pull_request` (the idempotent create/delete diff) runs only from the sync pipeline's
+      post-processing hook or from `manage.py recompute` -- neither is reachable from a browser action;
+      this e2e surface makes no live GitHub call and ships no "run detection" button. Fully covered by
+      apps/ai_detection/tests/test_services.py::test_second_detection_run_creates_no_new_signal and
+      apps/github_sync/tests/test_pipeline.py::test_second_sync_creates_no_duplicate_ai_signal.
+  - id: deactivating-a-rule-removes-its-signals-on-next-detection-run
+    reason: >
+      Same constraint as above: the "next run" that would delete the stale signal is
+      `detect_pull_request`/`recompute`, not the Deactivate button itself (which only flips
+      `is_active`, per apps/ai_detection/views.py::rule_toggle). The button's own observable effect is
+      covered by the toggle-rule-deactivates-and-reactivates case above. The removal-on-next-run behavior
+      is covered by test_services.py::test_deactivating_a_rule_removes_its_signals_and_resets_status.
+  - id: eight-detectors-each-matching-and-non-matching
+    reason: >
+      Pure per-detector regex behavior with no distinct UI per detector -- all eight read different
+      stored-row haystacks but render through the identical PR-detail signals table. The
+      pr-detail-shows-signal case above exercises one detector (pr_body_footer) end-to-end through the
+      real page; the other seven, plus every detector's negative case, are fully covered by
+      apps/ai_detection/tests/test_detectors.py's 16 matching/non-matching tests.
+  - id: disclosure-parser-edge-cases
+    reason: >
+      `[x]` vs `[X]`, a mixed-case heading, a malformed template, two ticked boxes (ambiguous), and a
+      missing section all resolve to the same "Disclosure" field on the same PR-detail page -- driving a
+      full page load per parser branch would repeat apps/ai_detection/tests/test_disclosure.py's dozen
+      pure-function cases without proving anything new about the wiring. The wiring itself (parser output
+      reaching the page) is proven once by pr-detail-shows-signal-evidence-status-disclosure-tools
+      (substantial) and pr-detail-empty-state-for-pr-without-signals (missing).
+  - id: all-five-ai-status-outcomes
+    reason: >
+      `resolve_ai_status` is a pure function of two arguments, fully covered by
+      apps/ai_detection/tests/test_ai_status.py (one test per outcome). The two e2e PR-detail cases
+      demonstrate the wiring for ai_explicit and unknown; ai_disclosed/ai_suspected/no_ai add no new
+      wiring path to prove.
+  - id: manage-recompute-and-seed-detection-rules-commands
+    reason: >
+      Both are CLI-only management commands with no page or button that invokes them; covered by
+      apps/github_sync/tests/test_recompute_command.py and apps/ai_detection/tests/test_seed_detection_rules.py.
+  - id: rules-and-pr-detail-a11y-and-dark-mode-sweep
+    reason: >
+      Same deferral as e2e/plans/people.plan.yaml and e2e/plans/connections.plan.yaml: accessibility and
+      platform-sanity cases for settings/detail pages are swept together in phase 10/11, not page-by-page.

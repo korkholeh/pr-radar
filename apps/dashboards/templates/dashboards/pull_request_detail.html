@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number }}{% endblock %}
+{% block content %}
+<div class="py-6 max-w-3xl mx-auto" id="pull-request-detail">
+  <div class="mb-4">
+    <h1 class="text-xl font-semibold text-[var(--text)]">
+      {{ pull_request.repository.full_name }}#{{ pull_request.number }} — {{ pull_request.title }}
+    </h1>
+    <a
+      href="https://github.com/{{ pull_request.repository.full_name }}/pull/{{ pull_request.number }}"
+      class="text-[var(--text-muted)]"
+      target="_blank"
+      rel="noopener"
+    >
+      {% translate "View on GitHub" %}
+    </a>
+  </div>
+
+  <section class="mb-6" id="ai-section">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "AI signals" %}</h2>
+    <dl class="grid grid-cols-2 gap-2 mb-4 text-sm">
+      <dt class="text-[var(--text-muted)]">{% translate "Status" %}</dt>
+      <dd class="text-[var(--text)]">{{ pull_request.get_ai_status_display }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Disclosure" %}</dt>
+      <dd class="text-[var(--text)]">{{ pull_request.get_ai_disclosure_display }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Tools" %}</dt>
+      <dd class="text-[var(--text)]">
+        {% if ai_tools_display %}
+          {{ ai_tools_display|join:", " }}
+        {% else %}
+          {% translate "None" %}
+        {% endif %}
+      </dd>
+    </dl>
+
+    <table class="w-full text-sm" id="ai-signals-table">
+      <caption class="sr-only">{% translate "AI signals" %}</caption>
+      <thead>
+        <tr class="text-left text-[var(--text-muted)]">
+          <th scope="col">{% translate "Detector" %}</th>
+          <th scope="col">{% translate "Tool" %}</th>
+          <th scope="col">{% translate "Confidence" %}</th>
+          <th scope="col">{% translate "Evidence" %}</th>
+          <th scope="col">{% translate "Commit" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for signal in signals %}
+        <tr class="border-t border-[var(--border)]">
+          <td>{{ signal.rule.get_detector_display }}</td>
+          <td>{{ signal.get_tool_display }}</td>
+          <td>{{ signal.get_confidence_display }}</td>
+          <td>{{ signal.evidence }}</td>
+          <td>{% if signal.commit %}{{ signal.commit.sha|slice:":12" }}{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-[var(--text-muted)] py-4">{% translate "No AI signals detected." %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}

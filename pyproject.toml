@@ -53,6 +53,9 @@ files = [
     "apps/*/selectors.py",
     "apps/catalog/identity.py",
     "apps/activity/derive.py",
+    "apps/ai_detection/detectors.py",
+    "apps/ai_detection/disclosure.py",
+    "apps/ai_detection/rules.py",
 ]
 ignore_missing_imports = true
 
