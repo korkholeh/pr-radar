@@ -39,6 +39,22 @@ def test_seed_app_settings_is_idempotent():
 
 
 @pytest.mark.django_db
+def test_sync_settings_migration_is_idempotent():
+    import importlib
+
+    from django.apps import apps as apps_registry
+
+    migration_module = importlib.import_module("apps.catalog.migrations.0003_sync_settings")
+    migration_module.seed_defaults(apps_registry, None)
+    row = AppSetting.objects.get(key="SYNC_MAX_RETRIES")
+    row.value = 3
+    row.save()
+    migration_module.seed_defaults(apps_registry, None)
+    row.refresh_from_db()
+    assert row.value == 3
+
+
+@pytest.mark.django_db
 def test_get_setting_unknown_key_raises():
     with pytest.raises(UnknownSettingError):
         get_setting("NOT_A_REAL_KEY")

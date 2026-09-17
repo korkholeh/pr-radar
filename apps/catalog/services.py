@@ -1,10 +1,15 @@
+import datetime
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
-from apps.catalog.models import AppSetting
+from apps.catalog.models import AppSetting, Organization, Project, Repository
 from apps.catalog.setting_defs import SETTING_DEFS
+
+if TYPE_CHECKING:
+    from apps.connections.models import GitHubConnection
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +94,78 @@ def set_setting(key: str, value: object) -> AppSetting:
         },
     )
     return row
+
+
+def create_repositories_from_discovery(
+    nodes: list[dict[str, Any]], *, connection: "GitHubConnection", project: Project | None = None
+) -> int:
+    """nodes: GraphQL repository nodes from discovery (id, name, nameWithOwner, isPrivate, isArchived,
+    defaultBranchRef, owner{id,login,__typename}). update_or_create on github_id, so re-submitting the
+    same selection creates no second row and never resets sync_since on an existing repository. A node
+    whose github_id already belongs to a different connection is skipped — bulk-add must never silently
+    rebind; that requires the explicit confirm step in rebind_repository(). Returns the number of
+    repositories created."""
+    from apps.github_sync.errors import require
+
+    sync_since = timezone.localdate() - datetime.timedelta(days=get_int("BACKFILL_DAYS"))
+    github_ids = [require(node, "id") for node in nodes]
+    bound_elsewhere = set(
+        Repository.objects.filter(github_id__in=github_ids)
+        .exclude(connection=connection)
+        .values_list("github_id", flat=True)
+    )
+    created = 0
+    for node in nodes:
+        github_id = require(node, "id")
+        if github_id in bound_elsewhere:
+            continue
+        owner = require(node, "owner")
+        organization, _ = Organization.objects.update_or_create(
+            github_id=require(owner, "id"),
+            defaults={
+                "login": require(owner, "login"),
+                "type": Organization.Type.ORG
+                if owner.get("__typename") == "Organization"
+                else Organization.Type.USER,
+            },
+        )
+        default_branch_ref = node.get("defaultBranchRef") or {}
+        shared_fields = {
+            "organization": organization,
+            "connection": connection,
+            "name": require(node, "name"),
+            "full_name": require(node, "nameWithOwner"),
+            "default_branch": default_branch_ref.get("name", ""),
+            "is_private": require(node, "isPrivate"),
+            "is_archived": require(node, "isArchived"),
+        }
+        repository, repo_created = Repository.objects.update_or_create(
+            github_id=github_id,
+            defaults=shared_fields,
+            create_defaults={**shared_fields, "sync_since": sync_since},
+        )
+        if repo_created:
+            created += 1
+        if project is not None:
+            project.repositories.add(repository)
+    return created
+
+
+def rebind_repository(repository: Repository, connection: "GitHubConnection", *, actor: Any = None) -> None:
+    """Moves a repository to another connection. Historical activity rows are untouched — only the FK
+    that decides which credentials future syncs use."""
+    from apps.accounts.services import record_audit
+
+    previous_connection_name = repository.connection.name
+    repository.connection = connection
+    repository.save(update_fields=["connection"])
+    record_audit(
+        actor,
+        "repository.rebind",
+        repository,
+        before={"connection": previous_connection_name},
+        after={"connection": connection.name},
+    )
 
 
 def seed_app_settings(model: type[AppSetting]) -> int:

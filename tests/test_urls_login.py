@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 from django.urls import URLPattern, URLResolver, get_resolver, reverse
 
@@ -16,6 +18,7 @@ ALLOWED_ANONYMOUS_NAMES = {
 SAMPLE_ARGS = {
     "uidb64": "MQ",
     "token": "set-password",
+    "pk": 1,
 }
 
 
@@ -40,14 +43,19 @@ def _named_urls(resolver=None, namespace_prefix=""):
 
 
 def _reverse(name):
-    try:
-        return reverse(name)
-    except Exception:
-        pass
-    try:
-        return reverse(name, kwargs=SAMPLE_ARGS)
-    except Exception:
-        return None
+    """Tries every combination of SAMPLE_ARGS keys (including none) — a URL pattern only
+    accepts the exact kwargs it declares, so a fixed guess (e.g. "the full dict" or "one key
+    at a time") misses patterns needing more than one key but not all of them
+    (password_reset_confirm takes uidb64+token, not pk)."""
+    keys = list(SAMPLE_ARGS)
+    for size in range(len(keys) + 1):
+        for combo in itertools.combinations(keys, size):
+            kwargs = {key: SAMPLE_ARGS[key] for key in combo}
+            try:
+                return reverse(name, kwargs=kwargs) if kwargs else reverse(name)
+            except Exception:
+                continue
+    return None
 
 
 UNREVERSIBLE_URL_NAMES = [name for name in _named_urls() if _reverse(name) is None]

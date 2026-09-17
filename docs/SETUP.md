@@ -26,6 +26,12 @@ uv run python manage.py createsuperuser
 Add that user to the `admin` group from `/admin/` (Django admin, `django.contrib.auth` → Users) if you want them to
 use the future admin-only pages; the Django admin site itself is reachable to any superuser regardless of group.
 
+## Connect GitHub
+
+Set `FIELD_ENCRYPTION_KEYS` in `.env` before creating a connection — see `docs/GITHUB_CONNECTIONS.md` for token
+types, scopes, the first-run checklist and `manage.py bootstrap_connection` (an optional one-time `.env`-driven
+shortcut for the first connection).
+
 ## Run
 
 Two processes, both from the repository root:

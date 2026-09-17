@@ -1,0 +1,92 @@
+feature: connections
+surfaces: [app]
+entry: "/settings/connections/ — Settings > Connections, admin-only"
+
+under_test:
+  - apps/connections/views.py (list, create/edit, check, discover, rebind, delete)
+  - apps/connections/context_processors.py::connection_alerts (the expiry/invalid banner)
+  - apps/github_sync/views.py::sync (the Sync page and its run list)
+  - templates/partials/connection_alerts.html, apps/connections/templates/connections/*.html,
+    apps/github_sync/templates/github_sync/*.html
+
+oracle: >
+  PLAN.md §8 (Surfaces, URLs and i18n) and §4 (verification/banner): an admin opens Settings > Connections and sees
+  every connection with its `token_last4` and no token; a connection whose token expires within
+  TOKEN_EXPIRY_WARNING_DAYS shows the expiry banner to an admin and to no one else (design §4, "only for users
+  holding catalog.manage_settings"); the Sync page lists past runs with their per-connection stats. No case here
+  triggers a sync — the live GitHub surface has no credentials configured for e2e and must make no outbound call
+  (intake forbids any live call in this project).
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with the seeded e2e-admin/e2e-lead personas and the connections,
+  repository and SyncRun rows `manage.py seed_e2e` now creates (apps/accounts/management/commands/seed_e2e.py):
+  connection "e2e-ok" (status=ok, no expiry), connection "e2e-expiring" (status=ok, expires in 5 days — inside the
+  14-day warning window), one repository bound to "e2e-ok", and one finished SyncRun. Deactivating, editing or
+  actually deleting a connection would mutate shared seeded state other cases in this file also read, so no case
+  here does that. Two added cases below still exercise a POST against real seeded state without mutating it: the
+  delete attempt on "e2e-ok" is refused by the `PROTECT` FK (apps/connections/views.py::connection_delete) because
+  it has a bound repository, so the connection and its repository survive the request; the discovery page GET with
+  no `connection` selected renders without issuing any GraphQL call (apps/connections/views.py::repository_discover
+  only calls `_discover_nodes()` once a connection is chosen), which is the only discovery-page state reachable
+  here — choosing "e2e-ok" would call the live GitHub API, forbidden by intake.
+
+cases:
+  - id: admin-sees-connection-list-with-last4-no-token
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/connections/"]
+    expected: >
+      the page shows "e2e-ok" and "e2e-expiring" with a masked token (ending in the last 4 characters only); the
+      full seeded token values never appear anywhere in the rendered HTML
+
+  - id: expiry-banner-visible-to-admin
+    priority: high
+    steps: ["log in as e2e-admin", "open /"]
+    expected: "a banner naming e2e-expiring and its expiry is visible on the page"
+
+  - id: expiry-banner-absent-for-lead
+    priority: high
+    steps: ["log in as e2e-lead", "open /"]
+    expected: "no connection-expiry banner is rendered, and Settings > Connections is not offered in the nav"
+
+  - id: sync-page-lists-seeded-run
+    priority: medium
+    steps: ["log in as e2e-lead", "open /sync/"]
+    expected: "the past-runs table lists the seeded finished run with its repository/PR counters"
+
+  - id: admin-sees-sync-now-button-lead-does-not
+    priority: high
+    steps: ["log in as e2e-admin", "open /sync/", "log in as e2e-lead", "open /sync/"]
+    expected: >
+      the admin sees a "Sync now" button; the lead sees the same page (run list included) with no "Sync now"
+      button anywhere on it (PLAN.md p03-review_fix1: POST /sync/run/ is gated to catalog.manage_settings, and
+      github_sync/partials/content.html only renders the button behind `perms.catalog.manage_settings`)
+
+  - id: deleting-connection-with-repositories-shows-rebind-message
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/connections/", "submit the Delete form for e2e-ok"]
+    expected: >
+      a visible message names "e2e-ok" and lists "e2e-org/widget" as a repository to rebind or deactivate first
+      (PLAN.md §6/T12); the connection row for "e2e-ok" is still present afterwards — the PROTECT FK refuses the
+      delete, so this exercises the real refusal path without losing seeded state for later cases
+
+  - id: discovery-page-loads-with-no-connection-chosen
+    priority: medium
+    steps: ["log in as e2e-admin", "open /settings/repositories/discover/"]
+    expected: >
+      the page renders the connection picker (offering "e2e-ok" and "e2e-expiring") and no repository table, with
+      no error message — apps/connections/views.py::repository_discover only calls GitHub once a connection is
+      selected, so this state is reachable with no outbound call
+
+findings: []
+
+deferred_not_authored:
+  - id: connections-a11y-and-dark-mode-sweep
+    reason: >
+      PLAN.md's own case-selection section defers accessibility and platform-sanity cases for these settings pages
+      to phase 10, which sweeps a11y/dark-mode across every page at once rather than page-by-page.
+  - id: live-sync-run
+    reason: >
+      Intake forbids any live GitHub call in this project (CLAUDE.md, "No live GitHub call at any point, in tests
+      or otherwise"); the e2e surface has no real credentials, so a case that clicks "Sync now" would either hang
+      or need a mocked GitHub server this suite does not have. Sync's fixture-backed behaviour is covered by the
+      unit suite (apps/github_sync/tests/test_sync.py and friends).

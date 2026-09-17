@@ -1,0 +1,62 @@
+{% load i18n connection_extras %}
+<div class="py-6 max-w-lg mx-auto" id="connection-form-page">
+  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">
+    {% if connection %}{% translate "Edit connection" %}{% else %}{% translate "New connection" %}{% endif %}
+  </h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="mb-4 text-[var(--bad)]" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <div class="mb-4">
+      <label class="block mb-1 text-[var(--text)]" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+      {{ form.name }}
+      {% for error in form.name.errors %}<p class="text-[var(--bad)]">{{ error }}</p>{% endfor %}
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1 text-[var(--text)]" for="{{ form.kind.id_for_label }}">{{ form.kind.label }}</label>
+      {{ form.kind }}
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1 text-[var(--text)]" for="{{ form.owner_login.id_for_label }}">{{ form.owner_login.label }}</label>
+      {{ form.owner_login }}
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1 text-[var(--text)]" for="{{ form.token.id_for_label }}">{{ form.token.label }}</label>
+      {% if connection.token_last4 %}
+        <p class="text-[var(--text-muted)] text-xs">
+          {% blocktranslate trimmed with last4=connection.token_last4 %}
+            Current token ends in {{ last4 }}.
+          {% endblocktranslate %}
+        </p>
+      {% endif %}
+      {{ form.token }}
+      <p class="text-[var(--text-muted)] text-xs">{{ form.token.help_text }}</p>
+      {% for error in form.token.errors %}<p class="text-[var(--bad)]">{{ error }}</p>{% endfor %}
+    </div>
+    <div class="mb-4 flex items-center gap-2">
+      {{ form.save_unverified }}
+      <label for="{{ form.save_unverified.id_for_label }}">{{ form.save_unverified.label }}</label>
+    </div>
+    <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+      {% translate "Save" %}
+    </button>
+  </form>
+
+  {% if connection %}
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Last check" %}</h2>
+      {% if connection.last_check_result %}
+        <ul class="list-disc pl-4">
+          {% for check in connection.last_check_result|render_checks %}
+            <li>{{ check.message }}{% if check.outcome != "ok" %} — {{ check.hint }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-[var(--text-muted)]">{% translate "This connection has not been checked yet." %}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

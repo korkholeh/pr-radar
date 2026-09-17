@@ -1,0 +1,25 @@
+{% load i18n %}
+{% if connection_alerts %}
+<div class="bg-[var(--bad)] text-[var(--on-accent)] px-4 py-2" role="alert">
+  <ul>
+    {% for connection in connection_alerts %}
+      <li>
+        {% if connection.status == "invalid" %}
+          {% blocktranslate trimmed with name=connection.name %}
+            {{ name }}: this connection's token is invalid.
+          {% endblocktranslate %}
+        {% elif connection.status == "expired" %}
+          {% blocktranslate trimmed with name=connection.name %}
+            {{ name }}: this connection's token has expired.
+          {% endblocktranslate %}
+        {% else %}
+          {% blocktranslate trimmed with name=connection.name expires_at=connection.expires_at %}
+            {{ name }}: this connection's token expires on {{ expires_at }}.
+          {% endblocktranslate %}
+        {% endif %}
+        <a href="{% url 'connections:edit' connection.pk %}" class="underline">{% translate "Review" %}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

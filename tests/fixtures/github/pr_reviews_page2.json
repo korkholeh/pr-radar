@@ -1,0 +1,619 @@
+{
+  "data": {
+    "node": {
+      "reviews": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "nodes": [
+          {
+            "id": "PRR_100",
+            "author": {
+              "login": "reviewer-100"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_101",
+            "author": {
+              "login": "reviewer-101"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_102",
+            "author": {
+              "login": "reviewer-102"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_103",
+            "author": {
+              "login": "reviewer-103"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_104",
+            "author": {
+              "login": "reviewer-104"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_105",
+            "author": {
+              "login": "reviewer-105"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_106",
+            "author": {
+              "login": "reviewer-106"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_107",
+            "author": {
+              "login": "reviewer-107"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_108",
+            "author": {
+              "login": "reviewer-108"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_109",
+            "author": {
+              "login": "reviewer-109"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_110",
+            "author": {
+              "login": "reviewer-110"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_111",
+            "author": {
+              "login": "reviewer-111"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_112",
+            "author": {
+              "login": "reviewer-112"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_113",
+            "author": {
+              "login": "reviewer-113"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_114",
+            "author": {
+              "login": "reviewer-114"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_115",
+            "author": {
+              "login": "reviewer-115"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_116",
+            "author": {
+              "login": "reviewer-116"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_117",
+            "author": {
+              "login": "reviewer-117"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_118",
+            "author": {
+              "login": "reviewer-118"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_119",
+            "author": {
+              "login": "reviewer-119"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_120",
+            "author": {
+              "login": "reviewer-120"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_121",
+            "author": {
+              "login": "reviewer-121"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_122",
+            "author": {
+              "login": "reviewer-122"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_123",
+            "author": {
+              "login": "reviewer-123"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_124",
+            "author": {
+              "login": "reviewer-124"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_125",
+            "author": {
+              "login": "reviewer-125"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_126",
+            "author": {
+              "login": "reviewer-126"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_127",
+            "author": {
+              "login": "reviewer-127"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_128",
+            "author": {
+              "login": "reviewer-128"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_129",
+            "author": {
+              "login": "reviewer-129"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_130",
+            "author": {
+              "login": "reviewer-130"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_131",
+            "author": {
+              "login": "reviewer-131"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_132",
+            "author": {
+              "login": "reviewer-132"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_133",
+            "author": {
+              "login": "reviewer-133"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_134",
+            "author": {
+              "login": "reviewer-134"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_135",
+            "author": {
+              "login": "reviewer-135"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_136",
+            "author": {
+              "login": "reviewer-136"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_137",
+            "author": {
+              "login": "reviewer-137"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_138",
+            "author": {
+              "login": "reviewer-138"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_139",
+            "author": {
+              "login": "reviewer-139"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_140",
+            "author": {
+              "login": "reviewer-140"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_141",
+            "author": {
+              "login": "reviewer-141"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_142",
+            "author": {
+              "login": "reviewer-142"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_143",
+            "author": {
+              "login": "reviewer-143"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_144",
+            "author": {
+              "login": "reviewer-144"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_145",
+            "author": {
+              "login": "reviewer-145"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_146",
+            "author": {
+              "login": "reviewer-146"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_147",
+            "author": {
+              "login": "reviewer-147"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_148",
+            "author": {
+              "login": "reviewer-148"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          },
+          {
+            "id": "PRR_149",
+            "author": {
+              "login": "reviewer-149"
+            },
+            "state": "APPROVED",
+            "submittedAt": "2026-01-02T10:00:00Z",
+            "body": "Looks good.",
+            "comments": {
+              "totalCount": 0
+            }
+          }
+        ]
+      }
+    },
+    "rateLimit": {
+      "remaining": 4930,
+      "resetAt": "2026-01-01T01:00:00Z",
+      "cost": 1
+    }
+  }
+}

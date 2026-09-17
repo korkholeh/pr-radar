@@ -1,0 +1,9 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "type": "UNAUTHORIZED",
+      "message": "Bad credentials"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{% load i18n %}
+<div class="py-6 max-w-4xl mx-auto" id="sync-page">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Sync" %}</h1>
+    {% if perms.catalog.manage_settings %}
+      <form hx-post="{% url 'github_sync:run' %}" hx-target="#sync-status" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]"
+          {% if running %}disabled{% endif %}
+        >{% translate "Sync now" %}</button>
+      </form>
+    {% endif %}
+  </div>
+  {% include "github_sync/partials/status.html" %}
+  {% include "github_sync/partials/runs.html" %}
+</div>

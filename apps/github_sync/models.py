@@ -34,3 +34,22 @@ class SyncRun(models.Model):
 
     def __str__(self) -> str:
         return f"sync {self.started_at:%Y-%m-%d %H:%M} ({self.status})"
+
+
+class SyncLock(models.Model):
+    """A unique-row mutex: select_for_update() is a silent no-op on SQLite (ADR 0001), so
+    acquisition is objects.create(name=...) and an IntegrityError means another run holds it.
+    A row older than SYNC_LOCK_STALE_MINUTES is stolen so a killed worker cannot wedge the tool."""
+
+    name = models.CharField(_("name"), max_length=100, unique=True)
+    acquired_at = models.DateTimeField(_("acquired at"), default=timezone.now)
+    sync_run = models.ForeignKey(
+        SyncRun, on_delete=models.CASCADE, related_name="locks", verbose_name=_("sync run")
+    )
+
+    class Meta:
+        verbose_name = _("sync lock")
+        verbose_name_plural = _("sync locks")
+
+    def __str__(self) -> str:
+        return self.name
