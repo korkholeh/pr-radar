@@ -13,7 +13,9 @@ cp .env.example .env    # edit SECRET_KEY at minimum
 uv run python manage.py migrate
 ```
 
-`migrate` also creates the `admin` and `lead` groups (empty until phase 2 attaches permissions to them).
+`migrate` also creates the `admin` and `lead` groups. `admin` holds the `catalog.manage_settings` permission;
+`lead` holds no model permission — both roles are otherwise distinguished by view-level checks, not Django
+permissions (see `docs/dev/adr/0002-session-auth-two-roles-and-one-scope-function.md`).
 
 ## Create the first admin
 

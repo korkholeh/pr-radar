@@ -30,6 +30,32 @@ class UserPreference(models.Model):
         return f"{self.user} preference"
 
 
+class UserProjectAccess(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="project_access",
+        verbose_name=_("user"),
+    )
+    project = models.ForeignKey(
+        "catalog.Project",
+        on_delete=models.CASCADE,
+        related_name="user_access",
+        verbose_name=_("project"),
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("user project access")
+        verbose_name_plural = _("user project access grants")
+        constraints = [
+            models.UniqueConstraint(fields=["user", "project"], name="uniq_user_project_access"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} → {self.project}"
+
+
 class AuditEntry(models.Model):
     """English-only audit trail: a code plus structured before/after JSON, never a rendered message."""
 

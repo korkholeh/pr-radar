@@ -34,6 +34,14 @@ INSTALLED_APPS = [
     "django_tables2",
     "django_filters",
     "apps.accounts",
+    "apps.connections",
+    "apps.catalog",
+    "apps.github_sync",
+    "apps.activity",
+    "apps.ai_detection",
+    "apps.policy",
+    "apps.metrics",
+    "apps.churn",
     "apps.dashboards",
 ]
 
