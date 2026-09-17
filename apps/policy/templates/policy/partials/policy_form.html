@@ -1,0 +1,65 @@
+{% load i18n %}
+<div class="py-6 max-w-2xl mx-auto" id="policy-settings-page">
+  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "AI policy" %}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="mb-4 text-[var(--bad)]" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    {% for field in form %}
+      {% if field.field.widget.input_type == "checkbox" %}
+        <div class="mb-4 flex items-center gap-2">
+          {{ field }}
+          <label class="text-[var(--text)]" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% for error in field.errors %}<p class="text-[var(--bad)]" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+      {% else %}
+        <div class="mb-4">
+          <label class="block mb-1 text-[var(--text)]" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<p class="text-[var(--bad)]" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+    <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+      {% translate "Save new version" %}
+    </button>
+  </form>
+
+  <h2 class="text-lg font-semibold text-[var(--text)] mt-8 mb-2">{% translate "Version history" %}</h2>
+  <table class="w-full text-sm" id="policy-history-table">
+    <caption class="sr-only">{% translate "AI policy version history" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Effective from" %}</th>
+        <th scope="col">{% translate "Require disclosure" %}</th>
+        <th scope="col">{% translate "Require human approval" %}</th>
+        <th scope="col">{% translate "Minimum approvals" %}</th>
+        <th scope="col">{% translate "Require tests" %}</th>
+        <th scope="col">{% translate "Max effective lines" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for version in history %}
+        <tr class="border-t border-[var(--border)]" id="policy-version-{{ version.pk }}">
+          <td>{{ version.effective_from }}</td>
+          <td>{% if version.require_disclosure %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+          <td>
+            {% if version.require_human_approval %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
+          </td>
+          <td>{{ version.min_human_approvals }}</td>
+          <td>
+            {% if version.require_tests_for_ai_prs %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
+          </td>
+          <td>{{ version.ai_pr_max_effective_lines|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-[var(--text-muted)] py-4">{% translate "No policy versions yet." %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

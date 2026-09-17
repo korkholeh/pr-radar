@@ -1,0 +1,70 @@
+feature: ai_policy_settings
+surfaces: [app]
+entry: "Settings → AI policy (/settings/ai-policy/, admin only)"
+
+under_test:
+  - apps/policy/views.py::policy_settings
+  - apps/policy/services.py::save_policy_version
+  - apps/policy/forms.py::AIPolicyForm
+  - apps/policy/templates/policy/policy_settings.html, apps/policy/templates/policy/partials/policy_form.html
+
+oracle: >
+  .autodev/phases/06-policy-engine/PLAN.md's "Settings UI → AI policy": the four settings URLs require
+  `catalog.manage_settings`, so a lead gets 403 with no nav link while an admin gets 200 on the same
+  URL (the paired permission pattern every settings page in this codebase uses). Saving **creates a new
+  version** rather than editing the existing row in place -- `AIPolicy` is a versioned, append-only
+  singleton (Design → Data model) -- and writes an AuditEntry with the previous version's values as
+  `before`. The version-history table lists every version, newest first. An invalid submission
+  re-renders the form with a visible field error and creates no new row.
+
+scope_notes: >
+  `manage.py seed_e2e`'s `_seed_policy` seeds exactly one AIPolicy version (effective_from pinned to
+  2020-01-01, require_disclosure=True) so the history table is never empty on a fresh surface and the
+  "history grows, oldest row still present" assertion has a stable baseline across reseeds.
+  `AIPolicyForm` has no `effective_from` field at all (it is stamped automatically at save time), so
+  the "duplicate effective_from is rejected" sub-case from apps/policy/tests/test_forms.py has no
+  reachable UI path; see deferred_not_authored.
+
+cases:
+  - id: admin-sees-settings-lead-403
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /", "confirm no 'AI policy' nav link exists", "open
+      /settings/ai-policy/ directly", "log in as e2e-admin", "open /settings/ai-policy/"]
+    expected: >
+      lead: a direct GET renders 'You do not have access to this page.', not the form; admin, same
+      URL: 200 with the form and a version-history table containing the seeded 2020-01-01 row.
+
+  - id: saving-creates-new-version-and-history-grows
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/ai-policy/", "record the history row count", "check
+      'Require human approval'", "set Minimum human approvals = 2", "set Maximum effective lines for an
+      AI PR = 500", "click 'Save new version'"]
+    expected: >
+      redirected back to /settings/ai-policy/; the history table has exactly one more row than before;
+      the newest row (first, per 'newest first') shows Require human approval='Yes', Minimum
+      approvals=2, Max effective lines=500; the original 2020-01-01 seeded row is still present below it
+      with its own values unchanged (the write is append-only, not an edit).
+
+  - id: invalid-minimum-approvals-shows-visible-error-and-creates-nothing
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/ai-policy/", "record the history row count", "set
+      Minimum human approvals = -1", "click 'Save new version'"]
+    expected: >
+      the form re-renders in place (no redirect) with a visible role=alert on the Minimum human
+      approvals field; the history table's row count is unchanged.
+
+findings: []
+
+deferred_not_authored:
+  - id: duplicate-effective-from-rejected
+    reason: >
+      AIPolicyForm has no effective_from field -- `services.save_policy_version` always stamps
+      `timezone.now()` (or the earliest PR's created_at for the very first version), so an admin cannot
+      submit a duplicate through this page at all. Fully covered as a service-level invariant by
+      apps/policy/tests/test_forms.py::test_duplicate_effective_from_rejected and
+      apps/policy/models.py's `unique=True` constraint test in test_models.py.
+  - id: ai_policy_settings-a11y-and-dark-mode-sweep
+    reason: "Same deferral as every other settings-page plan in this tree: swept in phase 10/11."

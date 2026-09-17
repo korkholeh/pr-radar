@@ -71,6 +71,30 @@ def test_ai_detection_settings_migration_is_idempotent():
 
 
 @pytest.mark.django_db
+def test_policy_settings_migration_is_idempotent():
+    import importlib
+
+    from django.apps import apps as apps_registry
+
+    migration_module = importlib.import_module("apps.catalog.migrations.0005_policy_settings")
+    migration_module.seed_defaults(apps_registry, None)
+    row = AppSetting.objects.get(key="VIOLATIONS_PAGE_SIZE")
+    row.value = 25
+    row.save()
+    migration_module.seed_defaults(apps_registry, None)
+    row.refresh_from_db()
+    assert row.value == 25
+
+
+@pytest.mark.django_db
+def test_policy_setting_falls_back_to_default_on_corrupt_stored_value():
+    row = AppSetting.objects.get(key="POLICY_VIOLATION_PATHS_IN_PARAMS")
+    row.value = "not-an-int"
+    row.save()
+    assert get_setting("POLICY_VIOLATION_PATHS_IN_PARAMS") == 20
+
+
+@pytest.mark.django_db
 def test_get_setting_unknown_key_raises():
     with pytest.raises(UnknownSettingError):
         get_setting("NOT_A_REAL_KEY")
@@ -115,6 +139,9 @@ def test_typed_accessors_return_python_types():
     assert isinstance(get_dict("PR_SIZE_BUCKETS"), dict)
     assert isinstance(get_int("DETECTION_DRY_RUN_PR_COUNT"), int)
     assert isinstance(get_dict("DISCLOSURE_TOOL_ALIASES"), dict)
+    assert isinstance(get_list("POLICY_DISABLED_RULES"), list)
+    assert isinstance(get_int("POLICY_VIOLATION_PATHS_IN_PARAMS"), int)
+    assert isinstance(get_int("VIOLATIONS_PAGE_SIZE"), int)
 
 
 @pytest.mark.django_db

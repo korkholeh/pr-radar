@@ -156,3 +156,87 @@ timeline, metrics, violations and churn.
 `Detector` values: `commit_trailer`, `commit_author`, `pr_author`, `pr_body_footer`, `html_comment`, `label`,
 `branch_pattern`, `commit_message`. `AIStatus` values: `ai_explicit`, `ai_disclosed`, `ai_suspected`, `no_ai`,
 `unknown`. `AIDisclosure` values: `none`, `partial`, `substantial`, `missing`, `ambiguous`.
+
+## Phase 6
+
+**Policy evaluation is the pipeline's fourth stage, in the same wanted-vs-existing diff shape as detection.**
+`apps.policy.services.evaluate_pull_request()` runs right after `detect_pull_request()`, computes the exact set
+of violations a PR's current state should have (one `Finding` per firing rule, from the nine pure evaluators in
+`apps/policy/rules.py`), and diffs it against what's already stored, keyed by `(pull_request, rule_code,
+details_hash)` where `details_hash` is computed only from a finding's declared `identity_params` — not its whole
+`details_params`. This is the one deliberate difference from detection's diff: instead of deleting a row whose
+key disappeared, policy **auto-resolves** it (`status=resolved`, `resolved_automatically=True`,
+`resolved_by=None`, `AuditEntry(actor=None)`), because a violation is a judgement a lead may already have acted
+on, and a delete would silently erase that judgement along with the row. The queryset that auto-resolves is
+filtered `status=open`, so an `acknowledged`/`waived`/already-`resolved` row is never touched and a `resolved`
+row is never reopened even if its condition returns — recurrence stays visible in the audit trail instead of
+resurrecting the old row. See `docs/POLICY.md` for the full nine-rule reference; full detail is in
+`.autodev/phases/06-policy-engine/PLAN.md`'s Design section.
+
+**Two hard gates run before any of the nine evaluators.** A PR is judged under the `AIPolicy` version in effect
+**at its own `created_at`** — the newest version whose `effective_from` was already in the past at that moment —
+never against the newest version overall. Picking the newest version unconditionally was a review-caught bug:
+every existing PR predates a freshly-saved version's `effective_from`, so the wanted set would go empty for the
+whole database and auto-resolve every open violation the first time an admin changed a policy field. With no
+policy in effect at a PR's `created_at` at all, the wanted set is empty, so it produces no violation and any
+violation still `open` on it auto-resolves; this is what makes backdating a stricter policy non-retroactive.
+A code in `MERGE_DEPENDENT` (`NO_HUMAN_APPROVAL`, `SELF_MERGE`) is skipped unless the PR is merged, so an open PR
+never carries a merge-dependent violation. A code listed in the `POLICY_DISABLED_RULES` setting is skipped the
+same way as a gate failure, so switching a rule off auto-resolves its open rows on the very next run rather than
+leaving them stranded.
+
+**`AIPolicy` is a versioned singleton, never edited in place.** Saving the settings form always inserts a new
+row with `effective_from` stamped to the moment it is saved (`services.save_policy_version`) — the field is not
+exposed on `AIPolicyForm`, so an admin can neither backdate a version over already-judged PRs nor schedule one
+for the future with no marker in the history list. `effective_from` is unique so two versions can never tie and
+make `current_policy()` order-dependent. History is therefore append-only and auditable
+(`AuditEntry(action="ai_policy.update")` with the previous version's values as `before`) without a separate
+history table.
+
+**Sensitive-path matching writes the column phase 2 defined but left empty.**
+`services.match_sensitive_paths(pr, sensitive_rules)` walks a PR's non-excluded files against every active,
+in-scope `SensitivePathRule` (global plus the PR's projects) in `Meta.ordering` order and writes
+`PRFile.matched_sensitive_rule` with one `bulk_update`, re-deriving the file list (not the rules) on every run so
+a deactivated or edited rule clears or moves the mark on the next pass. The two sensitive-path rules
+(`SENSITIVE_PATH_FORBIDDEN`, `SENSITIVE_PATH_REVIEW`) then read the marks the same run just wrote, so the console
+and a PR's file list can never disagree about which rule matched.
+
+**`details_params` carries data only, never prose.** `apps/policy/messages.py::render_violation(rule_code,
+params)` turns a stored code and its parameters into a full, `ngettext`-pluralised sentence at read time, in the
+reader's language; an unknown `rule_code` renders the raw code instead of raising, so a stale row from a removed
+rule can never 500 the console. This is asserted two ways in `test_details_params.py`: a schema check that every
+evaluator's declared `PARAM_SCHEMA` keys and value types (`str | int | float | bool | list[str]`) match what's
+actually stored, across all nine rules fired at once, and a prose check that no stored value contains a word from
+any rule's message template — so a future evaluator can't smuggle a rendered sentence into the JSON by accident.
+
+**Compliance KPIs and the by-rule chart live in `apps/policy/selectors.py`, not `metrics.compute()` — logged
+deviation, corrected in phase 7.** The metrics registry doesn't exist until phase 7, so `violations_in_scope`,
+`violations_by_rule`, `compliance_kpis` and `disclosure_mismatch_pull_requests` are this phase's read entry point
+for the Policy console, each starting from `scope_for_user()` like every other selector in the tree. Phase 7
+registers `violations_open`/`violations_new`/`violations_by_rule` as metrics with calculators that call these
+same functions rather than rewriting the queries. `compliance_kpis`' rate is `None` (never `0`) with an empty
+AI-PR denominator, and is greyed in the template below `MIN_SAMPLE` — the same convention every other metric in
+the codebase follows.
+
+**The by-rule chart is server-rendered bars plus a data table, not Chart.js — logged deviation, corrected in
+phase 8.** Vendoring Chart.js and `static/js/charts.js` for one bar chart would duplicate a phase-8 deliverable;
+`selectors.violations_by_rule()` already returns exactly the series a phase-8 JSON endpoint will serialise, and
+the text-alternative table satisfies the "every chart needs an accessible alternative" rule in the meantime.
+
+**The violation table is a plain form + `Paginator`, not `django-tables2`/`django-filter` — logged deviation,
+corrected in phase 8.** Both packages are installed but otherwise unused anywhere in the tree; phase 8 adopts
+them for the sortable, exportable table this one will be replaced by. `ViolationFilterForm` drops an unknown or
+out-of-scope filter id silently rather than 403ing (RISKS row 3's rule for this phase), and the bulk-action form
+validates every selected id against `violations_in_scope` the same way.
+
+**The `REPORT_TIMEZONE` day-boundary helper moves to `apps/metrics/timeframe.py` now, a phase early.** It was a
+private, undocumented `_day_start()` inside `manage.py recompute` (phase 5); this phase needed the same Kyiv-day
+logic for the console's KPI period and extracted it rather than writing a second copy, so phase 7's metrics
+registry inherits a tested helper (including a DST-transition test) instead of writing the first one.
+
+`PolicyViolation.RuleCode` values: `DISCLOSURE_MISSING`, `DISCLOSURE_MISMATCH`, `TOOL_NOT_ALLOWED`,
+`SENSITIVE_PATH_FORBIDDEN`, `SENSITIVE_PATH_REVIEW`, `NO_HUMAN_APPROVAL`, `SELF_MERGE`, `NO_TESTS`,
+`AI_PR_TOO_LARGE`. `PolicyViolation.Status` values: `open`, `acknowledged`, `waived`, `resolved`.
+`SensitivePathRule.AiMode` values: `forbidden`, `needs_extra_review`. See `docs/POLICY.md` for the severity of
+each rule, which `tests/test_docs.py::test_policy_severity_table_matches_the_code` pins against
+`apps.policy.rules.SEVERITY`.

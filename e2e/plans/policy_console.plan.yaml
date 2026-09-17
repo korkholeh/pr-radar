@@ -1,0 +1,187 @@
+feature: policy_console
+surfaces: [app]
+entry: "Policy (/policy/, every logged-in lead and admin)"
+
+under_test:
+  - apps/policy/views.py (console, violation_bulk_action)
+  - apps/policy/selectors.py (violations_in_scope, violations_by_rule, compliance_kpis, disclosure_mismatch_pull_requests)
+  - apps/policy/forms.py (ViolationFilterForm, BulkViolationActionForm)
+  - apps/policy/services.py (apply_status_change, apply_bulk_status_change)
+  - apps/policy/messages.py (render_violation, rule_label)
+  - apps/policy/templates/policy/console.html, apps/policy/templates/policy/partials/*.html
+  - apps/accounts/admin.py::AuditEntryAdmin (the audit trail's only UI surface in this phase)
+
+oracle: >
+  .autodev/phases/06-policy-engine/PLAN.md's "The Policy console" design and acceptance criteria 5-6:
+  the page shows four KPI cards (with MIN_SAMPLE greying, never a bare 0 for an empty denominator), a
+  by-rule bar chart with an accessible data-table alternative, the DISCLOSURE_MISMATCH PR list, and a
+  filterable paginated violation table showing the *rendered* sentence for each violation (never a raw
+  rule_code). Acknowledging or waiving requires a comment of at least 3 characters -- an empty or
+  whitespace-only one is rejected by the form and re-renders a visible field error, changing nothing
+  (criterion 5). Every accepted status change writes an AuditEntry with who, when and the before/after
+  state (criterion 6) -- viewable read-only in the Django admin (apps/accounts/admin.py's
+  ReadOnlyAdminMixin), the only UI this phase ships for it. A resolved row is refused, not silently
+  dropped, and a bulk selection reports skipped rows rather than truncating silently.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with rows `manage.py seed_e2e` adds in
+  `_seed_policy`: one AIPolicy version pinned at 2020-01-01 (require_disclosure=True,
+  allowed_tools=[claude_code]) and six PullRequest rows on the existing "e2e-org/widget" repository,
+  each evaluated through the real `policy.services.evaluate_pull_request()` at seed time (the same
+  function the sync pipeline calls) rather than hand-inserted PolicyViolation rows: "E2E Policy Ack
+  Target" (#940, DISCLOSURE_MISSING) for the acknowledge case; "E2E Policy Missing Comment Target"
+  (#941, DISCLOSURE_MISSING) for the empty-comment case; "E2E Policy Waive Target" (#942,
+  TOOL_NOT_ALLOWED via ai_tools=[cursor]) for the waive case; "E2E Policy Bulk Target One/Two" (#943,
+  #944, both DISCLOSURE_MISSING) for the multi-select case; "E2E Policy Disclosure Mismatch PR" (#945,
+  DISCLOSURE_MISMATCH, run through the real `detect_pull_request()` so its high-confidence signal is
+  genuine) for the chart/mismatch-list cases. The three action-target groups' violations are deleted
+  and re-evaluated on every reseed so a previous run's own Acknowledge/Waive click never leaks into the
+  next session (see the command's own docstring). The AI-cohort sample in the 30-day KPI period is
+  exactly {#945 (open violation, non-compliant), the ai_detection plan's #910 (no violation, compliant)}
+  -- sample_size=2, deterministically below MIN_SAMPLE=5, so the compliance-rate case always exercises
+  the greyed path. This e2e surface has exactly one repository/project, so the project/repository
+  filters and multi-page pagination cannot be demonstrated narrowing anything; see deferred_not_authored.
+
+cases:
+  - id: console-shows-seeded-violations-with-rendered-messages
+    priority: high
+    steps: ["log in as e2e-lead", "open /", "confirm a 'Policy' nav link exists", "open /policy/"]
+    expected: >
+      200 for a lead (no admin-only gate on this page); the violation table shows a row for
+      'e2e-org/widget#940' whose rule cell reads 'Disclosure missing' plus a rendered sentence (not the
+      raw code 'DISCLOSURE_MISSING'), severity 'Medium', status 'Open'; and a row for
+      'e2e-org/widget#942' reading 'Tool not allowed' / severity 'High' with a rendered sentence
+      mentioning 'cursor'.
+
+  - id: by-rule-chart-and-data-table-agree
+    priority: medium
+    steps: ["log in as e2e-admin", "open /policy/"]
+    expected: >
+      the accessible data-table alternative under the bar chart (#policy-rule-chart-table) lists both
+      'Disclosure missing' and 'Tool not allowed' with a non-zero count each, and the aria-hidden bar
+      list above it shows the same two labels (the a11y requirement: same numbers, two renderings).
+
+  - id: compliance-kpi-greys-below-min-sample
+    priority: medium
+    steps: ["log in as e2e-admin", "open /policy/"]
+    expected: >
+      the 'AI PR compliance rate' KPI card shows a percentage (not 'N/A') with a
+      [data-low-sample=true] marker, and a visible note naming the MIN_SAMPLE threshold (5) as the
+      reason the number is unreliable -- the deterministic 2-PR AI cohort in scope_notes never reaches 5.
+
+  - id: mismatch-list-shows-the-disclosure-mismatch-pr
+    priority: medium
+    steps: ["log in as e2e-admin", "open /policy/"]
+    expected: "the 'Disclosure mismatches' list contains 'e2e-org/widget#945'"
+
+  - id: filter-by-rule-code-narrows-table-and-survives-back-navigation
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /policy/", "confirm both #940 and #942 are visible", "select Rule =
+      'Tool not allowed' in the filter form", "submit", "confirm the URL now carries
+      rule_code=TOOL_NOT_ALLOWED", "click the browser Back button"]
+    expected: >
+      after filtering: only 'e2e-org/widget#942' remains in the table, '#940' is gone; the filtered
+      view is reachable by URL (hx-push-url); after Back, the unfiltered table (both rows) is restored,
+      proving the filter state round-trips through the query string rather than being lost.
+
+  - id: filter-by-severity-narrows-table
+    priority: medium
+    steps: ["log in as e2e-lead", "open /policy/", "select Severity = 'High'", "submit"]
+    expected: "only the 'Tool not allowed' (#942) and 'Disclosure mismatch' (#945) rows remain; the two 'Disclosure missing' (medium) rows are gone"
+
+  - id: search-by-pr-number-narrows-table
+    priority: medium
+    steps: ["log in as e2e-lead", "open /policy/", "type '941' into Search", "submit"]
+    expected: "only 'e2e-org/widget#941' remains in the table"
+
+  - id: acknowledge-updates-status-decrements-open-kpi-and-writes-audit-entry
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /policy/", "note the 'Open violations' KPI value", "check the
+      checkbox on the #940 row", "choose Action = 'Acknowledge'", "fill Comment = 'Reviewed with the
+      author, tracked in standup.'", "click Apply", "reload /policy/", "log in as e2e-admin", "open
+      /admin/accounts/auditentry/?action=policy_violation.acknowledge"]
+    expected: >
+      the #violations fragment swaps in place (no full navigation) showing a success notice and the
+      #940 row's Status now 'Acknowledged'; after a full reload the 'Open violations' KPI is exactly
+      one lower than before (server truth is correct immediately, even though the htmx swap itself does
+      not refresh the KPI cards -- see findings); the admin audit list has a
+      'policy_violation.acknowledge' entry for 'e2e-lead' at the current time, and opening it shows
+      changes.before.status='open' and changes.after.status='acknowledged' with the typed comment.
+
+  - id: waive-with-comment-updates-status
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /policy/", "check the checkbox on the #942 row", "choose Action =
+      'Waive'", "fill Comment = 'Cursor is allowed for this repo per exception.'", "click Apply"]
+    expected: "the #942 row's Status becomes 'Waived'; a success notice is shown; the row is still visible under the default 'Open' status filter's absence (no filter applied) -- but disappears once Status=Open only is selected"
+
+  - id: missing-comment-is-rejected-and-changes-nothing
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /policy/", "check the checkbox on the #941 row", "choose Action =
+      'Acknowledge'", "leave Comment empty", "click Apply"]
+    expected: >
+      the fragment re-renders with a visible field error (role=alert) naming the comment as required;
+      no success notice; the #941 row's Status is still 'Open' (acceptance criterion 5)
+
+  - id: bulk-select-two-rows-updates-both-with-one-notice
+    priority: medium
+    steps: >
+      ["log in as e2e-lead", "open /policy/", "check the checkboxes on both #943 and #944 rows",
+      "choose Action = 'Acknowledge'", "fill a comment", "click Apply"]
+    expected: "one notice reading 'Updated 2 violations.'; both rows' Status become 'Acknowledged'"
+
+findings:
+  - id: kpi-cards-stale-after-htmx-bulk-action
+    detail: >
+      `violation_bulk_action`'s htmx branch re-renders only `#violations` (apps/policy/views.py); the
+      KPI cards (`#policy-kpis`) are not part of that swap, so 'Open violations' visibly lags by one
+      full page reload after an Acknowledge/Waive click even though the underlying database state (and
+      a fresh GET) is correct immediately. Not a stated acceptance criterion for this phase -- compliance
+      KPIs are explicitly a phase-7 metrics-registry deliverable being borrowed early (PLAN.md
+      "Deviation, logged" #1) -- so left as an observation (see
+      acknowledge-updates-status-decrements-open-kpi-and-writes-audit-entry) rather than a failing
+      assertion. Worth an out-of-band swap or an `hx-trigger` refresh of #policy-kpis once phase 7/8
+      wires the chart JSON endpoints and the KPI cards stop being a one-off selector call.
+
+deferred_not_authored:
+  - id: nine-rules-positive-negative-idempotency-auto-resolve
+    reason: >
+      Exhaustively covered by test_rules_disclosure.py / test_rules_sensitive.py / test_rules_merge.py
+      (positive+negative per rule) and test_evaluate.py (idempotency + auto-resolve, parametrized over
+      all nine RuleCode values -- acceptance criteria 1-2). No browser action re-runs evaluation (no
+      "recompute" button on this console), so driving the other six rule conditions through the UI would
+      only prove the same three-rule wiring already exercised by
+      console-shows-seeded-violations-with-rendered-messages and mismatch-list-shows-the-disclosure-mismatch-pr.
+  - id: pr-created-before-effective-from-produces-no-violation
+    reason: >
+      No page element distinguishes "no violation because compliant" from "no violation because the PR
+      predates the policy" -- both render as "not in the table". Covered by
+      test_evaluate.py::test_pr_created_before_effective_from_is_not_evaluated (acceptance criterion 3).
+  - id: resolved-violation-cannot-be-re-judged
+    reason: >
+      Auto-resolve (the only path that produces a `resolved` row) fires from `evaluate_pull_request`,
+      which no button on this console calls; this e2e surface seeds no resolved row. Covered by
+      test_status_change.py's ViolationResolvedError case and test_evaluate.py's auto-resolve tests.
+  - id: project-and-repository-filters-narrow-table
+    reason: >
+      This surface seeds exactly one repository inside one project, so selecting either in the filter
+      form cannot demonstrate narrowing anything out. Isolation across projects/repositories is
+      exhaustively covered by test_selectors.py::test_restricted_scope_hides_another_projects_violation
+      and its chart/KPI variants.
+  - id: date-range-filter-narrows-table
+    reason: >
+      Pure Kyiv-day-boundary arithmetic already covered by apps/metrics/tests/test_timeframe.py and
+      apps/policy/tests/test_selectors.py's period-boundary tests; the UI wiring is identical in shape
+      to the rule_code/severity/status/q filters already exercised above.
+  - id: pagination-across-multiple-pages
+    reason: >
+      VIOLATIONS_PAGE_SIZE=50 and this seed produces 6 rows total; forcing 51+ rows just to click
+      Next/Previous would duplicate e2e/plans/people.plan.yaml's identity-queue pagination case without
+      proving any new wiring.
+  - id: policy-console-a11y-and-dark-mode-sweep
+    reason: >
+      Same deferral as e2e/plans/ai_detection.plan.yaml and e2e/plans/people.plan.yaml: accessibility
+      and platform-sanity cases are swept together in phase 10/11, not page-by-page.

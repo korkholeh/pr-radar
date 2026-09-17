@@ -7,13 +7,15 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.activity.models import PullRequest
+from apps.activity.models import AIDisclosure, PullRequest
 from apps.ai_detection.models import Confidence, DetectionRule, Detector, Tool
 from apps.ai_detection.services import detect_pull_request
-from apps.catalog.models import Identity, Organization, Person, Repository
+from apps.catalog.models import Identity, Organization, Person, Project, Repository
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
+from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
+from apps.policy.services import evaluate_pull_request
 
 USER_ADMIN = "e2e-admin"
 USER_LEAD = "e2e-lead"
@@ -52,6 +54,7 @@ class Command(BaseCommand):
         self._seed_github_connections_and_sync()
         self._seed_people_and_identities()
         seed_ids = self._seed_ai_detection()
+        self._seed_policy()
 
         self.stdout.write(self.style.SUCCESS(f"e2e personas ready: {USER_ADMIN}, {USER_LEAD}"))
         # Machine-readable line for e2e/conftest.py's `seed_ids` fixture: this phase's PR detail
@@ -291,3 +294,100 @@ class Command(BaseCommand):
             "ai_detection_signal_pr_pk": signal_pr.pk,
             "ai_detection_no_signal_pr_pk": no_signal_pr.pk,
         }
+
+    def _seed_policy(self) -> None:
+        """Rows for the Policy console (/policy/) and its two settings pages. One `AIPolicy`
+        version, pinned to a fixed point in the past (`SEED_POLICY_EFFECTIVE_FROM`) rather than
+        "N days before now", so it is idempotent across reseeds and always governs every PR below
+        (all created well after it, none before it). A handful of `PullRequest` rows are run
+        through the real `policy.services.evaluate_pull_request()` -- the same function the sync
+        pipeline calls -- so the console shows genuinely computed violations, not hand-picked
+        rows. `allowed_tools=[claude_code]` plus `require_disclosure=True` and nothing else keeps
+        exactly two rule codes reachable (DISCLOSURE_MISSING, TOOL_NOT_ALLOWED, and
+        DISCLOSURE_MISMATCH via a real detected signal) so the e2e filter/severity cases have a
+        deterministic, unambiguous set of rows to narrow. The three action-target PRs' violations
+        are deleted and re-evaluated on every reseed -- the same reset shape as ai_detection's
+        toggle rule and the identity queue above -- so a previous run's own Acknowledge/Waive
+        click can never leak into the next session."""
+        repository = Repository.objects.get(full_name="e2e-org/widget")
+
+        project, _ = Project.objects.get_or_create(
+            slug="e2e-widget-project", defaults={"name": "E2E Widget Project"}
+        )
+        project.repositories.add(repository)
+
+        seed_effective_from = datetime.datetime(2020, 1, 1, tzinfo=datetime.UTC)
+        AIPolicy.objects.get_or_create(
+            effective_from=seed_effective_from,
+            defaults={"allowed_tools": [Tool.CLAUDE_CODE], "require_disclosure": True},
+        )
+
+        SensitivePathRule.objects.filter(description__startswith="e2e seed rule -- UI created").delete()
+        SensitivePathRule.objects.get_or_create(
+            project=None,
+            glob="e2e-editable/**",
+            defaults={
+                "ai_mode": SensitivePathRule.AiMode.NEEDS_EXTRA_REVIEW,
+                "description": "e2e seed rule for the edit case",
+            },
+        )
+        toggle_rule, _ = SensitivePathRule.objects.get_or_create(
+            project=None,
+            glob="e2e-toggle/**",
+            defaults={
+                "ai_mode": SensitivePathRule.AiMode.FORBIDDEN,
+                "description": "e2e seed rule for the toggle case",
+            },
+        )
+        if not toggle_rule.is_active:
+            # Undoes a previous run's own "Deactivate" click, the same reset the ai_detection
+            # toggle rule needs above.
+            toggle_rule.is_active = True
+            toggle_rule.save(update_fields=["is_active"])
+
+        now = timezone.now()
+
+        def _get_or_create_pr(number: int, title: str, **fields) -> PullRequest:
+            defaults = {
+                "github_id": f"e2e-pr-policy-{number}",
+                "title": title,
+                "state": PullRequest.State.OPEN,
+                "created_at": now - datetime.timedelta(days=2),
+            }
+            defaults.update(fields)
+            pr, _ = PullRequest.objects.get_or_create(repository=repository, number=number, defaults=defaults)
+            return pr
+
+        ack_pr = _get_or_create_pr(940, "E2E Policy Ack Target")
+        comment_pr = _get_or_create_pr(941, "E2E Policy Missing Comment Target")
+        waive_pr = _get_or_create_pr(
+            942, "E2E Policy Waive Target", ai_disclosure=AIDisclosure.NONE, ai_tools=["cursor"]
+        )
+        bulk_pr_1 = _get_or_create_pr(943, "E2E Policy Bulk Target One")
+        bulk_pr_2 = _get_or_create_pr(944, "E2E Policy Bulk Target Two")
+        mismatch_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=945,
+            defaults={
+                "github_id": "e2e-pr-policy-945",
+                "title": "E2E Policy Disclosure Mismatch PR",
+                "state": PullRequest.State.OPEN,
+                "created_at": now - datetime.timedelta(days=2),
+                # An explicit "None" disclosure plus a real footer-detector match (the same
+                # "E2E footer rule" ai_detection seeds above) gives a genuine high-confidence
+                # signal with disclosure=none -- DISCLOSURE_MISMATCH's real condition. No
+                # "### AI tools used" section, so the disclosure parser adds no raw tool string
+                # that would also (mis)trigger TOOL_NOT_ALLOWED here.
+                "body": (
+                    "### AI assistance\n- [x] None\n- [ ] Partial\n- [ ] Substantial\n\n"
+                    "Generated with E2E Bot\n"
+                ),
+            },
+        )
+        detect_pull_request(mismatch_pr.pk)
+
+        action_target_prs = [ack_pr, comment_pr, waive_pr, bulk_pr_1, bulk_pr_2]
+        PolicyViolation.objects.filter(pull_request__in=action_target_prs).delete()
+
+        for pr in [*action_target_prs, mismatch_pr]:
+            evaluate_pull_request(pr.pk)

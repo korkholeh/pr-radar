@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 18:28+0000\n"
+"POT-Creation-Date: 2026-09-17 20:05+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -57,14 +57,14 @@ msgid "user preferences"
 msgstr "налаштування користувачів"
 
 #: apps/accounts/models.py:44 apps/catalog/models.py:82
-#: apps/policy/models.py:38
+#: apps/policy/models.py:42
 msgid "project"
 msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:302
-#: apps/ai_detection/models.py:46 apps/connections/models.py:43
-#: apps/policy/models.py:16 apps/policy/models.py:99
+#: apps/ai_detection/models.py:56 apps/connections/models.py:43
+#: apps/policy/models.py:20 apps/policy/models.py:119
 msgid "created at"
 msgstr "створено"
 
@@ -183,7 +183,7 @@ msgstr "L"
 msgid "XL"
 msgstr "XL"
 
-#: apps/activity/models.py:31 apps/policy/models.py:73
+#: apps/activity/models.py:31 apps/policy/models.py:93
 msgid "Open"
 msgstr "Відкрито"
 
@@ -379,8 +379,8 @@ msgstr "самостійний мердж"
 #: apps/activity/models.py:126 apps/activity/models.py:201
 #: apps/activity/models.py:224 apps/activity/models.py:261
 #: apps/activity/models.py:292 apps/activity/models.py:325
-#: apps/ai_detection/models.py:72 apps/churn/models.py:16
-#: apps/policy/models.py:82
+#: apps/ai_detection/models.py:92 apps/churn/models.py:16
+#: apps/policy/models.py:102
 msgid "pull request"
 msgstr "pull request"
 
@@ -425,7 +425,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:185 apps/activity/models.py:204
-#: apps/ai_detection/models.py:80
+#: apps/ai_detection/models.py:100
 msgid "commit"
 msgstr "коміт"
 
@@ -451,7 +451,7 @@ msgstr "шлях"
 
 #: apps/activity/models.py:227 apps/churn/models.py:24
 #: apps/connections/models.py:28 apps/github_sync/models.py:21
-#: apps/policy/models.py:88
+#: apps/policy/models.py:108
 msgid "status"
 msgstr "статус"
 
@@ -599,6 +599,8 @@ msgstr "Впевненість"
 
 #: apps/ai_detection/forms.py:17
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:17
+#: apps/policy/forms.py:126
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:20
 msgid "Is active"
 msgstr "Активне"
 
@@ -608,162 +610,171 @@ msgstr "Активне"
 msgid "Notes"
 msgstr "Нотатки"
 
-#: apps/ai_detection/models.py:9
+#: apps/ai_detection/models.py:19
 msgid "Commit trailer"
 msgstr "Трейлер коміту"
 
-#: apps/ai_detection/models.py:10
+#: apps/ai_detection/models.py:20
 msgid "Commit author"
 msgstr "Автор коміту"
 
-#: apps/ai_detection/models.py:11
+#: apps/ai_detection/models.py:21
 msgid "PR author"
 msgstr "Автор PR"
 
-#: apps/ai_detection/models.py:12
+#: apps/ai_detection/models.py:22
 msgid "PR body footer"
 msgstr "Підвал опису PR"
 
-#: apps/ai_detection/models.py:13
+#: apps/ai_detection/models.py:23
 msgid "HTML comment"
 msgstr "HTML-коментар"
 
-#: apps/ai_detection/models.py:14
+#: apps/ai_detection/models.py:24
 msgid "Label"
 msgstr "Лейбл"
 
-#: apps/ai_detection/models.py:15
+#: apps/ai_detection/models.py:25
 msgid "Branch pattern"
 msgstr "Шаблон гілки"
 
-#: apps/ai_detection/models.py:16
+#: apps/ai_detection/models.py:26
 msgid "Commit message"
 msgstr "Повідомлення коміту"
 
-#: apps/ai_detection/models.py:20
+#: apps/ai_detection/models.py:30
 msgid "Claude Code"
 msgstr "Claude Code"
 
-#: apps/ai_detection/models.py:21
+#: apps/ai_detection/models.py:31
 msgid "Copilot"
 msgstr "Copilot"
 
-#: apps/ai_detection/models.py:22
+#: apps/ai_detection/models.py:32
 msgid "Cursor"
 msgstr "Cursor"
 
-#: apps/ai_detection/models.py:23
+#: apps/ai_detection/models.py:33
 msgid "Codex"
 msgstr "Codex"
 
-#: apps/ai_detection/models.py:24
+#: apps/ai_detection/models.py:34
 msgid "Devin"
 msgstr "Devin"
 
-#: apps/ai_detection/models.py:25
+#: apps/ai_detection/models.py:35
 msgid "Gemini"
 msgstr "Gemini"
 
-#: apps/ai_detection/models.py:26
+#: apps/ai_detection/models.py:36
 msgid "Aider"
 msgstr "Aider"
 
-#: apps/ai_detection/models.py:27
+#: apps/ai_detection/models.py:37
 msgid "Windsurf"
 msgstr "Windsurf"
 
-#: apps/ai_detection/models.py:28
+#: apps/ai_detection/models.py:38
 msgid "ChatGPT"
 msgstr "ChatGPT"
 
-#: apps/ai_detection/models.py:29 apps/catalog/models.py:94
+#: apps/ai_detection/models.py:39 apps/catalog/models.py:94
 msgid "Other"
 msgstr "Інше"
 
-#: apps/ai_detection/models.py:33 apps/policy/models.py:68
+#: apps/ai_detection/models.py:43 apps/policy/models.py:88
 msgid "High"
 msgstr "Високий"
 
-#: apps/ai_detection/models.py:34 apps/policy/models.py:69
+#: apps/ai_detection/models.py:44 apps/policy/models.py:89
 msgid "Medium"
 msgstr "Середній"
 
-#: apps/ai_detection/models.py:35 apps/policy/models.py:70
+#: apps/ai_detection/models.py:45 apps/policy/models.py:90
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:39 apps/catalog/models.py:41
+#: apps/ai_detection/models.py:49 apps/catalog/models.py:41
 #: apps/catalog/models.py:64 apps/connections/models.py:19
 #: apps/github_sync/models.py:44
 msgid "name"
 msgstr "назва"
 
-#: apps/ai_detection/models.py:40
+#: apps/ai_detection/models.py:50
 msgid "detector"
 msgstr "детектор"
 
-#: apps/ai_detection/models.py:41
+#: apps/ai_detection/models.py:51
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:42 apps/ai_detection/models.py:85
+#: apps/ai_detection/models.py:52 apps/ai_detection/models.py:105
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:43 apps/ai_detection/models.py:86
+#: apps/ai_detection/models.py:53 apps/ai_detection/models.py:106
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:44 apps/catalog/models.py:17
+#: apps/ai_detection/models.py:54 apps/catalog/models.py:17
 #: apps/catalog/models.py:47 apps/catalog/models.py:73
 #: apps/catalog/models.py:97 apps/connections/models.py:34
-#: apps/policy/models.py:44
+#: apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:45 apps/catalog/models.py:102
+#: apps/ai_detection/models.py:55 apps/catalog/models.py:102
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:47 apps/connections/models.py:44
-#: apps/policy/models.py:100
+#: apps/ai_detection/models.py:57 apps/connections/models.py:44
+#: apps/policy/models.py:120
 msgid "updated at"
 msgstr "оновлено о"
 
-#: apps/ai_detection/models.py:50
+#: apps/ai_detection/models.py:60
 msgid "detection rule"
 msgstr "правило детекції"
 
-#: apps/ai_detection/models.py:51
+#: apps/ai_detection/models.py:61
 msgid "detection rules"
 msgstr "правила детекції"
 
-#: apps/ai_detection/models.py:63
+#: apps/ai_detection/models.py:73
 #, python-format
 msgid "Not a valid regular expression: %(error)s"
 msgstr "Не є коректним регулярним виразом: %(error)s"
 
-#: apps/ai_detection/models.py:83
+#: apps/ai_detection/models.py:79
+msgid ""
+"This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
+"which can hang on a normal PR body. Rewrite it without the nested quantifier."
+msgstr ""
+"Цей шаблон вкладає групу з повторенням в іншу групу з повторенням "
+"(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
+"Перепишіть його без вкладеного квантифікатора."
+
+#: apps/ai_detection/models.py:103
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:87
+#: apps/ai_detection/models.py:107
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:88
+#: apps/ai_detection/models.py:108
 msgid "evidence hash"
 msgstr "хеш доказу"
 
-#: apps/ai_detection/models.py:89
+#: apps/ai_detection/models.py:109
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:92
+#: apps/ai_detection/models.py:112
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:93
+#: apps/ai_detection/models.py:113
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:21
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:38
 msgid "AI signals"
@@ -795,6 +806,7 @@ msgstr "Нове правило детекції"
 #: apps/ai_detection/templates/ai_detection/partials/rule_form.html:29
 #: apps/catalog/templates/catalog/partials/person_form.html:29
 #: apps/connections/templates/connections/partials/form.html:44
+#: apps/policy/templates/policy/partials/sensitive_path_form.html:29
 msgid "Save"
 msgstr "Зберегти"
 
@@ -803,6 +815,10 @@ msgstr "Зберегти"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/connections/templates/connections/partials/discovery_content.html:76
 #: apps/connections/templates/connections/partials/row.html:18
+#: apps/policy/templates/policy/partials/policy_form.html:48
+#: apps/policy/templates/policy/partials/policy_form.html:50
+#: apps/policy/templates/policy/partials/policy_form.html:54
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:7
 msgid "Yes"
 msgstr "Так"
 
@@ -811,33 +827,41 @@ msgstr "Так"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/connections/templates/connections/partials/discovery_content.html:76
 #: apps/connections/templates/connections/partials/row.html:18
+#: apps/policy/templates/policy/partials/policy_form.html:48
+#: apps/policy/templates/policy/partials/policy_form.html:50
+#: apps/policy/templates/policy/partials/policy_form.html:54
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:7
 msgid "No"
 msgstr "Ні"
 
 #: apps/ai_detection/templates/ai_detection/partials/rule_row.html:10
 #: apps/catalog/templates/catalog/partials/people_content.html:50
 #: apps/connections/templates/connections/partials/row.html:20
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:9
 msgid "Edit"
 msgstr "Редагувати"
 
 #: apps/ai_detection/templates/ai_detection/partials/rule_row.html:20
 #: apps/connections/templates/connections/partials/row.html:36
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:19
 msgid "Deactivate"
 msgstr "Деактивувати"
 
 #: apps/ai_detection/templates/ai_detection/partials/rule_row.html:20
 #: apps/connections/templates/connections/partials/row.html:36
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:19
 msgid "Activate"
 msgstr "Активувати"
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:4
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:10
 #: apps/ai_detection/templates/ai_detection/rules.html:3
-#: templates/partials/nav.html:11
+#: templates/partials/nav.html:12
 msgid "Detection rules"
 msgstr "Правила детекції"
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:6
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:9
 msgid "New rule"
 msgstr "Нове правило"
 
@@ -845,6 +869,7 @@ msgstr "Нове правило"
 #: apps/catalog/templates/catalog/partials/identities_content.html:16
 #: apps/catalog/templates/catalog/partials/people_content.html:36
 #: apps/connections/templates/connections/partials/list_content.html:30
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:21
 msgid "Actions"
 msgstr "Дії"
 
@@ -869,7 +894,7 @@ msgid "Run"
 msgstr "Запустити"
 
 #: apps/catalog/admin.py:58 apps/catalog/models.py:66
-#: apps/catalog/models.py:158 apps/policy/models.py:43
+#: apps/catalog/models.py:158 apps/policy/models.py:47
 msgid "description"
 msgstr "опис"
 
@@ -1188,36 +1213,55 @@ msgstr ""
 "Мінімальна кількість змінених рядків для застосування порушення «немає "
 "тестів»."
 
-#: apps/catalog/setting_defs.py:188
+#: apps/catalog/setting_defs.py:192
+msgid ""
+"Rule codes switched off; an open violation for a disabled rule auto-resolves."
+msgstr ""
+"Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
+"вирішується автоматично."
+
+#: apps/catalog/setting_defs.py:199
+msgid ""
+"Maximum sensitive paths stored in a violation's details; the total is kept "
+"separately."
+msgstr ""
+"Максимальна кількість чутливих шляхів, що зберігаються в деталях порушення; "
+"загальна кількість зберігається окремо."
+
+#: apps/catalog/setting_defs.py:206
+msgid "Rows per page on the policy violations console."
+msgstr "Кількість рядків на сторінці консолі порушень політики."
+
+#: apps/catalog/setting_defs.py:209
 msgid "Days after merge over which churn is measured."
 msgstr "Дні після мерджу, за які вимірюється churn."
 
-#: apps/catalog/setting_defs.py:190
+#: apps/catalog/setting_defs.py:211
 msgid "Maximum files in a PR before churn analysis is skipped."
 msgstr ""
 "Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
 
-#: apps/catalog/setting_defs.py:192
+#: apps/catalog/setting_defs.py:213
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:197
+#: apps/catalog/setting_defs.py:218
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:200
+#: apps/catalog/setting_defs.py:221
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:205
+#: apps/catalog/setting_defs.py:226
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:209
+#: apps/catalog/setting_defs.py:230
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:215
+#: apps/catalog/setting_defs.py:236
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1225,41 +1269,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:218
+#: apps/catalog/setting_defs.py:239
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:223
+#: apps/catalog/setting_defs.py:244
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:230
+#: apps/catalog/setting_defs.py:251
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:234
+#: apps/catalog/setting_defs.py:255
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:237
+#: apps/catalog/setting_defs.py:258
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:243
+#: apps/catalog/setting_defs.py:264
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:250
+#: apps/catalog/setting_defs.py:271
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:257
+#: apps/catalog/setting_defs.py:278
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -1281,7 +1325,7 @@ msgstr "Об'єднати людей"
 #: apps/catalog/templates/catalog/partials/identities_content.html:5
 #: apps/catalog/templates/catalog/partials/people_content.html:4
 #: apps/catalog/templates/catalog/partials/people_content.html:27
-#: apps/catalog/templates/catalog/people.html:3 templates/partials/nav.html:10
+#: apps/catalog/templates/catalog/people.html:3 templates/partials/nav.html:11
 msgid "People"
 msgstr "Люди"
 
@@ -1300,10 +1344,12 @@ msgid "No unmapped identities. Everyone is accounted for."
 msgstr "Немає незіставлених ідентичностей. Усі враховані."
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:32
+#: apps/policy/templates/policy/partials/violations.html:87
 msgid "Pagination"
 msgstr "Сторінки"
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:34
+#: apps/policy/templates/policy/partials/violations.html:95
 msgid "Previous"
 msgstr "Попередня"
 
@@ -1313,6 +1359,7 @@ msgid "Page %(number)s of %(total)s"
 msgstr "Сторінка %(number)s з %(total)s"
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:38
+#: apps/policy/templates/policy/partials/violations.html:110
 msgid "Next"
 msgstr "Наступна"
 
@@ -1647,7 +1694,7 @@ msgid "New connection"
 msgstr "Нове підключення"
 
 #: apps/connections/templates/connections/list.html:3
-#: templates/partials/nav.html:8
+#: templates/partials/nav.html:9
 msgid "Connections"
 msgstr "Підключення"
 
@@ -1682,7 +1729,7 @@ msgid "No project"
 msgstr "Без проєкту"
 
 #: apps/connections/templates/connections/partials/discovery_content.html:57
-#: apps/metrics/models.py:8
+#: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:48
 msgid "Repository"
 msgstr "Репозиторій"
 
@@ -1752,6 +1799,8 @@ msgstr ""
 #: apps/connections/templates/connections/partials/list_content.html:28
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:23
 #: apps/github_sync/templates/github_sync/partials/runs.html:8
+#: apps/policy/templates/policy/console.html:36
+#: apps/policy/templates/policy/partials/violations.html:29
 msgid "Status"
 msgstr "Статус"
 
@@ -1963,7 +2012,7 @@ msgid "Trigger"
 msgstr "Тригер"
 
 #: apps/github_sync/templates/github_sync/partials/runs.html:9
-#: templates/partials/nav.html:9
+#: templates/partials/nav.html:10
 msgid "Repositories"
 msgstr "Репозиторії"
 
@@ -2005,10 +2054,13 @@ msgid "No sync is currently running."
 msgstr "Наразі синхронізація не виконується."
 
 #: apps/metrics/models.py:6
+#: apps/policy/templates/policy/partials/sensitive_path_row.html:3
 msgid "Global"
 msgstr "Глобально"
 
-#: apps/metrics/models.py:7
+#: apps/metrics/models.py:7 apps/policy/forms.py:122
+#: apps/policy/templates/policy/console.html:42
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:16
 msgid "Project"
 msgstr "Проєкт"
 
@@ -2056,153 +2108,587 @@ msgstr "денний зведений показник"
 msgid "daily rollups"
 msgstr "денні зведені показники"
 
-#: apps/policy/models.py:7
-msgid "allowed tools"
-msgstr "дозволені інструменти"
+#: apps/policy/forms.py:69
+#: apps/policy/templates/policy/partials/violations.html:72
+msgid "Acknowledge"
+msgstr "Взяти до відома"
 
-#: apps/policy/models.py:8
-msgid "require disclosure"
-msgstr "вимагати розкриття"
+#: apps/policy/forms.py:70
+#: apps/policy/templates/policy/partials/violations.html:73
+msgid "Waive"
+msgstr "Прийняти ризик"
 
-#: apps/policy/models.py:9
-msgid "require human approval"
-msgstr "вимагати апрув людини"
+#: apps/policy/forms.py:74 apps/policy/templates/policy/console.html:12
+msgid "Violations"
+msgstr "Порушення"
 
-#: apps/policy/models.py:10
-msgid "minimum human approvals"
-msgstr "мінімум апрувів людей"
+#: apps/policy/forms.py:76
+#: apps/policy/templates/policy/partials/violations.html:71
+msgid "Action"
+msgstr "Дія"
 
-#: apps/policy/models.py:11
-msgid "require tests for AI PRs"
-msgstr "вимагати тести для AI PR"
+#: apps/policy/forms.py:78
+#: apps/policy/templates/policy/partials/violations.html:77
+msgid "Comment"
+msgstr "Коментар"
 
-#: apps/policy/models.py:13
-msgid "maximum effective lines for an AI PR"
-msgstr "максимум ефективних рядків для AI PR"
+#: apps/policy/forms.py:81
+msgid "A comment of at least 3 characters is required."
+msgstr "Потрібен коментар щонайменше з 3 символів."
 
-#: apps/policy/models.py:15
-msgid "effective from"
-msgstr "діє з"
+#: apps/policy/forms.py:90
+msgid "Allowed tools"
+msgstr "Дозволені інструменти"
 
-#: apps/policy/models.py:19
-msgid "AI policy"
-msgstr "Політика ШІ"
+#: apps/policy/forms.py:104
+#: apps/policy/templates/policy/partials/policy_form.html:37
+msgid "Require disclosure"
+msgstr "Вимагати розкриття інформації"
 
-#: apps/policy/models.py:20
-msgid "AI policies"
-msgstr "Політики ШІ"
+#: apps/policy/forms.py:105
+#: apps/policy/templates/policy/partials/policy_form.html:38
+msgid "Require human approval"
+msgstr "Вимагати підтвердження людини"
 
-#: apps/policy/models.py:29 templates/403.html:3
-msgid "Forbidden"
-msgstr "Заборонено"
+#: apps/policy/forms.py:106
+msgid "Minimum human approvals"
+msgstr "Мінімальна кількість підтверджень людини"
 
-#: apps/policy/models.py:30
-msgid "Needs extra review"
-msgstr "Потребує додаткового ревʼю"
+#: apps/policy/forms.py:107
+msgid "Require tests for AI PRs"
+msgstr "Вимагати тести для AI PR"
 
-#: apps/policy/models.py:39
-msgid "Empty means the rule applies globally."
-msgstr "Порожнє значення означає, що правило діє глобально."
+#: apps/policy/forms.py:108
+msgid "Maximum effective lines for an AI PR"
+msgstr "Максимум ефективних рядків для AI PR"
 
-#: apps/policy/models.py:41
-msgid "path glob"
-msgstr "glob-шаблон шляху"
+#: apps/policy/forms.py:109
+#: apps/policy/templates/policy/partials/policy_form.html:36
+msgid "Effective from"
+msgstr "Діє з"
 
-#: apps/policy/models.py:42
+#: apps/policy/forms.py:123
+msgid "Path glob"
+msgstr "Glob-шаблон шляху"
+
+#: apps/policy/forms.py:124 apps/policy/models.py:46
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:18
 msgid "AI mode"
 msgstr "режим ШІ"
 
-#: apps/policy/models.py:47
+#: apps/policy/forms.py:125
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:19
+msgid "Description"
+msgstr "Опис"
+
+#: apps/policy/messages.py:29
+msgid "This pull request is missing the required AI-assistance disclosure."
+msgstr ""
+"У цьому pull request відсутнє обов’язкове розкриття інформації про допомогу "
+"ШІ."
+
+#: apps/policy/messages.py:33
+msgid ""
+"This pull request discloses no AI assistance, but a high-confidence AI "
+"signal was detected."
+msgstr ""
+"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ "
+"з високою впевненістю."
+
+#: apps/policy/messages.py:37
+#, python-format
+msgid "Tool %(tool)s is not in the policy's list of allowed tools."
+msgstr ""
+"Інструмент %(tool)s відсутній у переліку дозволених інструментів політики."
+
+#: apps/policy/messages.py:68
+msgid ""
+"This merged AI pull request was self-merged with no approval from another "
+"human."
+msgstr ""
+"Цей злитий AI pull request було влито автором самостійно, без підтвердження "
+"від іншої людини."
+
+#: apps/policy/messages.py:101
+#, python-format
+msgid ""
+"This AI pull request touches %(path_count)s file forbidden by a sensitive-"
+"path rule: %(paths)s."
+msgid_plural ""
+"This AI pull request touches %(path_count)s files forbidden by a sensitive-"
+"path rule: %(paths)s."
+msgstr[0] ""
+"Цей AI pull request зачіпає %(path_count)s файл, заборонений правилом "
+"чутливого шляху: %(paths)s."
+msgstr[1] ""
+"Цей AI pull request зачіпає %(path_count)s файли, заборонені правилом "
+"чутливого шляху: %(paths)s."
+msgstr[2] ""
+"Цей AI pull request зачіпає %(path_count)s файлів, заборонених правилом "
+"чутливого шляху: %(paths)s."
+msgstr[3] ""
+"Цей AI pull request зачіпає %(path_count)s файла, забороненого правилом "
+"чутливого шляху: %(paths)s."
+
+#: apps/policy/messages.py:106
+#, python-format
+msgid ""
+"This AI pull request touches %(path_count)s file needing extra review "
+"(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
+msgid_plural ""
+"This AI pull request touches %(path_count)s files needing extra review "
+"(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
+msgstr[0] ""
+"Цей AI pull request зачіпає %(path_count)s файл, що потребує додаткової "
+"перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
+"підтверджень людини."
+msgstr[1] ""
+"Цей AI pull request зачіпає %(path_count)s файли, що потребують додаткової "
+"перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
+"підтверджень людини."
+msgstr[2] ""
+"Цей AI pull request зачіпає %(path_count)s файлів, що потребують додаткової "
+"перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
+"підтверджень людини."
+msgstr[3] ""
+"Цей AI pull request зачіпає %(path_count)s файла, що потребує додаткової "
+"перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
+"підтверджень людини."
+
+#: apps/policy/messages.py:113
+#, python-format
+msgid ""
+"This merged AI pull request has %(approvals)s of %(required)s required human "
+"approval."
+msgid_plural ""
+"This merged AI pull request has %(approvals)s of %(required)s required human "
+"approvals."
+msgstr[0] ""
+"Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
+"підтвердження людини."
+msgstr[1] ""
+"Цей злитий AI pull request має %(approvals)s із %(required)s необхідних "
+"підтвердження людини."
+msgstr[2] ""
+"Цей злитий AI pull request має %(approvals)s із %(required)s необхідних "
+"підтверджень людини."
+msgstr[3] ""
+"Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
+"підтвердження людини."
+
+#: apps/policy/messages.py:118
+#, python-format
+msgid ""
+"Changes %(non_test_lines)s line of non-test code with no test changes "
+"(threshold %(threshold)s)."
+msgid_plural ""
+"Changes %(non_test_lines)s lines of non-test code with no test changes "
+"(threshold %(threshold)s)."
+msgstr[0] ""
+"Змінює %(non_test_lines)s рядок коду поза тестами без змін у тестах (поріг "
+"%(threshold)s)."
+msgstr[1] ""
+"Змінює %(non_test_lines)s рядки коду поза тестами без змін у тестах (поріг "
+"%(threshold)s)."
+msgstr[2] ""
+"Змінює %(non_test_lines)s рядків коду поза тестами без змін у тестах (поріг "
+"%(threshold)s)."
+msgstr[3] ""
+"Змінює %(non_test_lines)s рядка коду поза тестами без змін у тестах (поріг "
+"%(threshold)s)."
+
+#: apps/policy/messages.py:123
+#, python-format
+msgid ""
+"This AI pull request changes %(effective_lines)s effective line, over the "
+"limit of %(limit)s."
+msgid_plural ""
+"This AI pull request changes %(effective_lines)s effective lines, over the "
+"limit of %(limit)s."
+msgstr[0] ""
+"Цей AI pull request змінює %(effective_lines)s ефективний рядок, що "
+"перевищує ліміт %(limit)s."
+msgstr[1] ""
+"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує "
+"ліміт %(limit)s."
+msgstr[2] ""
+"Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
+"перевищує ліміт %(limit)s."
+msgstr[3] ""
+"Цей AI pull request змінює %(effective_lines)s ефективного рядка, що "
+"перевищує ліміт %(limit)s."
+
+#: apps/policy/messages.py:140
+#, python-format
+msgid "%(shown)s and %(more)s more"
+msgstr "%(shown)s і ще %(more)s"
+
+#: apps/policy/models.py:11
+msgid "allowed tools"
+msgstr "дозволені інструменти"
+
+#: apps/policy/models.py:12
+msgid "require disclosure"
+msgstr "вимагати розкриття"
+
+#: apps/policy/models.py:13
+msgid "require human approval"
+msgstr "вимагати апрув людини"
+
+#: apps/policy/models.py:14
+msgid "minimum human approvals"
+msgstr "мінімум апрувів людей"
+
+#: apps/policy/models.py:15
+msgid "require tests for AI PRs"
+msgstr "вимагати тести для AI PR"
+
+#: apps/policy/models.py:17
+msgid "maximum effective lines for an AI PR"
+msgstr "максимум ефективних рядків для AI PR"
+
+#: apps/policy/models.py:19
+msgid "effective from"
+msgstr "діє з"
+
+#: apps/policy/models.py:23
+#: apps/policy/templates/policy/partials/policy_form.html:3
+#: apps/policy/templates/policy/policy_settings.html:3
+#: templates/partials/nav.html:13
+msgid "AI policy"
+msgstr "Політика ШІ"
+
+#: apps/policy/models.py:24
+msgid "AI policies"
+msgstr "Політики ШІ"
+
+#: apps/policy/models.py:33 templates/403.html:3
+msgid "Forbidden"
+msgstr "Заборонено"
+
+#: apps/policy/models.py:34
+msgid "Needs extra review"
+msgstr "Потребує додаткового ревʼю"
+
+#: apps/policy/models.py:43
+msgid "Empty means the rule applies globally."
+msgstr "Порожнє значення означає, що правило діє глобально."
+
+#: apps/policy/models.py:45
+msgid "path glob"
+msgstr "glob-шаблон шляху"
+
+#: apps/policy/models.py:51
 msgid "sensitive path rule"
 msgstr "правило чутливого шляху"
 
-#: apps/policy/models.py:48
+#: apps/policy/models.py:52
 msgid "sensitive path rules"
 msgstr "правила чутливих шляхів"
 
-#: apps/policy/models.py:57
+#: apps/policy/models.py:70
+msgid "A path glob is required."
+msgstr "Потрібен glob-шаблон шляху."
+
+#: apps/policy/models.py:72
+msgid "This glob could not be compiled."
+msgstr "Цей glob-шаблон не вдалося скомпілювати."
+
+#: apps/policy/models.py:77
 msgid "Disclosure missing"
 msgstr "Розкриття відсутнє"
 
-#: apps/policy/models.py:58
+#: apps/policy/models.py:78
 msgid "Disclosure mismatch"
 msgstr "Невідповідність розкриття"
 
-#: apps/policy/models.py:59
+#: apps/policy/models.py:79
 msgid "Tool not allowed"
 msgstr "Інструмент не дозволено"
 
-#: apps/policy/models.py:60
+#: apps/policy/models.py:80
 msgid "Sensitive path forbidden"
 msgstr "Чутливий шлях заборонено"
 
-#: apps/policy/models.py:61
+#: apps/policy/models.py:81
 msgid "Sensitive path needs review"
 msgstr "Чутливий шлях потребує ревʼю"
 
-#: apps/policy/models.py:62
+#: apps/policy/models.py:82
 msgid "No human approval"
 msgstr "Немає апруву людини"
 
-#: apps/policy/models.py:63
+#: apps/policy/models.py:83
 msgid "Self-merge"
 msgstr "Самомердж"
 
-#: apps/policy/models.py:64
+#: apps/policy/models.py:84
 msgid "No tests"
 msgstr "Немає тестів"
 
-#: apps/policy/models.py:65
+#: apps/policy/models.py:85
 msgid "AI PR too large"
 msgstr "AI PR занадто великий"
 
-#: apps/policy/models.py:74
+#: apps/policy/models.py:94
 msgid "Acknowledged"
 msgstr "Взято до відома"
 
-#: apps/policy/models.py:75
+#: apps/policy/models.py:95
 msgid "Waived"
 msgstr "Знято вимогу"
 
-#: apps/policy/models.py:76
+#: apps/policy/models.py:96
 msgid "Resolved"
 msgstr "Вирішено"
 
-#: apps/policy/models.py:84
+#: apps/policy/models.py:104
 msgid "rule code"
 msgstr "код правила"
 
-#: apps/policy/models.py:85
+#: apps/policy/models.py:105
 msgid "severity"
 msgstr "серйозність"
 
-#: apps/policy/models.py:86
+#: apps/policy/models.py:106
 msgid "details params"
 msgstr "параметри деталей"
 
-#: apps/policy/models.py:87
+#: apps/policy/models.py:107
 msgid "details hash"
 msgstr "хеш деталей"
 
-#: apps/policy/models.py:95
+#: apps/policy/models.py:115
 msgid "resolved by"
 msgstr "вирішено ким"
 
-#: apps/policy/models.py:97
+#: apps/policy/models.py:117
 msgid "resolution comment"
 msgstr "коментар до вирішення"
 
-#: apps/policy/models.py:98
+#: apps/policy/models.py:118
 msgid "resolved automatically"
 msgstr "вирішено автоматично"
 
-#: apps/policy/models.py:103
+#: apps/policy/models.py:123
 msgid "policy violation"
 msgstr "порушення політики"
 
-#: apps/policy/models.py:104
+#: apps/policy/models.py:124
 msgid "policy violations"
 msgstr "порушення політики"
+
+#: apps/policy/templates/policy/console.html:3
+#: apps/policy/templates/policy/console.html:6 templates/partials/nav.html:7
+msgid "Policy"
+msgstr "Політика"
+
+#: apps/policy/templates/policy/console.html:24
+#: apps/policy/templates/policy/partials/rule_chart.html:20
+#: apps/policy/templates/policy/partials/violations.html:27
+msgid "Rule"
+msgstr "Правило"
+
+#: apps/policy/templates/policy/console.html:30
+#: apps/policy/templates/policy/partials/violations.html:28
+msgid "Severity"
+msgstr "Серйозність"
+
+#: apps/policy/templates/policy/console.html:54
+msgid "From"
+msgstr "Від"
+
+#: apps/policy/templates/policy/console.html:60
+msgid "To"
+msgstr "До"
+
+#: apps/policy/templates/policy/console.html:66
+msgid "Search"
+msgstr "Пошук"
+
+#: apps/policy/templates/policy/console.html:71
+msgid "Filter"
+msgstr "Фільтр"
+
+#: apps/policy/templates/policy/partials/kpis.html:4
+msgid "Open violations"
+msgstr "Відкриті порушення"
+
+#: apps/policy/templates/policy/partials/kpis.html:8
+msgid "New violations (30 days)"
+msgstr "Нові порушення (30 днів)"
+
+#: apps/policy/templates/policy/partials/kpis.html:13
+msgid "AI PR compliance rate"
+msgstr "Рівень відповідності AI PR політиці"
+
+#: apps/policy/templates/policy/partials/kpis.html:14
+msgid ""
+"Share of AI-cohort pull requests created in the period with no open "
+"violation."
+msgstr ""
+"Частка AI pull request-ів, створених за період, без відкритих порушень."
+
+#: apps/policy/templates/policy/partials/kpis.html:19
+msgid "N/A"
+msgstr "Н/Д"
+
+#: apps/policy/templates/policy/partials/kpis.html:29
+#, python-format
+msgid ""
+"\n"
+"            Sample too small (%(sample)s below %(min_sample)s) to be "
+"reliable.\n"
+"          "
+msgstr ""
+"\n"
+"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути "
+"надійною.\n"
+"          "
+
+#: apps/policy/templates/policy/partials/kpis.html:37
+#: apps/policy/templates/policy/partials/mismatch_list.html:3
+msgid "Disclosure mismatches"
+msgstr "Невідповідності розкриття"
+
+#: apps/policy/templates/policy/partials/mismatch_list.html:16
+msgid "No disclosure mismatches in this period."
+msgstr "За цей період невідповідностей розкриття немає."
+
+#: apps/policy/templates/policy/partials/policy_form.html:27
+msgid "Save new version"
+msgstr "Зберегти нову версію"
+
+#: apps/policy/templates/policy/partials/policy_form.html:31
+msgid "Version history"
+msgstr "Історія версій"
+
+#: apps/policy/templates/policy/partials/policy_form.html:33
+msgid "AI policy version history"
+msgstr "Історія версій політики ШІ"
+
+#: apps/policy/templates/policy/partials/policy_form.html:39
+msgid "Minimum approvals"
+msgstr "Мінімум підтверджень"
+
+#: apps/policy/templates/policy/partials/policy_form.html:40
+msgid "Require tests"
+msgstr "Вимагати тести"
+
+#: apps/policy/templates/policy/partials/policy_form.html:41
+msgid "Max effective lines"
+msgstr "Макс. ефективних рядків"
+
+#: apps/policy/templates/policy/partials/policy_form.html:60
+msgid "No policy versions yet."
+msgstr "Ще немає версій політики."
+
+#: apps/policy/templates/policy/partials/rule_chart.html:3
+msgid "Violations by rule"
+msgstr "Порушення за правилом"
+
+#: apps/policy/templates/policy/partials/rule_chart.html:17
+msgid "Violations by rule (data table)"
+msgstr "Порушення за правилом (таблиця даних)"
+
+#: apps/policy/templates/policy/partials/rule_chart.html:21
+msgid "Count"
+msgstr "Кількість"
+
+#: apps/policy/templates/policy/partials/rule_chart.html:31
+msgid "No violations in this period."
+msgstr "За цей період порушень немає."
+
+#: apps/policy/templates/policy/partials/sensitive_path_form.html:4
+#: apps/policy/templates/policy/sensitive_path_form.html:3
+msgid "Edit sensitive path"
+msgstr "Редагувати чутливий шлях"
+
+#: apps/policy/templates/policy/partials/sensitive_path_form.html:4
+#: apps/policy/templates/policy/sensitive_path_form.html:3
+msgid "New sensitive path"
+msgstr "Новий чутливий шлях"
+
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:4
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:13
+#: apps/policy/templates/policy/sensitive_paths.html:3
+#: templates/partials/nav.html:14
+msgid "Sensitive paths"
+msgstr "Чутливі шляхи"
+
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:17
+msgid "Glob"
+msgstr "Glob-шаблон"
+
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:29
+msgid "No sensitive-path rules yet."
+msgstr "Ще немає правил чутливих шляхів."
+
+#: apps/policy/templates/policy/partials/violations.html:22
+msgid "Policy violations"
+msgstr "Порушення політики"
+
+#: apps/policy/templates/policy/partials/violations.html:25
+msgid "Select"
+msgstr "Вибрати"
+
+#: apps/policy/templates/policy/partials/violations.html:26
+msgid "Pull request"
+msgstr "Pull request"
+
+#: apps/policy/templates/policy/partials/violations.html:30
+msgid "Age"
+msgstr "Вік"
+
+#: apps/policy/templates/policy/partials/violations.html:41
+msgid "Select this violation"
+msgstr "Вибрати це порушення"
+
+#: apps/policy/templates/policy/partials/violations.html:62
+msgid "No policy violations match these filters."
+msgstr "Жодне порушення політики не відповідає цим фільтрам."
+
+#: apps/policy/templates/policy/partials/violations.html:78
+msgid "Comment (required)"
+msgstr "Коментар (обов'язково)"
+
+#: apps/policy/templates/policy/partials/violations.html:81
+msgid "Apply"
+msgstr "Застосувати"
+
+#: apps/policy/templates/policy/partials/violations.html:99
+#, python-format
+msgid ""
+"\n"
+"      Page %(number)s of %(total)s\n"
+"    "
+msgstr ""
+"\n"
+"      Сторінка %(number)s з %(total)s\n"
+"    "
+
+#: apps/policy/views.py:89
+#, python-format
+msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
+msgid_plural ""
+"Updated %(updated)s violations; skipped %(skipped)s resolved violations."
+msgstr[0] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішене порушення."
+msgstr[1] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішених порушення."
+msgstr[2] ""
+"Оновлено %(updated)s порушень; пропущено %(skipped)s вирішених порушень."
+msgstr[3] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
+
+#: apps/policy/views.py:94
+#, python-format
+msgid "Updated %(updated)s violation."
+msgid_plural "Updated %(updated)s violations."
+msgstr[0] "Оновлено %(updated)s порушення."
+msgstr[1] "Оновлено %(updated)s порушення."
+msgstr[2] "Оновлено %(updated)s порушень."
+msgstr[3] "Оновлено %(updated)s порушення."
 
 #: templates/403.html:6
 msgid "You do not have access to this page."
@@ -2252,7 +2738,7 @@ msgstr "Переглянути"
 msgid "Language"
 msgstr "Мова"
 
-#: templates/partials/nav.html:17
+#: templates/partials/nav.html:20
 msgid "Log out"
 msgstr "Вийти"
 
@@ -2336,3 +2822,45 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:16
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#, python-format
+#~ msgid ""
+#~ "This AI pull request touches %(path_count)s files forbidden by a "
+#~ "sensitive-path rule: %(paths)s."
+#~ msgstr ""
+#~ "Цей AI pull request зачіпає %(path_count)s файлів, заборонених правилом "
+#~ "чутливого шляху: %(paths)s."
+
+#, python-format
+#~ msgid ""
+#~ "This AI pull request touches %(path_count)s files needing extra review "
+#~ "(%(paths)s) and has %(approvals)s of %(required)s required human "
+#~ "approvals."
+#~ msgstr ""
+#~ "Цей AI pull request зачіпає %(path_count)s файлів, що потребують "
+#~ "додаткової перевірки (%(paths)s), і має %(approvals)s із %(required)s "
+#~ "необхідних підтверджень людини."
+
+#, python-format
+#~ msgid ""
+#~ "This merged AI pull request has %(approvals)s of %(required)s required "
+#~ "human approvals."
+#~ msgstr ""
+#~ "Цей злитий AI pull request має %(approvals)s із %(required)s необхідних "
+#~ "підтверджень людини."
+
+#, python-format
+#~ msgid ""
+#~ "Changes %(non_test_lines)s lines of non-test code with no test changes "
+#~ "(threshold %(threshold)s)."
+#~ msgstr ""
+#~ "Змінює %(non_test_lines)s рядків коду поза тестами без змін у тестах "
+#~ "(поріг %(threshold)s)."
+
+#, python-format
+#~ msgid ""
+#~ "This AI pull request changes %(effective_lines)s effective lines, over "
+#~ "the limit of %(limit)s."
+#~ msgstr ""
+#~ "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
+#~ "перевищує ліміт %(limit)s."

@@ -1,17 +1,60 @@
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.activity.models import PullRequest
+from apps.catalog.factories import ProjectFactory
 from apps.catalog.models import Organization, Repository
 from apps.connections.models import GitHubConnection
-from apps.policy.models import PolicyViolation, SensitivePathRule
+from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
 
 
 @pytest.mark.django_db
 def test_global_sensitive_path_rule_has_no_project():
     rule = SensitivePathRule.objects.create(glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN)
     assert rule.project is None
+
+
+@pytest.mark.django_db
+def test_empty_glob_raises_validation_error():
+    rule = SensitivePathRule(glob="", ai_mode=SensitivePathRule.AiMode.FORBIDDEN)
+    with pytest.raises(ValidationError):
+        rule.clean()
+
+
+@pytest.mark.django_db
+def test_valid_glob_passes_clean():
+    rule = SensitivePathRule(glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN)
+    rule.clean()
+
+
+@pytest.mark.django_db
+def test_two_global_rules_with_same_glob_raise_integrity_error():
+    SensitivePathRule.objects.create(glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN)
+    with pytest.raises(IntegrityError), transaction.atomic():
+        SensitivePathRule.objects.create(glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN)
+
+
+@pytest.mark.django_db
+def test_same_glob_under_two_different_projects_is_allowed():
+    project_a = ProjectFactory()
+    project_b = ProjectFactory()
+    SensitivePathRule.objects.create(
+        project=project_a, glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN
+    )
+    SensitivePathRule.objects.create(
+        project=project_b, glob="**/secrets/**", ai_mode=SensitivePathRule.AiMode.FORBIDDEN
+    )
+    assert SensitivePathRule.objects.filter(glob="**/secrets/**").count() == 2
+
+
+@pytest.mark.django_db
+def test_two_ai_policies_with_same_effective_from_raise_integrity_error():
+    moment = timezone.now()
+    AIPolicy.objects.create(effective_from=moment)
+    with pytest.raises(IntegrityError), transaction.atomic():
+        AIPolicy.objects.create(effective_from=moment)
 
 
 @pytest.fixture

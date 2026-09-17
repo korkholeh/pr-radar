@@ -1,0 +1,114 @@
+feature: sensitive_paths_settings
+surfaces: [app]
+entry: "Settings → Sensitive paths (/settings/sensitive-paths/, admin only)"
+
+under_test:
+  - apps/policy/views.py (sensitive_paths, sensitive_path_create, sensitive_path_edit, sensitive_path_toggle)
+  - apps/policy/forms.py::SensitivePathRuleForm
+  - apps/policy/models.py::SensitivePathRule.clean
+  - apps/policy/templates/policy/sensitive_paths.html, apps/policy/templates/policy/sensitive_path_form.html,
+    apps/policy/templates/policy/partials/{sensitive_paths_content,sensitive_path_form,sensitive_path_row}.html
+
+oracle: >
+  .autodev/phases/06-policy-engine/PLAN.md's "Settings UI → Sensitive paths": the exact shape of
+  Settings → Detection rules -- list + create/edit/toggle behind `catalog.manage_settings`, so a lead
+  gets 403 and an admin gets 200 on the same URL. `SensitivePathRule.clean()` rejects an empty or
+  uncompilable glob with a visible field error, never an empty 400 body (Design → "Error handling").
+  A rule can be scoped globally (empty project) or to one project; deleting is not offered --
+  deactivating (`is_active=False`) is the only way to retire one, and the toggle button's own label
+  flips Deactivate/Activate to match the row's current state.
+
+scope_notes: >
+  `manage.py seed_e2e`'s `_seed_policy` seeds two global rules dedicated one-per-case: "e2e-editable/**"
+  (needs_extra_review) for the edit case, and "e2e-toggle/**" (forbidden), always reset to
+  is_active=True on reseed, for the activate/deactivate case -- the same one-fixture-per-mutating-case
+  shape as e2e/plans/ai_detection.plan.yaml's DetectionRule rows. It also seeds "E2E Widget Project"
+  (linked to the existing "e2e-org/widget" repository) so the project-scoped create case has a project
+  to pick from. Any previous run's own "e2e seed rule -- UI created ..." row is cleared on every reseed,
+  the same way ai_detection's "E2E UI created rule" is.
+
+cases:
+  - id: admin-sees-list-lead-403
+    priority: high
+    steps: >
+      ["log in as e2e-lead", "open /", "confirm no 'Sensitive paths' nav link exists", "open
+      /settings/sensitive-paths/ directly", "log in as e2e-admin", "open /settings/sensitive-paths/"]
+    expected: >
+      lead: 'You do not have access to this page.', not the table; admin, same URL: 200 with a table
+      row for 'e2e-editable/**' showing AI mode 'Needs extra review' and Is active 'Yes'.
+
+  - id: create-global-rule-persists-and-appears-in-list
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/sensitive-paths/", "click 'New rule'", "leave Project
+      empty", "fill Path glob = '**/secrets/**'", "select AI mode = 'Forbidden'", "fill Description =
+      'e2e seed rule -- UI created global'", "submit"]
+    expected: >
+      redirected to the sensitive-paths list; a row shows Project 'Global', Glob '**/secrets/**', AI
+      mode 'Forbidden', Is active 'Yes'.
+
+  - id: create-project-scoped-rule-shows-its-project-name
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/sensitive-paths/new/", "select Project = 'E2E Widget
+      Project'", "fill Path glob = 'infra/**'", "select AI mode = 'Needs extra review'", "fill
+      Description = 'e2e seed rule -- UI created project-scoped'", "submit"]
+    expected: >
+      redirected to the list; the new row shows Project 'E2E Widget Project' (not 'Global') and Glob
+      'infra/**'.
+
+  - id: whitespace-only-glob-shows-visible-error-and-creates-nothing
+    priority: high
+    steps: >
+      ["log in as e2e-admin", "open /settings/sensitive-paths/new/", "fill Path glob = '   '
+      (whitespace only)", "select AI mode = 'Forbidden'", "submit"]
+    expected: >
+      the form re-renders in place with a visible role=alert including 'A path glob is required.';
+      no redirect. See findings for why this covers the empty-glob branch and not the
+      "uncompilable glob" branch the PLAN also describes.
+
+  - id: edit-rule-persists-and-appears-in-list
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/sensitive-paths/", "click 'Edit' on the 'e2e-editable/**'
+      row", "change Description to 'Edited via e2e'", "submit"]
+    expected: "redirected to the list; the 'e2e-editable/**' row's Description column now reads 'Edited via e2e'"
+
+  - id: toggle-rule-deactivates-and-reactivates-via-htmx
+    priority: medium
+    steps: >
+      ["log in as e2e-admin", "open /settings/sensitive-paths/", "confirm 'e2e-toggle/**' shows Is
+      active=Yes", "click its Deactivate button", "confirm Is active=No and the button now reads
+      Activate", "click Activate"]
+    expected: >
+      Is active flips Yes -> No -> Yes in place (htmx swap of #sensitive-paths-page), matching the
+      button's own label at each step, with no full page navigation.
+
+findings:
+  - id: uncompilable-glob-branch-is-unreachable
+    detail: >
+      `SensitivePathRule.clean()` (apps/policy/models.py) rejects a glob `compile_globs()` "cannot
+      compile" as well as an empty one, and PLAN.md's T3 task text describes a `[unclosed`-style
+      case. But `apps/catalog/globs.py::compile_globs()` translates every character except `*`,
+      `?` and `/` through `re.escape()` before compiling, so no input string can ever fail to
+      compile -- there is no glob syntax error to reject in this dialect (unlike
+      `DetectionRule.pattern`, which is a real regex compiled with `re.compile()` and genuinely
+      can fail on `[unclosed`). Confirmed by hand: `page.get_by_label("Path glob").fill("[unclosed")`
+      creates the row successfully instead of erroring. The `clean()` branch and its "skipped with
+      a warning at evaluation" counterpart in Design -> "Error handling" are therefore dead code as
+      written; only the empty/whitespace-only branch is reachable, which is what this case now
+      tests. Logged in .autodev/DECISIONS.md as an open product question (tighten the glob dialect
+      to reject something, e.g. an unmatched `[`/`]` pair, or drop the "uncompilable" language from
+      the design) rather than fixed here, since either fix changes matching behavior for every
+      existing glob and is a product decision beyond this QA step's scope.
+
+deferred_not_authored:
+  - id: audit-entries-for-create-edit-toggle
+    reason: >
+      Each write's AuditEntry is exhaustively asserted at the service/view layer by
+      apps/policy/tests/test_views_sensitive_paths.py::test_create_edit_toggle_write_audit_entries; the
+      policy_console plan's audit case already proves this phase's one audit-trail UI surface (the
+      Django admin) end-to-end for a violation status change, which is the same wiring
+      `record_audit()` shares with these three actions.
+  - id: sensitive_paths-a11y-and-dark-mode-sweep
+    reason: "Same deferral as every other settings-page plan in this tree: swept in phase 10/11."

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if rule %}{% translate "Edit sensitive path" %}{% else %}{% translate "New sensitive path" %}{% endif %}{% endblock %}
+{% block content %}
+{% include "policy/partials/sensitive_path_form.html" %}
+{% endblock %}
