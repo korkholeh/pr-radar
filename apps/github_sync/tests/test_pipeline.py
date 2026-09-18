@@ -304,3 +304,42 @@ def test_hook_marks_the_pull_requests_days_dirty(monkeypatch):
 
     expected_day = day_of(pull_request.created_at)
     assert DirtyDay.objects.filter(date=expected_day).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_hook_flips_the_originals_followup_flag_and_dirties_its_merge_day(monkeypatch):
+    """Syncing the *fix* PR is what discovers a follow-up relationship, but the flag it flips
+    belongs to the *original* PR, and that original's merge day (not the fix PR's) is what must
+    be dirtied for `followup_fix_rate` to change on the next rollup."""
+    import apps.github_sync.pipeline as pipeline_module
+    from apps.activity.factories import PRFileFactory, PullRequestFactory
+    from apps.metrics.models import DirtyDay
+    from apps.metrics.timeframe import day_of
+
+    monkeypatch.setattr(pipeline_module, "detect_pull_request", lambda pk: None)
+    monkeypatch.setattr(pipeline_module, "evaluate_pull_request", lambda pk: None)
+    repository = _make_repository(full_name="acme/widget")
+    merged_at = datetime.datetime(2026, 1, 1, 12, 0, tzinfo=datetime.UTC)
+    original = PullRequestFactory(
+        repository=repository,
+        state=PullRequest.State.MERGED,
+        merged_at=merged_at,
+        title="Add feature",
+    )
+    PRFileFactory(pull_request=original, path="a.py")
+    PRFileFactory(pull_request=original, path="b.py")
+    fix_pr = PullRequestFactory(
+        repository=repository,
+        state=PullRequest.State.MERGED,
+        merged_at=merged_at + datetime.timedelta(days=5),
+        title="fix: patch it up",
+    )
+    PRFileFactory(pull_request=fix_pr, path="a.py")
+    PRFileFactory(pull_request=fix_pr, path="b.py")
+    assert DirtyDay.objects.filter(date=day_of(original.merged_at)).count() == 0
+
+    pipeline_module.process_pull_request(fix_pr.id)
+
+    original.refresh_from_db()
+    assert original.has_followup_fix is True
+    assert DirtyDay.objects.filter(date=day_of(original.merged_at)).exists()

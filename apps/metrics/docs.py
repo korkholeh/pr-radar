@@ -91,5 +91,9 @@ def render_metrics_doc() -> str:
                 lines.append("")
                 lines.append(force_str(metric_def.description))
                 lines.append("")
+                if metric_def.params:
+                    params = ", ".join(f"{key}={value}" for key, value in sorted(metric_def.params.items()))
+                    lines.append(f"Params: {params}")
+                    lines.append("")
 
         return "\n".join(lines).rstrip("\n") + "\n"

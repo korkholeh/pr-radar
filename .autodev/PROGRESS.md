@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 9/11 · step `commit`
+- **Current:** phase 10/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 13% (reset 18.09 21:40) · 7d 50%
-- **Totals:** 144 sessions · 19.8 h agent time · ≈$379.02 API-equivalent
-- **Clock:** 34.2 h since the run was created · 19.8 h working · 9.8 h paused on the usage limit · 4.7 h not running
-- **Updated:** 2026-09-18 17:28:24
+- **Usage:** 5h 6% (reset 19.09 02:40) · 7d 53%
+- **Totals:** 159 sessions · 22.9 h agent time · ≈$420.59 API-equivalent
+- **Clock:** 38.8 h since the run was created · 22.9 h working · 10.6 h paused on the usage limit · 5.2 h not running
+- **Updated:** 2026-09-18 22:02:07
 
 ## Run warnings
 
@@ -26,9 +26,15 @@
 | 6 | AI policy engine and violations console | yes | ✅ done | 5f96b3b | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 7 | Metrics registry, rollups and recompute | no | ✅ done | 4808103 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 8 | Dashboards, charts, themes and table export | yes | ✅ done | 482e896 | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/08-dashboards-and-charts/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; e2e skipped: the surfaces could not be started; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 9 | People, PRs, Reviews, scoped access and reports | yes | 🔨 in_progress |  |  |
-| 10 | CI first-pass, follow-up fixes and churn | yes | ⏳ pending |  |  |
+| 9 | People, PRs, Reviews, scoped access and reports | yes | ✅ done | 7a54bc2 | 6 PLAN.md task(s) left unchecked; DECISIONS.md is 312 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; e2e skipped: the surfaces could not be started; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 10 | CI first-pass, follow-up fixes and churn | yes | 🔨 in_progress |  |  |
 | 11 | Polish, performance and documentation | yes | ⏳ pending |  |  |
+
+## Screens
+
+What the product looked like at the end of each phase — the newest first.
+
+- **Phase 10 — CI first-pass, follow-up fixes and churn**: [4 frames](phases/10-ci-and-churn/SCREENS.md) — Overview Quality KPI row: ci_first_pass_rate (small sample) and 21-day churn at…; PR detail page: "40.0% churn — 6 of 10 lines still present after 21 days."; PR detail page for a rebase merge: "Churn is not measured for rebase merges." …
 
 ## Timeline
 
@@ -291,6 +297,35 @@
 - `2026-09-18 17:26:53` **e2e-up** — failed: exit 2 — see .autodev/logs/e2e-surfaces.log
 - `2026-09-18 17:28:23` **p09-docs** — done (1m, $0.69): Verified phase-9 docs against PLAN.md, DECISIONS.md, and actual code/templates/settings — all already true, no edits made. CLAUDE.md lists process_exports/cleanup_exports and current stack correctly. docs/user/people.md, pull-requests.md, reviews.md, exports.md match real URLs, nav labels (template…
 - `2026-09-18 17:28:24` **p09-docs** — no changes: the documentation was already true for this phase
+- `2026-09-18 17:28:24` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-18 17:28:24` **p09-commit** — done: 7a54bc2
+- `2026-09-18 17:28:27` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-18 17:28:31` **p09-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p09-people-prs-and-access
+- `2026-09-18 17:28:34` **p09-pr** — draft: https://github.com/korkholeh/pr-radar/pull/10
+- `2026-09-18 17:28:45` **p09-merge** — done: https://github.com/korkholeh/pr-radar/pull/10
+- `2026-09-18 17:37:20` **p10-plan** — done (8m, $3.5): Wrote .autodev/phases/10-ci-and-churn/PLAN.md covering the follow-up-fix heuristic (materialised as a new PullRequest.has_followup_fix derived field so the ratio stays rollup-able), ci_first_pass_rate proof tests (the calculator already exists), and the full churn implementation — GIT_ASKPASS helpe…
+- `2026-09-18 17:51:35` **p10-implement** — handover: context reached 200,710 tokens — checkpointing for a fresh session
+- `2026-09-18 18:07:45` **p10-implement** — partial (30m, $6.62): Completed and tested T1-T9 of phase 10: churn AppSettings + migration; `PullRequest.has_followup_fix` field + migration; the followup-fix heuristic (`apps/activity/followup.py`) with full positive/negative/boundary/idempotency coverage; wired it into `github_sync/pipeline.py` and `recompute.py` (in…
+- `2026-09-18 18:21:54` **p10-implement** — handover: context reached 200,736 tokens — checkpointing for a fresh session
+- `2026-09-18 18:29:04` **p10-implement** — partial (21m, $8.49): Session 2 finished T10–T19 of phase 10. Built the real churn implementation: apps/churn/clones.py (bare-clone lifecycle), blame.py (blame parsing + rename resolution), selectors.py (eligibility), services.py (compute_churn_for_pull_request + run_churn, with a thread-pool-safe ORM-prefetch fix to av…
+- `2026-09-18 18:54:56` **p10-implement** — done (25m, $4.13): Finished phase 10 (session 3), completing the last two tasks (T20 docs, T21 e2e) on top of sessions 1-2's T1-T19. T20: wrote docs/user/churn.md (what churn measures, the five PR-detail states, manual command, disk/schedule pointers), updated docs/user/pull-requests.md's stale churn bullet, added a …
+- `2026-09-18 19:02:08` **p10-tests** — pass: exit 0: ...................................... [100%]
+- `2026-09-18 19:07:03` **p10-review1** — changes_requested (4m, $2.75): Phase 10 delivers all seven acceptance criteria with genuine tests — a self-built temporary git repository with hand-counted line numbers, real clone/fetch against a file:// origin, a full token-leak sweep over argv/remote/.git/config/logs/ChurnResult.error, and positive+negative pairs for both rat…
+- `2026-09-18 20:02:11` **p10-review_fix1** — done (55m, $4.72): Applied all blocker/major and applicable minor/nit fixes from REVIEW-r1.md. Fixed: - MAJOR: `_sum_blame` now skips (contributes 0) any path missing at `merge_commit_sha` instead of erroring the whole PR when a PR deletes a file. Added `mixed_delete_pr` history to `git_origin` fixture + regression t…
+- `2026-09-18 20:08:46` **p10-tests** — pass: exit 0: ............................................... [100%]
+- `2026-09-18 20:13:05` **p10-review2** — changes_requested (4m, $2.25): Round 2: all three r1 majors are genuinely fixed, each with a dedicated, non-vacuous test (deadline computed inside the worker, all four churn AppSettings read once on the main thread, deleted files contributing 0 instead of erroring), and the r1 minors/nits were handled too — timeouts threaded int…
+- `2026-09-18 20:25:46` **p10-review_fix2** — partial (12m, $2.97): Fixed all three MAJOR findings from REVIEW-r2 plus the docs MINOR, per .autodev/DECISIONS.md's new p10-review_fix2 section: 1. `_sum_blame` (apps/churn/services.py) no longer swallows every GitOperationError as "missing path". It now only continues past a blame failure when the path is genuinely ab…
+- `2026-09-18 20:32:47` **p10-tests** — pass: exit 0: .................................................... [100%]
+- `2026-09-18 20:37:49` **run** — stopped: 5h usage 85% ≥ 85%, and waiting until ≈18.09 21:42 would run past --max-hours 24 — stopping instead of sleeping
+- `2026-09-18 20:37:51` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-18 20:49:58` **usage** — paused: 5h usage 86% ≥ 85%; sleeping until ≈18.09 21:42
+- `2026-09-18 21:42:01` **usage** — resumed: 5h 0% (reset ?) · 7d 53%
+- `2026-09-18 21:50:17` **p10-review_audit2** — approve (8m, $1.08): All three r2 MAJORs are genuinely fixed in the product, each with a test that fails without the fix: _sum_blame now re-raises a blame timeout or a failure on a path that genuinely exists at rev (so it becomes a retryable error/blame_failed instead of a silently under-counted, terminally settled ok …
+- `2026-09-18 21:55:54` **p10-e2e** — done (5m, $1.2): Ran the full unit suite (green) and the full e2e suite (55 cases green, incl. both churn PR-detail cases) against the already-running make e2e-up surface. Verified every phase-10 acceptance criterion directly against apps/churn/services.py, apps/churn/tests/*, apps/metrics/tests/test_metrics_qualit…
+- `2026-09-18 21:56:21` **p10-e2e** — pass: exit 0: ....................................................... [100%]
+- `2026-09-18 21:59:10` **p10-screens** — done (2m, $1.03): Captured 4 frames against the already-running e2e surface (admin login, English, light, 1280×800), seeded entirely by seed_e2e's new _seed_churn(). 01: Overview Quality KPI row — churn_21d reads 40.0% (greyed "Small sample", only 1 seeded ChurnResult vs MIN_SAMPLE=5) alongside ci_first_pass_rate (a…
+- `2026-09-18 21:59:10` **p10-screens** — done: 4 frame(s) → .autodev/phases/10-ci-and-churn/SCREENS.md
+- `2026-09-18 22:02:07` **p10-docs** — done (2m, $1.13): Checked docs against phase 10 code/PLAN/DECISIONS. Most were already true (CLAUDE.md, docs/user/churn.md, docs/CONFIGURATION.md, docs/SETUP.md, README.md, docs/METRICS.md — regenerated and fresh, metrics_doc --check passes). Fixed three stale spots: CHANGELOG.md's PR-detail bullet still said "a chu…
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

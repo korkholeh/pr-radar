@@ -7,6 +7,7 @@ orchestrator or its once-per-PR contract."""
 import logging
 
 from apps.activity.derive import derive_pull_request
+from apps.activity.followup import update_followup_fixes
 from apps.activity.models import PullRequest
 from apps.ai_detection.services import detect_pull_request
 from apps.catalog.identity import resolve_identities_for_pull_request
@@ -23,6 +24,11 @@ def process_pull_request(pull_request_id: int) -> None:
     )
     resolve_identities_for_pull_request(pull_request_id)
     derive_pull_request(pull_request_id)
+    changed_followup_ids = update_followup_fixes(pull_request_id)
     detect_pull_request(pull_request_id)
     evaluate_pull_request(pull_request_id)
-    mark_dirty(pull_request_id, previous_reverts_pr_id=previous_reverts_pr_id)
+    mark_dirty(
+        pull_request_id,
+        previous_reverts_pr_id=previous_reverts_pr_id,
+        extra_pull_request_ids=changed_followup_ids,
+    )

@@ -169,7 +169,7 @@ def test_violations_count_counts_only_open():
 
 
 @pytest.mark.django_db
-def test_churn_ratio_is_none_not_zero():
+def test_churn_ratio_is_none_not_zero_when_unmeasured():
     repository = RepositoryFactory()
     identity = IdentityFactory()
     PullRequestFactory(repository=repository, author=identity, created_at=IN_PERIOD)
@@ -178,6 +178,34 @@ def test_churn_ratio_is_none_not_zero():
 
     rows = pull_request_rows(_scope(), _params())
     assert rows[0]["churn_ratio"] is None
+
+
+@pytest.mark.django_db
+def test_churn_ratio_reflects_the_settled_churn_result():
+    from apps.catalog.services import get_int
+    from apps.churn.factories import ChurnResultFactory
+    from apps.churn.models import ChurnResult
+    from apps.dashboards.rows import pull_request_rows
+
+    repository = RepositoryFactory()
+    identity = IdentityFactory()
+    pull_request = PullRequestFactory(repository=repository, author=identity, created_at=IN_PERIOD)
+    ChurnResultFactory(
+        pull_request=pull_request,
+        window_days=get_int("CHURN_WINDOW_DAYS"),
+        status=ChurnResult.Status.OK,
+        churn_ratio=0.42,
+    )
+    # An error row for a different window must never leak into the export column.
+    ChurnResultFactory(
+        pull_request=pull_request,
+        window_days=get_int("CHURN_WINDOW_DAYS") + 1,
+        status=ChurnResult.Status.ERROR,
+        churn_ratio=None,
+    )
+
+    rows = pull_request_rows(_scope(), _params())
+    assert rows[0]["churn_ratio"] == pytest.approx(0.42)
 
 
 @pytest.mark.django_db
@@ -190,6 +218,13 @@ def test_no_n_plus_one():
         PolicyViolationFactory(pull_request=pull_request, status=PolicyViolation.Status.OPEN)
 
     from apps.dashboards.rows import pull_request_rows
+
+    # Warm the process-wide AppSetting cache (`catalog.services._all_setting_rows()`) before
+    # either capture: `churn_ratio`'s Subquery reads CHURN_WINDOW_DAYS through it, and an
+    # uncached read costs one query exactly once per cache generation, not once per row -- not
+    # an N+1, but it would otherwise make the two captures differ by exactly one query
+    # regardless of how many PRs are added between them.
+    pull_request_rows(_scope(), _params())
 
     with CaptureQueriesContext(connection) as first:
         pull_request_rows(_scope(), _params())

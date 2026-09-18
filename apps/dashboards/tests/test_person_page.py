@@ -69,3 +69,14 @@ def test_unknown_person_id_is_404(client, lead_user):
     response = client.get(reverse("dashboards:person", args=[999999]) + f"?{PERIOD_QS}")
 
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_person_comparison_table_labels_followup_fix_rate_a_heuristic(client, lead_user):
+    person, _project = _seed_person()
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:person", args=[person.pk]) + f"?{PERIOD_QS}")
+
+    assert response.status_code == 200
+    assert "heuristic" in response.content.decode()

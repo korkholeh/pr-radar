@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from django.http import FileResponse, Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.functional import Promise
 from django.utils.translation import get_language, ngettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from apps.accounts.selectors import scope_for_user
@@ -44,6 +46,17 @@ from apps.policy.services import BulkStatusChangeResult, apply_bulk_status_chang
 from config.htmx import is_htmx
 
 _XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+_CHURN_ERROR_REASONS = {
+    "no_snapshot": _("No commit was found on the default branch before the churn window ended."),
+    "fetch_failed": _("The repository could not be fetched."),
+    "blame_failed": _("Measuring surviving lines with git blame failed."),
+    "no_pr_commits": _("No commits could be attributed to this pull request."),
+    "connection_unusable": _("The GitHub connection for this repository is not usable."),
+    "timeout": _("The churn computation timed out."),
+    "git_error": _("A git error occurred while measuring churn."),
+}
+_CHURN_DEFAULT_ERROR_REASON = _CHURN_ERROR_REASONS["git_error"]
 
 
 def dashboard(
@@ -449,9 +462,29 @@ def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
     files = list(pull_request.files.select_related("matched_sensitive_rule").order_by("path")[:files_limit])
     extra_files_count = max(0, total_files - files_limit)
 
-    churn_result = pull_request.churn_results.filter(
-        window_days=get_int("CHURN_WINDOW_DAYS"), status=ChurnResult.Status.OK
-    ).first()
+    churn_result = (
+        pull_request.churn_results.filter(window_days=get_int("CHURN_WINDOW_DAYS"))
+        .order_by("-computed_at")
+        .first()
+    )
+
+    churn_error_reason: str | Promise = ""
+    churn_error_detail = ""
+    if churn_result is not None and churn_result.status == ChurnResult.Status.ERROR and churn_result.error:
+        code, _sep, detail = churn_result.error.partition(": ")
+        churn_error_reason = _CHURN_ERROR_REASONS.get(code, _CHURN_DEFAULT_ERROR_REASON)
+        churn_error_detail = detail
+
+    # `too_large`'s `error` field holds the CHURN_MAX_FILES value in force when the row was
+    # written -- rendering today's live setting would misstate a terminal row after an operator
+    # later changes the limit.
+    churn_too_large_limit = get_int("CHURN_MAX_FILES")
+    churn_is_too_large = churn_result is not None and churn_result.status == ChurnResult.Status.TOO_LARGE
+    if churn_is_too_large and churn_result.error:
+        try:
+            churn_too_large_limit = int(churn_result.error)
+        except ValueError:
+            pass
 
     return {
         "pull_request": pull_request,
@@ -461,6 +494,9 @@ def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
         "pr_metrics": pr_detail.pr_metrics(pull_request),
         "files": files,
         "extra_files_count": extra_files_count,
+        "churn_too_large_limit": churn_too_large_limit,
+        "churn_error_reason": churn_error_reason,
+        "churn_error_detail": churn_error_detail,
         "churn_result": churn_result,
         **_pr_violations_context(scope, pk),
     }

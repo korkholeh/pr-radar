@@ -225,6 +225,27 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "CHURN_MAX_FILES", "int", 50, _("Maximum files in a PR before churn analysis is skipped."), "churn"
     ),
     SettingDef(
+        "CHURN_MAX_WORKERS",
+        "int",
+        4,
+        _("Maximum concurrent git workers a churn run uses."),
+        "churn",
+    ),
+    SettingDef(
+        "CHURN_GIT_TIMEOUT_SECONDS",
+        "int",
+        120,
+        _("Timeout in seconds for a single git subprocess call during churn analysis."),
+        "churn",
+    ),
+    SettingDef(
+        "CHURN_REPO_TIME_BUDGET_SECONDS",
+        "int",
+        600,
+        _("Maximum seconds a churn run spends on a single repository before deferring the rest."),
+        "churn",
+    ),
+    SettingDef(
         "DASHBOARD_TABLE_PAGE_SIZE",
         "int",
         25,

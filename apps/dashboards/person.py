@@ -28,6 +28,7 @@ PERSON_COMPARISON_METRIC_KEYS: tuple[str, ...] = (
     "reviews_given",
     "reviewer_response_p50",
     "churn_21d",
+    "followup_fix_rate",
 )
 
 

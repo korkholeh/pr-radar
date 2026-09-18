@@ -27,8 +27,9 @@ Click any PR to open it. The page has five parts:
   a "+N more" line for a very large PR (see `PR_FILES_DISPLAY_LIMIT` in `docs/CONFIGURATION.md`).
 - **Violations** — any open policy violation on this PR, with the same acknowledge/waive action as the Policy
   console (a reason is required), scoped to this PR only.
-- **Churn** — filled in once churn analysis (phase 10) has run for this PR; until then it shows an explicit
-  "not computed yet" state, never a `0%`.
+- **Churn** — how much of this PR's own lines survive `CHURN_WINDOW_DAYS` after merge, filled in by the nightly
+  `compute_churn` job; until then, or if the PR isn't eligible, it shows an explicit state, never a `0%`. See
+  `docs/user/churn.md`.
 - **AI signals** — the resolved AI status, disclosure and tools, and every detected signal with its evidence
   (unchanged from earlier phases).
 

@@ -116,3 +116,17 @@ def test_mark_dirty_records_the_violation_creation_day():
     days = set(DirtyDay.objects.values_list("date", flat=True))
     assert datetime.date(2026, 1, 1) in days
     assert violation_day in days
+
+
+def test_mark_dirty_records_extra_pull_request_ids_merge_days():
+    """`followup_fix_rate` is a property of the *original* PR's merge day, discovered while
+    syncing a later fix PR — `extra_pull_request_ids` lets that sync also dirty it."""
+    original_merged = datetime.datetime(2026, 3, 1, 12, 0, tzinfo=KYIV).astimezone(datetime.UTC)
+    original = PullRequestFactory(created_at=original_merged, merged_at=original_merged)
+    fix_created = datetime.datetime(2026, 3, 10, 9, 0, tzinfo=KYIV).astimezone(datetime.UTC)
+    fix_pr = PullRequestFactory(created_at=fix_created, merged_at=fix_created)
+
+    mark_dirty(fix_pr.id, extra_pull_request_ids={original.id})
+
+    days = set(DirtyDay.objects.values_list("date", flat=True))
+    assert days == {datetime.date(2026, 3, 1), datetime.date(2026, 3, 10)}

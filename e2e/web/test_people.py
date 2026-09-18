@@ -35,7 +35,10 @@ def test_admin_sees_people_list_with_mapped_and_bot_rows(page: Page) -> None:
 def test_lead_cannot_reach_people(page: Page) -> None:
     log_in(page, USER_LEAD)
     page.goto("/")
-    expect(page.get_by_role("link", name="People")).to_have_count(0)
+    # Not "People" (dashboards:people_index, exact) -- phase 9 opened that dashboard page to
+    # every lead. Only the admin-only settings page, navigated to as "People settings", is
+    # restricted here.
+    expect(page.get_by_role("link", name="People settings")).to_have_count(0)
 
     page.goto("/settings/people/")
     expect(page.get_by_role("heading", name="You do not have access to this page.")).to_be_visible()

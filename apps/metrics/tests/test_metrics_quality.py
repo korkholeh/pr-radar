@@ -64,6 +64,24 @@ def test_rework_rate_positive_and_negative_row():
     assert _ratio("rework_rate") == MetricValue(0.5, 2)
 
 
+def test_ci_first_pass_rate_counts_a_successful_first_ci_commit():
+    passed = _merged_pr()
+    CheckStatusFactory(
+        pull_request=passed, is_first_ci_commit=True, rollup_state=CheckStatus.RollupState.SUCCESS
+    )
+
+    assert _ratio("ci_first_pass_rate") == MetricValue(1.0, 1)
+
+
+def test_ci_first_pass_rate_excludes_a_failed_first_ci_commit_from_the_numerator_only():
+    failed = _merged_pr()
+    CheckStatusFactory(
+        pull_request=failed, is_first_ci_commit=True, rollup_state=CheckStatus.RollupState.FAILURE
+    )
+
+    assert _ratio("ci_first_pass_rate") == MetricValue(0.0, 1)
+
+
 def test_ci_first_pass_rate_ignores_prs_with_no_first_ci_commit_check_status():
     passed = _merged_pr()
     CheckStatusFactory(
@@ -139,6 +157,18 @@ def test_churn_21d_is_none_without_churn_result_rows_and_median_with_them():
     assert metric_def.calculator.period(_period_ctx()) == MetricValue(0.2, 2)
 
 
-def test_followup_fix_rate_is_none_and_present_in_the_registry():
-    assert get_metric("followup_fix_rate") is not None
-    assert _ratio("followup_fix_rate") == MetricValue.empty()
+def test_followup_fix_rate_positive_and_negative_row():
+    _merged_pr(has_followup_fix=True)
+    _merged_pr(has_followup_fix=False)
+
+    assert _ratio("followup_fix_rate") == MetricValue(0.5, 2)
+
+
+def test_followup_fix_rate_is_registered_as_a_heuristic():
+    from django.utils import translation
+
+    metric_def = get_metric("followup_fix_rate")
+    assert metric_def is not None
+    assert metric_def.params["heuristic"] is True
+    with translation.override("en"):
+        assert "heuristic" in str(metric_def.title).lower()

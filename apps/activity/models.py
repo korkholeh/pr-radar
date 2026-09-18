@@ -121,6 +121,7 @@ class PullRequest(models.Model):
     )
     is_rubber_stamp = models.BooleanField(_("is rubber stamp"), default=False)
     is_self_merged = models.BooleanField(_("is self-merged"), default=False)
+    has_followup_fix = models.BooleanField(_("has follow-up fix"), default=False)
 
     class Meta:
         verbose_name = _("pull request")

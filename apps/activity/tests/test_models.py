@@ -102,6 +102,11 @@ def test_nullable_duration_source_fields_default_to_none(pull_request):
     assert pull_request.review_rounds is None
 
 
+@pytest.mark.django_db
+def test_has_followup_fix_defaults_to_false(pull_request):
+    assert pull_request.has_followup_fix is False
+
+
 def test_review_comment_has_no_body_text_field():
     field_names = {f.name for f in ReviewComment._meta.get_fields()}
     assert "body" not in field_names

@@ -1,0 +1,75 @@
+feature: churn
+surfaces: [app]
+entry: "A PR's Churn section at /prs/<pk>/"
+
+under_test:
+  - apps/dashboards/views.py::_pull_request_detail_context (churn_result lookup, error-reason rendering)
+  - apps/dashboards/templates/dashboards/pull_request_detail.html (the five churn branches)
+  - apps/churn/models.py (ChurnResult.Status)
+
+oracle: >
+  .autodev/phases/10-ci-and-churn/PLAN.md's design §10: the PR detail page renders one of four
+  `ChurnResult.status` branches plus the existing "not computed yet" state when no row exists, each a
+  full sentence with named placeholders, never a colour-only signal and never a bare `0%`. This suite
+  drives no git work at all (churn's own computation is proven against a real temporary git repository in
+  apps/churn/tests/, forbidden here since the e2e stack runs no subprocess/network); it only proves the
+  page renders each stored status correctly once a `ChurnResult` row exists, and that a real
+  `compute_churn` run (as the nightly job would leave behind) is what puts it there.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with rows `manage.py seed_e2e` adds in `_seed_churn`:
+  "E2E Churn Measured PR" (#950, squash-merged) with a `ChurnResult(status=ok, lines_at_merge=10,
+  lines_surviving=6, churn_ratio=0.4, window_days=CHURN_WINDOW_DAYS)` row, and "E2E Churn Rebase PR"
+  (#951, rebase-merged) with a `ChurnResult(status=unsupported_merge_method)` row -- written directly
+  rather than through `run_churn`, exactly the shape a real nightly run would leave behind. Their pks are
+  read from `manage.py seed_e2e`'s `E2E_SEED_IDS` line (`e2e/conftest.py`'s `seed_ids` fixture), the same
+  pattern `e2e/plans/ai_detection.plan.yaml` uses, since the PR list (`/prs/`) is not this plan's entry
+  point. `too_large` and `error` are not seeded as their own PRs -- their sentences are static, data-free
+  template branches (no computed number to get wrong) already reachable by reading the template alongside
+  the two live cases, and are covered without a browser at all by
+  apps/dashboards/tests/test_pull_request_detail.py's per-status render tests.
+
+cases:
+  - id: pr-detail-shows-a-computed-churn-percentage
+    priority: high
+    steps: ["log in as e2e-admin", "open /prs/<E2E Churn Measured PR pk>/"]
+    expected: >
+      the Churn section reads "40.0% churn — 6 of 10 lines still present after 21 days." (the window from
+      CHURN_WINDOW_DAYS), not "Churn not computed yet." and not a bare "40.0%"
+
+  - id: pr-detail-shows-unsupported-merge-method-sentence
+    priority: high
+    steps: ["log in as e2e-admin", "open /prs/<E2E Churn Rebase PR pk>/"]
+    expected: >
+      the Churn section reads "Churn is not measured for rebase merges." -- no percentage, no "not
+      computed yet" text
+
+findings: []
+
+deferred_not_authored:
+  - id: too-large-and-error-status-sentences
+    reason: >
+      Both are static sentences with no PR-specific number to render correctly or get wrong (`too_large`:
+      "This PR changes more than {limit} files; churn was not measured."; `error`: "Churn could not be
+      measured." plus a reason-code sentence) -- unlike the `ok` branch, there is no computed value whose
+      wiring a browser round-trip would prove beyond what reading the template shows. Both are asserted
+      per-status in apps/dashboards/tests/test_pull_request_detail.py (five-branch render coverage), and
+      adding two more merged PRs here to seed_e2e for a template branch already proven not to depend on
+      any live data would repeat that coverage without adding a real risk-carrying case.
+  - id: churn-not-computed-yet-empty-state
+    reason: >
+      Every PR seeded elsewhere in seed_e2e (ai_detection, policy) has no ChurnResult row and therefore
+      already renders this state incidentally on its own detail page -- adding a case dedicated to it
+      would assert something already true of every other case in this suite, not a new wiring path.
+      Covered explicitly by apps/dashboards/tests/test_pull_request_detail.py's no-result case.
+  - id: a-real-compute-churn-run-populating-the-page
+    reason: >
+      compute_churn clones and blames a real git repository (RISKS row 9's "no live GitHub credentials",
+      and this suite runs no subprocess/network at all, same constraint as
+      e2e/plans/connections.plan.yaml). The algorithm itself is proven end-to-end against a real temporary
+      git repository in apps/churn/tests/test_churn_compute.py and test_churn_run.py; here the
+      `ChurnResult` row is seeded directly, exactly the row that run would leave behind.
+  - id: churn-a11y-and-dark-mode-sweep
+    reason: >
+      Same deferral as every other plan in this suite: accessibility and platform-sanity cases are swept
+      together in phase 11, not page-by-page.

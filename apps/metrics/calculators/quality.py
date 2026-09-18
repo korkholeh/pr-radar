@@ -1,6 +1,6 @@
 """Quality metrics (spec §8.2): review/rework/CI/test/churn ratios over pull requests merged on a
-day, plus `churn_21d` (a distribution read from `ChurnResult`) and `followup_fix_rate`'s deferred
-placeholder (phase 10's own deliverable)."""
+day, plus `churn_21d` (a distribution read from `ChurnResult`) and `followup_fix_rate` (a ratio
+over the `PullRequest.has_followup_fix` cache field materialised by `apps.activity.followup`)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from django.utils.functional import Promise
 from django.utils.translation import gettext_lazy as _
 
 from apps.activity.models import CheckStatus, PRFile, PullRequest, ReviewComment
+from apps.catalog.setting_defs import SETTING_DEFS
 from apps.churn.models import ChurnResult
 from apps.metrics.calculators.base import (
     GLOBAL_SCOPE,
@@ -62,6 +63,7 @@ def _register_ratio_over_merged_prs(
     numerator: Callable[[DayContext], MetricValue],
     numerator_batch: BatchFunction,
     formula: str,
+    params: dict[str, object] | None = None,
 ) -> None:
     _register(
         MetricDef(
@@ -80,6 +82,7 @@ def _register_ratio_over_merged_prs(
                 denominator_batch=_merged_population_count_batch,
             ),
             formula=formula,
+            params=params or {},
         )
     )
 
@@ -395,34 +398,23 @@ _register(
 )
 
 
-def _followup_fix_empty(_ctx: DayContext) -> MetricValue:
-    return MetricValue.empty()
+_FOLLOWUP_FIX_SETTING_DEFAULTS = {d.key: d.default for d in SETTING_DEFS}
 
-
-def _followup_fix_empty_batch(_cohort: str, _date: datetime.date) -> dict:
-    return {}
-
-
-_register(
-    MetricDef(
-        key="followup_fix_rate",
-        title=_("Follow-up fix rate (heuristic)"),
-        description=_(
-            "(heuristic) Share of merged PRs followed within FOLLOWUP_FIX_WINDOW_DAYS by a "
-            "hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their files. Not "
-            "computed yet — always empty until this heuristic ships."
-        ),
-        unit="ratio",
-        direction="lower_is_better",
-        kind="ratio",
-        levels=_ALL_LEVELS,
-        supports_cohorts=True,
-        calculator=RatioCalc(
-            numerator=_followup_fix_empty,
-            denominator=_followup_fix_empty,
-            numerator_batch=_followup_fix_empty_batch,
-            denominator_batch=_followup_fix_empty_batch,
-        ),
-        formula="(heuristic, not yet computed) follow-up fixes within the window / PRs merged on the day",
-    )
+_register_ratio_over_merged_prs(
+    "followup_fix_rate",
+    _("Follow-up fix rate (heuristic)"),
+    _(
+        "(heuristic) Share of merged PRs followed within FOLLOWUP_FIX_WINDOW_DAYS by a "
+        "hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their files."
+    ),
+    "ratio",
+    "lower_is_better",
+    lambda ctx: count_value(_merged_on_day(ctx).filter(has_followup_fix=True).count()),
+    batch_count(lambda cohort, date: _merged_on_day_population(cohort, date).filter(has_followup_fix=True)),
+    "PRs merged on the day with a follow-up fix within the window / PRs merged on the day",
+    params={
+        "heuristic": True,
+        "window_days": _FOLLOWUP_FIX_SETTING_DEFAULTS["FOLLOWUP_FIX_WINDOW_DAYS"],
+        "file_overlap": _FOLLOWUP_FIX_SETTING_DEFAULTS["FOLLOWUP_FIX_FILE_OVERLAP"],
+    },
 )

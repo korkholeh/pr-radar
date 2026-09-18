@@ -64,10 +64,32 @@
 
   <section class="mb-6" id="pr-churn">
     <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Churn" %}</h2>
-    {% if churn_result %}
-      <p class="text-sm text-[var(--text)]">{{ churn_result.churn_ratio|percent }}</p>
-    {% else %}
+    {% if not churn_result %}
       <p class="text-sm text-[var(--text-muted)]">{% translate "Churn not computed yet." %}</p>
+    {% elif churn_result.status == "ok" and churn_result.churn_ratio is not None %}
+      <p class="text-sm text-[var(--text)]">
+        {% blocktranslate with ratio=churn_result.churn_ratio|percent surviving=churn_result.lines_surviving at_merge=churn_result.lines_at_merge days=churn_result.window_days %}
+          {{ ratio }} churn — {{ surviving }} of {{ at_merge }} lines still present after {{ days }} days.
+        {% endblocktranslate %}
+      </p>
+    {% elif churn_result.status == "ok" %}
+      <p class="text-sm text-[var(--text-muted)]">
+        {% translate "This PR had no measurable lines at merge; churn was not computed." %}
+      </p>
+    {% elif churn_result.status == "unsupported_merge_method" %}
+      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn is not measured for rebase merges." %}</p>
+    {% elif churn_result.status == "too_large" %}
+      <p class="text-sm text-[var(--text-muted)]">
+        {% blocktranslate with limit=churn_too_large_limit %}
+          This PR changes more than {{ limit }} files; churn was not measured.
+        {% endblocktranslate %}
+      </p>
+    {% else %}
+      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn could not be measured." %}</p>
+      <p class="text-sm text-[var(--text-muted)]">{{ churn_error_reason }}</p>
+      {% if churn_error_detail %}
+        <p class="text-xs text-[var(--text-muted)]">{{ churn_error_detail }}</p>
+      {% endif %}
     {% endif %}
   </section>
 

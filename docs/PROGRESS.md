@@ -146,3 +146,42 @@ detection, policy evaluation, dirty-day marking and rollups → phases 5–7 (al
 unrestricted), `git` credential handling via `GIT_ASKPASS`, webhooks and scheduled daily verification as a cron
 entry. See `.autodev/phases/03-connections-and-sync/PLAN.md`'s "Out of scope" section for which later phase
 owns each.
+
+## Phase 10 — CI first-pass, follow-up fixes and churn
+
+The three remaining quality metrics from `docs/METRICS.md`'s row 3 (`ci_first_pass_rate`, `followup_fix_rate`,
+`churn_21d`) are all real now, not placeholders.
+
+- **`followup_fix_rate`**: `PullRequest.has_followup_fix` (`apps/activity/followup.py`), a derived boolean
+  materialised at sync/`recompute` time — true when a later merged PR in the same repository matches the
+  `is_hotfix` title/branch pattern within `FOLLOWUP_FIX_WINDOW_DAYS` and shares at least
+  `FOLLOWUP_FIX_FILE_OVERLAP` of this PR's non-excluded files. The `RatioCalc` reads the flag directly, so its
+  rollup batch stays a grouped `COUNT`, never a `PRFile`×`PRFile` join. Surfaced, labelled "(heuristic)", on the
+  Person page's comparison table.
+- **`ci_first_pass_rate`**: unchanged production code from phase 7; this phase added an explicit positive/negative
+  test pair and a rollup round-trip proof.
+- **Churn** (`apps/churn`, spec §9, see `docs/user/churn.md`): the only component that shells out to `git`
+  directly. `askpass.py` hands a GitHub token to git through `GIT_ASKPASS` + two env vars only — never argv,
+  never the remote URL, never `.git/config` (`GIT_CONFIG_NOSYSTEM`/`GIT_CONFIG_GLOBAL=/dev/null` keep the
+  operator's own credential helper out); `gitcmd.run_git()` is the one `subprocess` call site, masking stderr
+  before it reaches an exception, a log, or `ChurnResult.error`. `clones.py` keeps one disposable bare clone per
+  repository under `DATA_DIR/repos/<owner>/<name>.git`, re-cloned once on a failed fetch. `blame.py` sums
+  `git blame --line-porcelain -M -C` for a PR's own commits at merge and again at a snapshot
+  `CHURN_WINDOW_DAYS` later, following renames; `services.py::compute_churn_for_pull_request` turns that into a
+  churn ratio with four terminal-or-retried statuses (`ok`, `unsupported_merge_method` for rebase merges,
+  `too_large` past `CHURN_MAX_FILES`, `error` retried on the next run); a PR with zero attributable lines still
+  gets a settled `ok` row with `churn_ratio=None` rather than no row at all, so it is never re-cloned and
+  re-blamed forever, and never shown as a fabricated `0%`. `run_churn` threads git work across repositories
+  (`CHURN_MAX_WORKERS`) while keeping every
+  `ChurnResult` write on the main thread — the one place in the system this parallel against SQLite's
+  single-writer model. Runs nightly at 02:00 (`compute_churn_task`) and via `manage.py compute_churn`.
+- **PR detail page**: the Churn section is now status-aware — a percentage, or one of four sentences explaining
+  why there isn't one — never a colour-only signal and never a fake `0%`.
+- Every new string has its Ukrainian translation in this phase.
+
+### Out of scope for phase 10
+
+A UI trigger for churn (CLI/nightly only, per spec), rebase-merge churn (the pre-rebase history GitHub
+garbage-collects), a `FollowupFix` link model naming *which* PR fixed which, clone garbage collection/disk caps
+for `DATA_DIR/repos` (documented as an operator concern instead). Empty-state/`MIN_SAMPLE` polish, the contrast
+audit, and `seed_demo --scale` → phase 11.

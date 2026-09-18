@@ -73,7 +73,7 @@
   whether it has open violations, exportable to CSV/XLSX. See `docs/user/pull-requests.md`.
 - A full PR detail page (`/prs/<id>/`): a chronological timeline, per-PR duration metrics, the changed-files
   list with test/excluded/sensitive-path badges, open violations with an inline acknowledge/waive action, and
-  a churn slot (computed in phase 10).
+  a status-aware churn section (see `docs/user/churn.md`).
 - Reviews page (`/reviews/`): reviewer workload, an author×reviewer heat map, and the list of PRs waiting for
   review. See `docs/user/reviews.md`.
 - A seven-sheet dashboard report (Summary, Trends with native Excel charts, the page's own tables, PRs,
@@ -83,3 +83,9 @@
   blocking the request; "My exports" (`/exports/`) lists your own jobs with live status and a download link,
   `manage.py process_exports`/`cleanup_exports` are the worker-free fallbacks, and every export — synchronous or
   background — writes an audit entry. See `docs/user/exports.md`.
+- Churn analysis: a nightly job (`manage.py compute_churn`, 02:00) clones each repository and measures how much
+  of a merged PR's own lines survive `CHURN_WINDOW_DAYS` after merge, feeding the `churn_21d` KPI, the
+  churn/rework chart, and a status-aware Churn section on the PR detail page (a percentage, "not measured for
+  rebase merges", "too large to measure", or a retried error — never a fake `0%`). See `docs/user/churn.md`.
+- `followup_fix_rate` (heuristic): flags a merged PR as likely followed by a fix, by title/branch pattern and
+  file overlap within a configurable window; shown labelled "(heuristic)" on the Person page's comparison table.
