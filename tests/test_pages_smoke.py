@@ -14,6 +14,7 @@ from django.core.management import call_command
 from django.test import Client
 from django.urls import reverse
 
+from apps.activity.models import PullRequest
 from apps.catalog.models import Project, Repository
 from apps.dashboards.tests.test_seed_demo import SHARED_REPO_FULL_NAME
 from apps.metrics.timeframe import today
@@ -53,6 +54,11 @@ def _dashboard_urls() -> list[tuple[str, str]]:
     project_pk = Project.objects.filter(repositories__full_name=SHARED_REPO_FULL_NAME).first().pk
     repository_pk = Repository.objects.get(full_name=SHARED_REPO_FULL_NAME).pk
     day = today()
+    sample_pr = (
+        PullRequest.objects.filter(repository__full_name=SHARED_REPO_FULL_NAME, author__isnull=False)
+        .select_related("author__person")
+        .first()
+    )
     return [
         ("overview", reverse("dashboards:overview")),
         ("projects_index", reverse("dashboards:projects_index")),
@@ -60,6 +66,12 @@ def _dashboard_urls() -> list[tuple[str, str]]:
         ("project", reverse("dashboards:project", args=[project_pk])),
         ("repository", reverse("dashboards:repository", args=[repository_pk])),
         ("overview_day_mode", reverse("dashboards:overview") + f"?mode=day&day={day.isoformat()}"),
+        ("people_index", reverse("dashboards:people_index")),
+        ("person", reverse("dashboards:person", args=[sample_pr.author.person_id])),
+        ("pull_requests_index", reverse("dashboards:pull_requests_index")),
+        ("pull_request_detail", reverse("dashboards:pull_request_detail", args=[sample_pr.pk])),
+        ("reviews", reverse("dashboards:reviews")),
+        ("exports_index", reverse("dashboards:exports_index")),
     ]
 
 
@@ -75,6 +87,12 @@ def _dashboard_urls() -> list[tuple[str, str]]:
             "project",
             "repository",
             "overview_day_mode",
+            "people_index",
+            "person",
+            "pull_requests_index",
+            "pull_request_detail",
+            "reviews",
+            "exports_index",
         ]
         for language in LANGUAGES
         for theme in THEMES

@@ -71,11 +71,14 @@ missing.
 | churn | `CHURN_WINDOW_DAYS` | int | `21` | Days after merge over which churn is measured. |
 | churn | `CHURN_MAX_FILES` | int | `50` | Maximum files in a PR before churn analysis is skipped. |
 | ui | `DASHBOARD_TABLE_PAGE_SIZE` | int | `25` | Rows per page on a dashboard table (projects, repositories, people, recent PRs). |
+| ui | `PR_FILES_DISPLAY_LIMIT` | int | `300` | Maximum files shown on the PR detail page before a "+N more" line. |
+| ui | `REVIEW_HEATMAP_TOP_N` | int | `15` | Authors/reviewers shown per axis on the reviews heat map; the rest fold into "Other". |
 | ui | `DEFAULT_UI_LANGUAGE` | str | `en` | Default UI language for a new user. Kept in sync with `UserPreference.language`'s field default by a test. |
 | ui | `DETECT_BROWSER_LANGUAGE` | bool | `False` | Whether to derive the initial UI language from the browser. |
 | ui | `DEFAULT_THEME` | str | `system` | Default UI theme for a new user. Kept in sync with `UserPreference.theme`'s field default by a test. |
 | export | `EXPORT_DURATION_UNIT` | str | `hours` | Unit durations are rendered in for CSV/XLSX exports. |
 | export | `EXPORT_SYNC_MAX_ROWS` | int | `20000` | Maximum rows a synchronous export may return. |
+| export | `EXPORT_RETENTION_DAYS` | int | `7` | Days a background export file is kept before cleanup deletes it. |
 
 Changing any `metrics`-group setting bumps `last_data_version`, so `compute()`'s cache stops serving pre-change
 results immediately (this is what keeps a `MIN_SAMPLE` change visible right away). It does **not** rewrite

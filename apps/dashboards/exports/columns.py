@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from urllib.parse import urljoin
 
 from django.utils.functional import Promise
 from django.utils.translation import gettext_lazy as _
@@ -50,6 +51,10 @@ class TableSpec:
     row_builder: Callable[[Scope, DashboardParams], list[dict[str, object]]]
     filename_slug: str
     metric_keys: tuple[str, ...] = ()
+    # A cheap `.count()` query mirroring `row_builder`'s row set, used only when no text search is
+    # active (`tables.full_row_count()`) so `views.export_table` can decide the sync-vs-background
+    # threshold without materialising and discarding every row dict first (round 2 review MINOR).
+    count_builder: Callable[[Scope, DashboardParams], int] | None = None
 
 
 def _metric_columns(
@@ -119,6 +124,16 @@ RECENT_PRS_COLUMNS = (
     ExportColumn("ai_tools", _("AI tools"), "badge_list", width=20),
     ExportColumn("violations_count", _("Violations"), "int", width=10),
 )
+PULL_REQUESTS_COLUMNS = (
+    *RECENT_PRS_COLUMNS,
+    ExportColumn("disclosure", _("Disclosure"), "text", width=14),
+    ExportColumn("review_rounds", _("Review rounds"), "int", width=10),
+    ExportColumn("churn_ratio", _("Churn"), "percent", width=10),
+)
+REVIEWER_LOAD_COLUMNS = (
+    ExportColumn(key="name", title=_("Reviewer"), type="url", link_key="url", width=30),
+    ExportColumn(key="reviews_given", title=_("Reviews given"), type="int", width=14),
+)
 
 
 def _project_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
@@ -143,13 +158,47 @@ def extract_value(column: ExportColumn, row: dict[str, object]) -> object:
     return row.get(column.key)
 
 
+def absolutize_urls(
+    rows: list[dict[str, object]], columns: tuple[ExportColumn, ...], base_url: str
+) -> list[dict[str, object]]:
+    """XLSX hyperlinks need an absolute URL (a relative `/projects/1/` is correct for an in-app
+    table or a CSV, which never writes an href, only display text, but `xlsxwriter.write_url()`
+    rejects an app-relative href outright). Shared by the synchronous export views
+    (`request.build_absolute_uri("/")`), `exports/reports.py::build_report()` and the background
+    job (`services.run_export_job()`, round 2 review MINOR) so all three produce the same
+    clickable-or-not result for the same `base_url`."""
+    link_keys = {column.link_key or column.key for column in columns if column.type == "url"}
+    if not base_url or not link_keys:
+        return rows
+    return [
+        {
+            **row,
+            **{
+                key: urljoin(base_url, str(row[key]))
+                for key in link_keys
+                if row.get(key) and str(row[key]).startswith("/")
+            },
+        }
+        for row in rows
+    ]
+
+
 TABLE_SPECS: dict[str, TableSpec] = {
     "projects": TableSpec(PROJECTS_COLUMNS, _project_rows, "projects", rows.PROJECT_REPOSITORY_METRIC_KEYS),
     "repositories": TableSpec(
         REPOSITORIES_COLUMNS, _repository_rows, "repositories", rows.PROJECT_REPOSITORY_METRIC_KEYS
     ),
     "people": TableSpec(PEOPLE_COLUMNS, _people_rows, "people", rows.PEOPLE_METRIC_KEYS),
-    "recent_prs": TableSpec(RECENT_PRS_COLUMNS, rows.recent_pr_rows, "pull_requests"),
+    "recent_prs": TableSpec(
+        RECENT_PRS_COLUMNS, rows.recent_pr_rows, "pull_requests", count_builder=rows.recent_pr_row_count
+    ),
+    "pull_requests": TableSpec(
+        PULL_REQUESTS_COLUMNS,
+        rows.pull_request_rows,
+        "pull_requests",
+        count_builder=rows.pull_request_row_count,
+    ),
+    "reviewer_load": TableSpec(REVIEWER_LOAD_COLUMNS, rows.reviewer_load_rows, "reviewer_load"),
 }
 
 

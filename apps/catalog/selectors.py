@@ -62,7 +62,14 @@ def people_in_scope(scope: ScopeFilter) -> QuerySet[Person]:
 
 
 def unmapped_identities(scope: ScopeFilter) -> QuerySet[Identity]:
-    return Identity.objects.filter(person=None).order_by("kind", "value")
+    queryset = Identity.objects.filter(person=None).order_by("kind", "value")
+    if scope.unrestricted:
+        return queryset
+    if scope.project_ids is not None:
+        queryset = queryset.filter(authored_pull_requests__repository__projects__id__in=scope.project_ids)
+    if scope.repository_ids is not None:
+        queryset = queryset.filter(authored_pull_requests__repository_id__in=scope.repository_ids)
+    return queryset.distinct()
 
 
 def unmapped_identity_count(scope: ScopeFilter) -> int:
@@ -70,12 +77,30 @@ def unmapped_identity_count(scope: ScopeFilter) -> int:
 
 
 def people_for_settings(scope: ScopeFilter) -> QuerySet[Person]:
-    return (
+    queryset = (
         Person.objects.prefetch_related("identities")
         .annotate(pr_count=Count("identities__authored_pull_requests", distinct=True))
         .order_by("display_name")
     )
+    if scope.unrestricted:
+        return queryset
+    if scope.project_ids is not None:
+        queryset = queryset.filter(
+            identities__authored_pull_requests__repository__projects__id__in=scope.project_ids
+        )
+    if scope.repository_ids is not None:
+        queryset = queryset.filter(identities__authored_pull_requests__repository_id__in=scope.repository_ids)
+    return queryset.distinct()
 
 
 def bot_person_count(scope: ScopeFilter) -> int:
-    return Person.objects.filter(is_bot=True).count()
+    queryset = Person.objects.filter(is_bot=True)
+    if scope.unrestricted:
+        return queryset.count()
+    if scope.project_ids is not None:
+        queryset = queryset.filter(
+            identities__authored_pull_requests__repository__projects__id__in=scope.project_ids
+        )
+    if scope.repository_ids is not None:
+        queryset = queryset.filter(identities__authored_pull_requests__repository_id__in=scope.repository_ids)
+    return queryset.distinct().count()

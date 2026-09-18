@@ -231,6 +231,20 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         _("Rows per page on a dashboard table (projects, repositories, people, recent PRs)."),
         "ui",
     ),
+    SettingDef(
+        "PR_FILES_DISPLAY_LIMIT",
+        "int",
+        300,
+        _("Maximum files shown on the PR detail page before a '+N more' line."),
+        "ui",
+    ),
+    SettingDef(
+        "REVIEW_HEATMAP_TOP_N",
+        "int",
+        15,
+        _("Authors/reviewers shown per axis on the reviews heat map; the rest fold into 'Other'."),
+        "ui",
+    ),
     SettingDef("DEFAULT_UI_LANGUAGE", "str", "en", _("Default UI language for a new user."), "ui"),
     SettingDef(
         "DETECT_BROWSER_LANGUAGE",
@@ -249,6 +263,13 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
     ),
     SettingDef(
         "EXPORT_SYNC_MAX_ROWS", "int", 20000, _("Maximum rows a synchronous export may return."), "export"
+    ),
+    SettingDef(
+        "EXPORT_RETENTION_DAYS",
+        "int",
+        7,
+        _("Days a background export file is kept before cleanup deletes it."),
+        "export",
     ),
     SettingDef(
         "SYNC_OVERLAP_MINUTES",

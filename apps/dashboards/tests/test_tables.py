@@ -7,7 +7,7 @@ import datetime
 
 import pytest
 
-from apps.accounts.selectors import scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
 from apps.activity.models import AIStatus
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
@@ -42,7 +42,7 @@ def _params(**overrides: object) -> DashboardParams:
 
 
 def _scope() -> Scope:
-    return Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    return Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
 
 
 # -- pure sort/search helpers -------------------------------------------------------------------

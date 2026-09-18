@@ -29,6 +29,7 @@ from apps.churn.factories import ChurnResultFactory
 from apps.churn.models import ChurnResult
 from apps.connections.admin import GitHubConnectionAdmin
 from apps.connections.models import GitHubConnection
+from apps.dashboards.models import ExportJob
 from apps.github_sync.models import SyncLock, SyncRun
 from apps.metrics.models import DailyRollup, DataVersion, DirtyDay
 from apps.policy.factories import PolicyViolationFactory
@@ -53,6 +54,7 @@ READ_ONLY_MODELS = {
     SyncLock,
     AuditEntry,
     GitHubConnection,
+    ExportJob,
 }
 
 EDITABLE_MODELS = {

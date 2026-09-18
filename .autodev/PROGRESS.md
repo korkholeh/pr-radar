@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 8/11 · step `commit`
+- **Current:** phase 9/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 6% (reset 18.09 16:40) · 7d 45%
-- **Totals:** 123 sessions · 16.3 h agent time · ≈$315.03 API-equivalent
-- **Clock:** 28.9 h since the run was created · 16.3 h working · 8.5 h paused on the usage limit · 4.2 h not running
-- **Updated:** 2026-09-18 12:08:50
+- **Usage:** 5h 13% (reset 18.09 21:40) · 7d 50%
+- **Totals:** 144 sessions · 19.8 h agent time · ≈$379.02 API-equivalent
+- **Clock:** 34.2 h since the run was created · 19.8 h working · 9.8 h paused on the usage limit · 4.7 h not running
+- **Updated:** 2026-09-18 17:28:24
 
 ## Run warnings
 
@@ -25,8 +25,8 @@
 | 5 | AI detection | yes | ✅ done | 66f9dc6 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 6 | AI policy engine and violations console | yes | ✅ done | 5f96b3b | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 7 | Metrics registry, rollups and recompute | no | ✅ done | 4808103 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 8 | Dashboards, charts, themes and table export | yes | 🔨 in_progress |  |  |
-| 9 | People, PRs, Reviews, scoped access and reports | yes | ⏳ pending |  |  |
+| 8 | Dashboards, charts, themes and table export | yes | ✅ done | 482e896 | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/08-dashboards-and-charts/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; e2e skipped: the surfaces could not be started; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 9 | People, PRs, Reviews, scoped access and reports | yes | 🔨 in_progress |  |  |
 | 10 | CI first-pass, follow-up fixes and churn | yes | ⏳ pending |  |  |
 | 11 | Polish, performance and documentation | yes | ⏳ pending |  |  |
 
@@ -256,6 +256,41 @@
 - `2026-09-18 12:07:35` **p08-tests** — pass: exit 0: ............................................................... [100%]
 - `2026-09-18 12:07:37` **e2e-up** — failed: exit 2 — see .autodev/logs/e2e-surfaces.log
 - `2026-09-18 12:08:50` **p08-docs** — done (1m, $0.69): Docs for phase 8 were nearly all already true (CLAUDE.md, docs/CONFIGURATION.md, docs/user/dashboards.md, docs/DECISIONS.md Phase 8 section, ADRs 0006/0007/0008, CHANGELOG.md, README.md, Makefile vendor target — all verified against the diff and current code, no changes needed). One stale line fixe…
+- `2026-09-18 12:08:50` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-18 12:08:50` **commit** — command files: this commit changes what the project's own commands run: Makefile
+- `2026-09-18 12:08:50` **p08-commit** — done: 482e896
+- `2026-09-18 12:08:53` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-18 12:08:58` **p08-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p08-dashboards-and-charts
+- `2026-09-18 12:09:01` **p08-pr** — draft: https://github.com/korkholeh/pr-radar/pull/9
+- `2026-09-18 12:09:15` **p08-merge** — done: https://github.com/korkholeh/pr-radar/pull/9
+- `2026-09-18 12:17:24` **p09-plan** — done (8m, $3.32): Explored the existing read surface, access plumbing and export layer, then wrote .autodev/phases/09-people-prs-and-access/PLAN.md with Context/Design/Tasks/Verification/Risks/Out-of-scope sections covering the real scope_for_user(), the People/Person/PR-list/PR-detail/Reviews pages, the seven-sheet…
+- `2026-09-18 12:37:24` **p09-implement** — handover: context reached 200,067 tokens — checkpointing for a fresh session
+- `2026-09-18 12:37:51` **p09-implement** — partial (20m, $6.07): Session 1 of phase 9 completed T1-T6 out of 27, all with passing tests: T1 real scope_for_user() (grant list, anonymous/None ⇒ restricted-empty, per-request memo); T2 closed the resulting selector gaps in apps/catalog/selectors.py (unmapped_identities, people_for_settings, bot_person_count now hono…
+- `2026-09-18 12:49:58` **p09-implement** — handover: context reached 202,511 tokens — checkpointing for a fresh session
+- `2026-09-18 12:56:20` **p09-implement** — partial (18m, $3.94): Completed T7-T9 of phase 9 this session (T1-T6 were already done from session 1): T7 apps/dashboards/person.py::build_comparison() (person vs primary-project vs organization baselines via metrics.compute(), reviewer_response_p50 correctly excluded from project/org calls since it's PERSON-only in th…
+- `2026-09-18 13:07:43` **p09-implement** — handover: context reached 200,999 tokens — checkpointing for a fresh session
+- `2026-09-18 13:11:48` **p09-implement** — partial (15m, $5.3): Phase 9 session 3: implemented T10 (rows.pull_request_rows + TABLE_SPECS/SEARCH_KEYS, plus a real SQLite JSON-contains bug fix in PRFilters.apply), T11 (/prs/ page, view, template, filter bar, nav), T12 (pr_detail.py timeline()/pr_metrics()), T14 (reviews.py reviewer_load/author_reviewer_matrix/prs…
+- `2026-09-18 13:22:20` **p09-implement** — handover: context reached 200,079 tokens — checkpointing for a fresh session
+- `2026-09-18 13:33:47` **p09-implement** — partial (21m, $6.04): T13 (PR detail page rebuild: timeline, per-PR metrics, files list w/ badges+cap, violations acknowledge/waive scoped to this PR via new `dashboards:pull_request_violation_action`, churn empty-state slot) and T15 (Reviews page: reviewer_load chart+table, author×reviewer heat map with new --heat-0..4…
+- `2026-09-18 13:41:17` **p09-implement** — handover: context reached 201,912 tokens — checkpointing for a fresh session
+- `2026-09-18 13:45:10` **p09-implement** — partial (11m, $3.43): T16 done (xlsx.py split into open_workbook()/write_sheet()/write_xlsx(), tested, marked [x] in PLAN.md). T17+T18 (apps/dashboards/exports/reports.py: build_report() with Summary/Trends+3 native charts/level table sheets/PRs/Violations/Metrics/Parameters, plus report_filename()) is written but UNTES…
+- `2026-09-18 14:00:02` **p09-implement** — handover: context reached 203,061 tokens — checkpointing for a fresh session
+- `2026-09-18 14:02:50` **p09-implement** — partial (17m, $5.83): Session picked up phase 9 at "T17/T18 — NEXT SESSION STARTS HERE." Completed: T17/T18 (wrote apps/dashboards/tests/test_reports.py per plan criteria; found and fixed a real crash in exports/xlsx.py::_write_value — write_url() raised ValueError on any relative href, which build_report() produces whe…
+- `2026-09-18 14:11:01` **p09-tests** — fail: exit 1: FAILED tests/test_factories.py::test_every_model_has_a_factory - AssertionErr...
+- `2026-09-18 14:16:19` **p09-test_fix1** — partial (5m, $0.86): Root causes fixed: (1) apps/accounts/tests/test_permissions.py had a stale stub-era test asserting scope_for_user() stays unrestricted with access rows — contradicts T1/PLAN.md's real grant-list semantics already implemented and covered by test_scope_for_user.py; updated the test to assert the corr…
+- `2026-09-18 14:23:23` **p09-tests** — pass: exit 0: ......................................... [100%]
+- `2026-09-18 14:28:20` **p09-review1** — changes_requested (4m, $3.29): Phase 9's access-control core is genuinely good: `scope_for_user()` is now a real grant list with a per-request memo, every new view and selector composes on it, and `tests/test_scope_isolation.py` proves the four exits (page, chart JSON, CSV, XLSX) plus a fifth for the report, each with a positive…
+- `2026-09-18 15:02:52` **p09-review_fix1** — done (34m, $13.46): Applied phase-9 review-r1 fixes. Fixed (blockers): - Background export layer (T22-T24): services.create_export_job()/run_export_job()/cleanup_exports(), apps/dashboards/tasks.py (export_job_task, cleanup_exports_task), manage.py process_exports/cleanup_exports, /exports/ + /exports/<pk>/download/ (…
+- `2026-09-18 15:09:29` **p09-tests** — pass: exit 0: ....................... [100%]
+- `2026-09-18 15:19:22` **p09-review2** — changes_requested (9m, $4.44): Phase 9 is materially complete and the r1 blockers/majors are genuinely fixed: `scope_for_user()` is a real grant list enforced at every exit, the background export layer (ExportJob, huey tasks, `process_exports`/`cleanup_exports`, "My exports", author-only 403 download, 7-day cleanup, stuck sweep)…
+- `2026-09-18 15:24:24` **usage** — paused: 5h usage 88% ≥ 85%; sleeping until ≈18.09 16:42
+- `2026-09-18 16:42:00` **usage** — resumed: 5h 0% (reset ?) · 7d 50%
+- `2026-09-18 17:16:57` **p09-review_fix2** — done (39m, $5.99): Applied round-2 review fixes for phase 9. Fixed: - MINOR: `views.export_table` now counts rows before building them (`TableSpec.count_builder`, `tables.full_row_count()`, `rows.pull_request_row_count()`/`recent_pr_row_count()`) instead of materialising the full row set just to discard it above the …
+- `2026-09-18 17:23:48` **p09-tests** — pass: exit 0: ........................... [100%]
+- `2026-09-18 17:26:51` **p09-review_audit2** — approve (3m, $1.34): Fixes hold. The single MAJOR (day-mode report aggregating the whole period) is rejected, and the rejection is correct and argued in DECISIONS: `params.parse()`'s day branch already forces `date_from = date_to = day` and `granularity = \"day\"` (DEFAULT_GRANULARITY == \"day\") before `build_report()…
+- `2026-09-18 17:26:53` **e2e-up** — failed: exit 2 — see .autodev/logs/e2e-surfaces.log
+- `2026-09-18 17:28:23` **p09-docs** — done (1m, $0.69): Verified phase-9 docs against PLAN.md, DECISIONS.md, and actual code/templates/settings — all already true, no edits made. CLAUDE.md lists process_exports/cleanup_exports and current stack correctly. docs/user/people.md, pull-requests.md, reviews.md, exports.md match real URLs, nav labels (template…
+- `2026-09-18 17:28:24` **p09-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

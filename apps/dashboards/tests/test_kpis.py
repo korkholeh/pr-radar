@@ -6,7 +6,7 @@ import datetime
 
 import pytest
 
-from apps.accounts.selectors import scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.dashboards import kpis
 from apps.dashboards.params import DashboardParams
 from apps.dashboards.services import build_dashboard
@@ -30,7 +30,7 @@ def test_row_metric_keys_are_registered_and_available_at_every_rendered_level(ro
 
 @pytest.mark.django_db
 def test_compare_row_matches_direct_compute_calls(django_user_model):
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=access)
     date_from = datetime.date(2026, 8, 1)
     date_to = datetime.date(2026, 8, 31)
@@ -53,7 +53,7 @@ def test_compare_row_matches_direct_compute_calls(django_user_model):
 
 @pytest.mark.django_db
 def test_build_dashboard_period_mode_returns_the_three_rows():
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=access)
     params = DashboardParams(
         mode="period",
@@ -78,7 +78,7 @@ def test_build_dashboard_period_mode_returns_the_three_rows():
 
 @pytest.mark.django_db
 def test_build_dashboard_day_mode_returns_the_two_rows():
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=access)
     params = DashboardParams(
         mode="day",

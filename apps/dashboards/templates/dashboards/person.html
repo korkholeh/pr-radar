@@ -1,0 +1,17 @@
+{% extends "dashboards/partials/_page.html" %}
+{% load i18n %}
+
+{% block title %}{{ scope_object }}{% endblock %}
+
+{% block heading %}
+  <h1 class="text-xl font-semibold text-[var(--text)]">
+    {{ scope_object }}
+    {% if params.mode == "day" %}&middot; {{ params.day }}{% endif %}
+  </h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% include "dashboards/partials/dashboard_content.html" %}
+  {% include "dashboards/partials/person_comparison.html" %}
+  {% include "dashboards/partials/person_notes.html" %}
+{% endblock %}

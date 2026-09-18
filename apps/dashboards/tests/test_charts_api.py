@@ -7,7 +7,7 @@ import datetime
 import pytest
 from django.urls import reverse
 
-from apps.accounts.selectors import scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.catalog.factories import ProjectFactory
 from apps.dashboards.charts import CHART_REGISTRY
 from apps.dashboards.params import DashboardParams
@@ -57,7 +57,7 @@ def test_endpoint_matches_compute(client, lead_user, chart_key):
     assert body["key"] == chart_key
     assert isinstance(body["datasets"], list)
 
-    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
     expected = CHART_REGISTRY[chart_key].build(scope, _global_params()).to_dict()
     assert body["datasets"] == expected["datasets"]
     assert any(value is not None for dataset in body["datasets"] for value in dataset["data"]), (
@@ -77,7 +77,7 @@ def test_throughput_endpoint_ai_and_non_ai_datasets_differ_and_match_compute(cli
     )
     body = response.json()
 
-    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
     expected = CHART_REGISTRY["throughput"].build(scope, _global_params()).to_dict()
     ai = next(d for d in body["datasets"] if d["color_token"] == "--series-ai")
     non_ai = next(d for d in body["datasets"] if d["color_token"] == "--series-non-ai")

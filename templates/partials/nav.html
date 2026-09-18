@@ -6,12 +6,16 @@
       <a href="{% url 'dashboards:overview' %}" class="text-[var(--text-muted)]">{% translate "Overview" %}</a>
       <a href="{% url 'dashboards:projects_index' %}" class="text-[var(--text-muted)]">{% translate "Projects" %}</a>
       <a href="{% url 'dashboards:repositories_index' %}" class="text-[var(--text-muted)]">{% translate "Repositories" %}</a>
+      <a href="{% url 'dashboards:people_index' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
+      <a href="{% url 'dashboards:pull_requests_index' %}" class="text-[var(--text-muted)]">{% translate "Pull requests" %}</a>
+      <a href="{% url 'dashboards:reviews' %}" class="text-[var(--text-muted)]">{% translate "Reviews" %}</a>
+      <a href="{% url 'dashboards:exports_index' %}" class="text-[var(--text-muted)]">{% translate "My exports" %}</a>
       <a href="{% url 'github_sync:sync' %}" class="text-[var(--text-muted)]">{% translate "Sync" %}</a>
       <a href="{% url 'policy:console' %}" class="text-[var(--text-muted)]">{% translate "Policy" %}</a>
       {% if perms.catalog.manage_settings %}
         <a href="{% url 'connections:list' %}" class="text-[var(--text-muted)]">{% translate "Connections" %}</a>
         <a href="{% url 'connections:discover' %}" class="text-[var(--text-muted)]">{% translate "Discover repositories" %}</a>
-        <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
+        <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People settings" %}</a>
         <a href="{% url 'ai_detection:rules' %}" class="text-[var(--text-muted)]">{% translate "Detection rules" %}</a>
         <a href="{% url 'policy:policy_settings' %}" class="text-[var(--text-muted)]">{% translate "AI policy" %}</a>
         <a href="{% url 'policy:sensitive_paths' %}" class="text-[var(--text-muted)]">{% translate "Sensitive paths" %}</a>

@@ -30,6 +30,12 @@ class MergePeopleForm(forms.Form):
         label=_("Into this person"), queryset=Person.objects.order_by("display_name")
     )
 
+    def __init__(self, *args, people=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if people is not None:
+            self.fields["source"].queryset = people
+            self.fields["target"].queryset = people
+
     def clean(self):
         cleaned = super().clean()
         source = cleaned.get("source")

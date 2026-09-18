@@ -14,7 +14,8 @@ from typing import Any
 from django.http import QueryDict
 
 from apps.accounts.selectors import ScopeFilter
-from apps.dashboards.forms import DashboardFilterForm
+from apps.dashboards.forms import DashboardFilterForm, PullRequestFilterForm
+from apps.dashboards.pr_filters import PRFilters
 from apps.metrics.timeframe import today as report_today
 from apps.metrics.types import Scope
 
@@ -93,6 +94,7 @@ class DashboardParams:
     sort: str
     page: int
     table: str
+    pr_filters: PRFilters = PRFilters()
 
     def to_query_dict(self) -> QueryDict:
         """Canonical, sorted, omits defaults — what the filter bar's links and every chart/export
@@ -124,6 +126,18 @@ class DashboardParams:
             query_dict["page"] = str(self.page)
         if self.table:
             query_dict["table"] = self.table
+        if self.pr_filters.author_ids:
+            query_dict.setlist("author", [str(author_id) for author_id in self.pr_filters.author_ids])
+        if self.pr_filters.states:
+            query_dict.setlist("state", list(self.pr_filters.states))
+        if self.pr_filters.ai_statuses:
+            query_dict.setlist("ai_status", list(self.pr_filters.ai_statuses))
+        if self.pr_filters.tools:
+            query_dict.setlist("tool", list(self.pr_filters.tools))
+        if self.pr_filters.size_buckets:
+            query_dict.setlist("size", list(self.pr_filters.size_buckets))
+        if self.pr_filters.has_violations:
+            query_dict["has_violations"] = self.pr_filters.has_violations
         query_dict = query_dict.copy()
         query_dict._mutable = False  # noqa: SLF001 -- QueryDict has no public freeze API.
         return query_dict
@@ -137,15 +151,28 @@ def parse(
     *,
     projects=None,
     repositories=None,
+    people=None,
     today: date | None = None,
 ) -> DashboardParams:
-    """The only way a `DashboardParams` is built from a request. `projects`/`repositories` are
-    the caller's already-scoped querysets (same contract as `policy.forms.ViolationFilterForm`);
+    """The only way a `DashboardParams` is built from a request. `projects`/`repositories`/`people`
+    are the caller's already-scoped querysets (same contract as `policy.forms.ViolationFilterForm`);
     an id outside them is dropped, never a validation error."""
     resolved_today = today if today is not None else report_today()
     form = DashboardFilterForm(query, projects=projects, repositories=repositories)
     form.is_valid()
     cleaned = form.cleaned_data
+
+    pr_filter_form = PullRequestFilterForm(query, people=people)
+    pr_filter_form.is_valid()
+    pr_cleaned = pr_filter_form.cleaned_data
+    pr_filters = PRFilters(
+        author_ids=tuple(sorted(pr_cleaned["author"].values_list("pk", flat=True))),
+        states=tuple(sorted(pr_cleaned["state"])),
+        ai_statuses=tuple(sorted(pr_cleaned["ai_status"])),
+        tools=tuple(sorted(pr_cleaned["tool"])),
+        size_buckets=tuple(sorted(pr_cleaned["size"])),
+        has_violations=pr_cleaned["has_violations"],
+    )
 
     mode = cleaned["mode"] or DEFAULT_MODE
     day = cleaned["day"] or resolved_today
@@ -181,6 +208,7 @@ def parse(
         sort=cleaned["sort"],
         page=cleaned["page"] or DEFAULT_PAGE,
         table=cleaned["table"],
+        pr_filters=pr_filters,
     )
 
 

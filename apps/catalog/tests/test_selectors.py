@@ -7,6 +7,7 @@ from apps.activity.factories import PullRequestFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
 from apps.catalog.models import Identity
 from apps.catalog.selectors import (
+    bot_person_count,
     people_for_settings,
     people_in_scope,
     projects_in_scope,
@@ -17,10 +18,10 @@ from apps.catalog.selectors import (
 
 
 @pytest.mark.django_db
-def test_unmapped_identities_lists_only_unmapped_rows():
+def test_unmapped_identities_lists_only_unmapped_rows(lead_user):
     mapped = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="mapped", person=PersonFactory())
     unmapped = IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="nobody@example.com")
-    scope = scope_for_user(None)
+    scope = scope_for_user(lead_user)
 
     result = list(unmapped_identities(scope))
 
@@ -29,21 +30,21 @@ def test_unmapped_identities_lists_only_unmapped_rows():
 
 
 @pytest.mark.django_db
-def test_unmapped_identity_count_matches_queryset():
+def test_unmapped_identity_count_matches_queryset(lead_user):
     IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="a@example.com")
     IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="b@example.com")
-    scope = scope_for_user(None)
+    scope = scope_for_user(lead_user)
 
     assert unmapped_identity_count(scope) == 2
 
 
 @pytest.mark.django_db
-def test_people_for_settings_query_count():
+def test_people_for_settings_query_count(lead_user):
     for i in range(5):
         person = PersonFactory()
         IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value=f"login-{i}", person=person)
 
-    scope = scope_for_user(None)
+    scope = scope_for_user(lead_user)
     with CaptureQueriesContext(connection) as ctx:
         for person in people_for_settings(scope):
             list(person.identities.all())
@@ -188,3 +189,64 @@ def test_people_in_scope_narrows_to_activity_in_the_callers_projects():
 
     assert person in result
     assert other_person not in result
+
+
+@pytest.mark.django_db
+def test_unmapped_identities_honours_scope():
+    repo_in = RepositoryFactory()
+    repo_out = RepositoryFactory()
+    project = ProjectFactory()
+    project.repositories.add(repo_in)
+
+    identity_in = IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="in@example.com")
+    PullRequestFactory(repository=repo_in, author=identity_in)
+    identity_out = IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="out@example.com")
+    PullRequestFactory(repository=repo_out, author=identity_out)
+
+    scope = ScopeFilter(unrestricted=False, project_ids=frozenset({project.pk}))
+    result = list(unmapped_identities(scope))
+
+    assert identity_in in result
+    assert identity_out not in result
+
+
+@pytest.mark.django_db
+def test_people_for_settings_honours_scope():
+    repo_in = RepositoryFactory()
+    repo_out = RepositoryFactory()
+    project = ProjectFactory()
+    project.repositories.add(repo_in)
+
+    person_in = PersonFactory()
+    identity_in = IdentityFactory(person=person_in)
+    PullRequestFactory(repository=repo_in, author=identity_in)
+
+    person_out = PersonFactory()
+    identity_out = IdentityFactory(person=person_out)
+    PullRequestFactory(repository=repo_out, author=identity_out)
+
+    scope = ScopeFilter(unrestricted=False, project_ids=frozenset({project.pk}))
+    result = list(people_for_settings(scope))
+
+    assert person_in in result
+    assert person_out not in result
+
+
+@pytest.mark.django_db
+def test_bot_person_count_honours_scope():
+    repo_in = RepositoryFactory()
+    repo_out = RepositoryFactory()
+    project = ProjectFactory()
+    project.repositories.add(repo_in)
+
+    bot_in = PersonFactory(is_bot=True)
+    identity_in = IdentityFactory(person=bot_in)
+    PullRequestFactory(repository=repo_in, author=identity_in)
+
+    bot_out = PersonFactory(is_bot=True)
+    identity_out = IdentityFactory(person=bot_out)
+    PullRequestFactory(repository=repo_out, author=identity_out)
+
+    scope = ScopeFilter(unrestricted=False, project_ids=frozenset({project.pk}))
+
+    assert bot_person_count(scope) == 1

@@ -353,3 +353,57 @@ across the huey worker and the web process alike.
 Full detail — the six chart specs, the `ExportColumn`/`TABLE_SPECS` shape, the XLSX formatting rules, and the
 `seed_demo` design — is in `.autodev/phases/08-dashboards-and-charts/PLAN.md`'s Design section and the
 `## p08-plan`/`## p08-implement` entries of `.autodev/DECISIONS.md`.
+
+## Phase 9
+
+**`scope_for_user()` became a real grant list in one change, not a gradual rollout.** Every domain selector
+already composed on `ScopeFilter` from phase 1 onward (`projects_in_scope`, `pull_requests_in_scope`,
+`violations_in_scope`, `scoped_pull_requests`/`scoped_reviews`/`scoped_violations`, …) — the stub that always
+returned `unrestricted=True` was the only thing making the restriction inert. Flipping it to a real
+`UserProjectAccess` grant list therefore activated scoping everywhere at once: pages, chart JSON, CSV/XLSX
+exports and the report all narrow through the same choke point, and `tests/test_scope_isolation.py` proves
+each exit separately with a positive control, so a page that happened to return nothing could not be mistaken
+for "isolated". A user with **no** grant rows sees everything (a grant list, not a role) — a superuser with
+grant rows is restricted like anyone else, which is the spec's rule, not an oversight.
+
+**A restricted lead's PR-page violation action posts to its own view, not the Policy console's.**
+`policy:violation_bulk_action`'s htmx branch always re-renders the console's own filtered/paginated table, which
+has no notion of "this one PR" — reusing it from the PR page would have swapped the PR's violations block with
+console-wide content. `dashboards:pull_request_violation_action` calls the same
+`policy.services.apply_bulk_status_change()` and the same form/wording, so behaviour and the audit trail are
+identical; it binds `violation_ids` to `violations_for_pull_request(scope, pk)`, so a violation id from another
+PR is a validation error, not silently applied.
+
+**A per-team comparison baseline on the Person page is deferred, not built.** The page compares a person against
+their primary project (the project with most of their PRs in the period) and the whole organisation — both real
+medians over raw rows at that level, never a median of per-person medians (ADR 0007). A per-team baseline would
+need a `team` dimension threaded through `Scope`/`DailyRollup`, which is a bigger structural change than this
+phase's read-surface work; `Person.team` is shown on the page as a label only.
+
+**`ExportJob.file`'s storage is a callable, not a bare `FileSystemStorage` instance.** Django's migration
+serializer bakes an instantiated storage's `location` kwarg into the migration file as a literal absolute path
+(this machine's `DATA_DIR`), which would break `makemigrations --check --dry-run` and the file's real location
+on every other machine. A zero-argument callable that reads `settings.DATA_DIR` at call time is instead recorded
+as an import reference and re-evaluated wherever the app runs — table exports and reports keep writing under
+`DATA_DIR/exports/`, never `MEDIA_ROOT`, so no URL can serve a file directly, only the author-only download view.
+
+**A background export job re-resolves `scope_for_user(job.user)` and re-parses the query string at run time,
+not at enqueue time.** `ExportJob.params` stores the canonical query string plus `scope_type`/`scope_id`/
+`table_key`/`fmt` — enough to rebuild the `Scope` from scratch — rather than a pre-resolved row set, so a grant
+revoked between enqueue and run is honoured by the time the huey worker (or `manage.py process_exports`, for
+when no worker is running) actually processes it (RISKS row 3). The task always leaves the job in a terminal
+state: any exception inside `run_export_job()` is caught and recorded as `status=FAILED, error_code="failed"`
+rather than propagating, since an unhandled exception in a background task has no request to surface it to.
+
+**The report's Violations sheet reads `metrics.selectors.scoped_violations(scope)`, not
+`policy.selectors.violations_in_scope(scope.access)`.** The latter applies only the caller's *access* filter,
+not the report's own project/repository/person narrowing — a project- or person-scoped report would otherwise
+list every visible project's violations alongside its own, the one place in the workbook that didn't match what
+the rest of the sheets (and the page itself) show. Every other sheet already went through a `scope`-aware
+selector (`compute()` for Summary, `scoped_pull_requests`-backed builders for the PRs/table sheets); Violations
+now does too.
+
+Full detail — the `PRFilters` shape, the timeline/per-PR-metrics split from `metrics.compute()`, the reviewer
+heat map's "Other" fold and heat-level tokens, and the seven-sheet report's sheet-by-sheet design — is in
+`.autodev/phases/09-people-prs-and-access/PLAN.md`'s Design section and the `## p09-*` entries of
+`.autodev/DECISIONS.md`.

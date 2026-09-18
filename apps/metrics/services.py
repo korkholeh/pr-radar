@@ -37,6 +37,9 @@ _DATA_VERSION_CACHE_KEY = "metrics:data-version"
 
 
 def _id_in_scope(scope_type: str, scope_id: int, access: ScopeFilter) -> bool:
+    # Only checks project_ids, never repository_ids: `access` here is always the caller's
+    # `scope_for_user()` grant (the projects axis), and `repository_ids` is the dashboard filter
+    # bar's UI-level narrowing (apps/accounts/selectors.py), never an access grant on its own.
     project_ids = access.project_ids or frozenset()
     if scope_type == ScopeType.PROJECT:
         return scope_id in project_ids

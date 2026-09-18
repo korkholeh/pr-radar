@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
-import logging
+from unittest import mock
 
 import openpyxl
 import pytest
@@ -12,6 +12,7 @@ from django.urls import reverse
 
 from apps.catalog.factories import ProjectFactory, RepositoryFactory
 from apps.catalog.services import set_setting
+from apps.dashboards.models import ExportJob
 from apps.dashboards.tables import paginate_rows
 from apps.metrics.models import ScopeType
 
@@ -93,19 +94,25 @@ def test_day_mode_export_filename_uses_the_day_not_a_range(client, lead_user):
 
 
 @pytest.mark.django_db
-def test_export_exceeding_the_configured_cap_is_logged_not_silently_uncapped(client, lead_user, caplog):
-    """Round-1 review: `EXPORT_SYNC_MAX_ROWS` was read nowhere — the row count wasn't even
-    recorded, despite the plan and docs implying it was. The background-job path stays phase 9;
-    this only proves an operator gets a signal when the configured cap is exceeded."""
+def test_export_exceeding_the_configured_cap_becomes_a_background_job(client, lead_user):
+    """Phase 9 T22: above `EXPORT_SYNC_MAX_ROWS`, `export_table` enqueues an `ExportJob` and
+    redirects to "My exports" instead of streaming every row in the request (plan §6, acceptance
+    criterion #9). The task itself is patched so this proves the *enqueue*, not the job's own
+    processing (covered separately in `test_export_jobs.py`)."""
     client.force_login(lead_user)
     set_setting("EXPORT_SYNC_MAX_ROWS", 2)
     for index in range(5):
         ProjectFactory(name=f"Radar Project {index:02d}")
 
-    with caplog.at_level(logging.WARNING, logger="apps.dashboards.views"):
+    with mock.patch("apps.dashboards.views.tasks.export_job_task") as mock_task:
         response = client.get(reverse("dashboards:export", args=["projects", "csv"]), {"q": "Radar Project"})
-    assert response.status_code == 200
-    assert any("EXPORT_SYNC_MAX_ROWS" in record.message for record in caplog.records)
+
+    assert response.status_code == 302
+    assert response.url == reverse("dashboards:exports_index")
+    job = ExportJob.objects.get()
+    assert job.status == ExportJob.Status.PENDING
+    assert job.kind == ExportJob.Kind.TABLE_CSV
+    mock_task.assert_called_once_with(job.id)
 
 
 @pytest.mark.django_db

@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}
+Private notes card (plan §2): visible to any authenticated lead with the person in scope. Saved
+via htmx to `dashboards:person_notes`, which swaps this fragment back in; a non-htmx submit falls
+back to a full-page redirect. The note text itself never reaches `AuditEntry` (CLAUDE.md).
+{% endcomment %}
+<div id="person-notes" class="mt-6 rounded border border-[var(--border)] p-4" data-testid="person-notes">
+  <h2 class="text-sm font-semibold text-[var(--text)] mb-2">{% translate "Private notes" %}</h2>
+  <form
+    method="post"
+    action="{% url 'dashboards:person_notes' scope_object.pk %}"
+    hx-post="{% url 'dashboards:person_notes' scope_object.pk %}"
+    hx-target="#person-notes"
+    hx-swap="outerHTML"
+  >
+    {% csrf_token %}
+    <textarea
+      name="notes"
+      rows="4"
+      class="w-full rounded border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] p-2"
+      data-testid="person-notes-input"
+    >{{ scope_object.notes }}</textarea>
+    <button
+      type="submit"
+      class="mt-2 rounded border border-[var(--border)] px-3 py-1 text-sm text-[var(--text)]"
+      data-testid="person-notes-save"
+    >
+      {% translate "Save" %}
+    </button>
+  </form>
+</div>

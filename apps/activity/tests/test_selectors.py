@@ -1,6 +1,6 @@
 import pytest
 
-from apps.accounts.selectors import ScopeFilter, scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
 from apps.activity.selectors import bot_pull_request_count, pull_requests_for_metrics
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
@@ -9,7 +9,7 @@ from apps.catalog.models import Identity
 
 @pytest.mark.django_db
 def test_bot_pr_is_out_of_the_metric_population_and_in_the_bot_counter(rf):
-    scope = scope_for_user(None)
+    scope = ScopeFilter(unrestricted=True)
     bot_person = PersonFactory(is_bot=True)
     bot_identity = IdentityFactory(
         kind=Identity.Kind.GITHUB_LOGIN, value="dependabot[bot]", person=bot_person
@@ -22,7 +22,7 @@ def test_bot_pr_is_out_of_the_metric_population_and_in_the_bot_counter(rf):
 
 @pytest.mark.django_db
 def test_excluded_person_pr_is_out_but_not_counted_as_a_bot():
-    scope = scope_for_user(None)
+    scope = ScopeFilter(unrestricted=True)
     excluded_person = PersonFactory(is_bot=False, exclude_from_metrics=True)
     identity = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="ex-employee", person=excluded_person)
     pr = PullRequestFactory(author=identity)
@@ -33,7 +33,7 @@ def test_excluded_person_pr_is_out_but_not_counted_as_a_bot():
 
 @pytest.mark.django_db
 def test_unmapped_author_pr_stays_in_the_metric_population():
-    scope = scope_for_user(None)
+    scope = ScopeFilter(unrestricted=True)
     identity = IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value="nobody@example.com")
     pr = PullRequestFactory(author=identity)
 

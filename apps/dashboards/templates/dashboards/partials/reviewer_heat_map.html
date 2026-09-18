@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}
+Author x reviewer heat map (plan §4): a server-side HTML table since Chart.js has no matrix type.
+Every cell carries the count as visible text as well as its `--heat-0`..`--heat-4` colour (spec
+§10.5: status is never colour-only). `id=None` on either axis is the folded "Other" bucket.
+{% endcomment %}
+<section class="mb-6" data-testid="reviewer-heat-map">
+  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Author × reviewer" %}</h2>
+  {% if heat_grid %}
+    <table class="text-sm" id="reviewer-heat-map-table">
+      <caption class="sr-only">{% translate "Reviews by author and reviewer" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          {% for reviewer in heat_map.reviewers %}
+            <th scope="col" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ reviewer.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in heat_grid %}
+          <tr>
+            <th scope="row" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ row.author.label }}</th>
+            {% for cell in row.cells %}
+              <td
+                class="px-2 py-1 text-center text-[var(--text)]"
+                style="background-color: var(--heat-{{ cell.level }})"
+                data-testid="heat-cell"
+                data-heat-level="{{ cell.level }}"
+              >
+                {{ cell.value }}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-[var(--text-muted)]">{% translate "No reviews in this period." %}</p>
+  {% endif %}
+</section>

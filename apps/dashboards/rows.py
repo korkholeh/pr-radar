@@ -5,7 +5,7 @@ the three renderers cannot drift apart."""
 
 from __future__ import annotations
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.urls import reverse
 
 from apps.accounts.selectors import ScopeFilter
@@ -16,6 +16,7 @@ from apps.metrics.selectors import scoped_pull_requests, scoped_reviews
 from apps.metrics.services import compute_many
 from apps.metrics.timeframe import day_end_exclusive, day_start
 from apps.metrics.types import MetricResultSet, Scope
+from apps.policy.models import PolicyViolation
 
 PROJECT_REPOSITORY_METRIC_KEYS: tuple[str, ...] = (
     "prs_merged",
@@ -184,6 +185,99 @@ def people_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]
     ]
 
 
+def _pr_row(pull_request) -> dict[str, object]:
+    return {
+        "id": pull_request.id,
+        "repository": pull_request.repository.full_name,
+        "number": pull_request.number,
+        "url": reverse("dashboards:pull_request_detail", args=[pull_request.pk]),
+        "title": pull_request.title,
+        "author": (
+            pull_request.author.person.display_name
+            if pull_request.author and pull_request.author.person
+            else ""
+        ),
+        "state": pull_request.state,
+        "created_at": pull_request.created_at,
+        "merged_at": pull_request.merged_at,
+        "size_bucket": pull_request.size_bucket or "",
+        "ai_status": pull_request.ai_status,
+        "ai_tools": pull_request.ai_tools,
+        "violations_count": pull_request.violations_count,
+    }
+
+
+def pull_request_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
+    """The PR list's own row set (plan §3): every PR in `scope` created in the period, narrowed by
+    `params.pr_filters` — a superset of `recent_pr_rows()`'s dashboard-card list, which stays on
+    `last_activity_at` and has no filter form. `violations_count` counts only *open* violations
+    (matches the badge the row renders), one annotation so the list pays no N+1. `disclosure`/
+    `review_rounds` reuse the row directly; `churn_ratio` is always `None` until phase 10 computes
+    `ChurnResult` (CLAUDE.md: a missing value is `None`, never `0`)."""
+    queryset = scoped_pull_requests(scope).filter(
+        created_at__gte=day_start(params.date_from),
+        created_at__lt=day_end_exclusive(params.date_to),
+    )
+    queryset = params.pr_filters.apply(queryset)
+    queryset = (
+        queryset.select_related("repository", "author__person")
+        .annotate(
+            violations_count=Count("violations", filter=Q(violations__status=PolicyViolation.Status.OPEN))
+        )
+        .order_by("-created_at")
+    )
+    return [
+        {
+            **_pr_row(pull_request),
+            "disclosure": pull_request.get_ai_disclosure_display(),
+            "review_rounds": pull_request.review_rounds,
+            "churn_ratio": None,
+        }
+        for pull_request in queryset
+    ]
+
+
+def pull_request_row_count(scope: Scope, params: DashboardParams) -> int:
+    """`.count()` twin of `pull_request_rows()` (round 2 review MINOR): the PR list is the one
+    table realistically large enough to hit `EXPORT_SYNC_MAX_ROWS`, so `views.export_table` counts
+    this instead of building and discarding every row dict first."""
+    queryset = scoped_pull_requests(scope).filter(
+        created_at__gte=day_start(params.date_from),
+        created_at__lt=day_end_exclusive(params.date_to),
+    )
+    return params.pr_filters.apply(queryset).count()
+
+
+def recent_pr_row_count(scope: Scope, params: DashboardParams) -> int:
+    """`.count()` twin of `recent_pr_rows()` (round 2 review MINOR)."""
+    cohort = _resolve_table_cohort(params)
+    return (
+        scoped_pull_requests(scope, cohort)
+        .filter(
+            last_activity_at__gte=day_start(params.date_from),
+            last_activity_at__lt=day_end_exclusive(params.date_to),
+        )
+        .count()
+    )
+
+
+def reviewer_load_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
+    """The Reviews page's own table: `reviews.reviewer_load()`'s `[(Person, reviews_given)]`,
+    already descending by count — a workload view, not a people ranking (RISKS row 1), so this
+    preserves that order rather than re-sorting by name."""
+    from apps.dashboards.reviews import reviewer_load
+
+    return [
+        {
+            "id": person.id,
+            "name": person.display_name,
+            "url": reverse("dashboards:person", args=[person.id]),
+            "reviews_given": count,
+        }
+        for person, count in reviewer_load(scope, params)
+    ]
+
+
 def recent_pr_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
     """A real queryset (`select_related`/`annotate`), not `compute()` — PRs touched in the period,
     ordered most-recent-first."""
@@ -198,25 +292,4 @@ def recent_pr_rows(scope: Scope, params: DashboardParams) -> list[dict[str, obje
         .annotate(violations_count=Count("violations"))
         .order_by("-last_activity_at")
     )
-    return [
-        {
-            "id": pull_request.id,
-            "repository": pull_request.repository.full_name,
-            "number": pull_request.number,
-            "url": reverse("dashboards:pull_request_detail", args=[pull_request.pk]),
-            "title": pull_request.title,
-            "author": (
-                pull_request.author.person.display_name
-                if pull_request.author and pull_request.author.person
-                else ""
-            ),
-            "state": pull_request.state,
-            "created_at": pull_request.created_at,
-            "merged_at": pull_request.merged_at,
-            "size_bucket": pull_request.size_bucket or "",
-            "ai_status": pull_request.ai_status,
-            "ai_tools": pull_request.ai_tools,
-            "violations_count": pull_request.violations_count,
-        }
-        for pull_request in queryset
-    ]
+    return [_pr_row(pull_request) for pull_request in queryset]
