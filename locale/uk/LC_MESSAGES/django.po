@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 06:15+0000\n"
+"POT-Creation-Date: 2026-09-18 11:44+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -11,10 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
-"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
-"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
-"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #: apps/accounts/models.py:8 templates/partials/theme_switcher.html:7
 msgid "System"
@@ -37,6 +34,7 @@ msgid "Ukrainian"
 msgstr "Українська"
 
 #: apps/accounts/models.py:20 apps/accounts/models.py:38
+#: apps/dashboards/models.py:46
 msgid "user"
 msgstr "користувач"
 
@@ -44,7 +42,7 @@ msgstr "користувач"
 msgid "theme"
 msgstr "тема"
 
-#: apps/accounts/models.py:23
+#: apps/accounts/models.py:23 apps/dashboards/models.py:52
 msgid "language"
 msgstr "мова"
 
@@ -64,7 +62,8 @@ msgstr "проєкт"
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:302
 #: apps/ai_detection/models.py:56 apps/connections/models.py:43
-#: apps/policy/models.py:20 apps/policy/models.py:119
+#: apps/dashboards/models.py:60 apps/policy/models.py:20
+#: apps/policy/models.py:119
 msgid "created at"
 msgstr "створено"
 
@@ -143,7 +142,7 @@ msgid "Unknown"
 msgstr "Невідомо"
 
 #: apps/activity/models.py:14 apps/activity/models.py:322
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:32
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:133
 msgid "None"
 msgstr "Немає"
 
@@ -187,11 +186,12 @@ msgstr "XL"
 msgid "Open"
 msgstr "Відкрито"
 
-#: apps/activity/models.py:32
+#: apps/activity/models.py:32 apps/dashboards/pr_detail.py:21
 msgid "Closed"
 msgstr "Закрито"
 
-#: apps/activity/models.py:33 apps/dashboards/exports/columns.py:87
+#: apps/activity/models.py:33 apps/dashboards/exports/columns.py:116
+#: apps/dashboards/pr_detail.py:20
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:74
 msgid "Merged"
 msgstr "Змерджено"
@@ -357,11 +357,12 @@ msgstr "це hotfix"
 msgid "has test changes"
 msgstr "має зміни в тестах"
 
-#: apps/activity/models.py:116 apps/dashboards/exports/columns.py:89
+#: apps/activity/models.py:116 apps/dashboards/exports/columns.py:118
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:139
 msgid "AI status"
 msgstr "статус ШІ"
 
-#: apps/activity/models.py:118 apps/dashboards/exports/columns.py:90
+#: apps/activity/models.py:118 apps/dashboards/exports/columns.py:119
 msgid "AI tools"
 msgstr "інструменти ШІ"
 
@@ -451,8 +452,8 @@ msgid "path"
 msgstr "шлях"
 
 #: apps/activity/models.py:227 apps/churn/models.py:24
-#: apps/connections/models.py:28 apps/github_sync/models.py:21
-#: apps/policy/models.py:108
+#: apps/connections/models.py:28 apps/dashboards/models.py:53
+#: apps/github_sync/models.py:21 apps/policy/models.py:108
 msgid "status"
 msgstr "статус"
 
@@ -540,7 +541,7 @@ msgstr "Помилка"
 msgid "Error"
 msgstr "Помилка виконання"
 
-#: apps/activity/models.py:321
+#: apps/activity/models.py:321 apps/dashboards/models.py:40
 msgid "Pending"
 msgstr "Очікує"
 
@@ -578,7 +579,7 @@ msgstr "Назва"
 
 #: apps/ai_detection/forms.py:13 apps/ai_detection/forms.py:38
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:14
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:41
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:142
 msgid "Detector"
 msgstr "Детектор"
 
@@ -588,13 +589,13 @@ msgstr "Патерн"
 
 #: apps/ai_detection/forms.py:15 apps/ai_detection/forms.py:40
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:15
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:143
 msgid "Tool"
 msgstr "Інструмент"
 
 #: apps/ai_detection/forms.py:16 apps/ai_detection/forms.py:41
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:16
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:43
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:144
 msgid "Confidence"
 msgstr "Впевненість"
 
@@ -681,6 +682,7 @@ msgid "ChatGPT"
 msgstr "ChatGPT"
 
 #: apps/ai_detection/models.py:39 apps/catalog/models.py:94
+#: apps/dashboards/reviews.py:84
 msgid "Other"
 msgstr "Інше"
 
@@ -750,7 +752,8 @@ msgstr "Не є коректним регулярним виразом: %(error)
 #: apps/ai_detection/models.py:79
 msgid ""
 "This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
-"which can hang on a normal PR body. Rewrite it without the nested quantifier."
+"which can hang on a normal PR body. Rewrite it without the nested "
+"quantifier."
 msgstr ""
 "Цей шаблон вкладає групу з повторенням в іншу групу з повторенням "
 "(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
@@ -777,8 +780,8 @@ msgid "AI signal"
 msgstr "сигнал ШІ"
 
 #: apps/ai_detection/models.py:113
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:21
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:38
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:122
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:139
 msgid "AI signals"
 msgstr "сигнали ШІ"
 
@@ -808,6 +811,7 @@ msgstr "Нове правило детекції"
 #: apps/ai_detection/templates/ai_detection/partials/rule_form.html:29
 #: apps/catalog/templates/catalog/partials/person_form.html:29
 #: apps/connections/templates/connections/partials/form.html:44
+#: apps/dashboards/templates/dashboards/partials/person_notes.html:28
 #: apps/policy/templates/policy/partials/sensitive_path_form.html:29
 msgid "Save"
 msgstr "Зберегти"
@@ -817,6 +821,10 @@ msgstr "Зберегти"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/connections/templates/connections/partials/discovery_content.html:76
 #: apps/connections/templates/connections/partials/row.html:18
+#: apps/dashboards/exports/reports.py:148
+#: apps/dashboards/exports/reports.py:366
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:56
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:60
 #: apps/policy/templates/policy/partials/policy_form.html:48
 #: apps/policy/templates/policy/partials/policy_form.html:50
 #: apps/policy/templates/policy/partials/policy_form.html:54
@@ -829,6 +837,10 @@ msgstr "Так"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/connections/templates/connections/partials/discovery_content.html:76
 #: apps/connections/templates/connections/partials/row.html:18
+#: apps/dashboards/exports/reports.py:148
+#: apps/dashboards/exports/reports.py:366
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:56
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:60
 #: apps/policy/templates/policy/partials/policy_form.html:48
 #: apps/policy/templates/policy/partials/policy_form.html:50
 #: apps/policy/templates/policy/partials/policy_form.html:54
@@ -858,7 +870,7 @@ msgstr "Активувати"
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:4
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:10
 #: apps/ai_detection/templates/ai_detection/rules.html:3
-#: templates/partials/nav.html:15
+#: templates/partials/nav.html:19
 msgid "Detection rules"
 msgstr "Правила детекції"
 
@@ -921,8 +933,9 @@ msgstr "Бот"
 msgid "Exclude from metrics"
 msgstr "Виключити з метрик"
 
-#: apps/catalog/forms.py:22 apps/dashboards/exports/columns.py:77
+#: apps/catalog/forms.py:22 apps/dashboards/exports/columns.py:98
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:72
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:14
 #: apps/metrics/models.py:9
 msgid "Person"
 msgstr "Людина"
@@ -935,15 +948,16 @@ msgstr "Об'єднати цю людину"
 msgid "Into this person"
 msgstr "З цією людиною"
 
-#: apps/catalog/forms.py:38 apps/catalog/identity.py:148
+#: apps/catalog/forms.py:44 apps/catalog/identity.py:148
 msgid "Cannot merge a person into themselves."
 msgstr "Не можна об'єднати людину із самою собою."
 
 #: apps/catalog/models.py:11
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:16
 msgid "Organization"
 msgstr "Організація"
 
-#: apps/catalog/models.py:12
+#: apps/catalog/models.py:12 apps/dashboards/exports/reports.py:352
 msgid "User"
 msgstr "Користувач"
 
@@ -1065,6 +1079,7 @@ msgid "Git email"
 msgstr "email Git"
 
 #: apps/catalog/models.py:126 apps/connections/models.py:20
+#: apps/dashboards/models.py:48
 msgid "kind"
 msgstr "вид"
 
@@ -1196,8 +1211,8 @@ msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
 msgstr ""
-"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
-"формальним."
+"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю"
+" формальним."
 
 #: apps/catalog/setting_defs.py:165
 msgid "How many top reviewers count toward review load."
@@ -1213,7 +1228,8 @@ msgstr "Мінімальна частка перетину файлів для �
 
 #: apps/catalog/setting_defs.py:185
 msgid ""
-"How long a computed metrics result stays cached before it expires on its own."
+"How long a computed metrics result stays cached before it expires on its "
+"own."
 msgstr ""
 "Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
 "сам по собі."
@@ -1231,7 +1247,8 @@ msgstr ""
 
 #: apps/catalog/setting_defs.py:206
 msgid ""
-"Rule codes switched off; an open violation for a disabled rule auto-resolves."
+"Rule codes switched off; an open violation for a disabled rule auto-"
+"resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
@@ -1265,27 +1282,46 @@ msgstr ""
 "Кількість рядків на сторінці таблиці дашборду (проєкти, репозиторії, люди, "
 "останні PR)."
 
-#: apps/catalog/setting_defs.py:234
+#: apps/catalog/setting_defs.py:238
+msgid "Maximum files shown on the PR detail page before a '+N more' line."
+msgstr ""
+"Максимальна кількість файлів на сторінці деталей PR перед рядком «+N ще»."
+
+#: apps/catalog/setting_defs.py:245
+msgid ""
+"Authors/reviewers shown per axis on the reviews heat map; the rest fold into"
+" 'Other'."
+msgstr ""
+"Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
+"згортаються в «Інше»."
+
+#: apps/catalog/setting_defs.py:248
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:239
+#: apps/catalog/setting_defs.py:253
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:242
+#: apps/catalog/setting_defs.py:256
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:247
+#: apps/catalog/setting_defs.py:261
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:251
+#: apps/catalog/setting_defs.py:265
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:257
+#: apps/catalog/setting_defs.py:271
+msgid "Days a background export file is kept before cleanup deletes it."
+msgstr ""
+"Кількість днів, протягом яких файл фонового експорту зберігається до "
+"видалення."
+
+#: apps/catalog/setting_defs.py:278
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1293,41 +1329,42 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:260
+#: apps/catalog/setting_defs.py:281
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:265
+#: apps/catalog/setting_defs.py:286
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
-"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
+"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків "
+"PR."
 
-#: apps/catalog/setting_defs.py:272
+#: apps/catalog/setting_defs.py:293
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:276
+#: apps/catalog/setting_defs.py:297
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:279
+#: apps/catalog/setting_defs.py:300
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:285
+#: apps/catalog/setting_defs.py:306
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:292
+#: apps/catalog/setting_defs.py:313
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:299
+#: apps/catalog/setting_defs.py:320
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -1349,13 +1386,17 @@ msgstr "Об'єднати людей"
 #: apps/catalog/templates/catalog/partials/identities_content.html:5
 #: apps/catalog/templates/catalog/partials/people_content.html:4
 #: apps/catalog/templates/catalog/partials/people_content.html:27
-#: apps/catalog/templates/catalog/people.html:3 templates/partials/nav.html:14
+#: apps/catalog/templates/catalog/people.html:3
+#: apps/dashboards/templates/dashboards/people_index.html:4
+#: apps/dashboards/templates/dashboards/people_index.html:7
+#: templates/partials/nav.html:9
 msgid "People"
 msgstr "Люди"
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:14
 #: apps/connections/forms.py:9
 #: apps/connections/templates/connections/partials/list_content.html:26
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:18
 msgid "Kind"
 msgstr "Вид"
 
@@ -1460,7 +1501,7 @@ msgstr "Ще немає людей."
 msgid "Edit person"
 msgstr "Редагувати людину"
 
-#: apps/catalog/views.py:120
+#: apps/catalog/views.py:123
 msgid "Choose a person to assign this identity to."
 msgstr "Виберіть людину, якій призначити цю ідентичність."
 
@@ -1581,8 +1622,8 @@ msgid ""
 "Replace it with a fine-grained token limited to the repositories PR Radar "
 "reads."
 msgstr ""
-"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR "
-"Radar."
+"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR"
+" Radar."
 
 #: apps/connections/check_codes.py:55
 #, python-format
@@ -1658,7 +1699,7 @@ msgstr "останні 4 символи токена"
 msgid "token login"
 msgstr "логін токена"
 
-#: apps/connections/models.py:26
+#: apps/connections/models.py:26 apps/dashboards/models.py:63
 msgid "expires at"
 msgstr "закінчується о"
 
@@ -1706,7 +1747,7 @@ msgstr "Підключення GitHub"
 
 #: apps/connections/templates/connections/discovery.html:3
 #: apps/connections/templates/connections/partials/discovery_content.html:3
-#: templates/partials/nav.html:13
+#: templates/partials/nav.html:17
 msgid "Discover repositories"
 msgstr "Знайти репозиторії"
 
@@ -1722,7 +1763,7 @@ msgid "New connection"
 msgstr "Нове підключення"
 
 #: apps/connections/templates/connections/list.html:3
-#: templates/partials/nav.html:12
+#: templates/partials/nav.html:16
 msgid "Connections"
 msgstr "Підключення"
 
@@ -1757,7 +1798,9 @@ msgid "No project"
 msgstr "Без проєкту"
 
 #: apps/connections/templates/connections/partials/discovery_content.html:57
-#: apps/dashboards/exports/columns.py:73 apps/dashboards/exports/columns.py:81
+#: apps/dashboards/exports/columns.py:105
+#: apps/dashboards/exports/columns.py:110
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:38
 #: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:48
 msgid "Repository"
 msgstr "Репозиторій"
@@ -1826,7 +1869,10 @@ msgstr ""
 "іншого підключення або деактивуйте:"
 
 #: apps/connections/templates/connections/partials/list_content.html:28
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:23
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:19
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:35
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:81
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:124
 #: apps/github_sync/templates/github_sync/partials/runs.html:8
 #: apps/policy/templates/policy/console.html:36
 #: apps/policy/templates/policy/partials/violations.html:29
@@ -1893,157 +1939,284 @@ msgstr "Виберіть підключення, до якого прив'яза
 msgid "Tick the confirmation box to rebind this repository."
 msgstr "Позначте підтвердження, щоб прив'язати цей репозиторій."
 
-#: apps/dashboards/charts.py:79
+#: apps/dashboards/charts.py:81
 msgid "No data in this period."
 msgstr "За цей період немає даних."
 
-#: apps/dashboards/charts.py:115 apps/dashboards/charts.py:238
-#: apps/dashboards/charts.py:270
+#: apps/dashboards/charts.py:117 apps/dashboards/charts.py:240
+#: apps/dashboards/charts.py:272
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:77
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:33
 #: apps/metrics/models.py:14
 msgid "AI"
 msgstr "ШІ"
 
-#: apps/dashboards/charts.py:116 apps/dashboards/charts.py:241
-#: apps/dashboards/charts.py:271
+#: apps/dashboards/charts.py:118 apps/dashboards/charts.py:243
+#: apps/dashboards/charts.py:273
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:78
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:37
 #: apps/metrics/models.py:15
 msgid "Non-AI"
 msgstr "Без ШІ"
 
-#: apps/dashboards/charts.py:125 apps/dashboards/charts.py:155
-#: apps/dashboards/charts.py:209 apps/dashboards/charts.py:318
+#: apps/dashboards/charts.py:127 apps/dashboards/charts.py:157
+#: apps/dashboards/charts.py:211 apps/dashboards/charts.py:320
 msgid "Date"
 msgstr "Дата"
 
-#: apps/dashboards/charts.py:126
+#: apps/dashboards/charts.py:128
 msgid "Pull requests merged"
 msgstr "Змерджені pull request-и"
 
-#: apps/dashboards/charts.py:145 apps/metrics/calculators/adoption.py:66
+#: apps/dashboards/charts.py:147 apps/dashboards/exports/reports.py:216
+#: apps/metrics/calculators/adoption.py:66
 msgid "AI PR share"
 msgstr "Частка AI PR"
 
-#: apps/dashboards/charts.py:146 apps/metrics/calculators/adoption.py:222
+#: apps/dashboards/charts.py:148 apps/dashboards/exports/reports.py:219
+#: apps/metrics/calculators/adoption.py:222
 msgid "Disclosure rate"
 msgstr "Рівень розкриття"
 
-#: apps/dashboards/charts.py:156 apps/dashboards/charts.py:281
+#: apps/dashboards/charts.py:158 apps/dashboards/charts.py:283
 msgid "Share"
 msgstr "Частка"
 
-#: apps/dashboards/charts.py:170
+#: apps/dashboards/charts.py:172 apps/dashboards/exports/reports.py:225
 msgid "Lead time (p50)"
 msgstr "Час виконання (p50)"
 
-#: apps/dashboards/charts.py:171 apps/metrics/calculators/flow.py:278
+#: apps/dashboards/charts.py:173 apps/dashboards/exports/reports.py:225
+#: apps/metrics/calculators/flow.py:278
 msgid "Lead time (p90)"
 msgstr "Час виконання (p90)"
 
-#: apps/dashboards/charts.py:172
+#: apps/dashboards/charts.py:174
 msgid "Time to first review (p50)"
 msgstr "Час до першого ревʼю (p50)"
 
-#: apps/dashboards/charts.py:173 apps/metrics/calculators/flow.py:305
+#: apps/dashboards/charts.py:175 apps/metrics/calculators/flow.py:305
 msgid "Time to first review (p90)"
 msgstr "Час до першого ревʼю (p90)"
 
-#: apps/dashboards/charts.py:210
+#: apps/dashboards/charts.py:212
 msgid "Duration"
 msgstr "Тривалість"
 
-#: apps/dashboards/charts.py:253 apps/dashboards/exports/columns.py:88
+#: apps/dashboards/charts.py:255 apps/dashboards/exports/columns.py:117
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:163
 msgid "Size"
 msgstr "Розмір"
 
-#: apps/dashboards/charts.py:254
+#: apps/dashboards/charts.py:256
+#: apps/dashboards/templates/dashboards/pull_requests.html:4
+#: apps/dashboards/templates/dashboards/pull_requests.html:7
 #: apps/github_sync/templates/github_sync/partials/runs.html:10
+#: templates/partials/nav.html:10
 msgid "Pull requests"
 msgstr "Pull requests"
 
-#: apps/dashboards/charts.py:279 apps/metrics/calculators/quality.py:382
+#: apps/dashboards/charts.py:281 apps/metrics/calculators/quality.py:382
 msgid "21-day churn"
 msgstr "Churn за 21 день"
 
-#: apps/dashboards/charts.py:279 apps/metrics/calculators/quality.py:126
+#: apps/dashboards/charts.py:281 apps/metrics/calculators/quality.py:126
 msgid "Rework rate"
 msgstr "Рівень доопрацювань"
 
-#: apps/dashboards/charts.py:280
+#: apps/dashboards/charts.py:282
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:13
 msgid "Metric"
 msgstr "Метрика"
 
-#: apps/dashboards/charts.py:319 apps/dashboards/exports/columns.py:91
+#: apps/dashboards/charts.py:321 apps/dashboards/exports/columns.py:120
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:175
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:8
 #: apps/policy/forms.py:102 apps/policy/templates/policy/console.html:12
 msgid "Violations"
 msgstr "Порушення"
 
-#: apps/dashboards/charts.py:329
+#: apps/dashboards/charts.py:345 apps/dashboards/exports/columns.py:129
+#| msgid "reviewer"
+msgid "Reviewer"
+msgstr "Ревʼюер"
+
+#: apps/dashboards/charts.py:346 apps/dashboards/charts.py:347
+#: apps/dashboards/exports/columns.py:130
+#: apps/dashboards/templates/dashboards/partials/day_lists.html:75
+#: apps/metrics/calculators/flow.py:173
+msgid "Reviews given"
+msgstr "Надані ревʼю"
+
+#: apps/dashboards/charts.py:356 apps/dashboards/exports/reports.py:211
 msgid "Throughput"
 msgstr "Пропускна здатність"
 
-#: apps/dashboards/charts.py:332
+#: apps/dashboards/charts.py:359 apps/dashboards/exports/reports.py:221
 msgid "AI adoption"
 msgstr "Впровадження ШІ"
 
-#: apps/dashboards/charts.py:338
+#: apps/dashboards/charts.py:365 apps/dashboards/exports/reports.py:233
 msgid "Latency"
 msgstr "Затримка"
 
-#: apps/dashboards/charts.py:341
+#: apps/dashboards/charts.py:368
 msgid "PR size distribution"
 msgstr "Розподіл розмірів PR"
 
-#: apps/dashboards/charts.py:349
+#: apps/dashboards/charts.py:376
 msgid "Churn & rework"
 msgstr "Churn і доопрацювання"
 
-#: apps/dashboards/charts.py:357 apps/metrics/calculators/adoption.py:410
+#: apps/dashboards/charts.py:384 apps/metrics/calculators/adoption.py:410
 #: apps/policy/templates/policy/partials/rule_chart.html:3
 msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
-#: apps/dashboards/exports/columns.py:58
+#: apps/dashboards/charts.py:392
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:18
+#| msgid "Review load share"
+msgid "Reviewer load"
+msgstr "Навантаження ревʼюерів"
+
+#: apps/dashboards/export_messages.py:8
+msgid ""
+"This export failed. Try again, or contact an administrator if it keeps "
+"failing."
+msgstr ""
+"Цей експорт завершився помилкою. Спробуйте ще раз або зверніться до "
+"адміністратора, якщо помилка повторюється."
+
+#: apps/dashboards/export_messages.py:9
+msgid ""
+"This export did not finish in time and was marked as failed. Try again."
+msgstr ""
+"Цей експорт не завершився вчасно і був позначений як невдалий. Спробуйте ще "
+"раз."
+
+#: apps/dashboards/export_messages.py:14
+msgid "This export failed."
+msgstr "Цей експорт завершився помилкою."
+
+#: apps/dashboards/exports/columns.py:64
 #, python-format
 msgid "%(title)s (Δ)"
 msgstr "%(title)s (Δ)"
 
-#: apps/dashboards/exports/columns.py:90
+#: apps/dashboards/exports/columns.py:82
 #, python-format
 msgid "%(title)s (org-wide)"
 msgstr "%(title)s (по всій організації)"
 
-#: apps/dashboards/exports/columns.py:71 apps/metrics/models.py:7
-#: apps/policy/forms.py:148 apps/policy/templates/policy/console.html:42
+#: apps/dashboards/exports/columns.py:103
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:15
+#: apps/metrics/models.py:7 apps/policy/forms.py:148
+#: apps/policy/templates/policy/console.html:42
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:16
 msgid "Project"
 msgstr "Проєкт"
 
-#: apps/dashboards/exports/columns.py:82
+#: apps/dashboards/exports/columns.py:111
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:13
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:42
 msgid "PR"
 msgstr "PR"
 
-#: apps/dashboards/exports/columns.py:83
+#: apps/dashboards/exports/columns.py:112
 msgid "Title"
 msgstr "Заголовок"
 
-#: apps/dashboards/exports/columns.py:84
+#: apps/dashboards/exports/columns.py:113
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:14
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:43
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:115
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
 msgid "Author"
 msgstr "Автор"
 
-#: apps/dashboards/exports/columns.py:85
+#: apps/dashboards/exports/columns.py:114
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:127
 msgid "State"
 msgstr "Стан"
 
-#: apps/dashboards/exports/columns.py:86
+#: apps/dashboards/exports/columns.py:115 apps/dashboards/pr_detail.py:18
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:17
 msgid "Created"
 msgstr "Створено"
+
+#: apps/dashboards/exports/columns.py:124
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:126
+msgid "Disclosure"
+msgstr "Розкриття"
+
+#: apps/dashboards/exports/columns.py:125
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:50
+#| msgid "review rounds"
+msgid "Review rounds"
+msgstr "Раунди ревʼю"
+
+#: apps/dashboards/exports/columns.py:126
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:66
+msgid "Churn"
+msgstr "Churn"
+
+#: apps/dashboards/exports/reports.py:202
+#| msgid "PRs merged"
+msgid "PRs merged (AI)"
+msgstr "Змерджені PR (ШІ)"
+
+#: apps/dashboards/exports/reports.py:206
+#| msgid "PRs merged"
+msgid "PRs merged (Non-AI)"
+msgstr "Змерджені PR (не ШІ)"
+
+#: apps/dashboards/exports/reports.py:320
+msgid "all, ai, non_ai"
+msgstr "усі, ai, non_ai"
+
+#: apps/dashboards/exports/reports.py:320
+msgid "all only"
+msgstr "лише «усі»"
+
+#: apps/dashboards/exports/reports.py:343
+#: apps/dashboards/exports/reports.py:345
+#: apps/dashboards/exports/reports.py:347
+#, python-format
+msgid "Filter: %(key)s"
+msgstr "Фільтр: %(key)s"
+
+#: apps/dashboards/exports/reports.py:354
+#| msgid "created at"
+msgid "Generated at"
+msgstr "Згенеровано"
+
+#: apps/dashboards/exports/reports.py:358
+msgid "Last successful sync"
+msgstr "Остання успішна синхронізація"
+
+#: apps/dashboards/exports/reports.py:361
+#| msgid "severity"
+msgid "Never"
+msgstr "Ніколи"
+
+#: apps/dashboards/exports/reports.py:363
+#| msgid "version"
+msgid "Tool version"
+msgstr "Версія інструмента"
+
+#: apps/dashboards/exports/reports.py:365
+#| msgid "AI suspected"
+msgid "AI cohort includes suspected"
+msgstr "Когорта ШІ включає підозрювані"
+
+#: apps/dashboards/exports/reports.py:368
+msgid "Report timezone"
+msgstr "Часовий пояс звіту"
+
+#: apps/dashboards/exports/reports.py:369
+#| msgid "language"
+msgid "Report language"
+msgstr "Мова звіту"
 
 #: apps/dashboards/formatting.py:19
 #, python-format
@@ -2073,6 +2246,81 @@ msgstr "%(days)dд %(hours)dг"
 msgid "%(hours)dh %(minutes)dm"
 msgstr "%(hours)dг %(minutes)dхв"
 
+#: apps/dashboards/models.py:35
+msgid "Table (CSV)"
+msgstr "Таблиця (CSV)"
+
+#: apps/dashboards/models.py:36
+msgid "Table (XLSX)"
+msgstr "Таблиця (XLSX)"
+
+#: apps/dashboards/models.py:37
+msgid "Report (XLSX)"
+msgstr "Звіт (XLSX)"
+
+#: apps/dashboards/models.py:41 apps/github_sync/models.py:13
+msgid "Running"
+msgstr "Виконується"
+
+#: apps/dashboards/models.py:42
+msgid "Done"
+msgstr "Готово"
+
+#: apps/dashboards/models.py:43 apps/github_sync/models.py:16
+msgid "Failed"
+msgstr "Помилка"
+
+#: apps/dashboards/models.py:51
+#| msgid "details params"
+msgid "params"
+msgstr "параметри"
+
+#: apps/dashboards/models.py:54
+#| msgid "PR file"
+msgid "file"
+msgstr "файл"
+
+#: apps/dashboards/models.py:55
+msgid "rows"
+msgstr "рядки"
+
+#: apps/dashboards/models.py:58
+#| msgid "error log"
+msgid "error code"
+msgstr "код помилки"
+
+#: apps/dashboards/models.py:59
+#| msgid "details params"
+msgid "error params"
+msgstr "параметри помилки"
+
+#: apps/dashboards/models.py:61 apps/github_sync/models.py:18
+msgid "started at"
+msgstr "розпочато о"
+
+#: apps/dashboards/models.py:62 apps/github_sync/models.py:19
+msgid "finished at"
+msgstr "завершено о"
+
+#: apps/dashboards/models.py:66
+#| msgid "Export"
+msgid "export job"
+msgstr "завдання експорту"
+
+#: apps/dashboards/models.py:67
+msgid "export jobs"
+msgstr "завдання експорту"
+
+#: apps/dashboards/pr_detail.py:17
+#| msgid "first commit at"
+msgid "First commit"
+msgstr "Перший коміт"
+
+#: apps/dashboards/pr_detail.py:19
+#| msgid "ready for review at"
+msgid "Ready for review"
+msgstr "Готовий до ревʼю"
+
 #: apps/dashboards/templates/dashboards/dashboard.html:4
 #: apps/dashboards/templates/dashboards/dashboard.html:8
 #: templates/partials/nav.html:6
@@ -2084,6 +2332,32 @@ msgstr "Огляд"
 #, python-format
 msgid "Day — %(day)s"
 msgstr "День — %(day)s"
+
+#: apps/dashboards/templates/dashboards/export_unavailable.html:4
+#: apps/dashboards/templates/dashboards/export_unavailable.html:8
+msgid "Export unavailable"
+msgstr "Експорт недоступний"
+
+#: apps/dashboards/templates/dashboards/export_unavailable.html:12
+#| msgid "This connection has not been checked yet."
+msgid "This export has not finished yet."
+msgstr "Цей експорт ще не завершено."
+
+#: apps/dashboards/templates/dashboards/export_unavailable.html:14
+msgid "This export has expired and its file is no longer available."
+msgstr "Строк дії цього експорту минув, і файл більше недоступний."
+
+#: apps/dashboards/templates/dashboards/export_unavailable.html:17
+msgid "Back to my exports"
+msgstr "Повернутися до моїх експортів"
+
+#: apps/dashboards/templates/dashboards/exports.html:4
+#: apps/dashboards/templates/dashboards/exports.html:8
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:14
+#: templates/partials/nav.html:12
+#| msgid "Export"
+msgid "My exports"
+msgstr "Мої експорти"
 
 #: apps/dashboards/templates/dashboards/partials/chart_card.html:26
 msgid "data table"
@@ -2122,14 +2396,31 @@ msgstr "Активність за людьми"
 msgid "Opened"
 msgstr "Відкрито"
 
-#: apps/dashboards/templates/dashboards/partials/day_lists.html:75
-#: apps/metrics/calculators/flow.py:173
-msgid "Reviews given"
-msgstr "Надані ревʼю"
-
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:90
 msgid "No activity this day."
 msgstr "У цей день немає активності."
+
+#: apps/dashboards/templates/dashboards/partials/export_queued.html:9
+msgid "This export is large and was queued as a background job."
+msgstr "Цей експорт великий і був поставлений у чергу як фонове завдання."
+
+#: apps/dashboards/templates/dashboards/partials/export_queued.html:12
+msgid "View my exports"
+msgstr "Переглянути мої експорти"
+
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:20
+msgid "Rows"
+msgstr "Рядків"
+
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:21
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:42
+msgid "Download"
+msgstr "Завантажити"
+
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:48
+#| msgid "No people yet."
+msgid "No exports yet."
+msgstr "Ще немає експортів."
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:18
 msgid "Mode"
@@ -2231,22 +2522,162 @@ msgstr "Проєкти"
 msgid "Repositories"
 msgstr "Репозиторії"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:113
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:151
+#| msgid "AI tools"
+msgid "AI tool"
+msgstr "Інструмент ШІ"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:179
+msgid "Any"
+msgstr "Будь-який"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:182
+#| msgid "Open violations"
+msgid "Has open violations"
+msgstr "Є відкриті порушення"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:185
+#| msgid "Open violations"
+msgid "No open violations"
+msgstr "Немає відкритих порушень"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:191
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:81
 #: apps/policy/templates/policy/partials/violations.html:81
 msgid "Apply"
 msgstr "Застосувати"
 
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:199
+msgid "Download report (XLSX)"
+msgstr "Завантажити звіт (XLSX)"
+
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:54
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:26
 msgid "Small sample"
 msgstr "Мала вибірка"
+
+#: apps/dashboards/templates/dashboards/partials/person_notes.html:8
+#| msgid "Private"
+msgid "Private notes"
+msgstr "Приватні нотатки"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:29
+#| msgid "No policy violations match these filters."
+msgid "Policy violations for this pull request"
+msgstr "Порушення політики для цього pull request"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:32
+#: apps/policy/templates/policy/partials/violations.html:25
+msgid "Select"
+msgstr "Вибрати"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:33
+#: apps/policy/templates/policy/console.html:24
+#: apps/policy/templates/policy/partials/rule_chart.html:20
+#: apps/policy/templates/policy/partials/violations.html:27
+msgid "Rule"
+msgstr "Правило"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:34
+#: apps/policy/templates/policy/console.html:30
+#: apps/policy/templates/policy/partials/violations.html:28
+msgid "Severity"
+msgstr "Серйозність"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:36
+#: apps/policy/templates/policy/partials/violations.html:30
+msgid "Age"
+msgstr "Вік"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:47
+#: apps/policy/templates/policy/partials/violations.html:41
+msgid "Select this violation"
+msgstr "Вибрати це порушення"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:63
+#| msgid "No policy violations match these filters."
+msgid "No policy violations on this pull request."
+msgstr "На цьому pull request немає порушень політики."
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:71
+#: apps/policy/forms.py:104
+#: apps/policy/templates/policy/partials/violations.html:71
+msgid "Action"
+msgstr "Дія"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:72
+#: apps/policy/forms.py:97
+#: apps/policy/templates/policy/partials/violations.html:72
+msgid "Acknowledge"
+msgstr "Взяти до відома"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:73
+#: apps/policy/forms.py:98
+#: apps/policy/templates/policy/partials/violations.html:73
+msgid "Waive"
+msgstr "Прийняти ризик"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:77
+#: apps/policy/forms.py:106
+#: apps/policy/templates/policy/partials/violations.html:77
+msgid "Comment"
+msgstr "Коментар"
+
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:78
+#: apps/policy/templates/policy/partials/violations.html:78
+msgid "Comment (required)"
+msgstr "Коментар (обов'язково)"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:8
+#| msgid "reviewer"
+msgid "Author × reviewer"
+msgstr "Автор × ревʼюер"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:11
+msgid "Reviews by author and reviewer"
+msgstr "Ревʼю за автором і ревʼюером"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:39
+#| msgid "No violations in this period."
+msgid "No reviews in this period."
+msgstr "У цьому періоді немає ревʼю."
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:20
+msgid ""
+"Workload, not a ranking — how many reviews each person gave in the period."
+msgstr ""
+"Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:33
+#| msgid "Waiting for review > 24h"
+msgid "Waiting for review"
+msgstr "Очікує ревʼю"
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:35
+#| msgid "Pull requests merged"
+msgid "Pull requests waiting for review"
+msgstr "Pull request-и, що очікують ревʼю"
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:39
+#: apps/policy/templates/policy/partials/violations.html:26
+msgid "Pull request"
+msgstr "Pull request"
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
+msgid "Waiting"
+msgstr "Час очікування"
+
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:63
+msgid "No pull request is waiting for review."
+msgstr "Жоден pull request не очікує ревʼю."
 
 #: apps/dashboards/templates/dashboards/partials/table.html:12
 msgid ""
 "These metrics are organization-wide; this table is not narrowed to the "
 "current project or repository."
 msgstr ""
-"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного "
-"проєкту чи репозиторію."
+"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного проєкту"
+" чи репозиторію."
 
 #: apps/dashboards/templates/dashboards/partials/table.html:30
 #: apps/dashboards/templates/dashboards/partials/table.html:35
@@ -2266,25 +2697,177 @@ msgstr "Немає рядків, що відповідають запиту."
 msgid "View on GitHub"
 msgstr "Переглянути на GitHub"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:25
-msgid "Disclosure"
-msgstr "Розкриття"
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:21
+msgid "Timeline"
+msgstr "Хронологія"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:27
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:32
+msgid "No timeline events."
+msgstr "Немає подій хронології."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:38
+#| msgid "Metric"
+msgid "Metrics"
+msgstr "Метрики"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:40
+#| msgid "Lead time (p50)"
+msgid "Lead time"
+msgstr "Час виконання"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
+#| msgid "Time to first review (p50)"
+msgid "Time to first review"
+msgstr "Час до першого ревʼю"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:44
+#| msgid "Cycle time (median)"
+msgid "Cycle time"
+msgstr "Час циклу"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:46
+#| msgid "Effective from"
+msgid "Effective size"
+msgstr "Ефективний розмір"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:48
+#| msgid "size bucket"
+msgid "Size bucket"
+msgstr "Категорія розміру"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:52
+#| msgid "commits after first review"
+msgid "Commits after first review"
+msgstr "Коміти після першого ревʼю"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:54
+#| msgid "Rubber-stamp rate"
+msgid "Rubber-stamp review"
+msgstr "Формальне ревʼю"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:58
+#| msgid "Self-merge"
+msgid "Self-merged"
+msgstr "Самомердж"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:70
+msgid "Churn not computed yet."
+msgstr "Churn ще не обчислено."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:75
+#| msgid "PR files"
+msgid "Files"
+msgstr "Файли"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:77
+#| msgid "changed files"
+msgid "Changed files"
+msgstr "Змінені файли"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:80
+#| msgid "Path glob"
+msgid "Path"
+msgstr "Шлях"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:82
+msgid "+/-"
+msgstr "+/-"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:83
+msgid "Flags"
+msgstr "Позначки"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:96
+#| msgid "is test"
+msgid "test"
+msgstr "тест"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:97
+#| msgid "Excluded"
+msgid "excluded"
+msgstr "виключено"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:98
+#| msgid "New sensitive path"
+msgid "sensitive"
+msgstr "чутливий"
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:103
+msgid "No files recorded."
+msgstr "Файлів не зафіксовано."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:110
+#, python-format
+msgid ""
+"\n"
+"          +%(count)s more file\n"
+"        "
+msgid_plural ""
+"\n"
+"          +%(count)s more files\n"
+"        "
+msgstr[0] ""
+"\n"
+"          +%(count)s файл\n"
+"        "
+msgstr[1] ""
+"\n"
+"          +%(count)s файли\n"
+"        "
+msgstr[2] ""
+"\n"
+"          +%(count)s файлів\n"
+"        "
+msgstr[3] ""
+"\n"
+"          +%(count)s файла\n"
+"        "
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:128
 msgid "Tools"
 msgstr "Інструменти"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:44
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:145
 msgid "Evidence"
 msgstr "Доказ"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:45
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:146
 msgid "Commit"
 msgstr "Коміт"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:59
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:160
 msgid "No AI signals detected."
 msgstr "Сигналів ШІ не виявлено."
+
+#: apps/dashboards/templates/dashboards/reviews.html:4
+#: apps/dashboards/templates/dashboards/reviews.html:7
+#: templates/partials/nav.html:11
+#| msgid "Review"
+msgid "Reviews"
+msgstr "Ревʼю"
+
+#: apps/dashboards/views.py:435 apps/policy/views.py:100
+#, python-format
+msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
+msgid_plural ""
+"Updated %(updated)s violations; skipped %(skipped)s resolved violations."
+msgstr[0] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішене порушення."
+msgstr[1] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішених порушення."
+msgstr[2] ""
+"Оновлено %(updated)s порушень; пропущено %(skipped)s вирішених порушень."
+msgstr[3] ""
+"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
+
+#: apps/dashboards/views.py:439 apps/policy/views.py:104
+#, python-format
+msgid "Updated %(updated)s violation."
+msgid_plural "Updated %(updated)s violations."
+msgstr[0] "Оновлено %(updated)s порушення."
+msgstr[1] "Оновлено %(updated)s порушення."
+msgstr[2] "Оновлено %(updated)s порушень."
+msgstr[3] "Оновлено %(updated)s порушення."
 
 #: apps/github_sync/models.py:8
 msgid "CLI"
@@ -2297,22 +2880,6 @@ msgstr "Інтерфейс"
 #: apps/github_sync/models.py:10
 msgid "Schedule"
 msgstr "Розклад"
-
-#: apps/github_sync/models.py:13
-msgid "Running"
-msgstr "Виконується"
-
-#: apps/github_sync/models.py:16
-msgid "Failed"
-msgstr "Помилка"
-
-#: apps/github_sync/models.py:18
-msgid "started at"
-msgstr "розпочато о"
-
-#: apps/github_sync/models.py:19
-msgid "finished at"
-msgstr "завершено о"
 
 #: apps/github_sync/models.py:20
 msgid "trigger"
@@ -2352,7 +2919,7 @@ msgstr "блокування синхронізації"
 
 #: apps/github_sync/templates/github_sync/partials/content.html:4
 #: apps/github_sync/templates/github_sync/sync.html:3
-#: templates/partials/nav.html:9
+#: templates/partials/nav.html:13
 msgid "Sync"
 msgstr "Синхронізація"
 
@@ -2586,8 +3153,8 @@ msgid ""
 "From ready for review to the first review, for PRs merged in the period "
 "(90th percentile)."
 msgstr ""
-"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й "
-"перцентиль)."
+"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й"
+" перцентиль)."
 
 #: apps/metrics/calculators/flow.py:329
 msgid "PR size (median)"
@@ -2595,11 +3162,11 @@ msgstr "Розмір PR (медіана)"
 
 #: apps/metrics/calculators/flow.py:330
 msgid ""
-"Median effective lines changed (additions + deletions) for PRs merged in the "
-"period."
+"Median effective lines changed (additions + deletions) for PRs merged in the"
+" period."
 msgstr ""
-"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за "
-"період."
+"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за"
+" період."
 
 #: apps/metrics/calculators/flow.py:358
 msgid "PR size buckets"
@@ -2631,15 +3198,15 @@ msgstr "Час відповіді рецензента (медіана)"
 
 #: apps/metrics/calculators/flow.py:431
 msgid ""
-"From the PR becoming ready for review (falling back to its creation) to this "
-"reviewer's review, for reviews given in the period — an approximation: no "
+"From the PR becoming ready for review (falling back to its creation) to this"
+" reviewer's review, for reviews given in the period — an approximation: no "
 "review-request timestamp is stored, so this is not measured from the actual "
 "request."
 msgstr ""
 "Від моменту, коли PR став готовим до ревʼю (або його створення, якщо іншого "
 "немає), до ревʼю цього рецензента, для ревʼю, наданих за період — "
-"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не "
-"від фактичного запиту."
+"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не"
+" від фактичного запиту."
 
 #: apps/metrics/calculators/quality.py:106
 msgid "Review rounds (average)"
@@ -2667,8 +3234,8 @@ msgstr "Рівень проходження CI з першого разу"
 
 #: apps/metrics/calculators/quality.py:175
 msgid ""
-"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS). "
-"PRs with no first-CI-commit record are excluded from both sides."
+"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS)."
+" PRs with no first-CI-commit record are excluded from both sides."
 msgstr ""
 "Частка PR, змерджених за день, чий перший коміт, охоплений CI, пройшов "
 "перевірку (SUCCESS). PR без запису про перший коміт CI виключені з обох "
@@ -2753,8 +3320,8 @@ msgid ""
 "a hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their "
 "files. Not computed yet — always empty until this heuristic ships."
 msgstr ""
-"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS "
-"слідував hotfix/fix PR, що перетинається щонайменше на "
+"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS"
+" слідував hotfix/fix PR, що перетинається щонайменше на "
 "FOLLOWUP_FIX_FILE_OVERLAP їхніх файлів. Ще не обчислюється — завжди "
 "порожньо, доки цю евристику не реалізовано."
 
@@ -2763,7 +3330,8 @@ msgid "Open PRs"
 msgstr "Відкриті PR"
 
 #: apps/metrics/calculators/state.py:49
-msgid "Pull requests open at the end of a day, reconstructed from their dates."
+msgid ""
+"Pull requests open at the end of a day, reconstructed from their dates."
 msgstr "Pull request-и, відкриті на кінець дня, відновлені за їхніми датами."
 
 #: apps/metrics/calculators/state.py:77
@@ -2883,26 +3451,6 @@ msgstr "Усі проєкти"
 msgid "All repositories"
 msgstr "Усі репозиторії"
 
-#: apps/policy/forms.py:97
-#: apps/policy/templates/policy/partials/violations.html:72
-msgid "Acknowledge"
-msgstr "Взяти до відома"
-
-#: apps/policy/forms.py:98
-#: apps/policy/templates/policy/partials/violations.html:73
-msgid "Waive"
-msgstr "Прийняти ризик"
-
-#: apps/policy/forms.py:104
-#: apps/policy/templates/policy/partials/violations.html:71
-msgid "Action"
-msgstr "Дія"
-
-#: apps/policy/forms.py:106
-#: apps/policy/templates/policy/partials/violations.html:77
-msgid "Comment"
-msgstr "Коментар"
-
 #: apps/policy/forms.py:109
 msgid "A comment of at least 3 characters is required."
 msgstr "Потрібен коментар щонайменше з 3 символів."
@@ -2958,8 +3506,8 @@ msgid ""
 "This pull request discloses no AI assistance, but a high-confidence AI "
 "signal was detected."
 msgstr ""
-"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ "
-"з високою впевненістю."
+"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ"
+" з високою впевненістю."
 
 #: apps/policy/messages.py:37
 #, python-format
@@ -3024,11 +3572,11 @@ msgstr[3] ""
 #: apps/policy/messages.py:113
 #, python-format
 msgid ""
-"This merged AI pull request has %(approvals)s of %(required)s required human "
-"approval."
+"This merged AI pull request has %(approvals)s of %(required)s required human"
+" approval."
 msgid_plural ""
-"This merged AI pull request has %(approvals)s of %(required)s required human "
-"approvals."
+"This merged AI pull request has %(approvals)s of %(required)s required human"
+" approvals."
 msgstr[0] ""
 "Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
 "підтвердження людини."
@@ -3075,8 +3623,8 @@ msgstr[0] ""
 "Цей AI pull request змінює %(effective_lines)s ефективний рядок, що "
 "перевищує ліміт %(limit)s."
 msgstr[1] ""
-"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує "
-"ліміт %(limit)s."
+"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує"
+" ліміт %(limit)s."
 msgstr[2] ""
 "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
 "перевищує ліміт %(limit)s."
@@ -3120,7 +3668,7 @@ msgstr "діє з"
 #: apps/policy/models.py:23
 #: apps/policy/templates/policy/partials/policy_form.html:3
 #: apps/policy/templates/policy/policy_settings.html:3
-#: templates/partials/nav.html:16
+#: templates/partials/nav.html:20
 msgid "AI policy"
 msgstr "Політика ШІ"
 
@@ -3245,20 +3793,9 @@ msgid "policy violations"
 msgstr "порушення політики"
 
 #: apps/policy/templates/policy/console.html:3
-#: apps/policy/templates/policy/console.html:6 templates/partials/nav.html:10
+#: apps/policy/templates/policy/console.html:6 templates/partials/nav.html:14
 msgid "Policy"
 msgstr "Політика"
-
-#: apps/policy/templates/policy/console.html:24
-#: apps/policy/templates/policy/partials/rule_chart.html:20
-#: apps/policy/templates/policy/partials/violations.html:27
-msgid "Rule"
-msgstr "Правило"
-
-#: apps/policy/templates/policy/console.html:30
-#: apps/policy/templates/policy/partials/violations.html:28
-msgid "Severity"
-msgstr "Серйозність"
 
 #: apps/policy/templates/policy/console.html:71
 msgid "Filter"
@@ -3287,13 +3824,11 @@ msgstr "Н/Д"
 #, python-format
 msgid ""
 "\n"
-"            Sample too small (%(sample)s below %(min_sample)s) to be "
-"reliable.\n"
+"            Sample too small (%(sample)s below %(min_sample)s) to be reliable.\n"
 "          "
 msgstr ""
 "\n"
-"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути "
-"надійною.\n"
+"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути надійною.\n"
 "          "
 
 #: apps/policy/templates/policy/partials/mismatch_list.html:16
@@ -3357,7 +3892,7 @@ msgstr "Новий чутливий шлях"
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:4
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:13
 #: apps/policy/templates/policy/sensitive_paths.html:3
-#: templates/partials/nav.html:17
+#: templates/partials/nav.html:21
 msgid "Sensitive paths"
 msgstr "Чутливі шляхи"
 
@@ -3373,29 +3908,9 @@ msgstr "Ще немає правил чутливих шляхів."
 msgid "Policy violations"
 msgstr "Порушення політики"
 
-#: apps/policy/templates/policy/partials/violations.html:25
-msgid "Select"
-msgstr "Вибрати"
-
-#: apps/policy/templates/policy/partials/violations.html:26
-msgid "Pull request"
-msgstr "Pull request"
-
-#: apps/policy/templates/policy/partials/violations.html:30
-msgid "Age"
-msgstr "Вік"
-
-#: apps/policy/templates/policy/partials/violations.html:41
-msgid "Select this violation"
-msgstr "Вибрати це порушення"
-
 #: apps/policy/templates/policy/partials/violations.html:62
 msgid "No policy violations match these filters."
 msgstr "Жодне порушення політики не відповідає цим фільтрам."
-
-#: apps/policy/templates/policy/partials/violations.html:78
-msgid "Comment (required)"
-msgstr "Коментар (обов'язково)"
 
 #: apps/policy/templates/policy/partials/violations.html:99
 #, python-format
@@ -3407,29 +3922,6 @@ msgstr ""
 "\n"
 "      Сторінка %(number)s з %(total)s\n"
 "    "
-
-#: apps/policy/views.py:100
-#, python-format
-msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
-msgid_plural ""
-"Updated %(updated)s violations; skipped %(skipped)s resolved violations."
-msgstr[0] ""
-"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішене порушення."
-msgstr[1] ""
-"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішених порушення."
-msgstr[2] ""
-"Оновлено %(updated)s порушень; пропущено %(skipped)s вирішених порушень."
-msgstr[3] ""
-"Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
-
-#: apps/policy/views.py:104
-#, python-format
-msgid "Updated %(updated)s violation."
-msgid_plural "Updated %(updated)s violations."
-msgstr[0] "Оновлено %(updated)s порушення."
-msgstr[1] "Оновлено %(updated)s порушення."
-msgstr[2] "Оновлено %(updated)s порушень."
-msgstr[3] "Оновлено %(updated)s порушення."
 
 #: templates/403.html:6
 msgid "You do not have access to this page."
@@ -3479,7 +3971,11 @@ msgstr "Переглянути"
 msgid "Language"
 msgstr "Мова"
 
-#: templates/partials/nav.html:23
+#: templates/partials/nav.html:18
+msgid "People settings"
+msgstr "Налаштування людей"
+
+#: templates/partials/nav.html:27
 msgid "Log out"
 msgstr "Вийти"
 
@@ -3569,8 +4065,8 @@ msgstr "Надіслати посилання"
 
 #, python-format
 #~ msgid ""
-#~ "This AI pull request touches %(path_count)s files forbidden by a "
-#~ "sensitive-path rule: %(paths)s."
+#~ "This AI pull request touches %(path_count)s files forbidden by a sensitive-"
+#~ "path rule: %(paths)s."
 #~ msgstr ""
 #~ "Цей AI pull request зачіпає %(path_count)s файлів, заборонених правилом "
 #~ "чутливого шляху: %(paths)s."
@@ -3578,17 +4074,16 @@ msgstr "Надіслати посилання"
 #, python-format
 #~ msgid ""
 #~ "This AI pull request touches %(path_count)s files needing extra review "
-#~ "(%(paths)s) and has %(approvals)s of %(required)s required human "
-#~ "approvals."
+#~ "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
 #~ msgstr ""
-#~ "Цей AI pull request зачіпає %(path_count)s файлів, що потребують "
-#~ "додаткової перевірки (%(paths)s), і має %(approvals)s із %(required)s "
-#~ "необхідних підтверджень людини."
+#~ "Цей AI pull request зачіпає %(path_count)s файлів, що потребують додаткової "
+#~ "перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
+#~ "підтверджень людини."
 
 #, python-format
 #~ msgid ""
-#~ "This merged AI pull request has %(approvals)s of %(required)s required "
-#~ "human approvals."
+#~ "This merged AI pull request has %(approvals)s of %(required)s required human"
+#~ " approvals."
 #~ msgstr ""
 #~ "Цей злитий AI pull request має %(approvals)s із %(required)s необхідних "
 #~ "підтверджень людини."
@@ -3598,13 +4093,13 @@ msgstr "Надіслати посилання"
 #~ "Changes %(non_test_lines)s lines of non-test code with no test changes "
 #~ "(threshold %(threshold)s)."
 #~ msgstr ""
-#~ "Змінює %(non_test_lines)s рядків коду поза тестами без змін у тестах "
-#~ "(поріг %(threshold)s)."
+#~ "Змінює %(non_test_lines)s рядків коду поза тестами без змін у тестах (поріг "
+#~ "%(threshold)s)."
 
 #, python-format
 #~ msgid ""
-#~ "This AI pull request changes %(effective_lines)s effective lines, over "
-#~ "the limit of %(limit)s."
+#~ "This AI pull request changes %(effective_lines)s effective lines, over the "
+#~ "limit of %(limit)s."
 #~ msgstr ""
 #~ "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
 #~ "перевищує ліміт %(limit)s."

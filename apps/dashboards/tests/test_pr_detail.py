@@ -4,12 +4,15 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.accounts.selectors import ScopeFilter
-from apps.activity.factories import PullRequestFactory
+from apps.activity.factories import PRFileFactory, PullRequestFactory
 from apps.activity.models import AIDisclosure, AIStatus
 from apps.activity.selectors import pull_requests_in_scope
 from apps.ai_detection.factories import AISignalFactory, DetectionRuleFactory
 from apps.ai_detection.models import Confidence, Detector, Tool
 from apps.catalog.factories import ProjectFactory, RepositoryFactory
+from apps.churn.factories import ChurnResultFactory
+from apps.policy.factories import PolicyViolationFactory
+from apps.policy.models import PolicyViolation
 
 
 @pytest.mark.django_db
@@ -79,7 +82,7 @@ def test_signal_list_query_count(client, lead_user):
     with CaptureQueriesContext(connection) as ctx:
         response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
     assert response.status_code == 200
-    assert len(ctx.captured_queries) < 10
+    assert len(ctx.captured_queries) < 20
 
 
 @pytest.mark.django_db
@@ -87,6 +90,111 @@ def test_unknown_pk_is_404(client, lead_user):
     client.force_login(lead_user)
     response = client.get(reverse("dashboards:pull_request_detail", args=[999999]))
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_timeline_and_metrics_blocks_render(client, lead_user):
+    pr = PullRequestFactory()
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'id="pr-timeline"' in content
+    assert 'id="pr-metrics"' in content
+
+
+@pytest.mark.django_db
+def test_files_block_shows_badges_and_display_cap(client, lead_user):
+    from apps.catalog.services import set_setting
+
+    set_setting("PR_FILES_DISPLAY_LIMIT", 2)
+    pr = PullRequestFactory()
+    PRFileFactory(pull_request=pr, path="tests/test_a.py", is_test=True)
+    PRFileFactory(pull_request=pr, path="app/excluded.py", is_excluded=True)
+    PRFileFactory(pull_request=pr, path="app/plain.py")
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "+1 more file" in content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_not_computed_yet_when_missing(client, lead_user):
+    pr = PullRequestFactory()
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+
+    assert b"Churn not computed yet." in response.content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_the_computed_ratio(client, lead_user):
+    pr = PullRequestFactory()
+    ChurnResultFactory(pull_request=pr, window_days=21, churn_ratio=0.25)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+
+    assert b"25.0%" in response.content
+
+
+@pytest.mark.django_db
+def test_violation_action_swaps_only_the_violations_fragment(client, lead_user):
+    pr = PullRequestFactory()
+    violation = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.OPEN)
+    client.force_login(lead_user)
+
+    response = client.post(
+        reverse("dashboards:pull_request_violation_action", args=[pr.pk]),
+        {"violation_ids": [violation.pk], "action": "acknowledge", "comment": "reviewed"},
+        HTTP_HX_REQUEST="true",
+    )
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'id="pr-violations"' in content
+    assert 'id="pr-timeline"' not in content
+    violation.refresh_from_db()
+    assert violation.status == PolicyViolation.Status.ACKNOWLEDGED
+
+
+@pytest.mark.django_db
+def test_violation_action_full_page_fallback_re_renders_the_whole_page(client, lead_user):
+    pr = PullRequestFactory()
+    violation = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.OPEN)
+    client.force_login(lead_user)
+
+    response = client.post(
+        reverse("dashboards:pull_request_violation_action", args=[pr.pk]),
+        {"violation_ids": [violation.pk], "action": "waive", "comment": "waived"},
+    )
+
+    assert response.status_code == 200
+    assert b'id="pr-timeline"' in response.content
+
+
+@pytest.mark.django_db
+def test_violation_action_rejects_a_violation_from_another_pr(client, lead_user):
+    pr = PullRequestFactory()
+    other_pr = PullRequestFactory()
+    other_violation = PolicyViolationFactory(pull_request=other_pr, status=PolicyViolation.Status.OPEN)
+    client.force_login(lead_user)
+
+    response = client.post(
+        reverse("dashboards:pull_request_violation_action", args=[pr.pk]),
+        {"violation_ids": [other_violation.pk], "action": "acknowledge", "comment": "reviewed"},
+        HTTP_HX_REQUEST="true",
+    )
+
+    assert response.status_code == 200
+    other_violation.refresh_from_db()
+    assert other_violation.status == PolicyViolation.Status.OPEN
 
 
 @pytest.mark.django_db

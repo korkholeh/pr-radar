@@ -1,0 +1,86 @@
+{% load i18n policy_extras %}
+{% comment %}
+The PR page's own violations block (plan §3/T13): scoped to this PR only, posted to
+`dashboards:pull_request_violation_action`, swapping only this fragment back (never the whole
+page) — CLAUDE.md's htmx contract.
+{% endcomment %}
+<section class="mb-6" id="pr-violations">
+  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Violations" %}</h2>
+  {% if notice %}
+    <div class="mb-2 text-[var(--good)]" role="status">{{ notice }}</div>
+  {% endif %}
+  {% if action_errors %}
+    <div class="mb-2 text-[var(--bad)]" role="alert">
+      {% for field, errors in action_errors.items %}
+        {% for error in errors %}<p>{{ error }}</p>{% endfor %}
+      {% endfor %}
+    </div>
+  {% endif %}
+  <form
+    method="post"
+    action="{% url 'dashboards:pull_request_violation_action' pull_request.pk %}"
+    hx-post="{% url 'dashboards:pull_request_violation_action' pull_request.pk %}"
+    hx-target="#pr-violations"
+    hx-swap="outerHTML"
+    id="pr-violation-form"
+  >
+    {% csrf_token %}
+    <table class="w-full text-sm mb-2" id="pr-violations-table">
+      <caption class="sr-only">{% translate "Policy violations for this pull request" %}</caption>
+      <thead>
+        <tr class="text-left text-[var(--text-muted)]">
+          <th scope="col"><span class="sr-only">{% translate "Select" %}</span></th>
+          <th scope="col">{% translate "Rule" %}</th>
+          <th scope="col">{% translate "Severity" %}</th>
+          <th scope="col">{% translate "Status" %}</th>
+          <th scope="col">{% translate "Age" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for violation in violations %}
+          <tr class="border-t border-[var(--border)]" id="pr-violation-row-{{ violation.pk }}">
+            <td>
+              <input
+                type="checkbox"
+                name="violation_ids"
+                value="{{ violation.pk }}"
+                aria-label="{% translate 'Select this violation' %}"
+              >
+            </td>
+            <td>
+              <div class="text-[var(--text)]">{{ violation.rule_code|rule_label }}</div>
+              <div class="text-[var(--text-muted)]">
+                {% render_violation_message violation.rule_code violation.details_params %}
+              </div>
+            </td>
+            <td>{{ violation.get_severity_display }}</td>
+            <td>{{ violation.get_status_display }}</td>
+            <td>{{ violation.created_at|timesince }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-[var(--text-muted)] py-4">
+              {% translate "No policy violations on this pull request." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if violations %}
+      <div class="flex items-center gap-3" id="pr-violation-action-bar">
+        <select name="action" aria-label="{% translate 'Action' %}">
+          <option value="acknowledge">{% translate "Acknowledge" %}</option>
+          <option value="waive">{% translate "Waive" %}</option>
+        </select>
+        <textarea
+          name="comment"
+          aria-label="{% translate 'Comment' %}"
+          placeholder="{% translate 'Comment (required)' %}"
+        ></textarea>
+        <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+          {% translate "Apply" %}
+        </button>
+      </div>
+    {% endif %}
+  </form>
+</section>

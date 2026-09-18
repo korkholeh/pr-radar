@@ -60,7 +60,8 @@ def person_create(request: HttpRequest) -> HttpResponse:
 @login_required
 @permission_required(PERMISSION, raise_exception=True)
 def person_edit(request: HttpRequest, pk: int) -> HttpResponse:
-    person = get_object_or_404(Person, pk=pk)
+    scope = scope_for_user(request.user)
+    person = get_object_or_404(people_for_settings(scope), pk=pk)
     if request.method == "POST":
         before = {field: getattr(person, field) for field in PersonForm.Meta.fields}
         form = PersonForm(request.POST, instance=person)
@@ -76,13 +77,15 @@ def person_edit(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @permission_required(PERMISSION, raise_exception=True)
 def person_merge(request: HttpRequest) -> HttpResponse:
+    scope = scope_for_user(request.user)
+    people = people_for_settings(scope)
     if request.method == "POST":
-        form = MergePeopleForm(request.POST)
+        form = MergePeopleForm(request.POST, people=people)
         if form.is_valid():
             merge_people(form.cleaned_data["source"], form.cleaned_data["target"], request.user)
             return redirect("catalog:people")
     else:
-        form = MergePeopleForm()
+        form = MergePeopleForm(people=people)
     template = "catalog/partials/merge_form.html" if is_htmx(request) else "catalog/merge.html"
     return render(request, template, {"form": form})
 

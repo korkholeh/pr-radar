@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n dashboards %}
 {% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number }}{% endblock %}
 {% block content %}
 <div class="py-6 max-w-3xl mx-auto" id="pull-request-detail">
@@ -16,6 +16,107 @@
       {% translate "View on GitHub" %}
     </a>
   </div>
+
+  <section class="mb-6" id="pr-timeline">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Timeline" %}</h2>
+    <ol class="text-sm">
+      {% for event in timeline %}
+        <li class="border-t border-[var(--border)] py-1 flex justify-between">
+          <span class="text-[var(--text)]">
+            {{ event.label }}
+            {% if event.actor %}&middot; {{ event.actor }}{% endif %}
+          </span>
+          <span class="text-[var(--text-muted)]">{{ event.at }}</span>
+        </li>
+      {% empty %}
+        <li class="text-[var(--text-muted)] py-4">{% translate "No timeline events." %}</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="mb-6" id="pr-metrics">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Metrics" %}</h2>
+    <dl class="grid grid-cols-2 gap-2 text-sm">
+      <dt class="text-[var(--text-muted)]">{% translate "Lead time" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.lead_time_hours|humanize_duration_hours }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Time to first review" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.time_to_first_review_hours|humanize_duration_hours }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Cycle time" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.cycle_time_hours|humanize_duration_hours }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Effective size" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.effective_size|format_lines }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Size bucket" %}</dt>
+      <dd class="text-[var(--text)]">{{ pull_request.get_size_bucket_display|default:"—" }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Review rounds" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.review_rounds|format_count }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Commits after first review" %}</dt>
+      <dd class="text-[var(--text)]">{{ pr_metrics.commits_after_first_review|format_count }}</dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Rubber-stamp review" %}</dt>
+      <dd class="text-[var(--text)]">
+        {% if pr_metrics.is_rubber_stamp %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
+      </dd>
+      <dt class="text-[var(--text-muted)]">{% translate "Self-merged" %}</dt>
+      <dd class="text-[var(--text)]">
+        {% if pr_metrics.is_self_merged %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
+      </dd>
+    </dl>
+  </section>
+
+  <section class="mb-6" id="pr-churn">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Churn" %}</h2>
+    {% if churn_result %}
+      <p class="text-sm text-[var(--text)]">{{ churn_result.churn_ratio|percent }}</p>
+    {% else %}
+      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn not computed yet." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="mb-6" id="pr-files">
+    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Files" %}</h2>
+    <table class="w-full text-sm" id="pr-files-table">
+      <caption class="sr-only">{% translate "Changed files" %}</caption>
+      <thead>
+        <tr class="text-left text-[var(--text-muted)]">
+          <th scope="col">{% translate "Path" %}</th>
+          <th scope="col">{% translate "Status" %}</th>
+          <th scope="col">{% translate "+/-" %}</th>
+          <th scope="col">{% translate "Flags" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+          <tr class="border-t border-[var(--border)]">
+            <td class="text-[var(--text)]">{{ file.path }}</td>
+            <td>{{ file.status }}</td>
+            <td>
+              <span class="text-[var(--good)]">+{{ file.additions|default:0 }}</span>
+              <span class="text-[var(--bad)]">-{{ file.deletions|default:0 }}</span>
+            </td>
+            <td class="text-[var(--text-muted)]">
+              {% if file.is_test %}{% translate "test" %}{% endif %}
+              {% if file.is_excluded %}{% translate "excluded" %}{% endif %}
+              {% if file.matched_sensitive_rule %}{% translate "sensitive" %}{% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-[var(--text-muted)] py-4">{% translate "No files recorded." %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if extra_files_count %}
+      <p class="text-sm text-[var(--text-muted)] mt-2">
+        {% blocktranslate count count=extra_files_count %}
+          +{{ count }} more file
+        {% plural %}
+          +{{ count }} more files
+        {% endblocktranslate %}
+      </p>
+    {% endif %}
+  </section>
+
+  {% include "dashboards/partials/pr_violations.html" %}
 
   <section class="mb-6" id="ai-section">
     <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "AI signals" %}</h2>

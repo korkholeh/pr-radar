@@ -45,7 +45,7 @@ def test_revoke_manage_settings_noops_when_permission_is_missing():
 
 
 @pytest.mark.django_db
-def test_scope_for_user_stays_unrestricted_even_with_access_rows(django_user_model):
+def test_scope_for_user_is_restricted_by_access_rows(django_user_model):
     from apps.accounts.models import UserProjectAccess
     from apps.catalog.models import Project
 
@@ -54,5 +54,5 @@ def test_scope_for_user_stays_unrestricted_even_with_access_rows(django_user_mod
     UserProjectAccess.objects.create(user=user, project=project)
 
     scope = scope_for_user(user)
-    assert scope.unrestricted is True
-    assert scope.project_ids is None
+    assert scope.unrestricted is False
+    assert scope.project_ids == frozenset({project.id})

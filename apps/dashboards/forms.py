@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from django import forms
 
-from apps.catalog.models import Project, Repository
+from apps.activity.models import AIStatus, PullRequest, SizeBucket
+from apps.ai_detection.models import Tool
+from apps.catalog.models import Person, Project, Repository
 
 
 class _LenientChoiceField(forms.ChoiceField):
@@ -124,3 +126,36 @@ class DashboardFilterForm(forms.Form):
     def clean_page(self) -> int | None:
         value = self.cleaned_data.get("page")
         return value if value and value >= 1 else None
+
+
+class _LenientMultipleChoiceField(forms.MultipleChoiceField):
+    """Like `_LenientChoiceField` but for a multi-select: an unknown value among several valid
+    ones is dropped rather than invalidating the whole field."""
+
+    def valid_value(self, value: str) -> bool:
+        return True  # never raises here; clean() below filters afterwards.
+
+    def clean(self, value):
+        cleaned = super().clean(value)
+        allowed = {choice_value for choice_value, _label in self.choices}
+        return [item for item in cleaned if item in allowed]
+
+
+class PullRequestFilterForm(forms.Form):
+    """The PR list's filter fields (plan §3): an unknown enum value or an out-of-scope author id
+    is dropped, never a validation error — same contract as `DashboardFilterForm`."""
+
+    author = _LenientModelMultipleChoiceField(queryset=Person.objects.none(), required=False)
+    state = _LenientMultipleChoiceField(choices=PullRequest.State.choices, required=False)
+    ai_status = _LenientMultipleChoiceField(choices=AIStatus.choices, required=False)
+    tool = _LenientMultipleChoiceField(choices=Tool.choices, required=False)
+    size = _LenientMultipleChoiceField(choices=SizeBucket.choices, required=False)
+    has_violations = _LenientChoiceField(choices=[("", "any"), ("yes", "yes"), ("no", "no")], required=False)
+
+    def __init__(self, *args, people=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["author"].queryset = people if people is not None else Person.objects.none()
+
+    def clean_has_violations(self) -> str:
+        value = self.cleaned_data.get("has_violations", "")
+        return value if value in {"", "yes", "no"} else ""

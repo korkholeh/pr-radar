@@ -16,9 +16,10 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from apps.accounts.selectors import scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
+from apps.catalog.models import Person
 from apps.catalog.services import get_int
 from apps.dashboards import rows
 from apps.dashboards.params import DashboardParams
@@ -87,7 +88,7 @@ def _seed_project(n_people: int = 1) -> tuple[ProjectFactory, RepositoryFactory]
 def test_overview_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _seed_project(1)
-    with django_assert_num_queries(274):
+    with django_assert_num_queries(275):
         client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
 
 
@@ -95,7 +96,7 @@ def test_overview_query_count(client, lead_user, django_assert_num_queries):
 def test_project_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     project, _repository = _seed_project(1)
-    with django_assert_num_queries(275):
+    with django_assert_num_queries(276):
         client.get(reverse("dashboards:project", args=[project.pk]) + f"?{PERIOD_QS}")
 
 
@@ -103,7 +104,7 @@ def test_project_query_count(client, lead_user, django_assert_num_queries):
 def test_repository_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _project, repository = _seed_project(1)
-    with django_assert_num_queries(257):
+    with django_assert_num_queries(258):
         client.get(reverse("dashboards:repository", args=[repository.pk]) + f"?{PERIOD_QS}")
 
 
@@ -111,7 +112,7 @@ def test_repository_query_count(client, lead_user, django_assert_num_queries):
 def test_day_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _seed_project(1)
-    with django_assert_num_queries(24):
+    with django_assert_num_queries(25):
         client.get(reverse("dashboards:overview") + "?mode=day&day=2026-08-05")
 
 
@@ -119,7 +120,7 @@ def test_day_query_count(client, lead_user, django_assert_num_queries):
 def test_projects_index_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _seed_project(1)
-    with django_assert_num_queries(24):
+    with django_assert_num_queries(25):
         client.get(reverse("dashboards:projects_index"))
 
 
@@ -127,8 +128,36 @@ def test_projects_index_query_count(client, lead_user, django_assert_num_queries
 def test_repositories_index_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _seed_project(1)
-    with django_assert_num_queries(24):
+    with django_assert_num_queries(25):
         client.get(reverse("dashboards:repositories_index"))
+
+
+@pytest.mark.django_db
+def test_pull_requests_index_query_count(client, lead_user, django_assert_num_queries):
+    """Round 1 review MINOR: `/prs/` had no page-level bound (only its row builder,
+    `test_pr_rows.py`, did), so a regression in the page assembly around it would not fail
+    the build."""
+    client.force_login(lead_user)
+    _seed_project(1)
+    with django_assert_num_queries(11):
+        client.get(reverse("dashboards:pull_requests_index") + f"?{PERIOD_QS}")
+
+
+@pytest.mark.django_db
+def test_reviews_page_query_count(client, lead_user, django_assert_num_queries):
+    client.force_login(lead_user)
+    _seed_project(1)
+    with django_assert_num_queries(21):
+        client.get(reverse("dashboards:reviews") + f"?{PERIOD_QS}")
+
+
+@pytest.mark.django_db
+def test_person_page_query_count(client, lead_user, django_assert_num_queries):
+    client.force_login(lead_user)
+    _seed_project(1)
+    person = Person.objects.get()
+    with django_assert_num_queries(321):
+        client.get(reverse("dashboards:person", args=[person.id]) + f"?{PERIOD_QS}")
 
 
 def _add_people(repository, n_people: int) -> None:
@@ -182,7 +211,7 @@ def test_people_table_query_count_grows_by_the_known_per_person_cost():
     each costing one query per bucket for value, previous and the series. Measured at 40
     queries/person for this fixture's date range and granularity; asserted as an exact multiple so
     a change to that cost (for better or worse) is visible, not silently absorbed."""
-    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
     params = _params()
 
     PersonFactory.create_batch(2)
@@ -203,7 +232,7 @@ def test_repositories_table_query_count_grows_by_the_known_per_repository_cost()
     """`PROJECT_REPOSITORY_METRIC_KEYS` includes two distribution/state metrics
     (`violations_open`, `lead_time_p50`) alongside four batched counter/ratio ones — measured at 16
     queries/repository for this fixture's date range and granularity."""
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     params = _params()
 
     RepositoryFactory.create_batch(2)
@@ -221,7 +250,7 @@ def test_repositories_table_query_count_grows_by_the_known_per_repository_cost()
 
 @pytest.mark.django_db
 def test_projects_table_query_count_grows_by_the_known_per_project_cost():
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     params = _params()
 
     ProjectFactory.create_batch(2)
@@ -242,7 +271,7 @@ def test_recent_prs_table_query_count_does_not_grow_with_row_count():
     """The one table backed by a real queryset, not `compute()` — a single annotated query
     regardless of how many PRs match, so doubling the row count costs nothing extra."""
     repository = RepositoryFactory()
-    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
     params = _params()
 
     def _add_prs(n: int) -> None:

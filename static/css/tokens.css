@@ -27,6 +27,11 @@
   --series-8: #57606a;
   --grid: #e2e5e9;
   --tooltip-bg: #24292f;
+  --heat-0: #f5f6f8;
+  --heat-1: #cfe0fd;
+  --heat-2: #93bffa;
+  --heat-3: #4f8ef0;
+  --heat-4: #2f6feb;
 }
 
 [data-theme="dark"] {
@@ -54,4 +59,9 @@
   --series-8: #b1bac4;
   --grid: #2c333d;
   --tooltip-bg: #e6e8eb;
+  --heat-0: #161a20;
+  --heat-1: #1d3a63;
+  --heat-2: #275693;
+  --heat-3: #3574c4;
+  --heat-4: #6ea8fe;
 }

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n dashboards %}
 {% comment %}
 All filter state round-trips through the query string (spec §10.1, acceptance criterion #4):
 this form's own field names are the query string's field names, and `hx-get` to the current path
@@ -109,7 +109,94 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
   {% endif %}
+  {% if table_ctx.table_key == "pull_requests" %}
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-author">
+        {% translate "Author" %}
+      </label>
+      <select id="filter-author" name="author" multiple>
+        {% for person in people %}
+          <option value="{{ person.pk }}" {% if person.pk in params.pr_filters.author_ids %}selected{% endif %}>
+            {{ person.display_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-state">
+        {% translate "State" %}
+      </label>
+      <select id="filter-state" name="state" multiple>
+        {% for value, label in state_choices %}
+          <option value="{{ value }}" {% if value in params.pr_filters.states %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-ai-status">
+        {% translate "AI status" %}
+      </label>
+      <select id="filter-ai-status" name="ai_status" multiple>
+        {% for value, label in ai_status_choices %}
+          <option value="{{ value }}" {% if value in params.pr_filters.ai_statuses %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-tool">
+        {% translate "AI tool" %}
+      </label>
+      <select id="filter-tool" name="tool" multiple>
+        {% for value, label in tool_choices %}
+          <option value="{{ value }}" {% if value in params.pr_filters.tools %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-size">
+        {% translate "Size" %}
+      </label>
+      <select id="filter-size" name="size" multiple>
+        {% for value, label in size_choices %}
+          <option value="{{ value }}" {% if value in params.pr_filters.size_buckets %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-has-violations">
+        {% translate "Violations" %}
+      </label>
+      <select id="filter-has-violations" name="has_violations">
+        <option value="" {% if params.pr_filters.has_violations == "" %}selected{% endif %}>
+          {% translate "Any" %}
+        </option>
+        <option value="yes" {% if params.pr_filters.has_violations == "yes" %}selected{% endif %}>
+          {% translate "Has open violations" %}
+        </option>
+        <option value="no" {% if params.pr_filters.has_violations == "no" %}selected{% endif %}>
+          {% translate "No open violations" %}
+        </option>
+      </select>
+    </div>
+  {% endif %}
   <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
     {% translate "Apply" %}
   </button>
+  {% if show_report_link %}
+    <a
+      href="{% report_url scope_type scope_id params %}"
+      class="rounded border border-[var(--border)] px-4 py-2 text-sm text-[var(--accent)] hover:underline"
+      data-testid="download-report-link"
+    >
+      {% translate "Download report (XLSX)" %}
+    </a>
+  {% endif %}
 </form>

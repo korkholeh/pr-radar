@@ -9,8 +9,8 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from apps.accounts.selectors import scope_for_user
-from apps.activity.factories import PullRequestFactory
+from apps.accounts.selectors import ScopeFilter
+from apps.activity.factories import PullRequestFactory, ReviewFactory
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest, SizeBucket
 from apps.catalog.factories import IdentityFactory, PersonFactory
 from apps.dashboards import charts
@@ -41,9 +41,10 @@ def _seed_period_data() -> None:
     period" for every test in this module) so every chart builder's comparison against a second,
     independent `compute()` call is actually meaningful (round-1 review: with an empty database
     every series is all-`None`, so a swapped-cohort or mismapped-key bug in a builder would still
-    pass since `None == None`). Covers throughput/adoption/latency/size/rework and one violation
-    for `violations_by_rule`."""
+    pass since `None == None`). Covers throughput/adoption/latency/size/rework, one violation for
+    `violations_by_rule` and one review for `reviewer_load` (T15)."""
     author = IdentityFactory(person=PersonFactory())
+    reviewer = IdentityFactory(person=PersonFactory())
     for offset, (ai_status, disclosure, size, rework) in enumerate(_SEED_PRS):
         day = _SEED_DATE_FROM + datetime.timedelta(days=5 + offset)
         created = datetime.datetime.combine(day, datetime.time(8), tzinfo=datetime.UTC)
@@ -66,11 +67,12 @@ def _seed_period_data() -> None:
         )
         with freeze_time(created):
             PolicyViolationFactory(pull_request=pull_request, rule_code=PolicyViolation.RuleCode.NO_TESTS)
+        ReviewFactory(pull_request=pull_request, reviewer=reviewer, submitted_at=first_review)
     rebuild(_SEED_DATE_FROM, _SEED_DATE_TO)
 
 
 def _scope() -> Scope:
-    return Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=scope_for_user(None))
+    return Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
 
 
 def _params(date_from: datetime.date, date_to: datetime.date, granularity: str = "day") -> DashboardParams:
@@ -93,7 +95,7 @@ def _params(date_from: datetime.date, date_to: datetime.date, granularity: str =
 
 
 @pytest.mark.django_db
-def test_registry_has_all_six_charts():
+def test_registry_has_all_seven_charts():
     assert set(CHART_KEYS) == {
         "throughput",
         "ai_adoption",
@@ -101,7 +103,17 @@ def test_registry_has_all_six_charts():
         "pr_size_distribution",
         "churn_rework",
         "violations_by_rule",
+        "reviewer_load",
     }
+    assert set(charts.DASHBOARD_CHART_KEYS) == {
+        "throughput",
+        "ai_adoption",
+        "latency",
+        "pr_size_distribution",
+        "churn_rework",
+        "violations_by_rule",
+    }
+    assert set(charts.REVIEWS_CHART_KEYS) == {"reviewer_load"}
 
 
 @pytest.mark.django_db

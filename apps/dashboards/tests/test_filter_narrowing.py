@@ -13,7 +13,7 @@ import pytest
 from django.http import QueryDict
 from django.urls import reverse
 
-from apps.accounts.selectors import ScopeFilter, scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
 from apps.catalog.models import Project, Repository
@@ -42,7 +42,7 @@ def _global_scope(access: ScopeFilter) -> Scope:
 
 
 def test_narrow_scope_is_a_noop_without_any_filter():
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = _global_scope(access)
     params = _parse({})
 
@@ -50,7 +50,7 @@ def test_narrow_scope_is_a_noop_without_any_filter():
 
 
 def test_narrow_scope_sets_project_ids_for_an_unrestricted_caller():
-    scope = _global_scope(scope_for_user(None))
+    scope = _global_scope(ScopeFilter(unrestricted=True))
     params = _parse({"project": "5"}, projects=Project.objects.none())
     params = params.replace(project_ids=(5,))
 
@@ -74,7 +74,7 @@ def test_narrow_scope_intersects_project_ids_with_an_already_restricted_access()
 
 
 def test_narrow_scope_sets_repository_ids_independently_of_project_ids():
-    scope = _global_scope(scope_for_user(None))
+    scope = _global_scope(ScopeFilter(unrestricted=True))
     params = _parse({}).replace(repository_ids=(7,))
 
     narrowed = narrow_scope(scope, params)
@@ -111,7 +111,7 @@ def test_project_filter_narrows_overview_kpis_and_tables():
         )
     rebuild(DATE_FROM, DATE_TO)
 
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = _global_scope(access)
     projects_queryset = Project.objects.filter(pk__in=[project_a.pk, project_b.pk])
     common_query = {"preset": "custom", "from": "2026-08-01", "to": "2026-08-31"}
@@ -154,7 +154,7 @@ def test_repository_filter_narrows_overview_kpis():
         )
     rebuild(DATE_FROM, DATE_TO)
 
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     scope = _global_scope(access)
     repositories_queryset = Repository.objects.filter(pk__in=[repo_a.pk, repo_b.pk])
     common_query = {"preset": "custom", "from": "2026-08-01", "to": "2026-08-31"}

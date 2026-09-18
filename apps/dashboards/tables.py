@@ -31,6 +31,8 @@ SEARCH_KEYS: dict[str, tuple[str, ...]] = {
     "repositories": ("name",),
     "people": ("name",),
     "recent_prs": ("title", "author", "repository"),
+    "pull_requests": ("title", "author", "repository"),
+    "reviewer_load": ("name",),
 }
 
 
@@ -159,6 +161,21 @@ def build_table_context(table_key: str, scope: Scope, params: DashboardParams) -
         export_csv_url=f"{reverse('dashboards:export', args=[table_key, 'csv'])}?{export_query}",
         export_xlsx_url=f"{reverse('dashboards:export', args=[table_key, 'xlsx'])}?{export_query}",
     )
+
+
+def full_row_count(table_key: str, scope: Scope, params: DashboardParams) -> int:
+    """Cheap row count for `views.export_table`'s sync-vs-background cap check, mirroring
+    `services.report_row_count()`: uses `TableSpec.count_builder` (a `.count()` query) when the
+    table has one and no text search is active — a search narrows rows in Python, so an accurate
+    count still needs the row list built; every other case falls back to `len(full_rows(...))`
+    (round 2 review MINOR: avoids materialising every row dict just to throw it away when the
+    count already exceeds the cap)."""
+    spec = TABLE_SPECS[table_key]
+    active = params.table == table_key
+    q = params.q if active else ""
+    if spec.count_builder is not None and not q:
+        return spec.count_builder(scope, params)
+    return len(full_rows(table_key, scope, params))
 
 
 def full_rows(table_key: str, scope: Scope, params: DashboardParams) -> list[dict[str, object]]:

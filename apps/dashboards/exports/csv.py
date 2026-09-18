@@ -73,3 +73,10 @@ def stream_csv(
     )
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+def render_csv_bytes(columns: Iterable[ExportColumn], data_rows: Iterable[dict[str, object]]) -> bytes:
+    """Same rows/formatting as `stream_csv()`, materialised as `bytes` instead of a streaming
+    response — for a background export job (T22), which writes the file directly rather than
+    streaming it in a request."""
+    return "".join(_iter_csv_rows(columns, data_rows)).encode("utf-8")

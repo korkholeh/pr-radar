@@ -1,0 +1,69 @@
+{% load i18n %}
+{% comment %}
+The Reviews page's own fragment (plan §4/T15), returned to an htmx swap and included from the
+full page. Reviewer load is a workload view, not a people ranking (RISKS row 1) — the subtitle
+says so explicitly.
+{% endcomment %}
+<div data-testid="reviews-kpis">
+  {% for row in kpi_rows %}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {% for card in row %}
+        {% include "dashboards/partials/kpi_card.html" with result=card.result secondary_result=card.secondary_result compare=card.compare %}
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+
+<section class="mb-6" data-testid="reviewer-load">
+  <h2 class="text-lg font-semibold text-[var(--text)] mb-1">{% translate "Reviewer load" %}</h2>
+  <p class="text-sm text-[var(--text-muted)] mb-2">
+    {% translate "Workload, not a ranking — how many reviews each person gave in the period." %}
+  </p>
+  <div data-testid="charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for card in charts %}
+      {% include "dashboards/partials/chart_card.html" %}
+    {% endfor %}
+  </div>
+  {% include "dashboards/partials/table.html" with ctx=table_ctx %}
+</section>
+
+{% include "dashboards/partials/reviewer_heat_map.html" %}
+
+<section class="mb-6" data-testid="waiting-for-review">
+  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Waiting for review" %}</h2>
+  <table class="w-full text-sm">
+    <caption class="sr-only">{% translate "Pull requests waiting for review" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Repository" %}</th>
+        <th scope="col">{% translate "Pull request" %}</th>
+        <th scope="col">{% translate "Author" %}</th>
+        <th scope="col">{% translate "Waiting" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in waiting %}
+        <tr class="border-t border-[var(--border)]">
+          <td>{{ item.pull_request.repository.full_name }}</td>
+          <td>
+            <a href="{% url 'dashboards:pull_request_detail' item.pull_request.pk %}">
+              #{{ item.pull_request.number }} {{ item.pull_request.title }}
+            </a>
+          </td>
+          <td>
+            {% if item.pull_request.author.person %}{{ item.pull_request.author.person.display_name }}{% endif %}
+          </td>
+          <td>
+            {% if item.hours_waited is not None %}{{ item.hours_waited|floatformat:0 }}h{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" class="text-[var(--text-muted)] py-4">
+            {% translate "No pull request is waiting for review." %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>

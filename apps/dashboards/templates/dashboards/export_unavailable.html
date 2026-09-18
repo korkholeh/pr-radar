@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n dashboards %}
+
+{% block title %}{% translate "Export unavailable" %}{% endblock %}
+
+{% block content %}
+<div class="py-6" id="export-unavailable" data-testid="export-unavailable">
+  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "Export unavailable" %}</h1>
+  {% if job.status == "failed" %}
+    <p class="text-[var(--bad)]">{{ job.error_code|export_error_message }}</p>
+  {% elif job.status == "pending" or job.status == "running" %}
+    <p class="text-[var(--text)]">{% translate "This export has not finished yet." %}</p>
+  {% else %}
+    <p class="text-[var(--text)]">{% translate "This export has expired and its file is no longer available." %}</p>
+  {% endif %}
+  <a href="{% url 'dashboards:exports_index' %}" class="text-[var(--accent)]">
+    {% translate "Back to my exports" %}
+  </a>
+</div>
+{% endblock %}

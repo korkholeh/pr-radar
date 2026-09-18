@@ -1,0 +1,40 @@
+{% load i18n dashboards %}
+{% comment %}
+The person-vs-baseline comparison table (plan §2): one row per `person.PERSON_COMPARISON_METRIC_KEYS`,
+with the person's value, their primary project's value (blank when they have none in scope for the
+period) and the reader's whole visible organization's value — both baselines real medians/sums over
+raw rows (ADR 0007), never a median of per-person medians (RISKS row 1).
+{% endcomment %}
+{% if comparison %}
+  <div class="mt-6 rounded border border-[var(--border)] overflow-x-auto" data-testid="person-comparison">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
+          <th class="p-2">{% translate "Metric" %}</th>
+          <th class="p-2">{% translate "Person" %}</th>
+          <th class="p-2">{% translate "Project" %}</th>
+          <th class="p-2">{% translate "Organization" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in comparison %}
+          <tr class="border-b border-[var(--border)] {% if entry.row.below_min_sample %}opacity-60{% endif %}">
+            <td class="p-2" title="{% metric_title entry.definition %}">{% metric_title entry.definition %}</td>
+            <td class="p-2" data-testid="comparison-person">
+              {{ entry.row.person_value|metric_value:entry.definition.unit }}
+              {% if entry.row.below_min_sample %}
+                <span class="text-xs text-[var(--warning)]">{% translate "Small sample" %}</span>
+              {% endif %}
+            </td>
+            <td class="p-2" data-testid="comparison-project">
+              {{ entry.row.project_value|metric_value:entry.definition.unit }}
+            </td>
+            <td class="p-2" data-testid="comparison-org">
+              {{ entry.row.org_value|metric_value:entry.definition.unit }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}

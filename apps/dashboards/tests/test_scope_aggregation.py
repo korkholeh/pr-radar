@@ -9,7 +9,7 @@ import datetime
 
 import pytest
 
-from apps.accounts.selectors import scope_for_user
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
 from apps.metrics.models import ScopeType
@@ -41,7 +41,7 @@ def test_shared_repository_is_counted_once_globally():
 
     rebuild(DATE_FROM, DATE_TO)
 
-    access = scope_for_user(None)
+    access = ScopeFilter(unrestricted=True)
     global_scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=access)
     project_a_scope = Scope(scope_type=ScopeType.PROJECT, scope_id=project_a.id, access=access)
     project_b_scope = Scope(scope_type=ScopeType.PROJECT, scope_id=project_b.id, access=access)

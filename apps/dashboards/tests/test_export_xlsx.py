@@ -9,7 +9,7 @@ import openpyxl
 import pytest
 
 from apps.dashboards.exports.columns import ExportColumn
-from apps.dashboards.exports.xlsx import write_xlsx
+from apps.dashboards.exports.xlsx import open_workbook, write_sheet, write_xlsx
 
 COLUMNS = [
     ExportColumn(key="name", title="Name", type="url", link_key="url", width=30),
@@ -159,3 +159,23 @@ def test_formula_looking_title_is_stored_as_a_string_not_a_formula() -> None:
     header_cell = sheet.cell(row=1, column=6)
     assert header_cell.value == "=cmd()"
     assert header_cell.data_type == "s"
+
+
+def test_write_sheet_can_write_two_sheets_into_one_workbook() -> None:
+    """T16: `open_workbook()`/`write_sheet()` let a multi-sheet workbook (the report,
+    `exports/reports.py`) share one format set across sheets."""
+    workbook, buffer, formats = open_workbook(constant_memory=False)
+    write_sheet(workbook, formats, "First", COLUMNS, [ROW])
+    write_sheet(workbook, formats, "Second", COLUMNS[:2], [{"name": "x", "url": None, "count": 7}])
+    workbook.close()
+
+    loaded = openpyxl.load_workbook(io.BytesIO(buffer.getvalue()))
+    assert loaded.sheetnames == ["First", "Second"]
+
+    first = loaded["First"]
+    assert first.cell(row=1, column=1).font.bold is True
+    assert first.cell(row=2, column=2).value == 3
+
+    second = loaded["Second"]
+    assert second.cell(row=1, column=1).value == "Name"
+    assert second.cell(row=2, column=2).value == 7

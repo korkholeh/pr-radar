@@ -11,8 +11,12 @@ from zoneinfo import ZoneInfo
 import xlsxwriter
 from django.conf import settings
 from django.utils.timezone import localtime
+from xlsxwriter.format import Format
+from xlsxwriter.worksheet import Worksheet
 
 from apps.dashboards.exports.columns import ExportColumn, extract_value
+
+Formats = dict[str, Format]
 
 _MAX_COLUMN_WIDTH = 60
 _INVALID_SHEET_NAME_CHARS = frozenset("[]:*?/\\")
@@ -41,6 +45,10 @@ def _delta_color(direction: str, value: float) -> str | None:
     return "good" if improved else "bad"
 
 
+def _is_absolute_url(url: str) -> bool:
+    return url.startswith("mailto:") or "://" in url
+
+
 def _clean_sheet_name(name: str) -> str:
     cleaned = "".join(char for char in name if char not in _INVALID_SHEET_NAME_CHARS)
     return cleaned[:31] or "Sheet1"
@@ -51,20 +59,22 @@ def _column_title(column: ExportColumn) -> str:
     return f"{title}, h" if column.type == "duration" else title
 
 
-def write_xlsx(columns: list[ExportColumn], data_rows: list[dict[str, object]], sheet_name: str) -> bytes:
+def open_workbook(*, constant_memory: bool) -> tuple[xlsxwriter.Workbook, io.BytesIO, Formats]:
+    """A workbook plus its backing buffer and the shared format set. `constant_memory=True` streams
+    rows to disk as they are written (one table export, `write_xlsx`); `constant_memory=False` keeps
+    every sheet addressable in memory, needed once a workbook has several sheets and native charts
+    that anchor against already-written ranges (the report, `exports/reports.py`)."""
     buffer = io.BytesIO()
     workbook = xlsxwriter.Workbook(
         buffer,
         {
             "in_memory": True,
-            "constant_memory": True,
+            "constant_memory": constant_memory,
             "strings_to_formulas": False,
             "strings_to_urls": False,
         },
     )
-    worksheet = workbook.add_worksheet(_clean_sheet_name(sheet_name))
-
-    formats = {
+    formats: Formats = {
         "header": workbook.add_format({"bold": True}),
         "percent": workbook.add_format({"num_format": "0.0%"}),
         "duration": workbook.add_format({"num_format": "0.0"}),
@@ -78,6 +88,19 @@ def write_xlsx(columns: list[ExportColumn], data_rows: list[dict[str, object]], 
             if num_format is not None:
                 spec["num_format"] = num_format
             formats[f"delta_{value_type}_{kind}"] = workbook.add_format(spec)
+    return workbook, buffer, formats
+
+
+def write_sheet(
+    workbook: xlsxwriter.Workbook,
+    formats: Formats,
+    sheet_name: str,
+    columns: list[ExportColumn],
+    data_rows: list[dict[str, object]],
+) -> Worksheet:
+    """One formatted sheet (header, column widths, typed cells, freeze pane, autofilter) in an
+    already-open workbook. Callers writing several sheets (the report) reuse the same `formats`."""
+    worksheet = workbook.add_worksheet(_clean_sheet_name(sheet_name))
 
     for col_index, column in enumerate(columns):
         worksheet.write_string(0, col_index, _column_title(column), formats["header"])
@@ -92,7 +115,12 @@ def write_xlsx(columns: list[ExportColumn], data_rows: list[dict[str, object]], 
     worksheet.freeze_panes(1, 0)
     if columns:
         worksheet.autofilter(0, 0, row_index, len(columns) - 1)
+    return worksheet
 
+
+def write_xlsx(columns: list[ExportColumn], data_rows: list[dict[str, object]], sheet_name: str) -> bytes:
+    workbook, buffer, formats = open_workbook(constant_memory=True)
+    write_sheet(workbook, formats, sheet_name, columns, data_rows)
     workbook.close()
     return buffer.getvalue()
 
@@ -100,9 +128,15 @@ def write_xlsx(columns: list[ExportColumn], data_rows: list[dict[str, object]], 
 def _write_value(worksheet, row_index: int, col_index: int, column: ExportColumn, value, formats) -> None:
     if column.type == "url":
         text, href = value
-        if href:
-            display = str(text) if text is not None else str(href)
+        display = str(text) if text is not None else (str(href) if href else None)
+        if href and _is_absolute_url(str(href)):
             worksheet.write_url(row_index, col_index, str(href), string=display)
+        elif display:
+            # xlsxwriter's `write_url` rejects an app-relative path outright (no scheme, no
+            # `internal:`/`mailto:` prefix) — a caller with no absolute base (`build_report()`
+            # with `base_url=""`, T22's request-free background task) still gets the row's text,
+            # just not a clickable link, rather than the whole export crashing on the first row.
+            worksheet.write_string(row_index, col_index, display)
         else:
             worksheet.write_blank(row_index, col_index, None)
         return

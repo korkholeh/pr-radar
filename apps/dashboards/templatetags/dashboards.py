@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from django import template
 from django.conf import settings
+from django.urls import reverse
 from django.utils.formats import number_format
 from django.utils.html import format_html
 from django.utils.safestring import SafeString, mark_safe
@@ -17,6 +18,7 @@ from django.utils.timezone import localtime
 from django.utils.translation import gettext
 
 from apps.dashboards.charts import ChartPayload
+from apps.dashboards.export_messages import render_export_error
 from apps.dashboards.formatting import EM_DASH
 from apps.dashboards.formatting import format_duration as _format_duration
 from apps.dashboards.params import DashboardParams
@@ -34,6 +36,18 @@ SPARKLINE_HEIGHT = 24
 @register.filter(name="humanize_duration")
 def humanize_duration(seconds: float | None) -> str:
     return _format_duration(seconds)
+
+
+@register.filter(name="humanize_duration_hours")
+def humanize_duration_hours(hours: float | None) -> str:
+    """`pr_detail.PRMetrics`'s durations are hours (a single-PR fact, not a `MetricResult` whose
+    unit is always seconds) — this filter is the one place that bridges the two."""
+    return _format_duration(None if hours is None else hours * 3600)
+
+
+@register.filter(name="export_error_message")
+def export_error_message(error_code: str) -> str:
+    return render_export_error(error_code)
 
 
 @register.filter(name="percent")
@@ -194,6 +208,18 @@ def table_page_url(context: dict, params: DashboardParams, table_key: str, page_
     current_q = params.q if params.table == table_key else ""
     query = params.replace(table=table_key, sort=current_sort, q=current_q, page=page_number).to_query_dict()
     return f"{context['request'].path}?{query.urlencode()}"
+
+
+@register.simple_tag(name="report_url")
+def report_url(scope_type: str, scope_id: int | None, params: DashboardParams) -> str:
+    """The href for the page's "Download report (XLSX)" button — same scope+query-string
+    contract as `services._chart_url()`, so a report can never disagree with the page it was
+    downloaded from."""
+    query = params.to_query_dict().copy()
+    query["scope_type"] = scope_type
+    if scope_id is not None:
+        query["scope_id"] = str(scope_id)
+    return f"{reverse('dashboards:export_report')}?{query.urlencode()}"
 
 
 @register.simple_tag(name="hidden_query_fields")

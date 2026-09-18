@@ -42,7 +42,11 @@ uv run python manage.py run_huey           # background worker (sync, exports, c
 ```
 
 Open <http://127.0.0.1:8000/>. Both processes read the same `.env` and the same `DATA_DIR`; the worker must be
-running for anything queued in the background (nothing is queued yet in this phase).
+running for anything queued in the background — a sync, churn recomputation, and a table or report export past
+`EXPORT_SYNC_MAX_ROWS` rows (see `docs/CONFIGURATION.md`). If the worker is ever stopped for a while, catching up
+is one command each rather than restarting it: `manage.py process_exports` runs every export left `pending`,
+`manage.py cleanup_exports` deletes export files past their retention window and clears a job stuck `running` for
+over an hour.
 
 ## Building the frontend assets
 

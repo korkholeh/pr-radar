@@ -46,5 +46,5 @@ autofilter, real numeric cells for percentages and durations (not text), and a c
 A value that would otherwise be mistaken for a spreadsheet formula (starting with `=`, `+`, `-` or `@`) is
 neutralised in the CSV so opening it in Excel never runs anything.
 
-A very large export (tens of thousands of rows) may take a few seconds to generate since it is built synchronously;
-background exports for very large tables are planned.
+A very large export (tens of thousands of rows) may take a few seconds to generate since it is built synchronously.
+Past a configured row cap it is instead queued as a background job — see `docs/user/exports.md`.

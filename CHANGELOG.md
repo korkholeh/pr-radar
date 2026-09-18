@@ -63,3 +63,23 @@
   autofilter, real numeric cells, and clickable PR links.
 - `manage.py seed_demo`, a deterministic demo dataset (projects, repositories — including one shared by two
   projects — people, PRs, reviews and policy violations) for trying out the dashboards without a live sync.
+- Per-project access restriction: a lead granted access to specific projects (Django admin → Accounts → User
+  project access) sees only those projects' data everywhere — every page, chart, CSV/XLSX export and report;
+  a lead with no grants continues to see everything.
+- People page (`/people/`) and a Person page (`/people/<id>/`): the person's PRs, violations, review load, a
+  comparison against their primary project and the whole organisation, and a private notes card visible only to
+  leads. See `docs/user/people.md`.
+- Pull requests page (`/prs/`): every PR in scope, filterable by author, state, AI status, tool, size and
+  whether it has open violations, exportable to CSV/XLSX. See `docs/user/pull-requests.md`.
+- A full PR detail page (`/prs/<id>/`): a chronological timeline, per-PR duration metrics, the changed-files
+  list with test/excluded/sensitive-path badges, open violations with an inline acknowledge/waive action, and
+  a churn slot (computed in phase 10).
+- Reviews page (`/reviews/`): reviewer workload, an author×reviewer heat map, and the list of PRs waiting for
+  review. See `docs/user/reviews.md`.
+- A seven-sheet dashboard report (Summary, Trends with native Excel charts, the page's own tables, PRs,
+  Violations, Metrics reference, Parameters), downloadable as XLSX from Overview, Project, Repository and
+  Person pages. See `docs/user/exports.md`.
+- Background exports: a table or report export past `EXPORT_SYNC_MAX_ROWS` rows is queued as a job instead of
+  blocking the request; "My exports" (`/exports/`) lists your own jobs with live status and a download link,
+  `manage.py process_exports`/`cleanup_exports` are the worker-free fallbacks, and every export — synchronous or
+  background — writes an audit entry. See `docs/user/exports.md`.

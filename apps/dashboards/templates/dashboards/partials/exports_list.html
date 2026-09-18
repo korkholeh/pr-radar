@@ -1,0 +1,53 @@
+{% load i18n dashboards %}
+{% comment %}
+"My exports" list fragment (plan §6): the caller's own jobs only, newest first. Polls itself
+every 3s while any job is still pending/running, and stops emitting `hx-trigger` (so htmx stops
+polling) once every job is terminal.
+{% endcomment %}
+<div
+  id="exports-list"
+  {% if polling %}hx-get="{% url 'dashboards:exports_index' %}" hx-trigger="every 3s" hx-swap="outerHTML"{% endif %}
+  data-testid="exports-list"
+  data-polling="{{ polling|yesno:'true,false' }}"
+>
+  <table class="w-full text-sm" id="exports-table">
+    <caption class="sr-only">{% translate "My exports" %}</caption>
+    <thead>
+      <tr class="text-left text-[var(--text-muted)]">
+        <th scope="col">{% translate "Created" %}</th>
+        <th scope="col">{% translate "Kind" %}</th>
+        <th scope="col">{% translate "Status" %}</th>
+        <th scope="col">{% translate "Rows" %}</th>
+        <th scope="col"><span class="sr-only">{% translate "Download" %}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr class="border-t border-[var(--border)]" data-testid="export-job-row" data-job-status="{{ job.status }}">
+        <td>{{ job.created_at }}</td>
+        <td>{{ job.get_kind_display }}</td>
+        <td>
+          {{ job.get_status_display }}
+          {% if job.status == "failed" %}
+            <div class="text-[var(--bad)]">{{ job.error_code|export_error_message }}</div>
+          {% endif %}
+        </td>
+        <td>{{ job.rows|default_if_none:"—" }}</td>
+        <td>
+          {% if job.status == "done" %}
+            <a
+              href="{% url 'dashboards:export_download' job.pk %}"
+              class="text-[var(--accent)]"
+              data-testid="export-download-link"
+            >{% translate "Download" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-[var(--text-muted)] py-4">{% translate "No exports yet." %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

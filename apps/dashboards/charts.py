@@ -23,7 +23,9 @@ from apps.policy.messages import rule_label
 CHART_MAX_BUCKETS = 31
 _GRANULARITY_ORDER = ("day", "week", "month")
 _ALL_LEVELS = frozenset(ScopeType.values)
+_REVIEWS_LEVELS = frozenset({ScopeType.GLOBAL, ScopeType.PROJECT, ScopeType.REPO})
 _SIZE_BUCKET_ORDER = ("XS", "S", "M", "L", "XL")
+_REVIEWER_LOAD_TOP_N = 20
 
 
 @dataclass(frozen=True)
@@ -323,6 +325,31 @@ def _build_violations_by_rule(scope: Scope, params: DashboardParams) -> ChartPay
     )
 
 
+def _build_reviewer_load(scope: Scope, params: DashboardParams) -> ChartPayload:
+    """The Reviews page's own chart (plan §4): `reviews.reviewer_load()` is a raw-row selector, not
+    a `compute()` aggregate (same documented exception as `rows.py`'s per-row builders), capped at
+    `_REVIEWER_LOAD_TOP_N` people so the bar chart stays readable — the full ranking is the page's
+    table, this is the at-a-glance view."""
+    from apps.dashboards.reviews import reviewer_load
+
+    pairs = reviewer_load(scope, params)[:_REVIEWER_LOAD_TOP_N]
+    labels = [person.display_name for person, _count in pairs]
+    data: list[float | None] = [float(count) for _person, count in pairs]
+    empty = not pairs
+    return ChartPayload(
+        key="reviewer_load",
+        type="bar",
+        stacked=False,
+        unit="count",
+        labels=labels,
+        x_title=gettext("Reviewer"),
+        y_title=gettext("Reviews given"),
+        datasets=[ChartDataset(gettext("Reviews given"), "--series-1", data)],
+        empty=empty,
+        empty_message=_empty_message() if empty else None,
+    )
+
+
 CHART_REGISTRY: dict[str, ChartSpec] = {
     spec.key: spec
     for spec in (
@@ -360,8 +387,30 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             ("violations_by_rule",),
             _build_violations_by_rule,
         ),
+        ChartSpec(
+            "reviewer_load",
+            _("Reviewer load"),
+            "bar",
+            False,
+            ("reviews_given",),
+            _build_reviewer_load,
+            levels=_REVIEWS_LEVELS,
+        ),
     )
 }
+
+# Which charts a page renders, in order — `CHART_REGISTRY` alone no longer decides this (plan T15):
+# a dashboard page (Overview/Project/Repository/Person) renders `DASHBOARD_CHART_KEYS`, the Reviews
+# page renders `REVIEWS_CHART_KEYS`, so `reviewer_load` shows up once, on its own page.
+DASHBOARD_CHART_KEYS: tuple[str, ...] = (
+    "throughput",
+    "ai_adoption",
+    "latency",
+    "pr_size_distribution",
+    "churn_rework",
+    "violations_by_rule",
+)
+REVIEWS_CHART_KEYS: tuple[str, ...] = ("reviewer_load",)
 
 
 def chart_available_at_level(spec: ChartSpec, scope_type: str) -> bool:
