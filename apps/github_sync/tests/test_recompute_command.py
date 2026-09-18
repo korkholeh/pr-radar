@@ -5,10 +5,13 @@ from django.core.management import call_command
 from django.utils import timezone
 
 from apps.activity.factories import PullRequestFactory
-from apps.activity.models import AIStatus
+from apps.activity.models import AIStatus, PullRequest
 from apps.ai_detection.factories import DetectionRuleFactory
 from apps.ai_detection.models import AISignal, Confidence, Detector, Tool
 from apps.catalog.factories import ProjectFactory, RepositoryFactory
+from apps.metrics.models import DailyRollup
+from apps.metrics.services import data_version
+from apps.metrics.timeframe import day_of
 from apps.policy.factories import AIPolicyFactory
 from apps.policy.models import PolicyViolation
 
@@ -150,3 +153,86 @@ def test_second_recompute_changes_no_policy_violation_row_counts():
     call_command("recompute")
 
     assert PolicyViolation.objects.count() == count_after_first
+
+
+@pytest.mark.django_db
+def test_from_to_rebuilds_only_that_range():
+    now = timezone.now()
+    in_range = PullRequestFactory(
+        state=PullRequest.State.MERGED, created_at=now - datetime.timedelta(days=1), merged_at=now
+    )
+    out_of_range = PullRequestFactory(
+        state=PullRequest.State.MERGED,
+        created_at=now - datetime.timedelta(days=30),
+        merged_at=now - datetime.timedelta(days=30),
+    )
+
+    call_command(
+        "recompute",
+        **{
+            "from": day_of(now - datetime.timedelta(days=5)).isoformat(),
+            "to": day_of(now).isoformat(),
+        },
+    )
+
+    assert DailyRollup.objects.filter(date=day_of(in_range.merged_at)).exists()
+    assert not DailyRollup.objects.filter(date=day_of(out_of_range.merged_at)).exists()
+
+
+@pytest.mark.django_db
+def test_rollups_only_skips_derive_detect_evaluate():
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    pr = PullRequestFactory(body="Generated with Claude Code")
+
+    call_command("recompute", **{"rollups_only": True})
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.UNKNOWN
+    assert AISignal.objects.filter(pull_request=pr).count() == 0
+
+
+@pytest.mark.django_db
+def test_skip_rollups_leaves_no_rollup_rows():
+    now = timezone.now()
+    PullRequestFactory(state=PullRequest.State.MERGED, created_at=now, merged_at=now)
+
+    call_command("recompute", **{"skip_rollups": True})
+
+    assert DailyRollup.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_command_bumps_the_data_version():
+    PullRequestFactory()
+    version_before = data_version()
+
+    call_command("recompute")
+
+    assert data_version() == version_before + 1
+
+
+@pytest.mark.django_db
+def test_running_recompute_twice_is_idempotent_at_the_rollup_row_level():
+    now = timezone.now()
+    PullRequestFactory(state=PullRequest.State.MERGED, created_at=now, merged_at=now)
+
+    call_command("recompute")
+    rows_after_first = list(
+        DailyRollup.objects.order_by("metric_key", "scope_type", "scope_id", "cohort", "date").values(
+            "metric_key", "scope_type", "scope_id", "cohort", "date", "value", "sample_size"
+        )
+    )
+
+    call_command("recompute")
+    rows_after_second = list(
+        DailyRollup.objects.order_by("metric_key", "scope_type", "scope_id", "cohort", "date").values(
+            "metric_key", "scope_type", "scope_id", "cohort", "date", "value", "sample_size"
+        )
+    )
+
+    assert rows_after_first == rows_after_second

@@ -131,6 +131,27 @@ def test_set_setting_wrong_type_raises():
 
 
 @pytest.mark.django_db
+def test_set_setting_bumps_the_data_version_for_a_metrics_group_key():
+    """A `metrics`-group setting (e.g. `MIN_SAMPLE`) is baked into `compute()`'s cache key
+    indirectly via `last_data_version` — bumping it here is what makes a `MIN_SAMPLE` change
+    visible immediately instead of waiting out `METRICS_CACHE_TTL_SECONDS`."""
+    from apps.metrics.services import data_version
+
+    before = data_version()
+    set_setting("MIN_SAMPLE", 10)
+    assert data_version() == before + 1
+
+
+@pytest.mark.django_db
+def test_set_setting_does_not_bump_the_data_version_for_a_non_metrics_key():
+    from apps.metrics.services import data_version
+
+    before = data_version()
+    set_setting("BACKFILL_DAYS", 30)
+    assert data_version() == before
+
+
+@pytest.mark.django_db
 def test_typed_accessors_return_python_types():
     assert isinstance(get_int("BACKFILL_DAYS"), int)
     assert isinstance(get_bool("AI_COHORT_INCLUDE_SUSPECTED"), bool)

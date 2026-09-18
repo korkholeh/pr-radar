@@ -30,7 +30,7 @@ from apps.churn.models import ChurnResult
 from apps.connections.admin import GitHubConnectionAdmin
 from apps.connections.models import GitHubConnection
 from apps.github_sync.models import SyncLock, SyncRun
-from apps.metrics.models import DailyRollup
+from apps.metrics.models import DailyRollup, DataVersion, DirtyDay
 from apps.policy.factories import PolicyViolationFactory
 from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
 
@@ -46,6 +46,8 @@ READ_ONLY_MODELS = {
     CheckStatus,
     AISignal,
     DailyRollup,
+    DataVersion,
+    DirtyDay,
     ChurnResult,
     SyncRun,
     SyncLock,

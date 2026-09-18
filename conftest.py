@@ -57,6 +57,22 @@ def _huey_immediate(settings):
         huey_instance.immediate = original_immediate
 
 
+@pytest.fixture(autouse=True)
+def _metrics_cache(settings, tmp_path):
+    from django.core.cache import caches
+
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": str(tmp_path / "metrics-cache"),
+            "OPTIONS": {"MAX_ENTRIES": 5000},
+        }
+    }
+    caches["default"].clear()
+    yield
+    caches["default"].clear()
+
+
 @pytest.fixture
 def lead_user(django_user_model):
     from django.contrib.auth.models import Group

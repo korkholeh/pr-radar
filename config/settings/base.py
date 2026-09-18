@@ -122,6 +122,14 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(DATA_DIR / "cache" / "metrics"),
+        "OPTIONS": {"MAX_ENTRIES": 5000},
+    }
+}
+
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "pr-radar",

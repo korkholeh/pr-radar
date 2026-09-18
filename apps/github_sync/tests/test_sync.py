@@ -11,6 +11,9 @@ from apps.connections.services import set_token
 from apps.github_sync.models import SyncLock, SyncRun
 from apps.github_sync.services import SyncAlreadyRunning, _watermark, run_sync
 from apps.github_sync.tests.conftest import mock_graphql_responses, mock_graphql_sequence
+from apps.metrics.models import DailyRollup
+from apps.metrics.services import data_version
+from apps.metrics.timeframe import day_of
 
 TOKEN = "ghp_secrettokenvalue0123456789"
 
@@ -178,6 +181,24 @@ def test_fixture_sync_creates_expected_rows_and_succeeds():
     assert repository.last_synced_at == run.started_at
 
 
+@pytest.mark.django_db(transaction=True)
+def test_successful_sync_leaves_rollup_rows_for_the_synced_day_and_bumps_the_data_version():
+    """transaction=True: the post-processing hook (mark_dirty included) only fires on a real
+    commit, same requirement as apps/github_sync/tests/test_pipeline.py."""
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+    version_before = data_version()
+
+    run = run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    run.refresh_from_db()
+    assert run.status == SyncRun.Status.SUCCESS
+    pull_request = PullRequest.objects.get(repository=repository)
+    expected_day = day_of(pull_request.created_at)
+    assert DailyRollup.objects.filter(date=expected_day, metric_key="prs_opened").exists()
+    assert data_version() == version_before + 1
+
+
 @pytest.mark.django_db
 def test_second_sync_is_idempotent():
     _make_repository(full_name="acme/widget")
@@ -320,10 +341,15 @@ def test_lock_is_released_after_a_crashing_run(monkeypatch):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(services_module, "_select_repositories", _boom)
+    version_before = data_version()
 
     with pytest.raises(RuntimeError):
         run_sync(SyncRun.Trigger.CLI, repo_full_names=[])
 
+    # A failed sync must still bump the version: any dirty days a partial run's committed PRs
+    # left behind are rebuilt on the failure path too, so compute()'s cache must not keep serving
+    # a pre-run answer for them.
+    assert data_version() == version_before + 1
     assert not SyncLock.objects.filter(name="global").exists()
     # The crashed run's own SyncRun must get a terminal status too, or the Sync page polls it
     # forever and "Sync now" stays disabled with no recovery.
@@ -332,6 +358,31 @@ def test_lock_is_released_after_a_crashing_run(monkeypatch):
     assert crashed_run.status == SyncRun.Status.FAILED
     assert crashed_run.finished_at is not None
     assert "boom" in crashed_run.error_log
+
+
+@pytest.mark.django_db
+def test_a_failing_post_sync_rebuild_does_not_mask_the_original_sync_exception(monkeypatch):
+    """The failure-path `rebuild_dirty()`/`bump_data_version()` calls are best-effort: the
+    `SyncRun` row already carries a terminal status by the time they run, so if the rebuild itself
+    raises (e.g. a concurrent `DirtyDay` write), the caller must still see the sync's own
+    exception, not the rebuild's."""
+    import apps.github_sync.services as services_module
+
+    def _boom(**kwargs):
+        raise RuntimeError("original sync failure")
+
+    def _rebuild_boom():
+        raise ValueError("rebuild also failed")
+
+    monkeypatch.setattr(services_module, "_select_repositories", _boom)
+    monkeypatch.setattr(services_module, "rebuild_dirty", _rebuild_boom)
+
+    with pytest.raises(RuntimeError, match="original sync failure"):
+        run_sync(SyncRun.Trigger.CLI, repo_full_names=[])
+
+    crashed_run = SyncRun.objects.get(trigger=SyncRun.Trigger.CLI)
+    assert crashed_run.status == SyncRun.Status.FAILED
+    assert "original sync failure" in crashed_run.error_log
 
 
 @pytest.mark.django_db
