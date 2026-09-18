@@ -1,0 +1,115 @@
+{% load i18n %}
+{% comment %}
+All filter state round-trips through the query string (spec §10.1, acceptance criterion #4):
+this form's own field names are the query string's field names, and `hx-get` to the current path
+with `hx-push-url` is what keeps the address bar in sync with a filter change.
+{% endcomment %}
+<form
+  method="get"
+  action="{{ request.path }}"
+  hx-get="{{ request.path }}"
+  hx-target="#dashboard-content"
+  hx-swap="innerHTML"
+  hx-push-url="true"
+  class="mb-4 flex flex-wrap gap-3 items-end"
+  id="dashboard-filters"
+>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-mode">{% translate "Mode" %}</label>
+    <select id="filter-mode" name="mode">
+      <option value="period" {% if params.mode == "period" %}selected{% endif %}>{% translate "Period" %}</option>
+      <option value="day" {% if params.mode == "day" %}selected{% endif %}>{% translate "Day" %}</option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-preset">{% translate "Preset" %}</label>
+    <select id="filter-preset" name="preset">
+      <option value="7d" {% if params.preset == "7d" %}selected{% endif %}>{% translate "Last 7 days" %}</option>
+      <option value="30d" {% if params.preset == "30d" %}selected{% endif %}>{% translate "Last 30 days" %}</option>
+      <option value="90d" {% if params.preset == "90d" %}selected{% endif %}>{% translate "Last 90 days" %}</option>
+      <option value="this_month" {% if params.preset == "this_month" %}selected{% endif %}>
+        {% translate "This month" %}
+      </option>
+      <option value="last_month" {% if params.preset == "last_month" %}selected{% endif %}>
+        {% translate "Last month" %}
+      </option>
+      <option value="quarter" {% if params.preset == "quarter" %}selected{% endif %}>
+        {% translate "This quarter" %}
+      </option>
+      <option value="custom" {% if params.preset == "custom" %}selected{% endif %}>
+        {% translate "Custom range" %}
+      </option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-from">{% translate "From" %}</label>
+    <input type="date" id="filter-from" name="from" value="{{ params.date_from|date:'Y-m-d' }}">
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-to">{% translate "To" %}</label>
+    <input type="date" id="filter-to" name="to" value="{{ params.date_to|date:'Y-m-d' }}">
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-day">{% translate "Day" %}</label>
+    <input type="date" id="filter-day" name="day" value="{{ params.day|date:'Y-m-d' }}">
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-granularity">
+      {% translate "Granularity" %}
+    </label>
+    <select id="filter-granularity" name="granularity">
+      <option value="" {% if params.granularity_is_auto %}selected{% endif %}>{% translate "Auto" %}</option>
+      <option value="day" {% if not params.granularity_is_auto and params.granularity == "day" %}selected{% endif %}>
+        {% translate "Day" %}
+      </option>
+      <option value="week" {% if not params.granularity_is_auto and params.granularity == "week" %}selected{% endif %}>
+        {% translate "Week" %}
+      </option>
+      <option value="month" {% if not params.granularity_is_auto and params.granularity == "month" %}selected{% endif %}>
+        {% translate "Month" %}
+      </option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-cohort">{% translate "Cohort" %}</label>
+    <select id="filter-cohort" name="cohort">
+      <option value="all" {% if params.cohort == "all" %}selected{% endif %}>{% translate "All" %}</option>
+      <option value="ai" {% if params.cohort == "ai" %}selected{% endif %}>{% translate "AI" %}</option>
+      <option value="non_ai" {% if params.cohort == "non_ai" %}selected{% endif %}>{% translate "Non-AI" %}</option>
+      <option value="compare" {% if params.cohort == "compare" %}selected{% endif %}>
+        {% translate "AI vs non-AI" %}
+      </option>
+    </select>
+  </div>
+  {% if projects %}
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-project">
+        {% translate "Projects" %}
+      </label>
+      <select id="filter-project" name="project" multiple>
+        {% for project in projects %}
+          <option value="{{ project.pk }}" {% if project.pk in params.project_ids %}selected{% endif %}>
+            {{ project.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  {% endif %}
+  {% if repositories %}
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-repository">
+        {% translate "Repositories" %}
+      </label>
+      <select id="filter-repository" name="repository" multiple>
+        {% for repository in repositories %}
+          <option value="{{ repository.pk }}" {% if repository.pk in params.repository_ids %}selected{% endif %}>
+            {{ repository.full_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  {% endif %}
+  <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+    {% translate "Apply" %}
+  </button>
+</form>

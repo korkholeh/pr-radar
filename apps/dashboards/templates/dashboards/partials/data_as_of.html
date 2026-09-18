@@ -1,0 +1,8 @@
+{% load i18n %}
+<p class="text-xs text-[var(--text-muted)]" data-testid="data-as-of">
+  {% if finished_at %}
+    {% blocktranslate with timestamp=finished_at %}Data as of {{ timestamp }}{% endblocktranslate %}
+  {% else %}
+    {% translate "Never synced yet." %}
+  {% endif %}
+</p>

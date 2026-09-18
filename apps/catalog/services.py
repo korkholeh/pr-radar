@@ -2,6 +2,7 @@ import datetime
 import logging
 from typing import TYPE_CHECKING, Any
 
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -42,11 +43,36 @@ def _validate_type(value_type: str, value: object) -> None:
         )
 
 
+_SETTINGS_CACHE_KEY = "catalog:app_settings:v1"
+
+
+def _all_setting_rows() -> dict[str, AppSetting]:
+    """One `AppSetting` query per process/cache-generation instead of one per `get_*()` call —
+    every metric, chart and table read reaches a handful of settings (MIN_SAMPLE, STALE_DAYS, …),
+    often once per series bucket, so an uncached read is a guaranteed N+1 (RISKS row 10). Cached
+    forever in the shared `FileBasedCache`, invalidated by `set_setting()` — cross-process safe
+    since the cache is filesystem-backed, unlike a module-level dict."""
+    rows = cache.get(_SETTINGS_CACHE_KEY)
+    if rows is None:
+        rows = {row.key: row for row in AppSetting.objects.all()}
+        cache.set(_SETTINGS_CACHE_KEY, rows, None)
+    return rows
+
+
+def invalidate_settings_cache(**_kwargs: Any) -> None:
+    """Connected to `AppSetting`'s `post_save`/`post_delete` in `CatalogConfig.ready()` — covers
+    every write path (the Django admin, `loaddata`, a migration), not just `set_setting()`, which
+    is the only in-app caller and was otherwise the sole way to invalidate `_all_setting_rows()`'s
+    process-wide cache. Without this, an admin edit to MIN_SAMPLE/STALE_DAYS/etc. never took effect
+    until the cache directory was wiped."""
+    cache.delete(_SETTINGS_CACHE_KEY)
+
+
 def get_setting(key: str) -> Any:
     setting_def = _DEFS_BY_KEY.get(key)
     if setting_def is None:
         raise UnknownSettingError(key)
-    row = AppSetting.objects.filter(key=key).first()
+    row = _all_setting_rows().get(key)
     if row is None:
         return setting_def.default
     try:
@@ -93,6 +119,7 @@ def set_setting(key: str, value: object) -> AppSetting:
             "value": value,
         },
     )
+    invalidate_settings_cache()
     if setting_def.group == "metrics":
         # A metrics-group setting (MIN_SAMPLE, AI_COHORT_INCLUDE_SUSPECTED, PR_SIZE_BUCKETS, ...)
         # is baked into compute()'s cache and, for the cohort/bucket-affecting ones, into stored

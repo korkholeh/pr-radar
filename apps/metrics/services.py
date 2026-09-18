@@ -262,6 +262,52 @@ def _counter_ratio_value(
     return _counter_ratio_value_from_raw(metric_def, scope, cohort, date_from, date_to)
 
 
+def _delta(value_mv: MetricValue, previous_mv: MetricValue) -> tuple[float | None, float | None]:
+    if value_mv.value is None or previous_mv.value is None:
+        return None, None
+    delta = value_mv.value - previous_mv.value
+    delta_ratio = delta / previous_mv.value if previous_mv.value != 0 else None
+    return delta, delta_ratio
+
+
+def _counter_ratio_result(
+    metric_def: MetricDef,
+    scope: Scope,
+    rows_by_key: dict[tuple[str, str], list[tuple[datetime.date, float | None, int]]],
+    cohort: str,
+    date_from: datetime.date,
+    date_to: datetime.date,
+    previous_from: datetime.date,
+    previous_to: datetime.date,
+    buckets: Sequence[tuple[datetime.date, datetime.date]],
+    min_sample: int,
+) -> MetricResult:
+    """Builds one metric's full `MetricResult` (value, previous, delta, series) from
+    already-fetched rollup rows — the code both `_compute_uncached()` (one scope) and
+    `compute_many()` (many scopes sharing one widened query) share, so the two paths can never
+    silently disagree on what a counter/ratio result looks like."""
+    value_mv = _counter_ratio_value(metric_def, scope, rows_by_key, cohort, date_from, date_to)
+    previous_mv = _counter_ratio_value(metric_def, scope, rows_by_key, cohort, previous_from, previous_to)
+    series = tuple(
+        SeriesPoint(b_from, b_to, *_counter_ratio_value(metric_def, scope, rows_by_key, cohort, b_from, b_to))
+        for b_from, b_to in buckets
+    )
+    delta, delta_ratio = _delta(value_mv, previous_mv)
+    return MetricResult(
+        key=metric_def.key,
+        definition=metric_def,
+        value=value_mv.value,
+        previous_value=previous_mv.value,
+        delta=delta,
+        delta_ratio=delta_ratio,
+        sample_size=value_mv.sample_size,
+        previous_sample_size=previous_mv.sample_size,
+        below_min_sample=value_mv.sample_size < min_sample,
+        series=series,
+        breakdown=(),
+    )
+
+
 def _distribution_or_state_value(
     metric_def: MetricDef, scope: Scope, cohort: str, date_from: datetime.date, date_to: datetime.date
 ) -> MetricValue:
@@ -273,13 +319,27 @@ def _distribution_or_state_value(
     return calculator.at_date(DayContext(scope=scope, cohort=cohort, date=date_to))
 
 
+def _axis_fingerprint(ids: frozenset[int] | None) -> str:
+    """`None` ("no restriction on this axis") and an explicit empty `frozenset` ("restricted to
+    nothing on this axis") are different `ScopeFilter` states (`narrow_scope()` produces both) and
+    must render differently here, or a repository-only filter and an intersection that resolved to
+    "no projects visible" would collide on the same cache key (round 2 audit MINOR)."""
+    if ids is None:
+        return "*"
+    if not ids:
+        return "-"
+    return ",".join(str(value) for value in sorted(ids))
+
+
 def _access_fingerprint(access: ScopeFilter) -> str:
-    """`"*"` for an unrestricted caller, else its sorted project ids — part of the cache key so a
-    restricted lead and an admin (or two leads with different project sets) can never share a
-    cached entry (RISKS row 3), once phase 9 turns per-user narrowing on."""
+    """`"*"` for an unrestricted caller, else its project and repository axis fingerprints — part
+    of the cache key so a restricted lead and an admin (or two leads/dashboard filters with
+    different project or repository sets) can never share a cached entry (RISKS row 3), once phase
+    9 turns per-user narrowing on, and *today* for the dashboard filter bar's own project/
+    repository multi-select, which reuses this same `ScopeFilter` narrowing."""
     if access.unrestricted:
         return "*"
-    return ",".join(str(project_id) for project_id in sorted(access.project_ids or frozenset()))
+    return f"{_axis_fingerprint(access.project_ids)}|{_axis_fingerprint(access.repository_ids)}"
 
 
 def _cache_key(
@@ -388,39 +448,34 @@ def _compute_uncached(
 
     results: dict[str, MetricResult] = {}
     for metric_def in metric_defs:
-        breakdown: tuple[BreakdownItem, ...] = ()
         if isinstance(metric_def.calculator, (CounterCalc, RatioCalc)):
-            value_mv = _counter_ratio_value(metric_def, scope, rows_by_key, cohort, date_from, date_to)
-            previous_mv = _counter_ratio_value(
-                metric_def, scope, rows_by_key, cohort, previous_from, previous_to
+            results[metric_def.key] = _counter_ratio_result(
+                metric_def,
+                scope,
+                rows_by_key,
+                cohort,
+                date_from,
+                date_to,
+                previous_from,
+                previous_to,
+                buckets,
+                min_sample,
             )
-            series = tuple(
-                SeriesPoint(
-                    b_from, b_to, *_counter_ratio_value(metric_def, scope, rows_by_key, cohort, b_from, b_to)
-                )
-                for b_from, b_to in buckets
-            )
-        else:
-            value_mv = _distribution_or_state_value(metric_def, scope, cohort, date_from, date_to)
-            previous_mv = _distribution_or_state_value(metric_def, scope, cohort, previous_from, previous_to)
-            series = tuple(
-                SeriesPoint(
-                    b_from, b_to, *_distribution_or_state_value(metric_def, scope, cohort, b_from, b_to)
-                )
-                for b_from, b_to in buckets
-            )
-            calculator = metric_def.calculator
-            if isinstance(calculator, DistributionCalc) and calculator.breakdown is not None:
-                period_ctx = PeriodContext(scope=scope, cohort=cohort, date_from=date_from, date_to=date_to)
-                breakdown = calculator.breakdown(period_ctx)
+            continue
 
-        delta: float | None = None
-        delta_ratio: float | None = None
-        if value_mv.value is not None and previous_mv.value is not None:
-            delta = value_mv.value - previous_mv.value
-            if previous_mv.value != 0:
-                delta_ratio = delta / previous_mv.value
+        breakdown: tuple[BreakdownItem, ...] = ()
+        value_mv = _distribution_or_state_value(metric_def, scope, cohort, date_from, date_to)
+        previous_mv = _distribution_or_state_value(metric_def, scope, cohort, previous_from, previous_to)
+        series = tuple(
+            SeriesPoint(b_from, b_to, *_distribution_or_state_value(metric_def, scope, cohort, b_from, b_to))
+            for b_from, b_to in buckets
+        )
+        calculator = metric_def.calculator
+        if isinstance(calculator, DistributionCalc) and calculator.breakdown is not None:
+            period_ctx = PeriodContext(scope=scope, cohort=cohort, date_from=date_from, date_to=date_to)
+            breakdown = calculator.breakdown(period_ctx)
 
+        delta, delta_ratio = _delta(value_mv, previous_mv)
         results[metric_def.key] = MetricResult(
             key=metric_def.key,
             definition=metric_def,
@@ -435,3 +490,121 @@ def _compute_uncached(
             breakdown=breakdown,
         )
     return MetricResultSet(results)
+
+
+def _fetch_counter_ratio_rows_many(
+    metric_defs: Sequence[MetricDef],
+    scope_type: str,
+    scope_ids: Sequence[int],
+    cohort: str,
+    date_from: datetime.date,
+    date_to: datetime.date,
+) -> dict[int, dict[tuple[str, str], list[tuple[datetime.date, float | None, int]]]]:
+    """The widened counterpart of `_fetch_counter_ratio_rows()`: one `DailyRollup` query covering
+    every requested scope id at once (`scope_id__in=scope_ids`), grouped by scope id and then by
+    `(metric_key, cohort)` exactly like the per-scope fetch — so a table of 50 repositories costs
+    one query instead of 50 (RISKS row 10, this phase's `compute_many()`)."""
+    keys: set[str] = set()
+    cohorts: set[str] = set()
+    for metric_def in metric_defs:
+        resolved_cohort = _rollup_cohort(metric_def, cohort)
+        cohorts.add(resolved_cohort)
+        if isinstance(metric_def.calculator, CounterCalc):
+            keys.add(metric_def.key)
+        else:
+            keys.add(metric_def.key + NUMERATOR_SUFFIX)
+            keys.add(metric_def.key + DENOMINATOR_SUFFIX)
+
+    by_scope: dict[int, dict[tuple[str, str], list[tuple[datetime.date, float | None, int]]]] = {
+        scope_id: {} for scope_id in scope_ids
+    }
+    if not keys or not scope_ids:
+        return by_scope
+
+    rows = DailyRollup.objects.filter(
+        scope_type=scope_type,
+        scope_id__in=scope_ids,
+        cohort__in=cohorts,
+        metric_key__in=keys,
+        date__gte=date_from,
+        date__lte=date_to,
+    ).values_list("scope_id", "metric_key", "cohort", "date", "value", "sample_size")
+    for scope_id, metric_key, row_cohort, date, value, sample_size in rows:
+        # `scope_id__in=scope_ids` (all concrete ints) already excludes the null-scope_id GLOBAL
+        # rows a plain `DailyRollup` row can otherwise carry.
+        assert scope_id is not None
+        by_scope[scope_id].setdefault((metric_key, row_cohort), []).append((date, value, sample_size))
+    return by_scope
+
+
+def compute_many(
+    metric_keys: Sequence[str],
+    scope_type: str,
+    scope_ids: Sequence[int],
+    access: ScopeFilter,
+    date_from: datetime.date,
+    date_to: datetime.date,
+    cohort: str = Cohort.ALL,
+    granularity: str = "day",
+) -> dict[int, MetricResultSet]:
+    """Batches `compute()` over many scope ids of the same level (a table of repositories, of
+    projects, of people) so it costs one `DailyRollup` query for their counter/ratio metrics
+    instead of one query per row. Distribution/state metrics, and *everything* for a restricted
+    `ScopeFilter`, fall back to the plain per-scope `compute()` call: rollup rows are written once
+    under an unrestricted access (`calculators.base.GLOBAL_SCOPE`), so batch-reading them back for
+    a narrowed caller would silently return the unrestricted number (RISKS row 3) — this is honest
+    rather than clever, per the plan's deviation note; phase 10 owns profiling that path if it
+    becomes the bottleneck. An empty `scope_ids` returns `{}` without touching the database."""
+    if not scope_ids:
+        return {}
+
+    metric_defs = [get_metric(key) for key in metric_keys]
+    for metric_def in metric_defs:
+        require_available_at_level(metric_def, scope_type)
+
+    if not access.unrestricted:
+        return {
+            scope_id: compute(
+                metric_keys, Scope(scope_type, scope_id, access), date_from, date_to, cohort, granularity
+            )
+            for scope_id in scope_ids
+        }
+
+    counter_ratio_defs = [
+        metric_def
+        for metric_def in metric_defs
+        if isinstance(metric_def.calculator, (CounterCalc, RatioCalc))
+    ]
+    other_keys = [metric_def.key for metric_def in metric_defs if metric_def not in counter_ratio_defs]
+
+    min_sample = get_int("MIN_SAMPLE")
+    previous_from, previous_to = previous_period(date_from, date_to)
+    buckets = bucket_ranges(date_from, date_to, granularity)
+    rows_by_scope = _fetch_counter_ratio_rows_many(
+        counter_ratio_defs, scope_type, scope_ids, cohort, previous_from, date_to
+    )
+
+    result_sets: dict[int, MetricResultSet] = {}
+    for scope_id in scope_ids:
+        scope = Scope(scope_type=scope_type, scope_id=scope_id, access=access)
+        rows_by_key = rows_by_scope.get(scope_id, {})
+        batched = {
+            metric_def.key: _counter_ratio_result(
+                metric_def,
+                scope,
+                rows_by_key,
+                cohort,
+                date_from,
+                date_to,
+                previous_from,
+                previous_to,
+                buckets,
+                min_sample,
+            )
+            for metric_def in counter_ratio_defs
+        }
+        other = (
+            compute(other_keys, scope, date_from, date_to, cohort, granularity).results if other_keys else {}
+        )
+        result_sets[scope_id] = MetricResultSet({**batched, **other})
+    return result_sets

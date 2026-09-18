@@ -224,6 +224,13 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
     SettingDef(
         "CHURN_MAX_FILES", "int", 50, _("Maximum files in a PR before churn analysis is skipped."), "churn"
     ),
+    SettingDef(
+        "DASHBOARD_TABLE_PAGE_SIZE",
+        "int",
+        25,
+        _("Rows per page on a dashboard table (projects, repositories, people, recent PRs)."),
+        "ui",
+    ),
     SettingDef("DEFAULT_UI_LANGUAGE", "str", "en", _("Default UI language for a new user."), "ui"),
     SettingDef(
         "DETECT_BROWSER_LANGUAGE",

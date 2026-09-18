@@ -1,0 +1,12 @@
+{% extends "dashboards/partials/_page.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Repositories" %}{% endblock %}
+
+{% block heading %}
+  <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Repositories" %}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% include "dashboards/partials/index_content.html" %}
+{% endblock %}

@@ -70,6 +70,7 @@ missing.
 | policy | `VIOLATIONS_PAGE_SIZE` | int | `50` | Rows per page on the Policy console's violation table. |
 | churn | `CHURN_WINDOW_DAYS` | int | `21` | Days after merge over which churn is measured. |
 | churn | `CHURN_MAX_FILES` | int | `50` | Maximum files in a PR before churn analysis is skipped. |
+| ui | `DASHBOARD_TABLE_PAGE_SIZE` | int | `25` | Rows per page on a dashboard table (projects, repositories, people, recent PRs). |
 | ui | `DEFAULT_UI_LANGUAGE` | str | `en` | Default UI language for a new user. Kept in sync with `UserPreference.language`'s field default by a test. |
 | ui | `DETECT_BROWSER_LANGUAGE` | bool | `False` | Whether to derive the initial UI language from the browser. |
 | ui | `DEFAULT_THEME` | str | `system` | Default UI theme for a new user. Kept in sync with `UserPreference.theme`'s field default by a test. |

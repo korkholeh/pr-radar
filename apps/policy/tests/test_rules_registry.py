@@ -51,7 +51,9 @@ def test_load_context_query_budget(django_assert_num_queries):
         ReviewFactory(pull_request=pr)
     policy = AIPolicyFactory()
 
-    with django_assert_num_queries(10):
+    load_context(pr.pk, policy)  # warm the process-wide settings cache before pinning a count
+
+    with django_assert_num_queries(7):
         ctx = load_context(pr.pk, policy)
 
     assert len(ctx.files) == 5
@@ -63,7 +65,7 @@ def test_load_context_query_budget(django_assert_num_queries):
     for _ in range(10):
         PRFileFactory(pull_request=big_pr)
         ReviewFactory(pull_request=big_pr)
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(7):
         big_ctx = load_context(big_pr.pk, policy)
     assert len(big_ctx.files) == 10
     assert len(big_ctx.reviews) == 10

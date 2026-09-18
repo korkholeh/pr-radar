@@ -1,0 +1,15 @@
+{% extends "dashboards/partials/_page.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with day=params.day %}Day — {{ day }}{% endblocktranslate %}{% endblock %}
+
+{% block heading %}
+  <h1 class="text-xl font-semibold text-[var(--text)]">
+    {% blocktranslate with day=params.day %}Day — {{ day }}{% endblocktranslate %}
+    {% if scope_object %}&middot; {{ scope_object }}{% endif %}
+  </h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% include "dashboards/partials/dashboard_content.html" %}
+{% endblock %}

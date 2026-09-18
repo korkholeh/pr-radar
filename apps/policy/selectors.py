@@ -17,27 +17,35 @@ from apps.activity.models import PullRequest
 from apps.activity.selectors import pull_requests_in_scope
 from apps.ai_detection.selectors import ai_cohort_pull_requests
 from apps.catalog.models import Project, Repository
+from apps.catalog.selectors import projects_in_scope as _catalog_projects_in_scope
+from apps.catalog.selectors import repositories_in_scope as _catalog_repositories_in_scope
 from apps.metrics.timeframe import day_end_exclusive, day_start
 from apps.policy.models import PolicyViolation
 
+__all__ = [
+    "compliance_kpis",
+    "disclosure_mismatch_pull_requests",
+    "projects_in_scope",
+    "repositories_in_scope",
+    "violations_by_rule",
+    "violations_for_pull_request",
+    "violations_in_scope",
+]
+
+# The Policy console's project/repository filter dropdowns: `apps.catalog.selectors` is now the
+# canonical home for this query (phase 8), so `dashboards` and `policy` share one authorization
+# code path (RISKS row 3) instead of keeping two copies in step by hand. Unlike dashboards, the
+# Policy console must still list an archived project/repository — an existing violation on one
+# needs to stay filterable — so this delegates with `include_inactive=True` (round 1 review: the
+# dashboards-only default silently dropped that behaviour when the two selectors were unified).
+
 
 def projects_in_scope(scope: ScopeFilter) -> QuerySet[Project]:
-    """The Policy console's project filter dropdown: every project a user may see, in scope
-    order — same `ScopeFilter` contract as every other selector here, so a restricted lead never
-    sees another project's name in the list once phase 9 turns scope narrowing on."""
-    queryset = Project.objects.order_by("name")
-    if scope.unrestricted:
-        return queryset
-    return queryset.filter(id__in=scope.project_ids or frozenset())
+    return _catalog_projects_in_scope(scope, include_inactive=True)
 
 
 def repositories_in_scope(scope: ScopeFilter) -> QuerySet[Repository]:
-    """The Policy console's repository filter dropdown, same scoping contract as
-    `projects_in_scope`."""
-    queryset = Repository.objects.order_by("full_name")
-    if scope.unrestricted:
-        return queryset
-    return queryset.filter(projects__id__in=scope.project_ids or frozenset()).distinct()
+    return _catalog_repositories_in_scope(scope, include_inactive=True)
 
 
 def violations_in_scope(scope: ScopeFilter) -> QuerySet[PolicyViolation]:

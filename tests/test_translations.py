@@ -10,7 +10,18 @@ PO_FILES = [
     BASE_DIR / "locale/uk/LC_MESSAGES/djangojs.po",
 ]
 
-CANARY_ENGLISH_STRINGS = ["Log in", "Log out", "Overview", "Password", "Username"]
+CANARY_ENGLISH_STRINGS = [
+    "Log in",
+    "Log out",
+    "Overview",
+    "Password",
+    "Username",
+    "Projects",
+    "Repositories",
+    "Export",
+    "Throughput",
+    "Small sample",
+]
 
 
 def _entry_key(entry):

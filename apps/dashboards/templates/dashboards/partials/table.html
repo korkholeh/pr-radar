@@ -1,0 +1,91 @@
+{% load i18n dashboards %}
+{% comment %}
+Shared table partial (plan §5) — one template for `projects`/`repositories`/`people`/`recent_prs`,
+driven entirely by `ctx` (a `tables.TableContext`). Search and sort reload only this table's
+fragment via htmx, `table=<key>` in the query string keeping every other table on the page in its
+own state; the Export control carries the same filters, sort and search as the visible page
+(acceptance criterion #5).
+{% endcomment %}
+<div class="mb-8" data-testid="table-{{ ctx.table_key }}">
+  {% if ctx.table_key == "people" and scope_type != "global" and not params.project_ids and not params.repository_ids %}
+    <p class="text-xs text-[var(--text-muted)] mb-2" data-testid="people-table-org-wide-note">
+      {% translate "These metrics are organization-wide; this table is not narrowed to the current project or repository." %}
+    </p>
+  {% endif %}
+  <form
+    method="get"
+    action="{{ request.path }}"
+    hx-get="{{ request.path }}"
+    hx-target="#dashboard-content"
+    hx-swap="innerHTML"
+    hx-push-url="true"
+    class="flex flex-wrap items-center gap-3 mb-2"
+  >
+    {% hidden_query_fields params "q" "page" "sort" "table" %}
+    <input type="hidden" name="table" value="{{ ctx.table_key }}">
+    <input
+      type="search"
+      name="q"
+      value="{{ ctx.q }}"
+      placeholder="{% translate "Search" %}"
+      class="rounded border border-[var(--border)] px-2 py-1 text-sm"
+      data-testid="table-search-{{ ctx.table_key }}"
+    >
+    <button type="submit" class="rounded border border-[var(--border)] px-3 py-1 text-sm">
+      {% translate "Search" %}
+    </button>
+    <div class="ml-auto flex gap-2 text-sm">
+      <span class="text-[var(--text-muted)]">{% translate "Export" %}</span>
+      <a href="{{ ctx.export_csv_url }}" class="text-[var(--accent)] hover:underline" data-testid="export-csv-{{ ctx.table_key }}">CSV</a>
+      <a href="{{ ctx.export_xlsx_url }}" class="text-[var(--accent)] hover:underline" data-testid="export-xlsx-{{ ctx.table_key }}">XLSX</a>
+    </div>
+  </form>
+
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-[var(--border)] sticky top-0 bg-[var(--surface)]">
+        {% for column in ctx.table.columns %}
+          <th scope="col" class="text-left py-2 pr-4 whitespace-nowrap">
+            <a href="{% table_sort_url params ctx.table_key column.name %}" class="hover:underline">
+              {{ column.header }}
+              {% if ctx.sort == column.name %}<span aria-hidden="true">▲</span>{% elif ctx.sort == "-"|add:column.name %}<span aria-hidden="true">▼</span>{% endif %}
+            </a>
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in ctx.table.rows %}
+        <tr class="border-b border-[var(--border)] odd:bg-[var(--surface-2)]">
+          {% for cell in row %}
+            <td class="py-2 pr-4 text-right first:text-left">{{ cell }}</td>
+          {% endfor %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{{ ctx.spec.columns|length }}" class="py-4 text-center text-[var(--text-muted)]">
+            {% translate "No matching rows." %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if ctx.page.paginator.num_pages > 1 %}
+    <div class="flex items-center gap-3 mt-2 text-sm" data-testid="table-pagination-{{ ctx.table_key }}">
+      {% if ctx.page.has_previous %}
+        <a href="{% table_page_url params ctx.table_key ctx.page.previous_page_number %}" class="text-[var(--accent)] hover:underline">
+          {% translate "Previous" %}
+        </a>
+      {% endif %}
+      <span class="text-[var(--text-muted)]">
+        {% blocktranslate with number=ctx.page.number total=ctx.page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}
+      </span>
+      {% if ctx.page.has_next %}
+        <a href="{% table_page_url params ctx.table_key ctx.page.next_page_number %}" class="text-[var(--accent)] hover:underline">
+          {% translate "Next" %}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

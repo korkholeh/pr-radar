@@ -9,8 +9,9 @@ Open the app's URL. Every page requires an account, so you land on **Log in**. E
 **Password** and select **Log in**. If you forgot your password, use the password reset flow linked from the
 login screen.
 
-After logging in you land on **Overview**, the page linked from the **PR Radar** title in the top bar. This
-phase's Overview is a placeholder — dashboards arrive in later phases.
+After logging in you land on **Overview**, the page linked from the **PR Radar** title in the top bar — the
+global dashboard, with KPI cards, charts and tables for every project and repository you have access to. See
+`docs/user/dashboards.md` for how to read it.
 
 ## Switch theme
 

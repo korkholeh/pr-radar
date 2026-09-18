@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n dashboards %}
+
+{% block content %}
+<div class="py-6" id="dashboard-page">
+  {% block heading %}{% endblock %}
+  {% data_as_of_banner %}
+  {% include "dashboards/partials/filter_bar.html" %}
+  <div id="dashboard-content">
+    {% block dashboard_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

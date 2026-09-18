@@ -11,11 +11,19 @@ from apps.catalog.models import Repository
 
 
 def _scoped(scope: ScopeFilter) -> QuerySet[PullRequest]:
+    """Restricts by repository id via a subquery (`repository_id__in=...values("id")`), never a
+    direct join across the `repository__projects` many-to-many on the `PullRequest` queryset
+    itself — joining there fans a PR belonging to a repository in N projects out into N duplicate
+    rows, which `.count()`/list results would then double-count."""
     queryset = PullRequest.objects.all()
     if scope.unrestricted:
         return queryset
-    scoped_repositories = Repository.objects.filter(projects__id__in=scope.project_ids or frozenset())
-    return queryset.filter(repository__in=scoped_repositories)
+    if scope.project_ids is not None:
+        scoped_repository_ids = Repository.objects.filter(projects__id__in=scope.project_ids).values("id")
+        queryset = queryset.filter(repository_id__in=scoped_repository_ids)
+    if scope.repository_ids is not None:
+        queryset = queryset.filter(repository_id__in=scope.repository_ids)
+    return queryset
 
 
 def pull_requests_in_scope(scope: ScopeFilter) -> QuerySet[PullRequest]:

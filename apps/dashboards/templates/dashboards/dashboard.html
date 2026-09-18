@@ -1,0 +1,14 @@
+{% extends "dashboards/partials/_page.html" %}
+{% load i18n %}
+
+{% block title %}{% if scope_object %}{{ scope_object }}{% else %}{% translate "Overview" %}{% endif %}{% endblock %}
+
+{% block heading %}
+  <h1 class="text-xl font-semibold text-[var(--text)]">
+    {% if scope_object %}{{ scope_object }}{% else %}{% translate "Overview" %}{% endif %}
+  </h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% include "dashboards/partials/dashboard_content.html" %}
+{% endblock %}

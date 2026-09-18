@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}
+The fragment `views.dashboard()` returns to an htmx swap and includes from the full page (ADR
+0006) — one entry point for both Period and Day mode. Tables (T17) join this fragment; for now it
+carries the KPI rows and, in Period mode, the chart cards.
+{% endcomment %}
+{% if mode == "day" %}
+  <div data-testid="day-kpis">
+    {% for row in kpi_rows %}
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+        {% for card in row %}
+          {% include "dashboards/partials/kpi_card.html" with result=card.result secondary_result=card.secondary_result compare=card.compare %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  {% include "dashboards/partials/day_lists.html" %}
+{% else %}
+  <div data-testid="period-kpis">
+    {% for row in kpi_rows %}
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {% for card in row %}
+          {% include "dashboards/partials/kpi_card.html" with result=card.result secondary_result=card.secondary_result compare=card.compare %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  <div data-testid="charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for card in charts %}
+      {% include "dashboards/partials/chart_card.html" %}
+    {% endfor %}
+  </div>
+  <div data-testid="tables">
+    {% for ctx in tables %}
+      {% include "dashboards/partials/table.html" %}
+    {% endfor %}
+  </div>
+{% endif %}

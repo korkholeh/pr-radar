@@ -204,6 +204,13 @@ def test_fk_heavy_changelist_query_count_does_not_grow_with_rows(client, admin_u
     model = factory_cls._meta.model
     url = _admin_url(model)
 
+    # Warm-up request: `connection_alerts` (apps/connections/context_processors.py) reads
+    # AppSetting on every page via apps.catalog.services.get_int(), which caches all settings
+    # rows for the rest of the process (apps/catalog/services.py::_all_setting_rows()). Without
+    # this call, the *first* of the two measured requests below would pay that one-time query
+    # and the second wouldn't, making the counts differ for a reason unrelated to row count.
+    client.get(url)
+
     factory_cls.create_batch(3)
     with CaptureQueriesContext(connection) as few_rows:
         response = client.get(url)

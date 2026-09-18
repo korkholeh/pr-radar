@@ -352,6 +352,8 @@ def test_evaluate_pull_requests_loads_policy_and_settings_once():
         PullRequestFactory(ai_disclosure=AIDisclosure.MISSING),
     ]
 
+    evaluate_pull_requests(PullRequest.objects.none())  # warm the process-wide settings cache
+
     with CaptureQueriesContext(connection) as one:
         evaluate_pull_requests(PullRequest.objects.filter(pk__in=[pr.pk for pr in one_pr]))
     with CaptureQueriesContext(connection) as two:

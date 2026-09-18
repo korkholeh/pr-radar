@@ -178,3 +178,16 @@ def test_unrestricted_scope_lists_every_project_and_repository():
 
     assert project in projects_in_scope(scope)
     assert repository in repositories_in_scope(scope)
+
+
+def test_filter_dropdowns_still_list_an_archived_project_and_repository():
+    """Round-1 review: unifying with `catalog.selectors` must not silently drop archived rows from
+    the Policy console's filter dropdowns — an existing violation on an archived project/repository
+    still needs to be filterable to."""
+    archived_project = ProjectFactory(is_active=False)
+    archived_repository = RepositoryFactory(is_active=False)
+
+    scope = ScopeFilter(unrestricted=True)
+
+    assert archived_project in projects_in_scope(scope)
+    assert archived_repository in repositories_in_scope(scope)
