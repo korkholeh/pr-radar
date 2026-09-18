@@ -62,6 +62,8 @@ missing.
 | metrics | `REVIEW_LOAD_TOP_N` | int | `2` | How many top reviewers count toward review load. |
 | metrics | `FOLLOWUP_FIX_WINDOW_DAYS` | int | `14` | Days after merge in which a follow-up fix is attributed. |
 | metrics | `FOLLOWUP_FIX_FILE_OVERLAP` | float | `0.5` | Minimum file overlap ratio to attribute a follow-up fix to a PR. |
+| metrics | `METRICS_CACHE_TTL_SECONDS` | int | `3600` | How long a `compute()` result stays cached before it expires on its own (a bumped `last_data_version` invalidates it sooner). |
+| metrics | `DEFAULT_PERIOD_DAYS` | int | `30` | Default number of days a dashboard period covers when none is chosen. |
 | policy | `NO_TESTS_MIN_LINES` | int | `20` | Minimum changed lines before a missing-tests violation applies. |
 | policy | `POLICY_DISABLED_RULES` | list | `[]` | Rule codes switched off entirely; an open violation for a disabled code auto-resolves on the next run. An unrecognised code is ignored with a logged warning. See `docs/POLICY.md`. |
 | policy | `POLICY_VIOLATION_PATHS_IN_PARAMS` | int | `20` | Maximum file paths stored in a sensitive-path violation's `details_params`; the real total is kept separately as `path_count` so a large PR can't write an oversized row. |
@@ -73,6 +75,13 @@ missing.
 | ui | `DEFAULT_THEME` | str | `system` | Default UI theme for a new user. Kept in sync with `UserPreference.theme`'s field default by a test. |
 | export | `EXPORT_DURATION_UNIT` | str | `hours` | Unit durations are rendered in for CSV/XLSX exports. |
 | export | `EXPORT_SYNC_MAX_ROWS` | int | `20000` | Maximum rows a synchronous export may return. |
+
+Changing any `metrics`-group setting bumps `last_data_version`, so `compute()`'s cache stops serving pre-change
+results immediately (this is what keeps a `MIN_SAMPLE` change visible right away). It does **not** rewrite
+`DailyRollup` rows already on disk: `AI_COHORT_INCLUDE_SUSPECTED` decides which PRs land in the `ai`/`non_ai`
+cohort rollups, and `PR_SIZE_BUCKETS`/`REVIEW_LOAD_TOP_N`/`STALE_DAYS`/`WAITING_REVIEW_HOURS` feed calculators
+whose stored counters/ratios were computed under the old value — after changing one of these, run
+`manage.py recompute` to rebuild history under the new setting.
 
 ## Settings modules
 

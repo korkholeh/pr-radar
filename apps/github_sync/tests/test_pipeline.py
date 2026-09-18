@@ -282,3 +282,25 @@ def test_detect_failure_inside_the_hook_is_still_contained(monkeypatch):
     assert PullRequest.objects.filter(repository=repository).exists()
     assert run.status == SyncRun.Status.PARTIAL
     assert run.stats["errors"] == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_hook_marks_the_pull_requests_days_dirty(monkeypatch):
+    """run_sync's own terminal rebuild_dirty() consumes and deletes DirtyDay rows (T16), so the
+    hook's own effect is checked by calling process_pull_request a second time, directly, after a
+    sync whose post-processing hook was stubbed out (nothing dirtied it the first time)."""
+    import apps.github_sync.pipeline as pipeline_module
+    from apps.metrics.models import DirtyDay
+    from apps.metrics.timeframe import day_of
+
+    monkeypatch.setattr(services_module, "process_pull_request", lambda pk: None)
+    repository = _make_repository(full_name="acme/widget")
+    mock_graphql_sequence(*_one_pr_sequence())
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+    pull_request = PullRequest.objects.get(repository=repository)
+    assert DirtyDay.objects.count() == 0
+
+    pipeline_module.process_pull_request(pull_request.id)
+
+    expected_day = day_of(pull_request.created_at)
+    assert DirtyDay.objects.filter(date=expected_day).exists()

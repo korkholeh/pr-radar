@@ -240,3 +240,68 @@ registry inherits a tested helper (including a DST-transition test) instead of w
 `SensitivePathRule.AiMode` values: `forbidden`, `needs_extra_review`. See `docs/POLICY.md` for the severity of
 each rule, which `tests/test_docs.py::test_policy_severity_table_matches_the_code` pins against
 `apps.policy.rules.SEVERITY`.
+
+## Phase 7
+
+**The registry's `kind` is derived from the calculator's strategy type, not a hand-set string.** `MetricDef`
+holds one of four frozen strategy dataclasses — `CounterCalc`, `RatioCalc`, `DistributionCalc`, `StateCalc` —
+and `_register()` validates `kind` against the strategy's actual class at import time, alongside a unique key,
+`levels ⊆ ScopeType.values`, lazy `title`/`description`, and an allowed `unit`/`direction`. This turns the
+phase's central risk (a distribution-kind metric silently rolled up into `DailyRollup`) into something the
+type system and `rollups.py` refuse rather than something a reviewer has to catch: `rollups.write_rollups()`
+iterates only `CounterCalc`/`RatioCalc` defs and raises `NonAdditiveMetricError` on anything else. Three
+metrics that read like plain counts — `ai_active_people` (a distinct-people count, not summable across days),
+`review_load_share` (top-N reviewers selected over the whole period), `wip_per_person` (a point-in-time
+snapshot) — are registered as `distribution`/`state` for exactly this reason, and `docs/METRICS.md` states it.
+
+**A ratio's numerator and denominator are stored as two `DailyRollup` rows under reserved keys
+`"<key>__num"`/`"<key>__den"`, divided only at read time; the ratio itself is never a stored value.** Several
+components (`ai_prs_merged`, `review_rounds_sum`, `test_lines`) are not metrics anyone reads directly, and
+registering them as their own `MetricDef`s would put internal keys into `docs/METRICS.md`, the ⓘ tooltip and
+the XLSX glossary. `ratio_value()` treats a missing (`None`) numerator as `0.0` once a denominator exists,
+because `count_value()` (see below) already turns "zero matches" into "no rollup row", so a real-activity
+period with zero numerator hits must read as `0`, not `None`.
+
+**A `DailyRollup` row is written only when `sample_size > 0`; `count_value()` in `calculators/base.py`
+enforces the same "no data → `None`, never `0`" rule for every counter and state calculator, not just ratios
+and distributions.** An absent row is the only representation of "no activity that day", which keeps the
+table proportional to actual activity (not scopes × cohorts × metrics × days) and lets `compute()` sum
+existing rows to get the right answer without a separate "was this really zero" flag.
+
+**`ci_first_pass_rate` and `churn_21d` are implemented in this phase, ahead of the roadmap's assumption that
+only `followup_fix_rate` would be deferred.** Their inputs — `CheckStatus.is_first_ci_commit` and
+`ChurnResult.churn_ratio` — are already stored by earlier phases, so each calculator is a short ratio or
+median over existing rows. `followup_fix_rate` alone ships as a registered `RatioCalc` returning
+`MetricValue.empty()`, its `(heuristic)` description already carrying the caveat, because its 14-day /
+≥50%-file-overlap logic is phase 10's own deliverable.
+
+**`DataVersion` and `DirtyDay` are their own models, not an `AppSetting` or a cache entry.**
+`metrics.DataVersion(id=1, version, updated_at)` is a singleton row bumped with an atomic `F("version") + 1`;
+it must be shared between the web process and the huey worker and must survive deleting `DATA_DIR/cache/`,
+which the architecture declares safe to wipe at any time — neither an `AppSetting` (operator-facing
+configuration with its own settings UI) nor a plain cache entry (reset by that same wipe) fits.
+`metrics.DirtyDay(date unique)` materialises ADR 0007's "dirty-days" set: `github_sync/pipeline.py` calls
+`metrics.mark_dirty(pr)` after every derive→detect→evaluate chain, recording every Kyiv day the PR could have
+touched (`created_at`, `merged_at`, `closed_at`, each review's `submitted_at`), and `run_sync()` calls
+`rollups.rebuild_dirty()` then `bump_data_version()` before returning — on both the success and the failure
+path, so an incremental sync rewrites only the days it touched and a rollup bug is as visible as any other
+sync bug. `manage.py recompute` calls the same pair, with `--rollups-only`/`--skip-rollups` to decouple the
+rollup rebuild from derive/detect/evaluate.
+
+**The metric cache key embeds an access fingerprint from the caller's `ScopeFilter`** (`"*"` when
+unrestricted, else the sorted `project_ids`) **alongside `last_data_version`.** `scope_for_user()` stays
+unrestricted until phase 9, but the cache key is already shaped so that once per-project narrowing turns on,
+an admin's cached result can never be served to a restricted lead — the exact failure the codebase's
+authorization choke point exists to prevent, reached here through a cache instead of a missing `scope_for_user()`
+call. `compute()` is a read-through wrapper: a cache hit costs zero queries, including the `last_data_version`
+lookup itself, which is cached under its own fixed key in the same `FileBasedCache` `bump_data_version()`
+writes to.
+
+Two new `metrics`-group settings, `METRICS_CACHE_TTL_SECONDS` (3600) and `DEFAULT_PERIOD_DAYS` (30); the
+latter replaces `apps/policy/views.py`'s hard-coded 30-day console default, closing the deferral phase 6 logged.
+`docs/METRICS.md` is generated by `apps/metrics/docs.py::render_metrics_doc()` (rendered in English under
+`translation.override("en")` regardless of the active UI language, per CLAUDE.md) and gated by a freshness
+test the same way `app.css` and the `.po`/`.mo` files already are; `manage.py metrics_doc --check` exits
+non-zero on a stale file. Full detail, including the calculator strategy signatures and the storage rules by
+kind, is in `.autodev/phases/07-metrics-registry/PLAN.md`'s Design section and the `## p07-plan`/
+`## p07-implement` entries of `.autodev/DECISIONS.md`.

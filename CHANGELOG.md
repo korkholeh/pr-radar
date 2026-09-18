@@ -47,3 +47,9 @@
   size limit) — saving creates a new version rather than editing history.
 - Settings → Sensitive paths: list, create, edit and activate/deactivate a path glob marked `forbidden` or
   `needs_extra_review`, globally or per project.
+- Metrics registry: 39 metrics across adoption, delivery flow and quality, each with a documented formula,
+  unit and direction. See `docs/METRICS.md`.
+- `manage.py recompute` now rebuilds daily rollups and bumps the metrics data version after
+  derive/detect/evaluate (`--rollups-only` / `--skip-rollups` to control which part runs); sync does the same
+  automatically for the days it touched.
+- `manage.py metrics_doc`, which generates `docs/METRICS.md` (`--check` to verify it is up to date).

@@ -35,3 +35,12 @@ def pull_requests_for_metrics(scope: ScopeFilter) -> QuerySet[PullRequest]:
 
 def bot_pull_request_count(scope: ScopeFilter) -> int:
     return _scoped(scope).filter(author__person__is_bot=True).count()
+
+
+def excluded_pull_requests(scope: ScopeFilter) -> QuerySet[PullRequest]:
+    """The complement of `pull_requests_for_metrics()`: bot and `exclude_from_metrics` PRs, the
+    population metrics leave out. Surfaced by the `prs_excluded_from_metrics` counter (spec §8.2)
+    so exclusion is visible rather than a silent drop."""
+    return _scoped(scope).filter(
+        Q(author__person__is_bot=True) | Q(author__person__exclude_from_metrics=True)
+    )

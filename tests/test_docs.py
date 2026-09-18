@@ -11,7 +11,9 @@ from apps.activity.derive import DerivedFields, FileDerivedFields
 from apps.activity.models import AIDisclosure, AIStatus
 from apps.ai_detection.disclosure import load_config, parse_disclosure
 from apps.ai_detection.models import Detector
+from apps.catalog.setting_defs import SETTING_DEFS
 from apps.connections.check_codes import CHECK_CODES
+from apps.metrics.registry import REGISTRY
 from apps.policy.models import PolicyViolation, SensitivePathRule
 from apps.policy.rules import SEVERITY
 
@@ -20,6 +22,8 @@ GITHUB_CONNECTIONS_DOCS_PATH = DOCS_ROOT / "GITHUB_CONNECTIONS.md"
 DECISIONS_DOCS_PATH = DOCS_ROOT / "DECISIONS.md"
 PR_TEMPLATE_PATH = DOCS_ROOT / "pull_request_template.md"
 POLICY_DOCS_PATH = DOCS_ROOT / "POLICY.md"
+CONFIGURATION_DOCS_PATH = DOCS_ROOT / "CONFIGURATION.md"
+METRICS_DOCS_PATH = DOCS_ROOT / "METRICS.md"
 
 # Fields that are bookkeeping (row identity, internal linkage) rather than a metric-facing rule and so
 # aren't expected to appear in the prose definition table.
@@ -95,3 +99,15 @@ def test_pull_request_template_parses_as_the_parser_expects():
     assert third_ticked != template
     substantial = parse_disclosure(third_ticked, config)
     assert substantial.disclosure == AIDisclosure.SUBSTANTIAL
+
+
+def test_every_setting_is_documented():
+    text = CONFIGURATION_DOCS_PATH.read_text(encoding="utf-8")
+    missing = [setting_def.key for setting_def in SETTING_DEFS if f"`{setting_def.key}`" not in text]
+    assert not missing, f"docs/CONFIGURATION.md is missing setting(s): {missing}"
+
+
+def test_every_metric_key_is_documented():
+    text = METRICS_DOCS_PATH.read_text(encoding="utf-8")
+    missing = [key for key in REGISTRY if f"`{key}`" not in text]
+    assert not missing, f"docs/METRICS.md is missing metric key(s): {missing}"

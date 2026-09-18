@@ -36,13 +36,12 @@ from apps.policy.services import BulkStatusChangeResult, apply_bulk_status_chang
 from config.htmx import is_htmx
 
 SETTINGS_PERMISSION = "catalog.manage_settings"
-PERIOD_DAYS = 30
 MISMATCH_LIST_LIMIT = 20
 
 
 def _period() -> tuple[datetime.date, datetime.date]:
     end = report_today()
-    start = end - datetime.timedelta(days=PERIOD_DAYS - 1)
+    start = end - datetime.timedelta(days=get_int("DEFAULT_PERIOD_DAYS") - 1)
     return start, end
 
 

@@ -58,6 +58,12 @@ files = [
     "apps/ai_detection/rules.py",
     "apps/policy/rules.py",
     "apps/policy/messages.py",
+    "apps/metrics/types.py",
+    "apps/metrics/registry.py",
+    "apps/metrics/rollups.py",
+    "apps/metrics/timeframe.py",
+    "apps/metrics/docs.py",
+    "apps/metrics/calculators",
 ]
 ignore_missing_imports = true
 

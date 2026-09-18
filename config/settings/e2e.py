@@ -38,6 +38,8 @@ configure_sqlite_transaction_mode(DATABASES["default"])
 
 STATIC_ROOT = DATA_DIR / "staticfiles"
 
+CACHES["default"]["LOCATION"] = str(DATA_DIR / "cache" / "metrics")  # noqa: F405
+
 LOGGING["handlers"]["file"]["filename"] = str(DATA_DIR / "logs" / "pr-radar.log")  # noqa: F405
 
 HUEY = {

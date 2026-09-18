@@ -93,6 +93,14 @@ def set_setting(key: str, value: object) -> AppSetting:
             "value": value,
         },
     )
+    if setting_def.group == "metrics":
+        # A metrics-group setting (MIN_SAMPLE, AI_COHORT_INCLUDE_SUSPECTED, PR_SIZE_BUCKETS, ...)
+        # is baked into compute()'s cache and, for the cohort/bucket-affecting ones, into stored
+        # DailyRollup rows. Bumping here at least invalidates the cache immediately; existing
+        # rollups still need a manage.py recompute (docs/CONFIGURATION.md says so).
+        from apps.metrics.services import bump_data_version
+
+        bump_data_version()
     return row
 
 

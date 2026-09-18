@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 20:05+0000\n"
+"POT-Creation-Date: 2026-09-18 01:24+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -599,7 +599,7 @@ msgstr "Впевненість"
 
 #: apps/ai_detection/forms.py:17
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:17
-#: apps/policy/forms.py:126
+#: apps/policy/forms.py:152
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:20
 msgid "Is active"
 msgstr "Активне"
@@ -728,7 +728,7 @@ msgid "notes"
 msgstr "нотатки"
 
 #: apps/ai_detection/models.py:57 apps/connections/models.py:44
-#: apps/policy/models.py:120
+#: apps/metrics/models.py:58 apps/policy/models.py:120
 msgid "updated at"
 msgstr "оновлено о"
 
@@ -1208,19 +1208,31 @@ msgid "Minimum file overlap ratio to attribute a follow-up fix to a PR."
 msgstr "Мінімальна частка перетину файлів для віднесення виправлення до PR."
 
 #: apps/catalog/setting_defs.py:185
+msgid ""
+"How long a computed metrics result stays cached before it expires on its own."
+msgstr ""
+"Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
+"сам по собі."
+
+#: apps/catalog/setting_defs.py:192
+msgid "Default number of days a dashboard period covers when none is chosen."
+msgstr ""
+"Кількість днів у періоді дашборду за замовчуванням, якщо період не обрано."
+
+#: apps/catalog/setting_defs.py:199
 msgid "Minimum changed lines before a missing-tests violation applies."
 msgstr ""
 "Мінімальна кількість змінених рядків для застосування порушення «немає "
 "тестів»."
 
-#: apps/catalog/setting_defs.py:192
+#: apps/catalog/setting_defs.py:206
 msgid ""
 "Rule codes switched off; an open violation for a disabled rule auto-resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
 
-#: apps/catalog/setting_defs.py:199
+#: apps/catalog/setting_defs.py:213
 msgid ""
 "Maximum sensitive paths stored in a violation's details; the total is kept "
 "separately."
@@ -1228,40 +1240,40 @@ msgstr ""
 "Максимальна кількість чутливих шляхів, що зберігаються в деталях порушення; "
 "загальна кількість зберігається окремо."
 
-#: apps/catalog/setting_defs.py:206
+#: apps/catalog/setting_defs.py:220
 msgid "Rows per page on the policy violations console."
 msgstr "Кількість рядків на сторінці консолі порушень політики."
 
-#: apps/catalog/setting_defs.py:209
+#: apps/catalog/setting_defs.py:223
 msgid "Days after merge over which churn is measured."
 msgstr "Дні після мерджу, за які вимірюється churn."
 
-#: apps/catalog/setting_defs.py:211
+#: apps/catalog/setting_defs.py:225
 msgid "Maximum files in a PR before churn analysis is skipped."
 msgstr ""
 "Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
 
-#: apps/catalog/setting_defs.py:213
+#: apps/catalog/setting_defs.py:227
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:218
+#: apps/catalog/setting_defs.py:232
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:221
+#: apps/catalog/setting_defs.py:235
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:226
+#: apps/catalog/setting_defs.py:240
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:230
+#: apps/catalog/setting_defs.py:244
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:236
+#: apps/catalog/setting_defs.py:250
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1269,41 +1281,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:239
+#: apps/catalog/setting_defs.py:253
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:244
+#: apps/catalog/setting_defs.py:258
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:251
+#: apps/catalog/setting_defs.py:265
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:255
+#: apps/catalog/setting_defs.py:269
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:258
+#: apps/catalog/setting_defs.py:272
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:264
+#: apps/catalog/setting_defs.py:278
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:271
+#: apps/catalog/setting_defs.py:285
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:278
+#: apps/catalog/setting_defs.py:292
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -2053,12 +2065,442 @@ msgstr ""
 msgid "No sync is currently running."
 msgstr "Наразі синхронізація не виконується."
 
+#: apps/metrics/calculators/adoption.py:66
+msgid "AI PR share"
+msgstr "Частка AI PR"
+
+#: apps/metrics/calculators/adoption.py:67
+msgid ""
+"Share of pull requests merged on a day that belong to the AI cohort (spec "
+"§15)."
+msgstr ""
+"Частка pull request-ів, змерджених за день, що належать до когорти AI "
+"(специфікація §15)."
+
+#: apps/metrics/calculators/adoption.py:102
+msgid "AI PR count"
+msgstr "Кількість AI PR"
+
+#: apps/metrics/calculators/adoption.py:103
+msgid "Pull requests created on a day that belong to the AI cohort."
+msgstr "Pull request-и, створені за день, що належать до когорти AI."
+
+#: apps/metrics/calculators/adoption.py:133
+msgid "AI status breakdown"
+msgstr "Розподіл за статусом AI"
+
+#: apps/metrics/calculators/adoption.py:134
+msgid ""
+"Pull requests created in the period, grouped by their detected AI status."
+msgstr ""
+"Pull request-и, створені за період, згруповані за визначеним статусом AI."
+
+#: apps/metrics/calculators/adoption.py:167
+msgid "AI tool breakdown"
+msgstr "Розподіл за інструментом AI"
+
+#: apps/metrics/calculators/adoption.py:169
+msgid ""
+"AI-cohort pull requests created in the period, grouped by disclosed tool. A "
+"PR with no disclosed tool contributes to no label."
+msgstr ""
+"Pull request-и когорти AI, створені за період, згруповані за розкритим "
+"інструментом. PR без розкритого інструменту не враховується в жодній "
+"категорії."
+
+#: apps/metrics/calculators/adoption.py:222
+msgid "Disclosure rate"
+msgstr "Рівень розкриття"
+
+#: apps/metrics/calculators/adoption.py:224
+msgid ""
+"Share of AI-cohort pull requests created on a day whose AI disclosure is "
+"partial or substantial (as opposed to missing or ambiguous)."
+msgstr ""
+"Частка pull request-ів когорти AI, створених за день, чиє розкриття AI "
+"часткове або суттєве (на відміну від відсутнього чи неоднозначного)."
+
+#: apps/metrics/calculators/adoption.py:274
+#: apps/policy/templates/policy/partials/kpis.html:37
+#: apps/policy/templates/policy/partials/mismatch_list.html:3
+msgid "Disclosure mismatches"
+msgstr "Невідповідності розкриття"
+
+#: apps/metrics/calculators/adoption.py:276
+msgid ""
+"Pull requests created on a day with an open disclosure-mismatch violation — "
+"same population as the policy console's disclosure mismatch list."
+msgstr ""
+"Pull request-и, створені за день, з відкритим порушенням невідповідності "
+"розкриття — та сама вибірка, що й у списку невідповідностей розкриття на "
+"консолі політик."
+
+#: apps/metrics/calculators/adoption.py:310
+msgid "AI-active people"
+msgstr "Активні щодо AI люди"
+
+#: apps/metrics/calculators/adoption.py:312
+msgid ""
+"Distinct people who authored at least one AI-cohort pull request in the "
+"period (not the sum of each day's distinct count)."
+msgstr ""
+"Унікальні люди, які створили щонайменше один pull request когорти AI за "
+"період (не сума щоденних унікальних кількостей)."
+
+#: apps/metrics/calculators/adoption.py:338
+#: apps/policy/templates/policy/partials/kpis.html:4
+msgid "Open violations"
+msgstr "Відкриті порушення"
+
+#: apps/metrics/calculators/adoption.py:340
+msgid ""
+"Violations created on or before the end of the period that are still open — "
+"a current snapshot bounded by created_at, matching the policy console."
+msgstr ""
+"Порушення, створені до кінця періоду включно, які досі відкриті — поточний "
+"зріз, обмежений за created_at, що відповідає консолі політик."
+
+#: apps/metrics/calculators/adoption.py:372
+msgid "New violations"
+msgstr "Нові порушення"
+
+#: apps/metrics/calculators/adoption.py:373
+msgid "Violations created on a day, regardless of their current status."
+msgstr "Порушення, створені за день, незалежно від їхнього поточного статусу."
+
+#: apps/metrics/calculators/adoption.py:410
+#: apps/policy/templates/policy/partials/rule_chart.html:3
+msgid "Violations by rule"
+msgstr "Порушення за правилом"
+
+#: apps/metrics/calculators/adoption.py:411
+msgid "Violations created in the period, grouped by rule code."
+msgstr "Порушення, створені за період, згруповані за кодом правила."
+
+#: apps/metrics/calculators/flow.py:72
+msgid "PRs opened"
+msgstr "Відкрито PR"
+
+#: apps/metrics/calculators/flow.py:73
+msgid "Pull requests created on a day."
+msgstr "Pull request-и, створені за день."
+
+#: apps/metrics/calculators/flow.py:103
+msgid "PRs merged"
+msgstr "Змерджено PR"
+
+#: apps/metrics/calculators/flow.py:104
+msgid "Pull requests merged on a day — the flow throughput counter."
+msgstr ""
+"Pull request-и, змерджені за день — лічильник пропускної здатності потоку."
+
+#: apps/metrics/calculators/flow.py:140
+msgid "PRs closed without merging"
+msgstr "Закрито PR без мерджу"
+
+#: apps/metrics/calculators/flow.py:141
+msgid "Pull requests closed on a day without being merged."
+msgstr "Pull request-и, закриті за день без мерджу."
+
+#: apps/metrics/calculators/flow.py:173
+msgid "Reviews given"
+msgstr "Надані ревʼю"
+
+#: apps/metrics/calculators/flow.py:174
+msgid "Reviews submitted on a day."
+msgstr "Ревʼю, подані за день."
+
+#: apps/metrics/calculators/flow.py:211
+msgid "PRs excluded from metrics"
+msgstr "PR, виключені з метрик"
+
+#: apps/metrics/calculators/flow.py:213
+msgid ""
+"Pull requests created on a day by a bot or a person excluded from metrics — "
+"the population every other metric leaves out, surfaced rather than silently "
+"dropped."
+msgstr ""
+"Pull request-и, створені за день ботом або людиною, виключеною з метрик — "
+"вибірка, яку решта метрик не враховують, показана явно, а не приховано "
+"відкинута."
+
+#: apps/metrics/calculators/flow.py:269
+msgid "Lead time (median)"
+msgstr "Час виконання (медіана)"
+
+#: apps/metrics/calculators/flow.py:270
+msgid "From ready for review to merge, for PRs merged in the period."
+msgstr "Від готовності до ревʼю до мерджу, для PR, змерджених за період."
+
+#: apps/metrics/calculators/flow.py:278
+msgid "Lead time (p90)"
+msgstr "Час виконання (p90)"
+
+#: apps/metrics/calculators/flow.py:279
+msgid ""
+"From ready for review to merge, for PRs merged in the period (90th "
+"percentile)."
+msgstr ""
+"Від готовності до ревʼю до мерджу, для PR, змерджених за період (90-й "
+"перцентиль)."
+
+#: apps/metrics/calculators/flow.py:287
+msgid "Cycle time (median)"
+msgstr "Час циклу (медіана)"
+
+#: apps/metrics/calculators/flow.py:288
+msgid "From first commit to merge, for PRs merged in the period."
+msgstr "Від першого коміту до мерджу, для PR, змерджених за період."
+
+#: apps/metrics/calculators/flow.py:296
+msgid "Time to first review (median)"
+msgstr "Час до першого ревʼю (медіана)"
+
+#: apps/metrics/calculators/flow.py:297
+msgid ""
+"From ready for review to the first review, for PRs merged in the period."
+msgstr ""
+"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період."
+
+#: apps/metrics/calculators/flow.py:305
+msgid "Time to first review (p90)"
+msgstr "Час до першого ревʼю (p90)"
+
+#: apps/metrics/calculators/flow.py:306
+msgid ""
+"From ready for review to the first review, for PRs merged in the period "
+"(90th percentile)."
+msgstr ""
+"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й "
+"перцентиль)."
+
+#: apps/metrics/calculators/flow.py:329
+msgid "PR size (median)"
+msgstr "Розмір PR (медіана)"
+
+#: apps/metrics/calculators/flow.py:330
+msgid ""
+"Median effective lines changed (additions + deletions) for PRs merged in the "
+"period."
+msgstr ""
+"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за "
+"період."
+
+#: apps/metrics/calculators/flow.py:358
+msgid "PR size buckets"
+msgstr "Розмірні категорії PR"
+
+#: apps/metrics/calculators/flow.py:360
+msgid ""
+"PRs merged in the period, grouped by size bucket (XS/S/M/L/XL, boundaries "
+"from PR_SIZE_BUCKETS)."
+msgstr ""
+"PR, змерджені за період, згруповані за розмірною категорією (XS/S/M/L/XL, "
+"межі з PR_SIZE_BUCKETS)."
+
+#: apps/metrics/calculators/flow.py:393
+msgid "Review load share"
+msgstr "Частка навантаження ревʼю"
+
+#: apps/metrics/calculators/flow.py:395
+msgid ""
+"Share of reviews given in the period that fall on the top REVIEW_LOAD_TOP_N "
+"reviewers by review count — a bottleneck-risk indicator."
+msgstr ""
+"Частка ревʼю, наданих за період, що припадає на топ-REVIEW_LOAD_TOP_N "
+"рецензентів за кількістю ревʼю — індикатор ризику вузького місця."
+
+#: apps/metrics/calculators/flow.py:429
+msgid "Reviewer response time (median)"
+msgstr "Час відповіді рецензента (медіана)"
+
+#: apps/metrics/calculators/flow.py:431
+msgid ""
+"From the PR becoming ready for review (falling back to its creation) to this "
+"reviewer's review, for reviews given in the period — an approximation: no "
+"review-request timestamp is stored, so this is not measured from the actual "
+"request."
+msgstr ""
+"Від моменту, коли PR став готовим до ревʼю (або його створення, якщо іншого "
+"немає), до ревʼю цього рецензента, для ревʼю, наданих за період — "
+"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не "
+"від фактичного запиту."
+
+#: apps/metrics/calculators/quality.py:106
+msgid "Review rounds (average)"
+msgstr "Раунди ревʼю (середнє)"
+
+#: apps/metrics/calculators/quality.py:107
+msgid ""
+"Average number of review rounds (CHANGES_REQUESTED + 1) for PRs merged on a "
+"day."
+msgstr ""
+"Середня кількість раундів ревʼю (CHANGES_REQUESTED + 1) для PR, змерджених "
+"за день."
+
+#: apps/metrics/calculators/quality.py:126
+msgid "Rework rate"
+msgstr "Рівень доопрацювань"
+
+#: apps/metrics/calculators/quality.py:127
+msgid ""
+"Share of PRs merged on a day that had at least one commit after their first "
+"review."
+msgstr ""
+"Частка PR, змерджених за день, що мали щонайменше один коміт після першого "
+"ревʼю."
+
+#: apps/metrics/calculators/quality.py:173
+msgid "CI first-pass rate"
+msgstr "Рівень проходження CI з першого разу"
+
+#: apps/metrics/calculators/quality.py:175
+msgid ""
+"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS). "
+"PRs with no first-CI-commit record are excluded from both sides."
+msgstr ""
+"Частка PR, змерджених за день, чий перший коміт, охоплений CI, пройшов "
+"перевірку (SUCCESS). PR без запису про перший коміт CI виключені з обох "
+"частин."
+
+#: apps/metrics/calculators/quality.py:206
+msgid "Revert rate"
+msgstr "Рівень відкатів"
+
+#: apps/metrics/calculators/quality.py:207
+msgid "Share of PRs merged on a day that were later reverted."
+msgstr "Частка PR, змерджених за день, які пізніше було відкочено."
+
+#: apps/metrics/calculators/quality.py:222
+msgid "Test change ratio"
+msgstr "Частка змін тестів"
+
+#: apps/metrics/calculators/quality.py:223
+msgid "Share of PRs merged on a day that changed test code."
+msgstr "Частка PR, змерджених за день, що змінювали тестовий код."
+
+#: apps/metrics/calculators/quality.py:272
+msgid "Test lines ratio"
+msgstr "Частка рядків тестів"
+
+#: apps/metrics/calculators/quality.py:274
+msgid ""
+"Test-file lines changed divided by all effective lines changed, for PRs "
+"merged on a day."
+msgstr ""
+"Змінені рядки тестових файлів, поділені на всі ефективні змінені рядки, для "
+"PR, змерджених за день."
+
+#: apps/metrics/calculators/quality.py:316
+msgid "Review comments per 100 lines"
+msgstr "Коментарі ревʼю на 100 рядків"
+
+#: apps/metrics/calculators/quality.py:317
+msgid ""
+"Review comments per 100 effective lines changed, for PRs merged on a day."
+msgstr ""
+"Коментарі ревʼю на 100 ефективних змінених рядків, для PR, змерджених за "
+"день."
+
+#: apps/metrics/calculators/quality.py:344
+msgid "Rubber-stamp rate"
+msgstr "Рівень формальних ревʼю"
+
+#: apps/metrics/calculators/quality.py:346
+msgid ""
+"Share of PRs merged on a day that were approved suspiciously fast with no "
+"comment on a large change (RUBBER_STAMP_MAX_MINUTES)."
+msgstr ""
+"Частка PR, змерджених за день, які були схвалені підозріло швидко без "
+"жодного коментаря при великій зміні (RUBBER_STAMP_MAX_MINUTES)."
+
+#: apps/metrics/calculators/quality.py:359
+msgid "Self-merge rate"
+msgstr "Рівень самостійного мерджу"
+
+#: apps/metrics/calculators/quality.py:360
+msgid "Share of PRs merged on a day that were merged by their own author."
+msgstr "Частка PR, змерджених за день, які були змерджені власним автором."
+
+#: apps/metrics/calculators/quality.py:382
+msgid "21-day churn"
+msgstr "Churn за 21 день"
+
+#: apps/metrics/calculators/quality.py:384
+msgid ""
+"Median share of a merged PR's lines that were themselves changed again "
+"within 21 days, for PRs merged in the period. None until manage.py "
+"compute_churn has run."
+msgstr ""
+"Медіанна частка рядків змердженого PR, які самі були повторно змінені "
+"протягом 21 дня, для PR, змерджених за період. None, доки не виконано "
+"manage.py compute_churn."
+
+#: apps/metrics/calculators/quality.py:409
+msgid "Follow-up fix rate (heuristic)"
+msgstr "Рівень подальших виправлень (евристика)"
+
+#: apps/metrics/calculators/quality.py:411
+msgid ""
+"(heuristic) Share of merged PRs followed within FOLLOWUP_FIX_WINDOW_DAYS by "
+"a hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their "
+"files. Not computed yet — always empty until this heuristic ships."
+msgstr ""
+"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS "
+"слідував hotfix/fix PR, що перетинається щонайменше на "
+"FOLLOWUP_FIX_FILE_OVERLAP їхніх файлів. Ще не обчислюється — завжди "
+"порожньо, доки цю евристику не реалізовано."
+
+#: apps/metrics/calculators/state.py:48
+msgid "Open PRs"
+msgstr "Відкриті PR"
+
+#: apps/metrics/calculators/state.py:49
+msgid "Pull requests open at the end of a day, reconstructed from their dates."
+msgstr "Pull request-и, відкриті на кінець дня, відновлені за їхніми датами."
+
+#: apps/metrics/calculators/state.py:77
+msgid "Stale PRs"
+msgstr "Застарілі PR"
+
+#: apps/metrics/calculators/state.py:79
+msgid ""
+"Open, non-draft pull requests with no activity for more than STALE_DAYS, as "
+"of the end of a day."
+msgstr ""
+"Відкриті, не чернеткові pull request-и без активності понад STALE_DAYS, "
+"станом на кінець дня."
+
+#: apps/metrics/calculators/state.py:110
+msgid "Waiting for review > 24h"
+msgstr "Очікують ревʼю > 24 год"
+
+#: apps/metrics/calculators/state.py:112
+msgid ""
+"Pull requests ready for review with no review yet, waiting for more than "
+"WAITING_REVIEW_HOURS, as of the end of a day."
+msgstr ""
+"Pull request-и, готові до ревʼю, які ще не отримали жодного ревʼю, очікуючи "
+"понад WAITING_REVIEW_HOURS, станом на кінець дня."
+
+#: apps/metrics/calculators/state.py:147
+msgid "WIP per person"
+msgstr "WIP на людину"
+
+#: apps/metrics/calculators/state.py:149
+msgid ""
+"Open, non-draft pull requests divided by the number of distinct authors "
+"holding one, as of the end of a day."
+msgstr ""
+"Відкриті, не чернеткові pull request-и, поділені на кількість унікальних "
+"авторів, які їх мають, станом на кінець дня."
+
 #: apps/metrics/models.py:6
 #: apps/policy/templates/policy/partials/sensitive_path_row.html:3
 msgid "Global"
 msgstr "Глобально"
 
-#: apps/metrics/models.py:7 apps/policy/forms.py:122
+#: apps/metrics/models.py:7 apps/policy/forms.py:148
 #: apps/policy/templates/policy/console.html:42
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:16
 msgid "Project"
@@ -2076,7 +2518,7 @@ msgstr "ШІ"
 msgid "Non-AI"
 msgstr "Без ШІ"
 
-#: apps/metrics/models.py:19
+#: apps/metrics/models.py:19 apps/metrics/models.py:72
 msgid "date"
 msgstr "дата"
 
@@ -2108,75 +2550,114 @@ msgstr "денний зведений показник"
 msgid "daily rollups"
 msgstr "денні зведені показники"
 
-#: apps/policy/forms.py:69
+#: apps/metrics/models.py:57
+msgid "version"
+msgstr "версія"
+
+#: apps/metrics/models.py:61 apps/metrics/models.py:62
+msgid "data version"
+msgstr "версія даних"
+
+#: apps/metrics/models.py:73
+msgid "marked at"
+msgstr "позначено о"
+
+#: apps/metrics/models.py:76
+msgid "dirty day"
+msgstr "брудний день"
+
+#: apps/metrics/models.py:77
+msgid "dirty days"
+msgstr "брудні дні"
+
+#: apps/metrics/tests/test_registry.py:45
+msgid "Test metric"
+msgstr "Тестова метрика"
+
+#: apps/metrics/tests/test_registry.py:46
+msgid "A metric used only by test_registry.py."
+msgstr "Метрика, що використовується лише в test_registry.py."
+
+#: apps/policy/forms.py:44
+msgid "All rules"
+msgstr "Усі правила"
+
+#: apps/policy/forms.py:47
+msgid "All severities"
+msgstr "Усі рівні серйозності"
+
+#: apps/policy/forms.py:51
+msgid "All projects"
+msgstr "Усі проєкти"
+
+#: apps/policy/forms.py:54
+msgid "All repositories"
+msgstr "Усі репозиторії"
+
+#: apps/policy/forms.py:97
 #: apps/policy/templates/policy/partials/violations.html:72
 msgid "Acknowledge"
 msgstr "Взяти до відома"
 
-#: apps/policy/forms.py:70
+#: apps/policy/forms.py:98
 #: apps/policy/templates/policy/partials/violations.html:73
 msgid "Waive"
 msgstr "Прийняти ризик"
 
-#: apps/policy/forms.py:74 apps/policy/templates/policy/console.html:12
+#: apps/policy/forms.py:102 apps/policy/templates/policy/console.html:12
 msgid "Violations"
 msgstr "Порушення"
 
-#: apps/policy/forms.py:76
+#: apps/policy/forms.py:104
 #: apps/policy/templates/policy/partials/violations.html:71
 msgid "Action"
 msgstr "Дія"
 
-#: apps/policy/forms.py:78
+#: apps/policy/forms.py:106
 #: apps/policy/templates/policy/partials/violations.html:77
 msgid "Comment"
 msgstr "Коментар"
 
-#: apps/policy/forms.py:81
+#: apps/policy/forms.py:109
 msgid "A comment of at least 3 characters is required."
 msgstr "Потрібен коментар щонайменше з 3 символів."
 
-#: apps/policy/forms.py:90
+#: apps/policy/forms.py:122
 msgid "Allowed tools"
 msgstr "Дозволені інструменти"
 
-#: apps/policy/forms.py:104
+#: apps/policy/forms.py:135
 #: apps/policy/templates/policy/partials/policy_form.html:37
 msgid "Require disclosure"
 msgstr "Вимагати розкриття інформації"
 
-#: apps/policy/forms.py:105
+#: apps/policy/forms.py:136
 #: apps/policy/templates/policy/partials/policy_form.html:38
 msgid "Require human approval"
 msgstr "Вимагати підтвердження людини"
 
-#: apps/policy/forms.py:106
+#: apps/policy/forms.py:137
 msgid "Minimum human approvals"
 msgstr "Мінімальна кількість підтверджень людини"
 
-#: apps/policy/forms.py:107
+#: apps/policy/forms.py:138
 msgid "Require tests for AI PRs"
 msgstr "Вимагати тести для AI PR"
 
-#: apps/policy/forms.py:108
+#: apps/policy/forms.py:139
 msgid "Maximum effective lines for an AI PR"
 msgstr "Максимум ефективних рядків для AI PR"
 
-#: apps/policy/forms.py:109
-#: apps/policy/templates/policy/partials/policy_form.html:36
-msgid "Effective from"
-msgstr "Діє з"
-
-#: apps/policy/forms.py:123
+#: apps/policy/forms.py:149
 msgid "Path glob"
 msgstr "Glob-шаблон шляху"
 
-#: apps/policy/forms.py:124 apps/policy/models.py:46
+#: apps/policy/forms.py:150 apps/policy/models.py:46
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:18
 msgid "AI mode"
 msgstr "режим ШІ"
 
-#: apps/policy/forms.py:125
+#: apps/policy/forms.py:151
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:19
 msgid "Description"
 msgstr "Опис"
@@ -2510,10 +2991,6 @@ msgstr "Пошук"
 msgid "Filter"
 msgstr "Фільтр"
 
-#: apps/policy/templates/policy/partials/kpis.html:4
-msgid "Open violations"
-msgstr "Відкриті порушення"
-
 #: apps/policy/templates/policy/partials/kpis.html:8
 msgid "New violations (30 days)"
 msgstr "Нові порушення (30 днів)"
@@ -2546,11 +3023,6 @@ msgstr ""
 "надійною.\n"
 "          "
 
-#: apps/policy/templates/policy/partials/kpis.html:37
-#: apps/policy/templates/policy/partials/mismatch_list.html:3
-msgid "Disclosure mismatches"
-msgstr "Невідповідності розкриття"
-
 #: apps/policy/templates/policy/partials/mismatch_list.html:16
 msgid "No disclosure mismatches in this period."
 msgstr "За цей період невідповідностей розкриття немає."
@@ -2567,6 +3039,10 @@ msgstr "Історія версій"
 msgid "AI policy version history"
 msgstr "Історія версій політики ШІ"
 
+#: apps/policy/templates/policy/partials/policy_form.html:36
+msgid "Effective from"
+msgstr "Діє з"
+
 #: apps/policy/templates/policy/partials/policy_form.html:39
 msgid "Minimum approvals"
 msgstr "Мінімум підтверджень"
@@ -2582,10 +3058,6 @@ msgstr "Макс. ефективних рядків"
 #: apps/policy/templates/policy/partials/policy_form.html:60
 msgid "No policy versions yet."
 msgstr "Ще немає версій політики."
-
-#: apps/policy/templates/policy/partials/rule_chart.html:3
-msgid "Violations by rule"
-msgstr "Порушення за правилом"
 
 #: apps/policy/templates/policy/partials/rule_chart.html:17
 msgid "Violations by rule (data table)"
@@ -2667,7 +3139,7 @@ msgstr ""
 "      Сторінка %(number)s з %(total)s\n"
 "    "
 
-#: apps/policy/views.py:89
+#: apps/policy/views.py:100
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -2681,7 +3153,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/policy/views.py:94
+#: apps/policy/views.py:104
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."

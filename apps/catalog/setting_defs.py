@@ -179,6 +179,20 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "metrics",
     ),
     SettingDef(
+        "METRICS_CACHE_TTL_SECONDS",
+        "int",
+        3600,
+        _("How long a computed metrics result stays cached before it expires on its own."),
+        "metrics",
+    ),
+    SettingDef(
+        "DEFAULT_PERIOD_DAYS",
+        "int",
+        30,
+        _("Default number of days a dashboard period covers when none is chosen."),
+        "metrics",
+    ),
+    SettingDef(
         "NO_TESTS_MIN_LINES",
         "int",
         20,

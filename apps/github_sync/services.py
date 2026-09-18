@@ -36,6 +36,8 @@ from apps.github_sync.queries import (
 )
 from apps.github_sync.rate_limit import RateBudgetRegistry
 from apps.github_sync.upserts import upsert_pull_request
+from apps.metrics.rollups import rebuild_dirty
+from apps.metrics.services import bump_data_version
 from config.security import mask_secrets
 
 logger = logging.getLogger(__name__)
@@ -397,6 +399,8 @@ def run_sync(
             run.status = SyncRun.Status.FAILED
         run.finished_at = timezone.now()
         run.save()
+        rebuild_dirty()
+        bump_data_version()
         return run
     except Exception as exc:
         # Anything that escapes the loop above (a bug, an unmasked exception type, a killed
@@ -406,6 +410,16 @@ def run_sync(
         run.finished_at = timezone.now()
         run.error_log = mask_secrets(f"{run.error_log}\n{exc}" if run.error_log else str(exc))
         run.save()
+        # A partial sync (PRs already committed before the crash) still marked days dirty via
+        # process_pull_request -> mark_dirty; rebuild them so those PRs are not left stale in
+        # dashboards until the next successful sync happens to touch the same days. Best-effort:
+        # the SyncRun row above already carries the terminal status, so a failure here must not
+        # replace the original sync exception on its way out.
+        try:
+            rebuild_dirty()
+            bump_data_version()
+        except Exception:
+            logger.exception("Post-sync rollup rebuild failed after a sync failure")
         raise
     finally:
         _release_lock(run)

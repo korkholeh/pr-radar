@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 6/11 · step `commit`
+- **Current:** phase 7/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 16% (reset 18.09 06:40) · 7d 36%
-- **Totals:** 84 sessions · 9.9 h agent time · ≈$198.25 API-equivalent
-- **Clock:** 19.2 h since the run was created · 9.9 h working · 5.6 h paused on the usage limit · 3.7 h not running
-- **Updated:** 2026-09-18 02:26:29
+- **Usage:** 5h 50% (reset 18.09 06:40) · 7d 38%
+- **Totals:** 101 sessions · 12.3 h agent time · ≈$246.18 API-equivalent
+- **Clock:** 21.7 h since the run was created · 12.3 h working · 5.6 h paused on the usage limit · 3.8 h not running
+- **Updated:** 2026-09-18 04:54:34
 
 ## Run warnings
 
@@ -23,8 +23,8 @@
 | 3 | GitHub connections and incremental sync | yes | ✅ done | d9e0077 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 4 | Identity resolution and derived PR fields | yes | ✅ done | ed2d2c8 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 5 | AI detection | yes | ✅ done | 66f9dc6 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 6 | AI policy engine and violations console | yes | 🔨 in_progress |  |  |
-| 7 | Metrics registry, rollups and recompute | no | ⏳ pending |  |  |
+| 6 | AI policy engine and violations console | yes | ✅ done | 5f96b3b | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 7 | Metrics registry, rollups and recompute | no | 🔨 in_progress |  |  |
 | 8 | Dashboards, charts, themes and table export | yes | ⏳ pending |  |  |
 | 9 | People, PRs, Reviews, scoped access and reports | yes | ⏳ pending |  |  |
 | 10 | CI first-pass, follow-up fixes and churn | yes | ⏳ pending |  |  |
@@ -190,6 +190,34 @@
 - `2026-09-18 02:25:12` **p06-e2e** — pass: exit 0: ..................................................... [100%]
 - `2026-09-18 02:26:29` **p06-docs** — done (1m, $0.53): Docs already true — no edits made. Checked CLAUDE.md (commands/conventions match, no new mgmt command this phase), docs/POLICY.md (nine-rule table matches apps.policy.rules.SEVERITY exactly, effective_from/auto-resolve/ack-vs-waive sections match the review-fixed behavior), docs/CONFIGURATION.md (t…
 - `2026-09-18 02:26:29` **p06-docs** — no changes: the documentation was already true for this phase
+- `2026-09-18 02:26:29` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-18 02:26:29` **p06-commit** — done: 5f96b3b
+- `2026-09-18 02:26:32` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-18 02:26:36` **p06-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p06-policy-engine
+- `2026-09-18 02:26:38` **p06-pr** — draft: https://github.com/korkholeh/pr-radar/pull/7
+- `2026-09-18 02:26:48` **p06-merge** — done: https://github.com/korkholeh/pr-radar/pull/7
+- `2026-09-18 02:35:14` **p07-plan** — done (8m, $3.3): Explored the metrics stub, the phase-4/6 selectors it builds on, ADR 0007 and RISKS, then wrote .autodev/phases/07-metrics-registry/PLAN.md with Context, Design (strategy objects deciding storage, ~40 §8.2 metrics classified by kind, compute()/cache/data-version/dirty-day design), 20 ordered tasks …
+- `2026-09-18 02:46:32` **p07-implement** — handover: context reached 204,006 tokens — checkpointing for a fresh session
+- `2026-09-18 02:49:41` **p07-implement** — partial (14m, $4.72): Phase 7 session 1: built the metrics registry's foundation. Done (T1-T6): FileBasedCache + METRICS_CACHE_TTL_SECONDS/DEFAULT_PERIOD_DAYS settings + migration + conftest cache isolation; timeframe.py gained day_of/previous_period/bucket_ranges/date_range; types.py (Scope/MetricValue/SeriesPoint/Brea…
+- `2026-09-18 03:00:51` **p07-implement** — handover: context reached 204,440 tokens — checkpointing for a fresh session
+- `2026-09-18 03:02:00` **p07-implement** — partial (12m, $4.21): Completed T1-T12 of phase-7 metrics registry plan. Wrote+verified tests for T7/T8 (adoption+policy calculators, previously untested), then implemented and tested T9 flow counters, T10 flow distributions, T11 state calculators, T12 quality metrics — 39 MetricDefs total now registered across apps/met…
+- `2026-09-18 03:13:09` **p07-implement** — handover: context reached 200,536 tokens — checkpointing for a fresh session
+- `2026-09-18 03:15:18` **p07-implement** — partial (13m, $4.3): Phase 7 session 3: implemented and tested T13 (rollups.py — write_rollups/rebuild/rebuild_dirty, apps/metrics/tests/test_rollups.py) and T14 (services.compute() core, apps/metrics/tests/test_compute.py), both marked [x] in PLAN.md. Also implemented T15's caching (cache-key builder, read-through wra…
+- `2026-09-18 03:26:58` **p07-implement** — handover: context reached 200,814 tokens — checkpointing for a fresh session
+- `2026-09-18 03:27:39` **p07-implement** — partial (12m, $4.48): Completed T15-T19 of phase 7 this session: T15 caching test suite (test_compute_cache.py); T16 pipeline/sync wiring (mark_dirty in process_pull_request, rebuild_dirty+bump_data_version in run_sync's success and failure paths, plus tests); T17 recompute command extended with --rollups-only/--skip-ro…
+- `2026-09-18 03:35:13` **p07-implement** — done (7m, $1.32): Completed final task T20 of phase 7 (metrics registry, rollups, recompute): added docs/DECISIONS.md's Phase 7 section (registry/calculator-strategy design, ratio num/den rollup storage, DataVersion/DirtyDay models, cache access-fingerprint), a CHANGELOG.md entry, and confirmed CLAUDE.md already lis…
+- `2026-09-18 03:35:50` **p07-tests** — fail: exit 1: FAILED tests/test_css_tokens.py::test_app_css_is_not_stale - AssertionError: ...
+- `2026-09-18 03:37:03` **p07-test_fix1** — done (1m, $0.26): Only failure: tests/test_css_tokens.py::test_app_css_is_not_stale — build manifest hash stale vs source (phase 7 touched files under Tailwind's scan globs). Fixed by running `make css` (regenerated .build-manifest.sha256 only; app.css bytes unchanged). Full suite now green. Logged in .autodev/DECIS…
+- `2026-09-18 03:37:40` **p07-tests** — pass: exit 0: .............................................................. [100%]
+- `2026-09-18 03:45:28` **p07-review1** — changes_requested (7m, $3.89): Substantial, well-structured phase: 39 metrics across four calculator strategies, kind derived from the strategy type (RISKS row 7 handled structurally), Kyiv day boundaries routed through one helper with real 23:59/00:01/DST tests, a generated docs/METRICS.md with a working freshness gate, and a v…
+- `2026-09-18 04:25:59` **p07-review_fix1** — done (40m, $13.19): Applied all review-r1 fixes for phase 7 (metrics registry/rollups/recompute). Fixed (blockers/majors): - MAJOR: restricted ScopeFilter leaked the unrestricted rollup total. compute() now computes counter/ratio metrics straight from the calculator (per-day, summed) whenever scope.access.unrestricted…
+- `2026-09-18 04:26:59` **p07-tests** — pass: exit 0: ........................................... [100%]
+- `2026-09-18 04:35:07` **p07-review2** — changes_requested (8m, $4.46): Round 2 of phase 7 fixes every blocker/major from r1 convincingly: restricted callers now bypass access-agnostic rollups (with a corrected cache test), rebuild() is batched via grouped aggregates and guarded by both an oracle test comparing every rollup row to the per-scope calculator and a query-c…
+- `2026-09-18 04:46:37` **p07-review_fix2** — done (11m, $1.9): Fixed all 5 findings from REVIEW-r2: - MAJOR: mark_dirty() now nominates the reverted PR's merge day (via reverts_pr_id), and pipeline.py captures the pre-derive reverts_pr_id so a repointed/cleared revert link also dirties the previously-targeted PR's day. New tests in test_data_version.py. - MINO…
+- `2026-09-18 04:47:37` **p07-tests** — pass: exit 0: .............................................. [100%]
+- `2026-09-18 04:53:15` **p07-review_audit2** — approve (5m, $1.41): The MAJOR from REVIEW-r2 is genuinely fixed in the product: mark_dirty() now nominates the reverted PR's merge day from reverts_pr_id, and the sync pipeline captures the pre-derive reverts_pr_id and passes it as previous_reverts_pr_id so a repointed or cleared revert link also dirties the day it us…
+- `2026-09-18 04:54:33` **p07-docs** — done (1m, $0.49): No edits made — documentation was already true for phase 7. Verified: CLAUDE.md (commands/conventions already list metrics_doc, recompute, compute() entry point, METRICS.md freshness test), CHANGELOG.md (Unreleased/Added entries for the registry, recompute flags, metrics_doc), docs/METRICS.md (rege…
+- `2026-09-18 04:54:34` **p07-docs** — no changes: the documentation was already true for this phase
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

@@ -46,3 +46,35 @@ class DailyRollup(models.Model):
 
     def __str__(self) -> str:
         return f"{self.metric_key} {self.scope_type}:{self.scope_id} {self.date}"
+
+
+class DataVersion(models.Model):
+    """A singleton row (`id=1`): bumped with an atomic `F("version") + 1` whenever the underlying
+    data changes, and stamped into `compute()`'s cache key so a stale cache entry can never be
+    served (ARCHITECTURE.md). A DB row rather than a cache entry or an `AppSetting` because it
+    must survive a cache wipe and be shared correctly between the web process and the huey worker."""
+
+    version = models.PositiveIntegerField(_("version"), default=1)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("data version")
+        verbose_name_plural = _("data version")
+
+    def __str__(self) -> str:
+        return f"v{self.version}"
+
+
+class DirtyDay(models.Model):
+    """A Kyiv calendar day a synced PR touched (`created_at`/`merged_at`/`closed_at`/a review's
+    `submitted_at`), waiting for `rollups.rebuild_dirty()` to rebuild and delete it."""
+
+    date = models.DateField(_("date"), unique=True)
+    marked_at = models.DateTimeField(_("marked at"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("dirty day")
+        verbose_name_plural = _("dirty days")
+
+    def __str__(self) -> str:
+        return str(self.date)
