@@ -11,6 +11,8 @@ from apps.activity.models import AIDisclosure, PullRequest
 from apps.ai_detection.models import Confidence, DetectionRule, Detector, Tool
 from apps.ai_detection.services import detect_pull_request
 from apps.catalog.models import Identity, Organization, Person, Project, Repository
+from apps.catalog.services import get_int
+from apps.churn.models import ChurnResult
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
@@ -55,6 +57,7 @@ class Command(BaseCommand):
         self._seed_people_and_identities()
         seed_ids = self._seed_ai_detection()
         self._seed_policy()
+        seed_ids.update(self._seed_churn())
 
         self.stdout.write(self.style.SUCCESS(f"e2e personas ready: {USER_ADMIN}, {USER_LEAD}"))
         # Machine-readable line for e2e/conftest.py's `seed_ids` fixture: this phase's PR detail
@@ -391,3 +394,59 @@ class Command(BaseCommand):
 
         for pr in [*action_target_prs, mismatch_pr]:
             evaluate_pull_request(pr.pk)
+
+    def _seed_churn(self) -> dict[str, int]:
+        """Rows for the PR detail page's Churn section (phase 10). No git runs in the e2e stack
+        (the whole suite forbids live subprocess/network work, same as GitHub itself), so these
+        `ChurnResult` rows are written directly rather than through `run_churn` -- exactly the
+        shape a real nightly `compute_churn` run would leave behind."""
+        repository = Repository.objects.get(full_name="e2e-org/widget")
+        window_days = get_int("CHURN_WINDOW_DAYS")
+        now = timezone.now()
+
+        ok_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=950,
+            defaults={
+                "github_id": "e2e-pr-churn-ok",
+                "title": "E2E Churn Measured PR",
+                "state": PullRequest.State.MERGED,
+                "merge_method": PullRequest.MergeMethod.SQUASH,
+                "created_at": now - datetime.timedelta(days=30),
+                "merged_at": now - datetime.timedelta(days=25),
+            },
+        )
+        ChurnResult.objects.update_or_create(
+            pull_request=ok_pr,
+            window_days=window_days,
+            defaults={
+                "status": ChurnResult.Status.OK,
+                "lines_at_merge": 10,
+                "lines_surviving": 6,
+                "churn_ratio": 0.4,
+                "snapshot_sha": "e2e0000000000000000000000000000snapsho",
+            },
+        )
+
+        unsupported_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=951,
+            defaults={
+                "github_id": "e2e-pr-churn-rebase",
+                "title": "E2E Churn Rebase PR",
+                "state": PullRequest.State.MERGED,
+                "merge_method": PullRequest.MergeMethod.REBASE,
+                "created_at": now - datetime.timedelta(days=30),
+                "merged_at": now - datetime.timedelta(days=25),
+            },
+        )
+        ChurnResult.objects.update_or_create(
+            pull_request=unsupported_pr,
+            window_days=window_days,
+            defaults={"status": ChurnResult.Status.UNSUPPORTED_MERGE_METHOD},
+        )
+
+        return {
+            "churn_ok_pr_pk": ok_pr.pk,
+            "churn_unsupported_pr_pk": unsupported_pr.pk,
+        }

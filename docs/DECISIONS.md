@@ -407,3 +407,47 @@ Full detail — the `PRFilters` shape, the timeline/per-PR-metrics split from `m
 heat map's "Other" fold and heat-level tokens, and the seven-sheet report's sheet-by-sheet design — is in
 `.autodev/phases/09-people-prs-and-access/PLAN.md`'s Design section and the `## p09-*` entries of
 `.autodev/DECISIONS.md`.
+
+## Phase 10
+
+**A PR with zero attributable lines gets a settled `ChurnResult` row, not no row at all.** Spec §9.6 reads
+literally as "write no row"; the first implementation did exactly that, and it turned out to mean
+`eligible_pull_requests` would treat the PR as still-eligible forever, re-cloning and re-blaming it on every
+future nightly run. The shipped behaviour instead writes `status=ok, lines_at_merge=0, churn_ratio=None` —
+settled, so it is never retried, and `churn_ratio=None` so `churn_21d`'s median (which already drops `None`
+values) and the PR detail page never show a fabricated `0%`. This is a deliberate, twice-reviewed deviation
+from the spec's literal text that still honours its intent (never a made-up ratio).
+
+**Churn's rules live in `apps/churn/services.py`, not spec §9's parenthetical `churn/service.py`.** Every other
+app in this codebase puts its rules in `services.py`; the spec's parenthetical is a naming hint, not a contract,
+and one app spelled differently would be a permanent inconsistency for no benefit.
+
+**`followup_fix_rate` is a derived boolean cached at sync time (`PullRequest.has_followup_fix`,
+`apps/activity/followup.py`), not a join computed inside the metric's rollup.** The metric is a `RatioCalc`, so
+its batch function runs once per day per scope per cohort inside `rollups.rebuild()`; computing the overlap
+there would mean a `PRFile`×`PRFile` self-join on `path`, the one genuinely quadratic query the metrics registry
+would otherwise contain. The heuristic reuses `PullRequest.is_hotfix` (phase 4's title/branch pattern) rather
+than a second regex, and its overlap is `|paths(A) ∩ paths(B)| / |paths(A)|` — anchored on the *original* PR's
+own files, so the claim is "half of what this PR touched got fixed again," not diluted by the size of whatever
+fixed it.
+
+**Churn is the one component that shells out to `git` and touches the filesystem at scale, so it gets its own
+concurrency and credential rules.** Git work (clone/fetch/blame) runs in a `ThreadPoolExecutor` across
+repositories, but every `ChurnResult` write happens on the main thread after a future resolves — the single
+writer that keeps SQLite's write-contention risk out of the most parallel component in the system. The token
+reaches `git` only through `GIT_ASKPASS` and two process-only environment variables (ADR 0004); the same run
+also sets `GIT_CONFIG_NOSYSTEM=1`/`GIT_CONFIG_GLOBAL=/dev/null` so a developer's own credential helper is never
+offered the token to store. `CHURN_MAX_WORKERS`, `CHURN_GIT_TIMEOUT_SECONDS` and `CHURN_REPO_TIME_BUDGET_SECONDS`
+are read once per run on the main thread and passed down explicitly, never read fresh inside a worker thread —
+an early version's per-thread `get_int()` calls could each open their own SQLite connection concurrently, the
+exact contention the single-writer design exists to avoid.
+
+**A rebase merge has no churn number, by design, not by omission.** GitHub does not keep a rebased PR's
+pre-rebase commit history around long enough to reconstruct its original line set, so `merge_method == rebase`
+is `unsupported_merge_method` rather than an approximation. `merge_method == unknown` (GitHub's GraphQL leaves
+this absent often enough to matter) is instead resolved by asking `git` directly — a merge commit's parent count
+— rather than being treated as unsupported, since dropping it would erase most of the metric.
+
+Full detail — the churn algorithm, the credential handoff, the test fixture that builds a real temporary git
+repository instead of a JSON fixture, and every review-round fix — is in
+`.autodev/phases/10-ci-and-churn/PLAN.md`'s Design section and the `## p10-*` entries of `.autodev/DECISIONS.md`.

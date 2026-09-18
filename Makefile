@@ -36,6 +36,7 @@ vendor:
 	mkdir -p static/vendor
 	curl -sSL -o static/vendor/htmx.min.js https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js
 	curl -sSL -o static/vendor/chart.umd.js https://unpkg.com/chart.js@4.4.4/dist/chart.umd.js
+	curl -sSL -o static/vendor/chart.umd.js.map https://unpkg.com/chart.js@4.4.4/dist/chart.umd.js.map
 
 messages:
 	uv run python manage.py makemessages -l uk -a --ignore=static/vendor/*

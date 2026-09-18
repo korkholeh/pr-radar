@@ -48,6 +48,14 @@ is one command each rather than restarting it: `manage.py process_exports` runs 
 `manage.py cleanup_exports` deletes export files past their retention window and clears a job stuck `running` for
 over an hour.
 
+Churn analysis (`docs/user/churn.md`) runs as a scheduled huey task, `compute_churn`, at 02:00 server time — an
+hour before the 03:00 export cleanup — as long as `run_huey` is running. It clones each repository with open
+churn work into `DATA_DIR/repos/<owner>/<name>.git` (bare clones, fetched in place on later runs rather than
+re-cloned) and can be run manually with `manage.py compute_churn`. Budget disk space for one bare clone per
+active repository — the same order of magnitude as that repository's own `.git` directory — and expect the first
+nightly run after connecting a large repository to take longer than subsequent ones, which only fetch new
+commits. Deleting `DATA_DIR/repos/` is always safe: the next run re-clones whatever it needs.
+
 ## Building the frontend assets
 
 The compiled CSS (`static/css/app.css`) and the vendored `static/vendor/htmx.min.js` are committed, so a plain

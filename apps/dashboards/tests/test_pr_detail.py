@@ -11,6 +11,7 @@ from apps.ai_detection.factories import AISignalFactory, DetectionRuleFactory
 from apps.ai_detection.models import Confidence, Detector, Tool
 from apps.catalog.factories import ProjectFactory, RepositoryFactory
 from apps.churn.factories import ChurnResultFactory
+from apps.churn.models import ChurnResult
 from apps.policy.factories import PolicyViolationFactory
 from apps.policy.models import PolicyViolation
 
@@ -136,12 +137,71 @@ def test_churn_slot_shows_not_computed_yet_when_missing(client, lead_user):
 @pytest.mark.django_db
 def test_churn_slot_shows_the_computed_ratio(client, lead_user):
     pr = PullRequestFactory()
-    ChurnResultFactory(pull_request=pr, window_days=21, churn_ratio=0.25)
+    ChurnResultFactory(pull_request=pr, window_days=21, churn_ratio=0.25, lines_at_merge=8, lines_surviving=6)
     client.force_login(lead_user)
 
     response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
 
     assert b"25.0%" in response.content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_an_error_row_even_though_status_is_not_ok(client, lead_user):
+    """`_pull_request_detail_context` must fetch the latest result **regardless of status**, not
+    only `status=ok` rows -- an `error` retry must still render (RISKS row 11)."""
+    pr = PullRequestFactory()
+    ChurnResultFactory(
+        pull_request=pr, window_days=21, status=ChurnResult.Status.ERROR, error="timeout: git timed out"
+    )
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+
+    assert b"Churn could not be measured." in response.content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_unsupported_merge_method(client, lead_user):
+    pr = PullRequestFactory()
+    ChurnResultFactory(pull_request=pr, window_days=21, status=ChurnResult.Status.UNSUPPORTED_MERGE_METHOD)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+
+    assert b"Churn is not measured for rebase merges." in response.content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_too_large(client, lead_user):
+    from apps.catalog.services import set_setting
+
+    set_setting("CHURN_MAX_FILES", 50)
+    pr = PullRequestFactory()
+    ChurnResultFactory(pull_request=pr, window_days=21, status=ChurnResult.Status.TOO_LARGE)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+
+    assert b"more than 50 files" in response.content
+
+
+@pytest.mark.django_db
+def test_churn_slot_shows_error_reason_and_masked_detail(client, lead_user):
+    pr = PullRequestFactory()
+    ChurnResultFactory(
+        pull_request=pr,
+        window_days=21,
+        status=ChurnResult.Status.ERROR,
+        error="no_snapshot: no commit on default branch before window end",
+    )
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+    content = response.content.decode()
+
+    assert "Churn could not be measured." in content
+    assert "No commit was found on the default branch" in content
+    assert "no commit on default branch before window end" in content
 
 
 @pytest.mark.django_db

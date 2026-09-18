@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models.functions import Coalesce
 
 from apps.activity.derive import derive_pull_requests
+from apps.activity.followup import update_followup_fixes_for
 from apps.activity.models import PullRequest
 from apps.ai_detection.services import detect_pull_requests
 from apps.metrics.rollups import rebuild
@@ -67,11 +68,12 @@ class Command(BaseCommand):
 
         if not options["rollups_only"]:
             derived = derive_pull_requests(queryset)
+            followup = update_followup_fixes_for(queryset)
             detected = detect_pull_requests(queryset)
             evaluated = evaluate_pull_requests(queryset)
             self.stdout.write(
                 f"Recomputed {derived} pull request(s) "
-                f"(derive={derived}, detect={detected}, evaluate={evaluated})."
+                f"(derive={derived}, followup={followup}, detect={detected}, evaluate={evaluated})."
             )
 
         if options["skip_rollups"]:

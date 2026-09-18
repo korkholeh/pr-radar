@@ -85,7 +85,11 @@ def bump_data_version() -> int:
     return version
 
 
-def mark_dirty(pull_request_id: int, previous_reverts_pr_id: int | None = None) -> None:
+def mark_dirty(
+    pull_request_id: int,
+    previous_reverts_pr_id: int | None = None,
+    extra_pull_request_ids: set[int] | None = None,
+) -> None:
     """Records, in `DirtyDay`, every Kyiv day a synced PR can affect: `created_at`, `merged_at`,
     `closed_at`, each of its reviews' `submitted_at` day, each of its violations' own `created_at`
     day (spec: dirty-days set, ADR 0007), and — for `revert_rate`, whose numerator is a property of
@@ -95,7 +99,9 @@ def mark_dirty(pull_request_id: int, previous_reverts_pr_id: int | None = None) 
     must be nominated too or an incremental sync leaves it uncounted until the next full recompute.
     `previous_reverts_pr_id` lets a caller that captured the PR's `reverts_pr_id` *before* this
     sync's `derive_pull_request()` ran also dirty the previously targeted PR's merge day, in case
-    detection repointed or cleared the link. Appended to
+    detection repointed or cleared the link. `extra_pull_request_ids` dirties the merge day of
+    every PR whose `has_followup_fix` flag `update_followup_fixes()` just changed — that flag is
+    a property of the *original* PR's merge day, not this sync's PR. Appended to
     `github_sync/pipeline.py::process_pull_request`."""
     row = (
         PullRequest.objects.filter(id=pull_request_id)
@@ -127,6 +133,14 @@ def mark_dirty(pull_request_id: int, previous_reverts_pr_id: int | None = None) 
         ).values_list("merged_at", flat=True)
         if merged_at is not None
     )
+    if extra_pull_request_ids:
+        days.update(
+            day_of(merged_at)
+            for merged_at in PullRequest.objects.filter(
+                id__in=extra_pull_request_ids, merged_at__isnull=False
+            ).values_list("merged_at", flat=True)
+            if merged_at is not None
+        )
     now = timezone.now()
     for day in days:
         # `marked_at` is bumped on every call, including one that finds the row already dirty:

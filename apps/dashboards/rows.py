@@ -5,11 +5,13 @@ the three renderers cannot drift apart."""
 
 from __future__ import annotations
 
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.urls import reverse
 
 from apps.accounts.selectors import ScopeFilter
 from apps.catalog.selectors import people_in_scope, projects_in_scope, repositories_in_scope
+from apps.catalog.services import get_int
+from apps.churn.models import ChurnResult
 from apps.dashboards.params import DashboardParams
 from apps.metrics.models import Cohort, ScopeType
 from apps.metrics.selectors import scoped_pull_requests, scoped_reviews
@@ -212,8 +214,14 @@ def pull_request_rows(scope: Scope, params: DashboardParams) -> list[dict[str, o
     `params.pr_filters` — a superset of `recent_pr_rows()`'s dashboard-card list, which stays on
     `last_activity_at` and has no filter form. `violations_count` counts only *open* violations
     (matches the badge the row renders), one annotation so the list pays no N+1. `disclosure`/
-    `review_rounds` reuse the row directly; `churn_ratio` is always `None` until phase 10 computes
-    `ChurnResult` (CLAUDE.md: a missing value is `None`, never `0`)."""
+    `review_rounds` reuse the row directly; `churn_ratio` is a one-row `Subquery` against the
+    settled `ChurnResult` for `CHURN_WINDOW_DAYS`, so it stays `None` (never `0`, CLAUDE.md) for a
+    PR that has no `status=ok` row yet, and adds no per-row query (round 2 review MAJOR)."""
+    churn_subquery = ChurnResult.objects.filter(
+        pull_request=OuterRef("pk"),
+        window_days=get_int("CHURN_WINDOW_DAYS"),
+        status=ChurnResult.Status.OK,
+    ).values("churn_ratio")[:1]
     queryset = scoped_pull_requests(scope).filter(
         created_at__gte=day_start(params.date_from),
         created_at__lt=day_end_exclusive(params.date_to),
@@ -222,7 +230,8 @@ def pull_request_rows(scope: Scope, params: DashboardParams) -> list[dict[str, o
     queryset = (
         queryset.select_related("repository", "author__person")
         .annotate(
-            violations_count=Count("violations", filter=Q(violations__status=PolicyViolation.Status.OPEN))
+            violations_count=Count("violations", filter=Q(violations__status=PolicyViolation.Status.OPEN)),
+            churn_ratio=Subquery(churn_subquery),
         )
         .order_by("-created_at")
     )
@@ -231,7 +240,7 @@ def pull_request_rows(scope: Scope, params: DashboardParams) -> list[dict[str, o
             **_pr_row(pull_request),
             "disclosure": pull_request.get_ai_disclosure_display(),
             "review_rounds": pull_request.review_rounds,
-            "churn_ratio": None,
+            "churn_ratio": pull_request.churn_ratio,
         }
         for pull_request in queryset
     ]

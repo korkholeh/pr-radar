@@ -70,6 +70,9 @@ missing.
 | policy | `VIOLATIONS_PAGE_SIZE` | int | `50` | Rows per page on the Policy console's violation table. |
 | churn | `CHURN_WINDOW_DAYS` | int | `21` | Days after merge over which churn is measured. |
 | churn | `CHURN_MAX_FILES` | int | `50` | Maximum files in a PR before churn analysis is skipped. |
+| churn | `CHURN_MAX_WORKERS` | int | `4` | Maximum concurrent git workers a churn run uses. |
+| churn | `CHURN_GIT_TIMEOUT_SECONDS` | int | `120` | Timeout in seconds for a single git subprocess call during churn analysis. |
+| churn | `CHURN_REPO_TIME_BUDGET_SECONDS` | int | `600` | Maximum seconds a churn run spends on a single repository before deferring the rest. |
 | ui | `DASHBOARD_TABLE_PAGE_SIZE` | int | `25` | Rows per page on a dashboard table (projects, repositories, people, recent PRs). |
 | ui | `PR_FILES_DISPLAY_LIMIT` | int | `300` | Maximum files shown on the PR detail page before a "+N more" line. |
 | ui | `REVIEW_HEATMAP_TOP_N` | int | `15` | Authors/reviewers shown per axis on the reviews heat map; the rest fold into "Other". |

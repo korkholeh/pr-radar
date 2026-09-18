@@ -128,6 +128,36 @@ def test_running_it_twice_is_a_noop_on_row_counts():
 
 
 @pytest.mark.django_db
+def test_recompute_flips_stale_followup_fix_flags():
+    """A `has_followup_fix` flag written before a fix PR existed is stale until `recompute`
+    re-derives it -- `update_followup_fixes_for` runs the batch entry point, not the sync-time
+    cascading one."""
+    from apps.activity.factories import PRFileFactory
+
+    merged_at = timezone.now() - datetime.timedelta(days=20)
+    original = PullRequestFactory(
+        repository=RepositoryFactory(), state=PullRequest.State.MERGED, merged_at=merged_at
+    )
+    PRFileFactory(pull_request=original, path="a.py")
+    PRFileFactory(pull_request=original, path="b.py")
+    fix_pr = PullRequestFactory(
+        repository=original.repository,
+        state=PullRequest.State.MERGED,
+        merged_at=merged_at + datetime.timedelta(days=5),
+        title="fix: patch it up",
+        is_hotfix=True,
+    )
+    PRFileFactory(pull_request=fix_pr, path="a.py")
+    PRFileFactory(pull_request=fix_pr, path="b.py")
+    assert original.has_followup_fix is False
+
+    call_command("recompute")
+
+    original.refresh_from_db()
+    assert original.has_followup_fix is True
+
+
+@pytest.mark.django_db
 def test_recompute_evaluates_a_policy_added_after_the_pr_was_synced():
     pr = PullRequestFactory(created_at=timezone.now() - datetime.timedelta(days=10), body="")
     call_command("recompute")

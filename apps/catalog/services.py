@@ -87,6 +87,10 @@ def get_int(key: str) -> int:
     return int(get_setting(key))
 
 
+def get_float(key: str) -> float:
+    return float(get_setting(key))
+
+
 def get_bool(key: str) -> bool:
     return bool(get_setting(key))
 
