@@ -138,6 +138,7 @@ def test_queue_query_count(client, admin_user):
         Identity.objects.all().delete()
         for i in range(n):
             IdentityFactory(kind=Identity.Kind.GIT_EMAIL, value=f"b{i}-{n}@example.com")
+        client.get(reverse("catalog:identity_queue"))  # warm the process-wide settings cache
         with CaptureQueriesContext(connection) as ctx:
             response = client.get(reverse("catalog:identity_queue"))
         assert response.status_code == 200

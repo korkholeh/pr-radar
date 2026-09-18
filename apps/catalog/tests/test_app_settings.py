@@ -169,3 +169,28 @@ def test_typed_accessors_return_python_types():
 def test_default_theme_and_language_match_user_preference_defaults():
     assert get_str("DEFAULT_THEME") == UserPreference._meta.get_field("theme").default
     assert get_str("DEFAULT_UI_LANGUAGE") == UserPreference._meta.get_field("language").default
+
+
+@pytest.mark.django_db
+def test_saving_an_app_setting_outside_set_setting_still_invalidates_the_cache():
+    """Round-1 review: the only in-app caller of `set_setting()` is `apps.catalog.services`
+    itself — the Django admin (`AppSettingAdmin`) edits `AppSetting.value` directly via
+    `ModelAdmin.save_model()`, which calls `.save()`, not `set_setting()`. Before the
+    `post_save`/`post_delete` receiver in `CatalogConfig.ready()`, an admin edit silently had no
+    effect until the process-wide settings cache expired (never, since it's cached forever)."""
+    assert get_int("MIN_SAMPLE") == 5  # warm the cache
+
+    row = AppSetting.objects.get(key="MIN_SAMPLE")
+    row.value = 9
+    row.save()  # the admin's write path — not set_setting()
+
+    assert get_int("MIN_SAMPLE") == 9
+
+
+@pytest.mark.django_db
+def test_deleting_an_app_setting_invalidates_the_cache():
+    assert get_int("MIN_SAMPLE") == 5  # warm the cache
+
+    AppSetting.objects.get(key="MIN_SAMPLE").delete()
+
+    assert get_int("MIN_SAMPLE") == 5  # falls back to the code default, not a stale cached row

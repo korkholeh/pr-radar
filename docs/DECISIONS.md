@@ -305,3 +305,51 @@ test the same way `app.css` and the `.po`/`.mo` files already are; `manage.py me
 non-zero on a stale file. Full detail, including the calculator strategy signatures and the storage rules by
 kind, is in `.autodev/phases/07-metrics-registry/PLAN.md`'s Design section and the `## p07-plan`/
 `## p07-implement` entries of `.autodev/DECISIONS.md`.
+
+## Phase 8
+
+**`compute_many()` is an additive batching wrapper inside `apps/metrics`, not a second read entry point.**
+A table of dozens of rows × six metrics must not cost one `compute()` call, and one `DailyRollup` query, per
+row. `compute_many(metric_keys, scope_type, scope_ids, access, date_from, date_to, cohort, granularity)`
+batches counter/ratio metrics for an unrestricted caller into a single `DailyRollup` query with
+`scope_id__in=scope_ids`, reusing the existing per-scope arithmetic; distribution/state metrics, and every
+metric for a restricted `ScopeFilter`, fall back to the existing per-scope path rather than trying to be
+clever about percentiles across scopes. `dashboards/` still never touches `DailyRollup` or a domain model
+directly — every number reaches a template through `apps/metrics`. A contract test asserts
+`compute_many(...)[id]` equals a direct `compute()` call, field by field, for every scope.
+
+**Chart JSON and KPI cards call the same `compute()` (or `compute_many()`) with the same `DashboardParams`,
+so they cannot disagree.** Colours never reach the browser as literals: a `ChartPayload` dataset carries a
+`color_token` (e.g. `--series-ai`), resolved client-side with `getComputedStyle` and re-resolved on a
+`themechange` event, which is what keeps `tests/test_no_hardcoded_colors.py` green for a Chart.js config built
+entirely in JS. The same discipline applies to server-rendered KPI-card delta colours: `direction_class()`
+returns one of three whole literal Tailwind class strings from a fixed dict rather than building one by
+f-string interpolation — Tailwind's static scanner only sees literal strings in source, so a dynamically
+assembled class name is invisible to it and silently ships unstyled markup for whichever value no other
+template happens to spell out literally. This phase's `make css` run caught exactly that: the `neutral` delta
+colour had no generated CSS rule anywhere in the codebase until the fix, since no other template's literal
+`text-[var(--bad)]`/`text-[var(--good)]` usage happened to cover it too.
+
+**All query-string state lives in `DashboardParams`, parsed by a lenient form that never raises on bad
+input.** An unknown preset, a malformed date, an out-of-scope project id, or a bad granularity falls back to a
+default instead of a validation error, matching `apps/policy/forms.py`'s existing pattern — the query string
+is a link a lead shares, not a form a lead fills in, so it must degrade gracefully rather than 400. This is
+also what makes "the query string alone restores the view" testable as a round trip:
+`parse(params.to_query_dict()) == params`.
+
+**A repository in two projects contributes its full activity to each project but is counted once globally** —
+proved end to end by `test_scope_aggregation.py`, which found a missing `rollups.rebuild()` call in its first
+draft: counter/ratio metrics read from `DailyRollup`, not live from `PullRequest`, so a test that only creates
+PR rows and never rebuilds rollups sees `None` at every scope and passes its equality assertion vacuously.
+
+**Every `AppSetting` read is cached as one dict in the shared `FileBasedCache`, invalidated by
+`set_setting()`.** Profiling this phase's `assertNumQueries` tests found `catalog_appsetting` alone was 108 of
+364 queries on a 2-person Overview render — `MIN_SAMPLE`, `STALE_DAYS`, `WAITING_REVIEW_HOURS`, `DURATION_MODE`
+etc. are read once per metric per series bucket across KPI rows, charts and tables. A process-wide dict would
+leak an `AppSetting` created in one test into the next; the existing `_metrics_cache` autouse fixture already
+gives every test a fresh, isolated `FileBasedCache`, so caching there is isolated for free and stays correct
+across the huey worker and the web process alike.
+
+Full detail — the six chart specs, the `ExportColumn`/`TABLE_SPECS` shape, the XLSX formatting rules, and the
+`seed_demo` design — is in `.autodev/phases/08-dashboards-and-charts/PLAN.md`'s Design section and the
+`## p08-plan`/`## p08-implement` entries of `.autodev/DECISIONS.md`.

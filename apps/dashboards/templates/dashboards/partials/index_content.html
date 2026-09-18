@@ -1,0 +1,5 @@
+{% comment %}
+The fragment `views.projects_index()`/`views.repositories_index()` return to an htmx swap and
+include from the full page — one `table.html` per index page (plan T20).
+{% endcomment %}
+{% include "dashboards/partials/table.html" with ctx=table_ctx %}

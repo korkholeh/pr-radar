@@ -15,10 +15,13 @@
 <title>{% block title %}{% translate "PR Radar" %}{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+<script src="{% static 'vendor/chart.umd.js' %}" defer></script>
 {% if request.user.is_authenticated %}
 <script src="{% url 'javascript-catalog' %}" defer></script>
 {% endif %}
 <script src="{% static 'js/theme.js' %}" defer></script>
+<script src="{% static 'js/formatting.js' %}" defer></script>
+<script src="{% static 'js/charts.js' %}" defer></script>
 </head>
 <body
   class="bg-[var(--bg)] text-[var(--text)] min-h-screen"

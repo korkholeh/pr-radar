@@ -1,0 +1,92 @@
+{% load i18n dashboards %}
+{% comment %}
+Day mode's raw lists (plan T8): the PRs opened/merged that Kyiv day, and a per-person activity
+table. `prs_opened`/`prs_merged`/`person_activity` come from `apps/dashboards/selectors.py`.
+{% endcomment %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <div data-testid="day-prs-opened">
+    <h3 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Opened today" %}</h3>
+    {% if prs_opened %}
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-[var(--text-muted)]">
+            <th scope="col">{% translate "PR" %}</th>
+            <th scope="col">{% translate "Author" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pr in prs_opened %}
+            <tr>
+              <td>
+                <a class="text-[var(--accent)]" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
+                  {{ pr.repository.full_name }}#{{ pr.number }}
+                </a>
+                {{ pr.title }}
+              </td>
+              <td>{{ pr.author.person.display_name|default:pr.author }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-[var(--text-muted)]">{% translate "No pull requests opened this day." %}</p>
+    {% endif %}
+  </div>
+
+  <div data-testid="day-prs-merged">
+    <h3 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Merged today" %}</h3>
+    {% if prs_merged %}
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-[var(--text-muted)]">
+            <th scope="col">{% translate "PR" %}</th>
+            <th scope="col">{% translate "Author" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pr in prs_merged %}
+            <tr>
+              <td>
+                <a class="text-[var(--accent)]" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
+                  {{ pr.repository.full_name }}#{{ pr.number }}
+                </a>
+                {{ pr.title }}
+              </td>
+              <td>{{ pr.author.person.display_name|default:pr.author }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-[var(--text-muted)]">{% translate "No pull requests merged this day." %}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div data-testid="day-person-activity" class="mb-6">
+  <h3 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Activity by person" %}</h3>
+  {% if person_activity %}
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-[var(--text-muted)]">
+          <th scope="col">{% translate "Person" %}</th>
+          <th scope="col" class="text-right">{% translate "Opened" %}</th>
+          <th scope="col" class="text-right">{% translate "Merged" %}</th>
+          <th scope="col" class="text-right">{% translate "Reviews given" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in person_activity %}
+          <tr>
+            <td>{{ row.person.display_name }}</td>
+            <td class="text-right">{{ row.prs_opened }}</td>
+            <td class="text-right">{{ row.prs_merged }}</td>
+            <td class="text-right">{{ row.reviews_given }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-[var(--text-muted)]">{% translate "No activity this day." %}</p>
+  {% endif %}
+</div>

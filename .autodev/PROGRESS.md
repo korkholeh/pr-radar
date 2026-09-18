@@ -1,14 +1,14 @@
 # Autodev progress — PR Radar
 
 - **Status:** running
-- **Current:** phase 7/11 · step `commit`
+- **Current:** phase 8/11 · step `commit`
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 50% (reset 18.09 06:40) · 7d 38%
-- **Totals:** 101 sessions · 12.3 h agent time · ≈$246.18 API-equivalent
-- **Clock:** 21.7 h since the run was created · 12.3 h working · 5.6 h paused on the usage limit · 3.8 h not running
-- **Updated:** 2026-09-18 04:54:34
+- **Usage:** 5h 6% (reset 18.09 16:40) · 7d 45%
+- **Totals:** 123 sessions · 16.3 h agent time · ≈$315.03 API-equivalent
+- **Clock:** 28.9 h since the run was created · 16.3 h working · 8.5 h paused on the usage limit · 4.2 h not running
+- **Updated:** 2026-09-18 12:08:50
 
 ## Run warnings
 
@@ -24,8 +24,8 @@
 | 4 | Identity resolution and derived PR fields | yes | ✅ done | ed2d2c8 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 5 | AI detection | yes | ✅ done | 66f9dc6 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 6 | AI policy engine and violations console | yes | ✅ done | 5f96b3b | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 7 | Metrics registry, rollups and recompute | no | 🔨 in_progress |  |  |
-| 8 | Dashboards, charts, themes and table export | yes | ⏳ pending |  |  |
+| 7 | Metrics registry, rollups and recompute | no | ✅ done | 4808103 | not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
+| 8 | Dashboards, charts, themes and table export | yes | 🔨 in_progress |  |  |
 | 9 | People, PRs, Reviews, scoped access and reports | yes | ⏳ pending |  |  |
 | 10 | CI first-pass, follow-up fixes and churn | yes | ⏳ pending |  |  |
 | 11 | Polish, performance and documentation | yes | ⏳ pending |  |  |
@@ -218,6 +218,44 @@
 - `2026-09-18 04:53:15` **p07-review_audit2** — approve (5m, $1.41): The MAJOR from REVIEW-r2 is genuinely fixed in the product: mark_dirty() now nominates the reverted PR's merge day from reverts_pr_id, and the sync pipeline captures the pre-derive reverts_pr_id and passes it as previous_reverts_pr_id so a repointed or cleared revert link also dirties the day it us…
 - `2026-09-18 04:54:33` **p07-docs** — done (1m, $0.49): No edits made — documentation was already true for phase 7. Verified: CLAUDE.md (commands/conventions already list metrics_doc, recompute, compute() entry point, METRICS.md freshness test), CHANGELOG.md (Unreleased/Added entries for the registry, recompute flags, metrics_doc), docs/METRICS.md (rege…
 - `2026-09-18 04:54:34` **p07-docs** — no changes: the documentation was already true for this phase
+- `2026-09-18 04:54:34` **commit** — held back: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); tests/test_logging.py (it contains what looks like a GitHub token)
+- `2026-09-18 04:54:34` **p07-commit** — done: 4808103
+- `2026-09-18 04:54:36` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-18 04:54:41` **p07-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p07-metrics-registry
+- `2026-09-18 04:54:44` **p07-pr** — draft: https://github.com/korkholeh/pr-radar/pull/8
+- `2026-09-18 04:54:54` **p07-merge** — done: https://github.com/korkholeh/pr-radar/pull/8
+- `2026-09-18 05:02:56` **p08-plan** — done (8m, $3.34): Wrote .autodev/phases/08-dashboards-and-charts/PLAN.md covering the dashboard read surface: DashboardParams query-string state, one view across global/project/repo plus Day mode, three KPI rows with server-rendered SVG sparklines, six chart JSON endpoints feeding a vendored Chart.js that resolves C…
+- `2026-09-18 05:04:55` **usage** — paused: 5h usage 90% ≥ 85%; sleeping until ≈18.09 06:42
+- `2026-09-18 06:42:00` **usage** — resumed: 5h ? (reset ?) · 7d ?
+- `2026-09-18 06:50:16` **p08-implement** — handover: context reached 200,105 tokens — checkpointing for a fresh session
+- `2026-09-18 06:58:24` **p08-implement** — partial (18m, $6.8): Phase 8 session: completed T1-T4 of 24. T1 seed_demo (deterministic ORM-only demo dataset + pipeline run + rollups + SyncRun, built by a resumed background agent, verified independently). T2 DashboardParams/DashboardFilterForm (apps/dashboards/params.py, forms.py) — query-string round trip, presets…
+- `2026-09-18 07:09:39` **p08-implement** — handover: context reached 200,113 tokens — checkpointing for a fresh session
+- `2026-09-18 07:16:55` **p08-implement** — partial (18m, $4.3): Session 2 finished T5 (KPI formatting helpers + kpi_card.html), T6 (kpis.py + services.build_dashboard()), T7 (dashboard() view for Overview/Project/Repository, urls.py, dashboard.html/day.html/_page.html/filter_bar.html/dashboard_content.html), and T9 (data-as-of banner tag+partial), each with pas…
+- `2026-09-18 07:33:55` **p08-implement** — handover: context reached 200,198 tokens — checkpointing for a fresh session
+- `2026-09-18 07:45:43` **p08-implement** — partial (28m, $6.16): Session 3 completed T10-T13 fully (chart registry tests, `/api/charts/&lt;key&gt;/` endpoint, vendored Chart.js, `static/js/charts.js`, chart cards wired into `services.build_dashboard()`/`dashboard_content.html`/`base.html` with sr-only data-table twins) and T8 (Day mode: `apps/dashboards/selector…
+- `2026-09-18 07:58:59` **p08-implement** — handover: context reached 201,087 tokens — checkpointing for a fresh session
+- `2026-09-18 07:59:40` **p08-implement** — partial (13m, $4.22): Completed T14-T17, T19, T20 this session (exports/columns.py + tests, csv.py + tests fixing a real `date`-column crash bug, xlsx.py + tests, tables.py + partials/table.html with Python-side sort/search/pagination wired into services.build_dashboard() and two new index views/URLs, export_table view …
+- `2026-09-18 08:21:05` **p08-implement** — handover: context reached 200,074 tokens — checkpointing for a fresh session
+- `2026-09-18 08:25:12` **p08-implement** — partial (25m, $5.54): Fixed T21 (test_scope_aggregation was missing a rebuild() call, root-caused and fixed). Completed T18 (assertNumQueries suite for every list view) — profiling it uncovered a real cross-cutting N+1: apps/catalog/services.py::get_setting() queried AppSetting uncached on every call; now cached in the …
+- `2026-09-18 08:34:04` **p08-implement** — partial (8m, $1.83): All 24 PLAN.md tasks now marked [x]. This session finished T23 (page smoke test: tests/test_pages_smoke.py, seeds demo data once per module, renders overview/projects_index/repositories_index/project/repository/day-mode in en+uk × light+dark, asserts 200 + no canary English leak — 25 cases, all pas…
+- `2026-09-18 08:37:26` **p08-tests** — fail: exit 1: FAILED tests/test_admin.py::test_fk_heavy_changelist_query_count_does_not_grow_with_rows[CheckStatusFactory]
+- `2026-09-18 08:49:03` **p08-test_fix1** — done (11m, $1.11): Root cause: T18 (this phase) added a process-wide cache for AppSetting rows (apps/catalog/services.py::_all_setting_rows()), warmed on first read. apps/connections/context_processors.py::connection_alerts() calls get_int() on every templated response (incl. admin), so the first of two sequential re…
+- `2026-09-18 08:52:23` **p08-tests** — pass: exit 0: ................................ [100%]
+- `2026-09-18 09:01:28` **p08-review1** — changes_requested (9m, $5.58): Phase 8 delivers the whole surface (params round trip, KPI rows, six charts, four tables, CSV/XLSX, both themes, uk translations, seed_demo, docs) and most acceptance criteria are genuinely proven — XLSX formatting, CSV injection, shared-repository counting and the query-string round trip all have …
+- `2026-09-18 09:17:45` **p08-review_fix1** — partial (16m, $7.94): Applied review-r1 fixes for phase 8. Fixed: BLOCKER delta columns (were hardcoded type="percent", now match the metric's own unit; added regression tests in columns/rows/csv/xlsx/tables). MAJOR: Overview now renders the spec-required "projects" table; people table at Project/Repository level is nar…
+- `2026-09-18 09:21:42` **p08-tests** — fail: exit 1: FAILED tests/test_css_tokens.py::test_app_css_is_not_stale - AssertionError: ...
+- `2026-09-18 09:24:42` **p08-test_fix1** — partial (2m, $0.22): Root cause: static/css/app.css + manifest stale vs Tailwind sources (new phase-8 templates/JS added utility classes without rebuild) — test_css_tokens.py::test_app_css_is_not_stale failed. Fix: ran `make css` (regenerated app.css and .build-manifest.sha256). All other tests already passed (only 1 f…
+- `2026-09-18 09:28:41` **p08-tests** — pass: exit 0: .............................................. [100%]
+- `2026-09-18 09:35:48` **p08-review2** — changes_requested (7m, $4.77): Round 2: every blocker and major from REVIEW-r1 is genuinely fixed and each carries a regression test that can fail — delta columns now render in the metric's own unit (CSV, XLSX and HTML all asserted), Overview gained the spec §10.3 projects table, the people table is row-narrowed per scope, the c…
+- `2026-09-18 10:03:34` **p08-review_fix2** — done (27m, $10.43): All BLOCKER/MAJOR/MINOR/NIT findings from REVIEW-r2.md fixed, each with a new regression test: - BLOCKER (filter bar inert): extended `ScopeFilter` with `repository_ids` (symmetric to existing `project_ids`), added `apps/dashboards/params.py::narrow_scope()` which turns a selected project/repositor…
+- `2026-09-18 10:07:56` **p08-tests** — pass: exit 0: ........................................................... [100%]
+- `2026-09-18 10:24:44` **p08-review_audit2** — changes_requested (16m, $2.75): The BLOCKER is genuinely fixed in the product: narrow_scope() is wired at all four Scope-building call sites (views.py:50, 94, 105, 181), ScopeFilter.repository_ids is propagated through activity._scoped, the catalog selectors and the compute() cache fingerprint, and I confirmed at runtime on a scr…
+- `2026-09-18 10:24:45` **usage** — paused: 5h usage 85% ≥ 85%; sleeping until ≈18.09 11:42
+- `2026-09-18 11:42:00` **usage** — resumed: 5h 0% (reset ?) · 7d 45%
+- `2026-09-18 12:03:00` **p08-review_fix2** — done (21m, $3.16): Fixed both MAJORs and both MINORs from REVIEW-r2-audit.md; nothing rejected. Fixed: 1. [MAJOR] "(org-wide)" people-export marker: was unconditional (false whenever filter bar narrows project/repo, since narrow_scope now really narrows PERSON-scope compute_many). Added `rows.people_values_are_org_wi…
+- `2026-09-18 12:07:35` **p08-tests** — pass: exit 0: ............................................................... [100%]
+- `2026-09-18 12:07:37` **e2e-up** — failed: exit 2 — see .autodev/logs/e2e-surfaces.log
+- `2026-09-18 12:08:50` **p08-docs** — done (1m, $0.69): Docs for phase 8 were nearly all already true (CLAUDE.md, docs/CONFIGURATION.md, docs/user/dashboards.md, docs/DECISIONS.md Phase 8 section, ADRs 0006/0007/0008, CHANGELOG.md, README.md, Makefile vendor target — all verified against the diff and current code, no changes needed). One stale line fixe…
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

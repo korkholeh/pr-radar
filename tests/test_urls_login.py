@@ -19,6 +19,9 @@ SAMPLE_ARGS = {
     "uidb64": "MQ",
     "token": "set-password",
     "pk": 1,
+    "chart_key": "throughput",
+    "table_key": "people",
+    "fmt": "csv",
 }
 
 

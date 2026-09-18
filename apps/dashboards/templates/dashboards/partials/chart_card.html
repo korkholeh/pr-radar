@@ -1,0 +1,47 @@
+{% load i18n dashboards %}
+{% comment %}
+Renders one chart card (plan §4). `card.payload` is the same `ChartPayload` the
+`/api/charts/<key>/` endpoint returns for this scope/params, computed once server-side so the
+page can render an empty state and the accessible data-table twin without waiting on JS.
+`charts.js` re-fetches the same JSON to draw the `<canvas>` (acceptance criterion #3: the two
+can never disagree, since both call `spec.build()`/the endpoint with the same params).
+{% endcomment %}
+<div class="mb-6" id="chart-{{ card.key }}" data-testid="chart-card" data-chart-key="{{ card.key }}">
+  <h3 class="text-lg font-semibold text-[var(--text)] mb-2">{{ card.title }}</h3>
+  {% if card.payload.empty %}
+    <p class="text-[var(--text-muted)]">{{ card.payload.empty_message }}</p>
+  {% else %}
+    <div class="relative h-64">
+      <canvas
+        class="w-full h-full"
+        data-chart-key="{{ card.key }}"
+        data-chart-type="{{ card.payload.type }}"
+        data-chart-stacked="{{ card.payload.stacked|yesno:'true,false' }}"
+        data-chart-unit="{{ card.payload.unit }}"
+        data-chart-url="{{ card.url }}"
+      ></canvas>
+    </div>
+  {% endif %}
+  <table class="sr-only">
+    <caption>{{ card.title }} ({% translate "data table" %})</caption>
+    <thead>
+      <tr>
+        <th scope="col">{% translate "Label" %}</th>
+        {% for dataset in card.payload.datasets %}
+          <th scope="col">{{ dataset.label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% chart_rows card.payload as rows %}
+      {% for label, values in rows %}
+        <tr>
+          <td>{{ label }}</td>
+          {% for value in values %}
+            <td>{{ value|metric_value:card.payload.unit }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

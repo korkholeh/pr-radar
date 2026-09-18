@@ -5,7 +5,7 @@
 ### Added
 
 - First runnable version of the app: sign in, sign out, and reset a forgotten password.
-- Placeholder Overview page at `/` — the landing page after login; real dashboards arrive in later phases.
+- Overview page at `/` — the landing page after login.
 - Theme switcher (System / Light / Dark). The choice is saved to your account and applied before the page
   paints, so there is no flash of the wrong theme.
 - Language switcher (English / Українська), also available on the login page. Your choice is saved to your
@@ -53,3 +53,13 @@
   derive/detect/evaluate (`--rollups-only` / `--skip-rollups` to control which part runs); sync does the same
   automatically for the days it touched.
 - `manage.py metrics_doc`, which generates `docs/METRICS.md` (`--check` to verify it is up to date).
+- Dashboards (Overview, Projects, Repositories): KPI cards with delta arrows and sparklines, six charts
+  (throughput, AI adoption, latency, PR size distribution, churn/rework, violations by rule), and sortable,
+  searchable, paginated tables for projects, repositories, people and recent PRs. Every filter — period,
+  granularity, cohort, and a Day mode showing one calendar day — is carried in the URL, so a filtered view can
+  be shared as a link. See `docs/user/dashboards.md`.
+- Table export to CSV and XLSX from any dashboard table, carrying the table's current filters, search and sort
+  and covering every matching row, not just the current page. The XLSX file has a bold frozen header, an
+  autofilter, real numeric cells, and clickable PR links.
+- `manage.py seed_demo`, a deterministic demo dataset (projects, repositories — including one shared by two
+  projects — people, PRs, reviews and policy violations) for trying out the dashboards without a live sync.

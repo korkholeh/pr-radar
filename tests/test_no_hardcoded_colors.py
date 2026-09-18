@@ -21,6 +21,13 @@ SCAN_CSS_DIR = "static/css"
 
 EXCLUDED_CSS_FILES = {"tokens.css", "app.css"}
 EXCLUDED_DIR_PARTS = {"vendor", "migrations", "__pycache__"}
+# CLAUDE.md's token rule is about the web UI's light/dark theming; an exported .xlsx file is
+# opened in Excel, which has no notion of the app's CSS custom properties, so spec §10.6's
+# "conditional formatting of deltas (green/red by direction)" is necessarily a literal RGB colour
+# picked once, independent of the reader's dashboard theme — logged in DECISIONS (p08/review_fix2).
+# Exempted line by line (each carries this marker), not by whole file, so any *other* literal
+# later added to the same file still fails the build (round 2 audit MINOR #3).
+_LINE_EXEMPT_MARKER = "color-literal-exempt"
 
 
 def _iter_files():
@@ -50,7 +57,7 @@ def test_no_color_literals_outside_tokens_css():
     for path in _iter_files():
         text = path.read_text(encoding="utf-8", errors="ignore")
         for lineno, line in enumerate(text.splitlines(), start=1):
-            if COLOR_RE.search(line):
+            if COLOR_RE.search(line) and _LINE_EXEMPT_MARKER not in line:
                 violations.append(f"{path.relative_to(BASE_DIR)}:{lineno}: {line.strip()}")
     assert not violations, "Color literals found outside tokens.css:\n" + "\n".join(violations)
 
