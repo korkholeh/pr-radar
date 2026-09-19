@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.ai_detection.models import Tool
 from apps.catalog.models import Project, Repository
 from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
+from config.forms import date_widget
 
 
 class _LenientChoiceField(forms.ChoiceField):
@@ -53,8 +54,8 @@ class ViolationFilterForm(forms.Form):
     repository = _LenientModelChoiceField(
         queryset=Repository.objects.order_by("full_name"), required=False, empty_label=_("All repositories")
     )
-    date_from = forms.DateField(required=False)
-    date_to = forms.DateField(required=False)
+    date_from = forms.DateField(required=False, widget=date_widget())
+    date_to = forms.DateField(required=False, widget=date_widget())
     q = forms.CharField(required=False)
 
     def __init__(self, *args, projects=None, repositories=None, **kwargs):

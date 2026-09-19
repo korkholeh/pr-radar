@@ -9,68 +9,112 @@
   {% include "policy/partials/rule_chart.html" %}
   {% include "policy/partials/mismatch_list.html" %}
 
-  <h2 class="section-title mt-8 mb-3">{% translate "Violations" %}</h2>
-  <form
-    method="get"
-    hx-get="{% url 'policy:console' %}"
-    hx-target="#violations"
-    hx-swap="innerHTML"
-    hx-push-url="true"
-    class="filter-grid mb-6"
-    id="violation-filters"
-  >
-    <div>
-      <label class="label" for="{{ filter_form.rule_code.id_for_label }}">
-        {% translate "Rule" %}
-      </label>
-      {{ filter_form.rule_code }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.severity.id_for_label }}">
-        {% translate "Severity" %}
-      </label>
-      {{ filter_form.severity }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.status.id_for_label }}">
-        {% translate "Status" %}
-      </label>
-      {{ filter_form.status }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.project.id_for_label }}">
-        {% translate "Project" %}
-      </label>
-      {{ filter_form.project }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.repository.id_for_label }}">
-        {% translate "Repository" %}
-      </label>
-      {{ filter_form.repository }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.date_from.id_for_label }}">
-        {% translate "From" %}
-      </label>
-      {{ filter_form.date_from }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.date_to.id_for_label }}">
-        {% translate "To" %}
-      </label>
-      {{ filter_form.date_to }}
-    </div>
-    <div>
-      <label class="label" for="{{ filter_form.q.id_for_label }}">
-        {% translate "Search" %}
-      </label>
-      {{ filter_form.q }}
-    </div>
-    <button type="submit" class="btn btn-primary">
-      {% translate "Filter" %}
+  <div class="mt-8 mb-3 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="section-title">{% translate "Violations" %}</h2>
+    <button
+      type="button"
+      class="btn btn-secondary"
+      data-drawer-toggle="violation-filters-drawer"
+      aria-controls="violation-filters-drawer"
+      aria-expanded="false"
+      data-testid="open-filters"
+    >
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M4 6h16M7 12h10M10 18h4"/>
+      </svg>
+      {% translate "Filters" %}
     </button>
-  </form>
+  </div>
+
+  {% comment %}
+  The violation filters live in a right-hand drawer the button above opens (`filters.js`). The drawer is
+  outside `#violations`, the region htmx swaps, so filtering never re-renders the panel the reader
+  is working in.
+  {% endcomment %}
+  <div class="drawer" id="violation-filters-drawer" data-drawer aria-hidden="true">
+    <div class="drawer-scrim" data-drawer-close></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="violation-filters-heading">
+      <div class="drawer-header">
+        <h2 class="card-title" id="violation-filters-heading">{% translate "Filters" %}</h2>
+        <button type="button" class="btn btn-ghost btn-sm px-2" data-drawer-close>
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"/>
+          </svg>
+          <span class="sr-only">{% translate "Close the filters" %}</span>
+        </button>
+      </div>
+      <form
+        method="get"
+        hx-get="{% url 'policy:console' %}"
+        hx-target="#violations"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+        class="drawer-form filter-form"
+        id="violation-filters"
+      >
+        <div class="drawer-body">
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.rule_code.id_for_label }}">
+              {% translate "Rule" %}
+            </label>
+            {{ filter_form.rule_code }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.severity.id_for_label }}">
+              {% translate "Severity" %}
+            </label>
+            {{ filter_form.severity }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.status.id_for_label }}">
+              {% translate "Status" %}
+            </label>
+            {{ filter_form.status }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.project.id_for_label }}">
+              {% translate "Project" %}
+            </label>
+            {{ filter_form.project }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.repository.id_for_label }}">
+              {% translate "Repository" %}
+            </label>
+            {{ filter_form.repository }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.date_from.id_for_label }}">
+              {% translate "From" %}
+            </label>
+            {{ filter_form.date_from }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.date_to.id_for_label }}">
+              {% translate "To" %}
+            </label>
+            {{ filter_form.date_to }}
+          </div>
+          <div class="field-row">
+            <label class="label" for="{{ filter_form.q.id_for_label }}">
+              {% translate "Search" %}
+            </label>
+            {{ filter_form.q }}
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <button type="submit" class="btn btn-primary flex-1">
+            {% translate "Filter" %}
+          </button>
+          <a href="{% url 'policy:console' %}" class="btn btn-secondary" data-drawer-close>
+            {% translate "Reset" %}
+          </a>
+        </div>
+      </form>
+    </aside>
+  </div>
 
   <div id="violations">
     {% include "policy/partials/violations.html" %}

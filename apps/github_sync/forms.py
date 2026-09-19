@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.catalog.models import Repository
 from apps.metrics.timeframe import today
+from config.forms import date_widget
 
 CUSTOM_WINDOW = "custom"
 
@@ -32,7 +33,7 @@ class BackfillForm(forms.Form):
     since = forms.DateField(
         label=_("Start date"),
         required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
+        widget=date_widget(),
         help_text=_("Pull requests updated on or after this date are fetched again."),
     )
     repositories = forms.ModelMultipleChoiceField(

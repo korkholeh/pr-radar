@@ -4,7 +4,7 @@ This page is for a lead. It covers the pull requests list and a single PR's own 
 
 ## The pull requests list (`/prs/`)
 
-Every PR you have access to in the selected period, newest first. Beyond the usual period/cohort filter bar,
+Every PR you have access to in the selected period, newest first. Beyond the usual period/cohort filters,
 this page adds its own filters: author, state, AI status, tool, size bucket, and whether the PR has an open
 policy violation. Combine as many as you like — an unknown or out-of-scope value in a shared link is dropped
 silently rather than erroring, so a bookmarked or shared filtered link never breaks.

@@ -13,7 +13,7 @@ generic "no data":
   [Connect GitHub and sync your repositories](connect-github.md) if you haven't connected a repository yet.
 - **"No pull requests in this period." / "No pull requests match this period and filter. Widen the period or
   clear the filters."** — data exists, just not inside the period and filters you currently have set. Widen the
-  period (the filter bar's preset) or clear a cohort/PR filter before assuming something is broken.
+  period (the filter panel's preset) or clear a cohort/PR filter before assuming something is broken.
 
 If you have access to only some projects (Django admin → Accounts → User project access), a project you don't
 have access to always looks empty to you, not forbidden — that is by design, not a bug.

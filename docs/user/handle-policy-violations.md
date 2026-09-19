@@ -16,7 +16,7 @@ look.
 
 ## Filter the violation table
 
-Use the filter bar to narrow by rule, severity, status (defaults to `open`), project, repository, date range, or
+Use the **Filters** button to narrow by rule, severity, status (defaults to `open`), project, repository, date range, or
 a PR title/number search. Filters apply on submit and stay set as you page through results or take an action, so
 you don't lose your place. Clicking a violation's PR link opens that pull request.
 

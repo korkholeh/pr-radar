@@ -1,0 +1,66 @@
+{% load i18n dashboards %}
+{% comment %}
+The bar under the page title: what the numbers are currently narrowed to, the report link, and
+the button that opens the filter drawer. The filters themselves are behind that button, so this
+strip is the only place a reader sees the period, the cohort and how many projects or
+repositories are selected. It is rendered from inside the fragment htmx swaps, so a filter change
+redraws it along with the numbers it describes.
+{% endcomment %}
+<div
+  id="dashboard-filter-toolbar"
+  class="mb-4 flex flex-wrap items-center gap-2"
+  data-testid="filter-toolbar"
+>
+  {% if params.mode == "day" %}
+    <span class="badge">
+      {% blocktranslate with day=params.day|date:"Y-m-d" %}Day — {{ day }}{% endblocktranslate %}
+    </span>
+  {% else %}
+    <span class="badge">
+      {% blocktranslate with start=params.date_from|date:"Y-m-d" end=params.date_to|date:"Y-m-d" %}{{ start }} to {{ end }}{% endblocktranslate %}
+    </span>
+  {% endif %}
+  {% if params.cohort == "ai" %}
+    <span class="badge badge-accent">{% translate "AI" %}</span>
+  {% elif params.cohort == "non_ai" %}
+    <span class="badge badge-accent">{% translate "Non-AI" %}</span>
+  {% elif params.cohort == "compare" %}
+    <span class="badge badge-accent">{% translate "AI vs non-AI" %}</span>
+  {% endif %}
+  {% if params.project_ids %}
+    <span class="badge badge-accent">
+      {% blocktranslate count counter=params.project_ids|length %}{{ counter }} project{% plural %}{{ counter }} projects{% endblocktranslate %}
+    </span>
+  {% endif %}
+  {% if params.repository_ids %}
+    <span class="badge badge-accent">
+      {% blocktranslate count counter=params.repository_ids|length %}{{ counter }} repository{% plural %}{{ counter }} repositories{% endblocktranslate %}
+    </span>
+  {% endif %}
+
+  <div class="ml-auto flex flex-wrap items-center gap-2">
+    {% if show_report_link %}
+      <a
+        href="{% report_url scope_type scope_id params %}"
+        class="btn btn-secondary"
+        data-testid="download-report-link"
+      >
+        {% translate "Download report (XLSX)" %}
+      </a>
+    {% endif %}
+    <button
+      type="button"
+      class="btn btn-secondary"
+      data-drawer-toggle="dashboard-filters-drawer"
+      aria-controls="dashboard-filters-drawer"
+      aria-expanded="false"
+      data-testid="open-filters"
+    >
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M4 6h16M7 12h10M10 18h4"/>
+      </svg>
+      {% translate "Filters" %}
+    </button>
+  </div>
+</div>

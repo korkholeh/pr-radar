@@ -4,6 +4,7 @@ The fragment `views.dashboard()` returns to an htmx swap and includes from the f
 0006) — one entry point for both Period and Day mode. Tables (T17) join this fragment; for now it
 carries the KPI rows and, in Period mode, the chart cards.
 {% endcomment %}
+{% include "dashboards/partials/filter_toolbar.html" %}
 {% if mode == "day" %}
   <div data-testid="day-kpis">
     {% for row in kpi_rows %}

@@ -516,3 +516,35 @@ about a form the project does not use would be the wrong trade.
 so a document added later is covered without anyone remembering to list it, and it asserts the public surface of
 `GitHubClient` is exactly `graphql`/`rest_get`/`paginate` — a `rest_post()` added beside them would be a new write
 path that no other test would notice.
+
+**Filters live in a right-hand drawer, and the page says what is applied.** Every filtered page (the dashboards, the
+Pull requests, Reviews and index pages, the Policy console) keeps its filter form in a `.drawer` panel that
+slides in from the right and is closed until the page's **Filters** button opens it. The form itself is
+unchanged — the same field names, the same `hx-get` to the current path with `hx-push-url` — so the query
+string stays the single source of filter state. The drawer is rendered outside the region htmx swaps, so
+applying a filter never re-renders the panel under the reader's hands; `static/js/filters.js` closes it on
+submit. Because the controls are now hidden by default, `filter_toolbar.html` renders a strip of badges (the
+period, the cohort, how many projects or repositories are selected) *inside* the swapped fragment, so it is
+always redrawn together with the numbers it describes.
+
+**Date fields are text inputs with a calendar drawn by the app.** A native `<input type="date">` opens a popup
+that no stylesheet can reach, so it cannot follow the app's tokens, its dark theme or its language. Every date
+field is therefore a plain text input holding an ISO date (`config.forms.date_widget()` for Django-rendered
+fields, `data-datepicker` in hand-written templates) and `static/js/datepicker.js` draws the calendar from the
+`.datepicker-*` classes. The submitted string is the same `YYYY-MM-DD` the native control would have sent, and
+Django's `DateField` accepts ISO input in every locale (the `uk` locale's own `DATE_INPUT_FORMATS` does not list
+it, but `BaseTemporalField` falls back to `date.fromisoformat`), so nothing downstream changed and a page whose
+JavaScript failed still takes a typed date. Month and weekday names come from `Intl.DateTimeFormat` with the
+document's `lang`; the six UI strings go through the `djangojs` catalog. The panel is positioned `fixed` against
+the field's box rather than nested beside it, because the drawer body scrolls and would otherwise clip it.
+
+**A multi-value filter is a tag box over the native `<select multiple>`.** `static/js/tagselect.js` hides the
+select, keeps it in the DOM and draws a box of removable tags plus a searchable drop-down beside it. The select
+stays the only source of truth: the script only flips `option.selected` and fires `change`, so the submitted
+query string, `DashboardFilterForm`/`ViolationFilterForm` and the page without JavaScript are all unchanged —
+the native list is exactly what a reader without the script gets, which is why the `.filter-form
+select[multiple]` sizing rule stays in the stylesheet. The widget is applied to every `select[multiple]` inside
+a `.filter-form` (or one marked `data-tagselect`), never to every multi-select in the app. Its menu is
+positioned `fixed` for the same reason the date picker's is: the drawer body scrolls. Because the native
+control is hidden, Playwright can no longer drive it, so the box carries `data-testid="tagselect-<name>"` and
+`e2e/web/test_policy_console.py::_choose_tag` goes through the widget the way a reader would.

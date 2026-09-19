@@ -23,11 +23,13 @@ with a "small sample" badge is based on fewer than 5 data points; the number is 
 median computed from that few PRs is not reliable enough to act on.
 
 The quality row (rework rate, CI first-pass rate, revert rate, churn) can show AI-authored and non-AI PRs
-side by side — switch the filter bar's **Cohort** to "AI vs non-AI" to turn this on for every card on the page.
+side by side — switch the filter panel's **Cohort** to "AI vs non-AI" to turn this on for every card on the page.
 
 ## Change what you see
 
-The filter bar controls the period (a preset like "Last 30 days" or a custom range), granularity of the charts
+The filters live behind the **Filters** button above the page; the button opens a panel on the right, and the
+badges beside it say what is currently applied. The panel controls the period (a preset like "Last 30 days" or a
+custom range), granularity of the charts
 (day/week/month, or automatic based on how long the period is), and cohort. On a project or repository page you
 can also switch between **Period** mode (the KPIs and charts above) and **Day** mode, which shows exactly what
 happened on one calendar day — PRs opened, PRs merged, reviews given — using the day as it falls in Kyiv time, not

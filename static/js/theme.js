@@ -17,11 +17,16 @@
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySystemPreference);
 
   document.addEventListener("DOMContentLoaded", function () {
-    var select = document.getElementById("theme-select");
-    if (!select) return;
-    select.addEventListener("change", function () {
-      if (select.value === "dark" || select.value === "light") {
-        setResolvedTheme(select.value);
+    // The toggle submits the preference it is about to store; repaint the page with it right
+    // away so the click is not answered only once the redirect has landed.
+    var form = document.querySelector("[data-theme-switcher]");
+    if (!form) return;
+    form.addEventListener("submit", function () {
+      var next = form.querySelector("[data-theme-next]");
+      if (!next) return;
+      document.documentElement.setAttribute("data-theme-preference", next.value);
+      if (next.value === "dark" || next.value === "light") {
+        setResolvedTheme(next.value);
       } else {
         applySystemPreference();
       }

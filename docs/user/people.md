@@ -11,7 +11,7 @@ dashboards.md`). Click a name to open that person's own page.
 
 ## The Person page (`/people/<id>/`)
 
-The same KPI cards, charts and filter bar as a project or repository page, plus four sections specific to a
+The same KPI cards, charts and filters as a project or repository page, plus four sections specific to a
 person:
 
 **Comparison.** Each metric in the comparison row shows the person's own value next to their *primary project*

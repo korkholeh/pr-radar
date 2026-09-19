@@ -13,6 +13,30 @@
   come only from `static/css/tokens.css`; the new surface, accent-tint and shadow tokens are defined there for
   both themes.
 
+- **Filters moved into a side panel.** On every page that has them — the dashboards, Pull requests, Reviews,
+  the Projects/Repositories/People lists and the Policy console — the filters are now behind a **Filters**
+  button and open as a panel sliding in from the right, so the page itself is free for the data. A strip of
+  badges under the title shows what is applied (the period, the cohort, how many projects or repositories are
+  selected). Applying a filter closes the panel; **Reset** clears every filter. Links you have bookmarked keep
+  working: filter state still lives entirely in the address bar.
+
+- **Filters that take several values are now tag boxes.** Projects, repositories, authors, state, AI status, AI
+  tool, size and violation status no longer need Ctrl-clicking a scrolling list: what you picked shows as
+  removable tags, and the rest are in a searchable drop-down — useful once there are more repositories or people
+  than fit on a screen. The keyboard works throughout (type to search, arrows to move, Enter to toggle,
+  Backspace to drop the last tag, Escape to close).
+
+- **Every date field has the same calendar.** Dates are picked from a calendar the app draws itself, in your
+  theme and your language, instead of the one the browser supplies — which looked different in every browser
+  and ignored both. It opens from the field or its calendar icon, moves by month with the arrows, has **Today**
+  and **Clear**, and takes the arrow keys, Enter and Escape. A date can still simply be typed as
+  `YYYY-MM-DD`. Filter controls are also sized alike now, so a select and a date field read as the same kind
+  of control.
+
+- **The header controls are smaller.** The theme control is now a single icon button that cycles system →
+  light → dark, showing the preference in force; the language control is a compact `EN | UK` pill where both
+  languages are visible at once. Both still work without JavaScript.
+
 ### Added
 
 - **Repository settings** (admins, Settings menu): every repository PR Radar holds, the connection that syncs it

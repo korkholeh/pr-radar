@@ -12,6 +12,20 @@ def _violation_row(page: Page, pr_number: int):
     return page.locator("#violations-table tbody tr", has_text=f"#{pr_number}")
 
 
+def _open_filters(page: Page) -> None:
+    """The violation filters live in a drawer that is closed until its button opens it."""
+    page.locator("#policy-console").get_by_role("button", name="Filters").click()
+    expect(page.locator("#violation-filters")).to_be_visible()
+
+
+def _choose_tag(page: Page, field: str, option_label: str) -> None:
+    """A multi-value filter is a tag box (`tagselect.js`) over a hidden `<select multiple>`: open
+    it, pick the option, then close the menu so it stops covering the Filter button."""
+    page.locator(f"[data-testid='tagselect-{field}']").click()
+    page.locator(".tagselect-menu").get_by_role("option", name=option_label, exact=True).click()
+    page.keyboard.press("Escape")
+
+
 def test_console_shows_seeded_violations_with_rendered_messages(page: Page) -> None:
     log_in(page, USER_LEAD)
     page.goto("/")
@@ -70,6 +84,7 @@ def test_filter_by_rule_code_narrows_table_and_survives_back_navigation(page: Pa
     expect(_violation_row(page, 940)).to_be_visible()
     expect(_violation_row(page, 942)).to_be_visible()
 
+    _open_filters(page)
     page.get_by_label("Rule").select_option(label="Tool not allowed")
     page.locator("#violation-filters").get_by_role("button", name="Filter").click()
 
@@ -86,6 +101,7 @@ def test_filter_by_severity_narrows_table(page: Page) -> None:
     log_in(page, USER_LEAD)
     page.goto("/policy/")
 
+    _open_filters(page)
     page.get_by_label("Severity").select_option(label="High")
     page.locator("#violation-filters").get_by_role("button", name="Filter").click()
 
@@ -99,6 +115,7 @@ def test_search_by_pr_number_narrows_table(page: Page) -> None:
     log_in(page, USER_LEAD)
     page.goto("/policy/")
 
+    _open_filters(page)
     page.get_by_label("Search").fill("941")
     page.locator("#violation-filters").get_by_role("button", name="Filter").click()
 
@@ -123,7 +140,8 @@ def test_acknowledge_updates_status_decrements_open_kpi_and_writes_audit_entry(p
     # The default view filters to open-only (ViolationFilterForm.clean_status), so an
     # acknowledged row leaves it immediately -- itself proof the status actually changed.
     expect(_violation_row(page, 940)).to_have_count(0)
-    page.get_by_label("Status").select_option(["acknowledged"])
+    _open_filters(page)
+    _choose_tag(page, "status", "Acknowledged")
     page.locator("#violation-filters").get_by_role("button", name="Filter").click()
     expect(_violation_row(page, 940)).to_contain_text("Acknowledged")
 
@@ -187,7 +205,8 @@ def test_bulk_select_two_rows_updates_both_with_one_notice(page: Page) -> None:
     expect(_violation_row(page, 943)).to_have_count(0)
     expect(_violation_row(page, 944)).to_have_count(0)
 
-    page.get_by_label("Status").select_option(["acknowledged"])
+    _open_filters(page)
+    _choose_tag(page, "status", "Acknowledged")
     page.locator("#violation-filters").get_by_role("button", name="Filter").click()
     expect(_violation_row(page, 943)).to_contain_text("Acknowledged")
     expect(_violation_row(page, 944)).to_contain_text("Acknowledged")

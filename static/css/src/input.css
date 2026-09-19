@@ -148,6 +148,24 @@
     @apply gap-1.5 px-2.5 py-1.5 text-xs;
   }
 
+  /* A compact pair of choices rendered inline, as in the "EN | UK" language control. */
+  .segmented {
+    @apply inline-flex items-center gap-1 rounded-lg border border-border-strong bg-surface px-2 py-1;
+  }
+
+  .segmented-item {
+    @apply cursor-pointer rounded-md px-1 py-0.5 text-xs leading-4 font-medium text-text-muted
+           transition-colors hover:bg-surface-2 hover:text-text;
+  }
+
+  .segmented-item-active {
+    @apply bg-accent-soft text-accent;
+  }
+
+  .segmented-sep {
+    @apply text-xs leading-4 text-text-muted select-none;
+  }
+
   .link {
     @apply text-accent underline-offset-2 hover:underline;
   }
@@ -263,6 +281,220 @@
 
   .pager a {
     @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  /* Filters ---------------------------------------------------------------
+     Every filtered page keeps its filters in a right-hand drawer that is closed until the page's
+     "Filters" button opens it: the page itself stays free for the data. The drawer is always in
+     the DOM (htmx swaps only the content region, so its open state survives an Apply) and is
+     hidden with `visibility`, which also takes it out of the tab order. */
+  .drawer {
+    @apply invisible fixed inset-0 z-50 opacity-0;
+    transition: opacity 200ms ease, visibility 200ms ease;
+  }
+
+  .drawer[data-open] {
+    @apply visible opacity-100;
+  }
+
+  .drawer-scrim {
+    @apply absolute inset-0;
+    background: var(--scrim);
+  }
+
+  .drawer-panel {
+    @apply absolute inset-y-0 right-0 flex w-[min(22rem,90vw)] flex-col border-l border-border
+           bg-surface shadow-pop;
+    transform: translateX(100%);
+    transition: transform 200ms ease-out;
+  }
+
+  .drawer[data-open] .drawer-panel {
+    transform: translateX(0);
+  }
+
+  .drawer-header {
+    @apply flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3;
+  }
+
+  .drawer-form {
+    @apply flex min-h-0 flex-1 flex-col;
+  }
+
+  .drawer-body {
+    @apply min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4;
+  }
+
+  .drawer-footer {
+    @apply flex shrink-0 flex-wrap items-center gap-2 border-t border-border px-4 py-3;
+  }
+
+  /* One control per row, all of them the same width and — lists aside — the same height, so a
+     select and a date field read as the same kind of thing. */
+  .filter-form :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"])),
+  .filter-form :where(select:not([multiple])),
+  .filter-form :where(textarea) {
+    @apply h-10 w-full;
+  }
+
+  .filter-form :where(select[multiple]) {
+    @apply h-36 w-full px-2 py-1.5;
+  }
+
+  .filter-form .field-row {
+    @apply min-w-0;
+  }
+
+  /* Tag select -------------------------------------------------------------
+     `tagselect.js` puts this box over a plain `<select multiple>`, which stays in the DOM,
+     hidden, and remains what the form submits. Without JavaScript the native list is what the
+     reader gets, which is why the `select[multiple]` rule above still stands. */
+  .tagselect {
+    @apply relative block;
+  }
+
+  .tagselect-control {
+    @apply flex min-h-10 w-full cursor-pointer flex-wrap items-center gap-1 rounded-lg border
+           border-border-strong bg-surface px-2 py-1.5 text-sm text-text;
+  }
+
+  .tagselect-tags {
+    @apply flex min-w-0 flex-1 flex-wrap items-center gap-1;
+  }
+
+  .tagselect-placeholder {
+    @apply text-text-muted;
+  }
+
+  .tagselect-chevron {
+    @apply shrink-0 text-text-muted;
+  }
+
+  .tag {
+    @apply inline-flex max-w-full items-center gap-1 rounded-md border border-accent/40
+           bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-accent;
+  }
+
+  .tag-label {
+    @apply truncate;
+  }
+
+  .tag-remove {
+    @apply inline-flex shrink-0 cursor-pointer items-center rounded-sm text-accent opacity-70
+           transition-opacity hover:opacity-100;
+  }
+
+  .tagselect-menu {
+    @apply fixed z-[60] flex max-h-72 flex-col gap-2 rounded-xl border border-border bg-surface p-2
+           shadow-pop;
+  }
+
+  .tagselect-search {
+    @apply w-full rounded-lg border border-border-strong bg-surface px-2 py-1.5 text-sm text-text;
+  }
+
+  .tagselect-options {
+    @apply min-h-0 flex-1 overflow-y-auto;
+  }
+
+  .tagselect-option {
+    @apply flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm
+           text-text transition-colors hover:bg-surface-2;
+  }
+
+  .tagselect-option-active {
+    @apply bg-surface-2;
+  }
+
+  .tagselect-option-selected {
+    @apply font-medium text-accent;
+  }
+
+  .tagselect-check {
+    @apply shrink-0 opacity-0;
+  }
+
+  .tagselect-option-selected .tagselect-check {
+    @apply opacity-100;
+  }
+
+  .tagselect-empty {
+    @apply px-2 py-2 text-sm text-text-muted;
+  }
+
+  /* Date picker ------------------------------------------------------------
+     `datepicker.js` replaces the browser's own calendar (which cannot be themed) with one built
+     from these classes; the field itself stays a plain text input holding an ISO date. */
+  .datepicker-field {
+    @apply relative block;
+  }
+
+  .datepicker-field > input {
+    @apply w-full pr-10;
+  }
+
+  .datepicker-trigger {
+    @apply absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center
+           rounded-r-lg text-text-muted transition-colors hover:text-text;
+  }
+
+  .datepicker-pop {
+    @apply fixed z-[60] w-72 rounded-xl border border-border bg-surface p-3 shadow-pop;
+  }
+
+  .datepicker-head {
+    @apply mb-2 flex items-center justify-between gap-2;
+  }
+
+  .datepicker-title {
+    @apply text-sm font-semibold text-text first-letter:uppercase;
+  }
+
+  .datepicker-nav {
+    @apply inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg
+           text-text-muted transition-colors hover:bg-surface-2 hover:text-text;
+  }
+
+  .datepicker-grid {
+    @apply grid grid-cols-7 gap-0.5;
+  }
+
+  .datepicker-weekday {
+    @apply flex h-7 items-center justify-center text-[0.7rem] font-semibold tracking-wide
+           text-text-muted;
+  }
+
+  .datepicker-day {
+    @apply flex h-8 cursor-pointer items-center justify-center rounded-lg text-sm text-text
+           transition-colors hover:bg-surface-2;
+  }
+
+  .datepicker-day-outside {
+    @apply text-text-muted opacity-60;
+  }
+
+  .datepicker-day-today {
+    @apply font-semibold text-accent ring-1 ring-accent ring-inset;
+  }
+
+  /* The day the keyboard is on, which is not necessarily the one the field holds. */
+  .datepicker-day-focused {
+    @apply bg-surface-2 ring-1 ring-accent ring-inset;
+  }
+
+  .datepicker-day-selected {
+    @apply bg-accent font-semibold text-on-accent hover:bg-accent-hover;
+  }
+
+  .datepicker-footer {
+    @apply mt-2 flex items-center justify-between gap-2 border-t border-border pt-2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer,
+    .drawer-panel {
+      transition: none;
+    }
   }
 
   /* A filter form: the same surface as a card, laid out as a responsive grid. */

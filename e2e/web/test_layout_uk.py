@@ -14,11 +14,11 @@ VIEWPORTS = [DESKTOP, PHONE]
 
 
 def _switch_to_ukrainian(page: Page) -> None:
-    # The switcher auto-submits a form (`onchange="this.form.requestSubmit()"`) that redirects
-    # back to the current page -- waiting for that navigation to settle before the caller's own
-    # `page.goto()` avoids a race where the two navigations collide (`net::ERR_ABORTED`).
+    # The switcher is a two-button pill; its submit redirects back to the current page --
+    # waiting for that navigation to settle before the caller's own `page.goto()` avoids a race
+    # where the two navigations collide (`net::ERR_ABORTED`).
     with page.expect_navigation():
-        page.locator("#language-select").select_option("uk")
+        page.locator(".language-switcher").get_by_role("button", name="UK").click()
 
 
 def _document_scroll_width_within_viewport(page: Page) -> bool:

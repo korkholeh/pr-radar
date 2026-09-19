@@ -1,10 +1,20 @@
 {% load i18n %}
+{% comment %}
+Language control: the two languages as one compact "EN | UK" pill. Both are submit buttons of a
+single form, so the active one is visible rather than hidden behind a closed dropdown.
+{% endcomment %}
 <form method="post" action="{% url 'accounts:set_language' %}" class="language-switcher">
   {% csrf_token %}
   <input type="hidden" name="next" value="{{ request.get_full_path }}">
-  <label class="sr-only" for="language-select">{% translate "Language" %}</label>
-  <select id="language-select" name="language" onchange="this.form.requestSubmit()" class="select input-sm w-auto">
-    <option value="en" {% if LANGUAGE_CODE == "en" %}selected{% endif %}>English</option>
-    <option value="uk" {% if LANGUAGE_CODE == "uk" %}selected{% endif %}>Українська</option>
-  </select>
+  <div class="segmented" role="group" aria-label="{% translate "Language" %}">
+    <button type="submit" name="language" value="en"
+            class="segmented-item{% if LANGUAGE_CODE == 'en' %} segmented-item-active{% endif %}"
+            {% if LANGUAGE_CODE == 'en' %}aria-current="true"{% endif %}
+            title="{% translate "Switch the interface to English." %}">EN</button>
+    <span class="segmented-sep" aria-hidden="true">|</span>
+    <button type="submit" name="language" value="uk"
+            class="segmented-item{% if LANGUAGE_CODE == 'uk' %} segmented-item-active{% endif %}"
+            {% if LANGUAGE_CODE == 'uk' %}aria-current="true"{% endif %}
+            title="{% translate "Switch the interface to Ukrainian." %}">UK</button>
+  </div>
 </form>

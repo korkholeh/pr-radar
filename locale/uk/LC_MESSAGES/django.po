@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 17:56+0000\n"
+"POT-Creation-Date: 2026-09-19 19:18+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -16,15 +16,15 @@ msgstr ""
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
-#: apps/accounts/models.py:8 templates/partials/theme_switcher.html:7
+#: apps/accounts/models.py:8
 msgid "System"
 msgstr "Системна"
 
-#: apps/accounts/models.py:9 templates/partials/theme_switcher.html:8
+#: apps/accounts/models.py:9
 msgid "Light"
 msgstr "Світла"
 
-#: apps/accounts/models.py:10 templates/partials/theme_switcher.html:9
+#: apps/accounts/models.py:10
 msgid "Dark"
 msgstr "Темна"
 
@@ -361,7 +361,7 @@ msgid "has test changes"
 msgstr "має зміни в тестах"
 
 #: apps/activity/models.py:116 apps/dashboards/exports/columns.py:123
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:139
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:160
 msgid "AI status"
 msgstr "статус ШІ"
 
@@ -608,7 +608,7 @@ msgstr "Впевненість"
 
 #: apps/ai_detection/forms.py:17
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:18
-#: apps/policy/forms.py:152
+#: apps/policy/forms.py:153
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:21
 msgid "Is active"
 msgstr "Активне"
@@ -1938,8 +1938,8 @@ msgstr "Без проєкту"
 #: apps/connections/templates/connections/partials/repositories_content.html:28
 #: apps/dashboards/exports/columns.py:110
 #: apps/dashboards/exports/columns.py:115
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
-#: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:48
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
+#: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:85
 msgid "Repository"
 msgstr "Репозиторій"
 
@@ -2052,7 +2052,7 @@ msgstr ""
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:111
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:159
 #: apps/github_sync/templates/github_sync/partials/runs.html:10
-#: apps/policy/templates/policy/console.html:36
+#: apps/policy/templates/policy/console.html:73
 #: apps/policy/templates/policy/partials/violations.html:30
 msgid "Status"
 msgstr "Статус"
@@ -2072,10 +2072,10 @@ msgstr ""
 #: apps/connections/templates/connections/partials/repositories_content.html:4
 #: apps/connections/templates/connections/partials/repositories_content.html:25
 #: apps/connections/templates/connections/repositories.html:3
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:101
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:122
 #: apps/dashboards/templates/dashboards/repositories_index.html:4
 #: apps/dashboards/templates/dashboards/repositories_index.html:7
-#: apps/github_sync/forms.py:39
+#: apps/github_sync/forms.py:40
 #: apps/github_sync/templates/github_sync/partials/runs.html:11
 #: templates/partials/nav_items.html:16
 msgid "Repositories"
@@ -2117,7 +2117,9 @@ msgstr "Ще немає репозиторіїв."
 msgid ""
 "Discover the repositories a connection can read, then add the ones you want "
 "to measure."
-msgstr "Перегляньте репозиторії, доступні підключенню, і додайте ті, які хочете вимірювати."
+msgstr ""
+"Перегляньте репозиторії, доступні підключенню, і додайте ті, які хочете "
+"вимірювати."
 
 #: apps/connections/templates/connections/partials/repository_connection_form.html:7
 #, python-format
@@ -2130,12 +2132,15 @@ msgstr "Скасувати"
 
 #: apps/connections/templates/connections/partials/repository_connection_form.html:40
 msgid "No other connection to move this repository to."
-msgstr "Немає іншого підключення, до якого можна перепривʼязати цей репозиторій."
+msgstr ""
+"Немає іншого підключення, до якого можна перепривʼязати цей репозиторій."
 
 #: apps/connections/templates/connections/partials/repository_connection_form.html:41
 msgid ""
 "Add a second connection with the new token, then come back and pick it here."
-msgstr "Додайте друге підключення з новим токеном, а потім поверніться й виберіть його тут."
+msgstr ""
+"Додайте друге підключення з новим токеном, а потім поверніться й виберіть "
+"його тут."
 
 #: apps/connections/templates/connections/partials/row.html:14
 msgid "none"
@@ -2195,7 +2200,8 @@ msgstr "За цей період немає даних."
 
 #: apps/dashboards/charts.py:117 apps/dashboards/charts.py:244
 #: apps/dashboards/charts.py:290
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:77
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:98
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:24
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:36
 #: apps/metrics/models.py:14
 msgid "AI"
@@ -2203,7 +2209,8 @@ msgstr "ШІ"
 
 #: apps/dashboards/charts.py:118 apps/dashboards/charts.py:247
 #: apps/dashboards/charts.py:291
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:78
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:99
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:26
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:40
 #: apps/metrics/models.py:15
 msgid "Non-AI"
@@ -2254,7 +2261,7 @@ msgid "Duration"
 msgstr "Тривалість"
 
 #: apps/dashboards/charts.py:259 apps/dashboards/exports/columns.py:122
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:163
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:184
 msgid "Size"
 msgstr "Розмір"
 
@@ -2280,9 +2287,9 @@ msgid "Metric"
 msgstr "Метрика"
 
 #: apps/dashboards/charts.py:348 apps/dashboards/exports/columns.py:125
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:175
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:196
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:8
-#: apps/policy/forms.py:102 apps/policy/templates/policy/console.html:12
+#: apps/policy/forms.py:103 apps/policy/templates/policy/console.html:13
 msgid "Violations"
 msgstr "Порушення"
 
@@ -2323,7 +2330,7 @@ msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
 #: apps/dashboards/charts.py:419
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:19
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:20
 msgid "Reviewer load"
 msgstr "Навантаження ревʼюерів"
 
@@ -2357,8 +2364,8 @@ msgstr "%(title)s (по всій організації)"
 
 #: apps/dashboards/exports/columns.py:108
 #: apps/dashboards/templates/dashboards/partials/person_comparison.html:15
-#: apps/metrics/models.py:7 apps/policy/forms.py:148
-#: apps/policy/templates/policy/console.html:42
+#: apps/metrics/models.py:7 apps/policy/forms.py:149
+#: apps/policy/templates/policy/console.html:79
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:17
 msgid "Project"
 msgstr "Проєкт"
@@ -2376,13 +2383,13 @@ msgstr "Заголовок"
 #: apps/dashboards/exports/columns.py:118
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:15
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:46
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:115
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:42
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:136
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:43
 msgid "Author"
 msgstr "Автор"
 
 #: apps/dashboards/exports/columns.py:119
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:127
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:148
 msgid "State"
 msgstr "Стан"
 
@@ -2567,6 +2574,7 @@ msgstr "Огляд"
 
 #: apps/dashboards/templates/dashboards/day.html:4
 #: apps/dashboards/templates/dashboards/day.html:8
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:16
 #, python-format
 msgid "Day — %(day)s"
 msgstr "День — %(day)s"
@@ -2663,125 +2671,166 @@ msgid ""
 msgstr ""
 "Завантажте звіт CSV або XLSX з таблиці дашборду, щоб побачити його тут."
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:18
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:15
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:63
+#: apps/policy/templates/policy/console.html:26
+#: apps/policy/templates/policy/console.html:40
+msgid "Filters"
+msgstr "Фільтри"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:21
+#: apps/policy/templates/policy/console.html:46
+msgid "Close the filters"
+msgstr "Закрити фільтри"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:36
 msgid "Mode"
 msgstr "Режим"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:20
-#: apps/github_sync/forms.py:27
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:38
+#: apps/github_sync/forms.py:28
 msgid "Period"
 msgstr "Період"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:21
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:53
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:63
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:39
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:73
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:84
 msgid "Day"
 msgstr "День"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:25
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:43
 msgid "Preset"
 msgstr "Пресет"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:27
-#: apps/github_sync/forms.py:17
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:45
+#: apps/github_sync/forms.py:18
 msgid "Last 7 days"
 msgstr "Останні 7 днів"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:28
-#: apps/github_sync/forms.py:19
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:46
+#: apps/github_sync/forms.py:20
 msgid "Last 30 days"
 msgstr "Останні 30 днів"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:29
-#: apps/github_sync/forms.py:20
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:47
+#: apps/github_sync/forms.py:21
 msgid "Last 90 days"
 msgstr "Останні 90 днів"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:31
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:49
 msgid "This month"
 msgstr "Цей місяць"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:34
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:52
 msgid "Last month"
 msgstr "Минулий місяць"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:37
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:55
 msgid "This quarter"
 msgstr "Цей квартал"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:40
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:58
 msgid "Custom range"
 msgstr "Довільний період"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:45
-#: apps/policy/templates/policy/console.html:54
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:63
+#: apps/policy/templates/policy/console.html:91
 msgid "From"
 msgstr "Від"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:49
-#: apps/policy/templates/policy/console.html:60
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:68
+#: apps/policy/templates/policy/console.html:97
 msgid "To"
 msgstr "До"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:58
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:79
 msgid "Granularity"
 msgstr "Деталізація"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:61
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:82
 msgid "Auto"
 msgstr "Авто"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:66
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:87
 msgid "Week"
 msgstr "Тиждень"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:69
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:90
 msgid "Month"
 msgstr "Місяць"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:74
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:95
 msgid "Cohort"
 msgstr "Когорта"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:76
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:97
 #: apps/metrics/models.py:13
 msgid "All"
 msgstr "Усі"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:80
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:101
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:28
 msgid "AI vs non-AI"
 msgstr "ШІ проти не-ШІ"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:87
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:108
 #: apps/dashboards/templates/dashboards/projects_index.html:4
 #: apps/dashboards/templates/dashboards/projects_index.html:7
 #: templates/partials/nav_items.html:13
 msgid "Projects"
 msgstr "Проєкти"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:151
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:172
 msgid "AI tool"
 msgstr "Інструмент ШІ"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:179
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:200
 msgid "Any"
 msgstr "Будь-який"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:182
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:203
 msgid "Has open violations"
 msgstr "Є відкриті порушення"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:185
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:206
 msgid "No open violations"
 msgstr "Немає відкритих порушень"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:191
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:213
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:83
 #: apps/policy/templates/policy/partials/violations.html:85
 msgid "Apply"
 msgstr "Застосувати"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:198
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:214
+#: apps/policy/templates/policy/console.html:113
+msgid "Reset"
+msgstr "Скинути"
+
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:20
+#, python-format
+msgid "%(start)s to %(end)s"
+msgstr "%(start)s — %(end)s"
+
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:32
+#, python-format
+msgid "%(counter)s project"
+msgid_plural "%(counter)s projects"
+msgstr[0] "%(counter)s проєкт"
+msgstr[1] "%(counter)s проєкти"
+msgstr[2] "%(counter)s проєктів"
+msgstr[3] "%(counter)s проєкти"
+
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:37
+#, python-format
+msgid "%(counter)s repository"
+msgid_plural "%(counter)s repositories"
+msgstr[0] "%(counter)s репозиторій"
+msgstr[1] "%(counter)s репозиторії"
+msgstr[2] "%(counter)s репозиторіїв"
+msgstr[3] "%(counter)s репозиторії"
+
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:48
 msgid "Download report (XLSX)"
 msgstr "Завантажити звіт (XLSX)"
 
@@ -2845,14 +2894,14 @@ msgid "Select"
 msgstr "Вибрати"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:34
-#: apps/policy/templates/policy/console.html:24
+#: apps/policy/templates/policy/console.html:61
 #: apps/policy/templates/policy/partials/rule_chart.html:21
 #: apps/policy/templates/policy/partials/violations.html:28
 msgid "Rule"
 msgstr "Правило"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:35
-#: apps/policy/templates/policy/console.html:30
+#: apps/policy/templates/policy/console.html:67
 #: apps/policy/templates/policy/partials/violations.html:29
 msgid "Severity"
 msgstr "Серйозність"
@@ -2872,25 +2921,25 @@ msgid "No policy violations on this pull request."
 msgstr "На цьому pull request немає порушень політики."
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:73
-#: apps/policy/forms.py:104
+#: apps/policy/forms.py:105
 #: apps/policy/templates/policy/partials/violations.html:75
 msgid "Action"
 msgstr "Дія"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:74
-#: apps/policy/forms.py:97
+#: apps/policy/forms.py:98
 #: apps/policy/templates/policy/partials/violations.html:76
 msgid "Acknowledge"
 msgstr "Взяти до відома"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:75
-#: apps/policy/forms.py:98
+#: apps/policy/forms.py:99
 #: apps/policy/templates/policy/partials/violations.html:77
 msgid "Waive"
 msgstr "Прийняти ризик"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:79
-#: apps/policy/forms.py:106
+#: apps/policy/forms.py:107
 #: apps/policy/templates/policy/partials/violations.html:81
 msgid "Comment"
 msgstr "Коментар"
@@ -2912,29 +2961,29 @@ msgstr "Ревʼю за автором і ревʼюером"
 msgid "No reviews in this period."
 msgstr "У цьому періоді немає ревʼю."
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:21
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:22
 msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period."
 msgstr "Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:34
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:35
 msgid "Waiting for review"
 msgstr "Очікує ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:37
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:38
 msgid "Pull requests waiting for review"
 msgstr "Pull request-и, що очікують ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:42
 #: apps/policy/templates/policy/partials/violations.html:27
 msgid "Pull request"
 msgstr "Pull request"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:43
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:44
 msgid "Waiting"
 msgstr "Час очікування"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:65
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:66
 msgid "No pull request is waiting for review."
 msgstr "Жоден pull request не очікує ревʼю."
 
@@ -2948,7 +2997,7 @@ msgstr ""
 
 #: apps/dashboards/templates/dashboards/partials/table.html:30
 #: apps/dashboards/templates/dashboards/partials/table.html:34
-#: apps/policy/templates/policy/console.html:66
+#: apps/policy/templates/policy/console.html:103
 msgid "Search"
 msgstr "Пошук"
 
@@ -3208,32 +3257,32 @@ msgstr[1] "Оновлено %(updated)s порушення."
 msgstr[2] "Оновлено %(updated)s порушень."
 msgstr[3] "Оновлено %(updated)s порушення."
 
-#: apps/github_sync/forms.py:18
+#: apps/github_sync/forms.py:19
 msgid "Last 14 days"
 msgstr "Останні 14 днів"
 
-#: apps/github_sync/forms.py:21
+#: apps/github_sync/forms.py:22
 msgid "From a specific date"
 msgstr "Від конкретної дати"
 
-#: apps/github_sync/forms.py:33
+#: apps/github_sync/forms.py:34
 msgid "Start date"
 msgstr "Дата початку"
 
-#: apps/github_sync/forms.py:36
+#: apps/github_sync/forms.py:37
 msgid "Pull requests updated on or after this date are fetched again."
 msgstr ""
 "Pull request-и, оновлені в цей день або пізніше, завантажуються повторно."
 
-#: apps/github_sync/forms.py:42
+#: apps/github_sync/forms.py:43
 msgid "Leave empty to backfill every active repository."
 msgstr "Залиште порожнім, щоб довантажити всі активні репозиторії."
 
-#: apps/github_sync/forms.py:55
+#: apps/github_sync/forms.py:56
 msgid "Pick a start date."
 msgstr "Вкажіть дату початку."
 
-#: apps/github_sync/forms.py:59
+#: apps/github_sync/forms.py:60
 msgid "The start date cannot be in the future."
 msgstr "Дата початку не може бути в майбутньому."
 
@@ -3848,62 +3897,62 @@ msgstr "Тестова метрика"
 msgid "A metric used only by test_registry.py."
 msgstr "Метрика, що використовується лише в test_registry.py."
 
-#: apps/policy/forms.py:44
+#: apps/policy/forms.py:45
 msgid "All rules"
 msgstr "Усі правила"
 
-#: apps/policy/forms.py:47
+#: apps/policy/forms.py:48
 msgid "All severities"
 msgstr "Усі рівні серйозності"
 
-#: apps/policy/forms.py:51
+#: apps/policy/forms.py:52
 msgid "All projects"
 msgstr "Усі проєкти"
 
-#: apps/policy/forms.py:54
+#: apps/policy/forms.py:55
 msgid "All repositories"
 msgstr "Усі репозиторії"
 
-#: apps/policy/forms.py:109
+#: apps/policy/forms.py:110
 msgid "A comment of at least 3 characters is required."
 msgstr "Потрібен коментар щонайменше з 3 символів."
 
-#: apps/policy/forms.py:122
+#: apps/policy/forms.py:123
 msgid "Allowed tools"
 msgstr "Дозволені інструменти"
 
-#: apps/policy/forms.py:135
+#: apps/policy/forms.py:136
 #: apps/policy/templates/policy/partials/policy_form.html:38
 msgid "Require disclosure"
 msgstr "Вимагати розкриття інформації"
 
-#: apps/policy/forms.py:136
+#: apps/policy/forms.py:137
 #: apps/policy/templates/policy/partials/policy_form.html:39
 msgid "Require human approval"
 msgstr "Вимагати підтвердження людини"
 
-#: apps/policy/forms.py:137
+#: apps/policy/forms.py:138
 msgid "Minimum human approvals"
 msgstr "Мінімальна кількість підтверджень людини"
 
-#: apps/policy/forms.py:138
+#: apps/policy/forms.py:139
 msgid "Require tests for AI PRs"
 msgstr "Вимагати тести для AI PR"
 
-#: apps/policy/forms.py:139
+#: apps/policy/forms.py:140
 msgid "Maximum effective lines for an AI PR"
 msgstr "Максимум ефективних рядків для AI PR"
 
-#: apps/policy/forms.py:149
+#: apps/policy/forms.py:150
 msgid "Path glob"
 msgstr "Glob-шаблон шляху"
 
-#: apps/policy/forms.py:150 apps/policy/models.py:46
+#: apps/policy/forms.py:151 apps/policy/models.py:46
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:19
 msgid "AI mode"
 msgstr "режим ШІ"
 
-#: apps/policy/forms.py:151
+#: apps/policy/forms.py:152
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:20
 msgid "Description"
 msgstr "Опис"
@@ -4211,7 +4260,7 @@ msgstr "порушення політики"
 msgid "Policy"
 msgstr "Політика"
 
-#: apps/policy/templates/policy/console.html:71
+#: apps/policy/templates/policy/console.html:110
 msgid "Filter"
 msgstr "Фільтр"
 
@@ -4377,11 +4426,11 @@ msgstr "Помилка сервера"
 msgid "Something went wrong."
 msgstr "Щось пішло не так."
 
-#: templates/base.html:15 templates/base.html:37 templates/partials/nav.html:21
+#: templates/base.html:15 templates/base.html:40 templates/partials/nav.html:21
 msgid "PR Radar"
 msgstr "PR Radar"
 
-#: templates/base.html:30
+#: templates/base.html:33
 msgid "Skip to content"
 msgstr "Перейти до вмісту"
 
@@ -4405,9 +4454,17 @@ msgstr ""
 msgid "Review"
 msgstr "Переглянути"
 
-#: templates/partials/language_switcher.html:5
+#: templates/partials/language_switcher.html:9
 msgid "Language"
 msgstr "Мова"
+
+#: templates/partials/language_switcher.html:13
+msgid "Switch the interface to English."
+msgstr "Перемкнути інтерфейс на англійську."
+
+#: templates/partials/language_switcher.html:18
+msgid "Switch the interface to Ukrainian."
+msgstr "Перемкнути інтерфейс на українську."
 
 #: templates/partials/nav.html:26
 msgid "Main"
@@ -4434,9 +4491,17 @@ msgstr "Налаштування людей"
 msgid "Log out"
 msgstr "Вийти"
 
-#: templates/partials/theme_switcher.html:5
-msgid "Theme"
-msgstr "Тема"
+#: templates/partials/theme_switcher.html:11
+msgid "Theme: light. Switch to dark."
+msgstr "Тема: світла. Перемкнути на темну."
+
+#: templates/partials/theme_switcher.html:14
+msgid "Theme: dark. Switch to the system setting."
+msgstr "Тема: темна. Перемкнути на системну."
+
+#: templates/partials/theme_switcher.html:17
+msgid "Theme: follow the system. Switch to light."
+msgstr "Тема: як у системі. Перемкнути на світлу."
 
 #: templates/registration/logged_out.html:4
 msgid "Logged out"
@@ -4518,6 +4583,9 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:17
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#~ msgid "Theme"
+#~ msgstr "Тема"
 
 #~ msgid ""
 #~ "Check the connection's token scopes, or that the account has access to "

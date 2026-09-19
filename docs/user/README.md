@@ -48,7 +48,7 @@ Read these in sequence the first time. After that, [Find the right page](index.m
 3. **[Map people](map-people.md)** — clear the unmapped-identity queue so every pull request is attributed to the
    right person, merge duplicates, and mark the bots. Person-level numbers are only as good as this step.
 4. **[Read the dashboards](dashboards.md)** — Overview, Projects and Repositories: how to read a KPI card, what a
-   greyed "small sample" number means, how the filter bar works, and how to share a link to exactly what you're
+   greyed "small sample" number means, how the filter panel works, and how to share a link to exactly what you're
    looking at.
 5. **[Tune AI detection](tune-ai-detection.md)** — check a few pull requests whose AI status you can verify by
    hand, and adjust the detection rules before anyone acts on an adoption number.
