@@ -1,6 +1,6 @@
 # Autodev progress — PR Radar
 
-- **Status:** running
+- **Status:** done
 - **Current:** finished
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
@@ -40,9 +40,6 @@ What the product looked like at the end of each phase — the newest first.
 
 ## Timeline
 
-- `2026-09-17 09:27:17` **p02-implement** — handover: context reached 200,961 tokens — checkpointing for a fresh session
-- `2026-09-17 09:27:51` **p02-implement** — partial (15m, $5.94): Phase 2 (domain models, migrations, admin) is functionally complete: T1-T17 done and checked off in .autodev/phases/02-data-model/PLAN.md. Built all 8 new apps (connections, catalog, activity, ai_detection, policy, metrics, churn, github_sync) with models per spec §4, migrations from zero, factorie…
-- `2026-09-17 09:32:53` **usage** — paused: 5h usage 87% ≥ 85%; sleeping until ≈17.09 10:22
 - `2026-09-17 10:22:01` **usage** — resumed: 5h ? (reset ?) · 7d 23%
 - `2026-09-17 10:22:37` **p02-implement** — done (5m, $2.13): Phase 2 complete. All T1-T17 (models/migrations/admin/factories/i18n/CSS) were already done by the prior session; this session finished T18 (docs.PROGRESS.md phase-2 entry, DECISIONS.md p02-implement bullets) and T19 (full gate). Gate run found and fixed real issues: ~40 ruff E501/DJ001/DJ012 findi…
 - `2026-09-17 10:22:42` **p02-tests** — pass: exit 0: ................................................... [100%]
@@ -340,6 +337,9 @@ What the product looked like at the end of each phase — the newest first.
 - `2026-09-19 06:28:32` **p11-pr** — draft: https://github.com/korkholeh/pr-radar/pull/12
 - `2026-09-19 06:28:43` **p11-merge** — done: https://github.com/korkholeh/pr-radar/pull/12
 - `2026-09-19 07:12:40` **finalize** — done (43m, $38.05): Shippable: the whole product across 11 phases, with every gate green from this working tree — uv run pytest -q at PYTEST_EXIT=0 over 1,841 tests, e2e 63 passed, the full lint gate clean, and make css / make messages / runserver all executed rather than assumed. All seven finalize deliverables are w…
+- `2026-09-19 07:12:40` **commit** — held back: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token)
+- `2026-09-19 07:12:40` **finalize** — done: Shippable: the whole product across 11 phases, with every gate green from this working tree — uv run pytest -q at PYTEST_EXIT=0 over 1,841 tests, e2e 63 passed, the full lint gate clean, and make css…
+- `2026-09-19 07:12:40` **run** — done: all 11 phases completed
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.
