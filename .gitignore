@@ -13,3 +13,6 @@ staticfiles/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
+
+# Local Claude Code configuration (hooks, toggles)
+.claude/
