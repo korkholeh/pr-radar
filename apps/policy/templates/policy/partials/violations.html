@@ -1,4 +1,4 @@
-{% load i18n policy_extras %}
+{% load i18n pagination policy_extras %}
 {% if notice %}
   <div class="mb-4 rounded-lg border border-good/40 bg-surface-2 px-3 py-2 text-sm text-good" role="status">{{ notice }}</div>
 {% endif %}
@@ -88,30 +88,5 @@
   {% endif %}
 </form>
 
-<nav class="pager" aria-label="{% translate 'Pagination' %}">
-  {% if page_obj.has_previous %}
-    <a
-      href="?{{ querystring }}&page={{ page_obj.previous_page_number }}"
-      hx-get="{% url 'policy:console' %}?{{ querystring }}&page={{ page_obj.previous_page_number }}"
-      hx-target="#violations"
-      hx-swap="innerHTML"
-    >
-      {% translate "Previous" %}
-    </a>
-  {% endif %}
-  <span class="text-text-muted">
-    {% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}
-      Page {{ number }} of {{ total }}
-    {% endblocktranslate %}
-  </span>
-  {% if page_obj.has_next %}
-    <a
-      href="?{{ querystring }}&page={{ page_obj.next_page_number }}"
-      hx-get="{% url 'policy:console' %}?{{ querystring }}&page={{ page_obj.next_page_number }}"
-      hx-target="#violations"
-      hx-swap="innerHTML"
-    >
-      {% translate "Next" %}
-    </a>
-  {% endif %}
-</nav>
+{% url 'policy:console' as console_url %}
+{% digg_pager page_obj base_url=console_url query=querystring hx_target="#violations" testid="violations-pagination" %}

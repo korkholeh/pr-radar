@@ -1,17 +1,33 @@
 {% load i18n %}
 {% comment %}
 Author x reviewer heat map (plan §4): a server-side HTML table since Chart.js has no matrix type.
+Rows are authors, columns are reviewers; the corner cell and the column-group header spell that
+out so the axes are never guessed, and every cell carries a `title` naming both people.
 Every cell carries the count as visible text as well as its `--heat-0`..`--heat-4` colour (spec
 §10.5: status is never colour-only). `id=None` on either axis is the folded "Other" bucket.
 {% endcomment %}
 <section class="mb-6" data-testid="reviewer-heat-map">
   <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Author × reviewer" %}</h2>
   {% if heat_grid %}
+    <p class="text-sm text-[var(--text-muted)] mb-2">
+      {% translate "Each row is a pull-request author, each column is one of their reviewers." %}
+    </p>
     <table class="text-sm" id="reviewer-heat-map-table">
       <caption class="sr-only">{% translate "Reviews by author and reviewer" %}</caption>
       <thead>
         <tr>
-          <th scope="col"></th>
+          <th scope="col" rowspan="2" class="text-left px-2 py-1 align-bottom text-[var(--text-muted)]">
+            {% translate "Author" %} <span aria-hidden="true">↓</span>
+          </th>
+          <th
+            scope="colgroup"
+            colspan="{{ heat_map.reviewers|length }}"
+            class="text-center px-2 py-1 text-[var(--text-muted)] border-b border-[var(--border)]"
+          >
+            {% translate "Reviewer" %} <span aria-hidden="true">→</span>
+          </th>
+        </tr>
+        <tr>
           {% for reviewer in heat_map.reviewers %}
             <th scope="col" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ reviewer.label }}</th>
           {% endfor %}
@@ -22,11 +38,17 @@ Every cell carries the count as visible text as well as its `--heat-0`..`--heat-
           <tr>
             <th scope="row" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ row.author.label }}</th>
             {% for cell in row.cells %}
+              {% blocktranslate trimmed asvar cell_title count value=cell.value with author=row.author.label reviewer=cell.reviewer.label %}
+                {{ reviewer }} reviewed {{ value }} pull request by {{ author }}
+              {% plural %}
+                {{ reviewer }} reviewed {{ value }} pull requests by {{ author }}
+              {% endblocktranslate %}
               <td
                 class="px-2 py-1 text-center {% if cell.level >= 3 %}text-[var(--on-heat)]{% else %}text-[var(--text)]{% endif %}"
                 style="background-color: var(--heat-{{ cell.level }})"
                 data-testid="heat-cell"
                 data-heat-level="{{ cell.level }}"
+                title="{{ cell_title }}"
               >
                 {{ cell.value }}
               </td>

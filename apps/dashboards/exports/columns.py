@@ -100,7 +100,7 @@ def _people_columns(*, org_wide: bool) -> tuple[ExportColumn, ...]:
     the marked variant per request for CSV/XLSX."""
     title_suffix = _org_wide_title if org_wide else None
     return (
-        ExportColumn(key="name", title=_("Person"), type="text", width=30),
+        ExportColumn(key="name", title=_("Person"), type="url", link_key="url", width=30),
         *_metric_columns(rows.PEOPLE_METRIC_KEYS, title_suffix=title_suffix),
     )
 

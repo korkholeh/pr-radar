@@ -1,4 +1,4 @@
-{% load i18n dashboards %}
+{% load i18n dashboards pagination %}
 {% comment %}
 Shared table partial (plan §5) — one template for `projects`/`repositories`/`people`/`recent_prs`,
 driven entirely by `ctx` (a `tables.TableContext`). Search and sort reload only this table's
@@ -72,20 +72,9 @@ own state; the Export control carries the same filters, sort and search as the v
   </div>
 
   {% if ctx.page.paginator.num_pages > 1 %}
-    <div class="flex items-center gap-3 border-t border-border px-4 py-3 text-sm" data-testid="table-pagination-{{ ctx.table_key }}">
-      {% if ctx.page.has_previous %}
-        <a href="{% table_page_url params ctx.table_key ctx.page.previous_page_number %}" class="link">
-          {% translate "Previous" %}
-        </a>
-      {% endif %}
-      <span class="text-text-muted">
-        {% blocktranslate with number=ctx.page.number total=ctx.page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}
-      </span>
-      {% if ctx.page.has_next %}
-        <a href="{% table_page_url params ctx.table_key ctx.page.next_page_number %}" class="link">
-          {% translate "Next" %}
-        </a>
-      {% endif %}
+    {% table_page_query params ctx.table_key as page_query %}
+    <div class="border-t border-border px-4 py-3">
+      {% digg_pager ctx.page base_url=request.path query=page_query testid="table-pagination-"|add:ctx.table_key %}
     </div>
   {% endif %}
 </div>

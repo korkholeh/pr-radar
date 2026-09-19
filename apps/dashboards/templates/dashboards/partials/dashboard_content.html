@@ -32,7 +32,7 @@ carries the KPI rows and, in Period mode, the chart cards.
       {% include "dashboards/partials/chart_card.html" %}
     {% endfor %}
   </div>
-  <div data-testid="tables">
+  <div data-testid="tables" class="mt-6 space-y-6">
     {% for ctx in tables %}
       {% include "dashboards/partials/table.html" %}
     {% endfor %}

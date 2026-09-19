@@ -186,7 +186,13 @@ def people_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]
         include_series=False,
     )
     return [
-        _metric_row(person.id, person.display_name, None, PEOPLE_METRIC_KEYS, results.get(person.id))
+        _metric_row(
+            person.id,
+            person.display_name,
+            reverse("dashboards:person", args=[person.id]),
+            PEOPLE_METRIC_KEYS,
+            results.get(person.id),
+        )
         for person in people
     ]
 

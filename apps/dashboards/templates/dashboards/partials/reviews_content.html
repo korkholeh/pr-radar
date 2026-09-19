@@ -26,7 +26,9 @@ says so explicitly.
       {% include "dashboards/partials/chart_card.html" %}
     {% endfor %}
   </div>
-  {% include "dashboards/partials/table.html" with ctx=table_ctx %}
+  <div class="mt-6">
+    {% include "dashboards/partials/table.html" with ctx=table_ctx %}
+  </div>
 </section>
 
 {% include "dashboards/partials/reviewer_heat_map.html" %}

@@ -4,6 +4,11 @@
 
 ### Changed
 
+- **Paging now shows the page numbers.** Every paginated list — the dashboard tables, the identity queue and
+  the Policy console — carries the same pager: **Previous**, the first and last page, a window of pages around
+  the one you are on with an ellipsis for each gap, then **Next**, so page 30 of a long table is one click away
+  instead of twenty-nine. The current page is marked for screen readers, and the "Page N of M" readout stays.
+
 - **The interface has been redesigned.** Every page now shares one visual system: a sticky application header
   with the primary destinations, a Settings menu holding the admin-only pages, a page container with consistent
   width and spacing, and cards for KPIs, charts, filters, forms and tables. Buttons, inputs, labels, badges,
@@ -51,6 +56,10 @@
   the start date they used. The command-line equivalent, `manage.py sync --since`, is unchanged.
 
 ### Fixed
+
+- **A person's name in the People table is now a link.** The name column now opens that person's dashboard,
+  the way the Projects, Repositories and Reviews tables already did; the XLSX report's People sheet carries the
+  same link.
 
 - A connection whose token cannot read the repositories it tracks is no longer reported as healthy. The
   `PERM_PULL_REQUESTS` check now actually lists pull requests on one of the connection's repositories instead of

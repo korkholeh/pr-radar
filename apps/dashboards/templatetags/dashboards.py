@@ -213,12 +213,15 @@ def table_sort_url(context: dict, params: DashboardParams, table_key: str, colum
     return f"{context['request'].path}?{query.urlencode()}"
 
 
-@register.simple_tag(name="table_page_url", takes_context=True)
-def table_page_url(context: dict, params: DashboardParams, table_key: str, page_number: int) -> str:
+@register.simple_tag(name="table_page_query")
+def table_page_query(params: DashboardParams, table_key: str) -> str:
+    """This table's query string without `page` — what `{% digg_pager %}` appends each page
+    number to, so a page link keeps its own table's sort/search and every other table's state."""
     current_sort = params.sort if params.table == table_key else ""
     current_q = params.q if params.table == table_key else ""
-    query = params.replace(table=table_key, sort=current_sort, q=current_q, page=page_number).to_query_dict()
-    return f"{context['request'].path}?{query.urlencode()}"
+    query = params.replace(table=table_key, sort=current_sort, q=current_q, page=1).to_query_dict().copy()
+    query.pop("page", None)  # `to_query_dict()` hands back a frozen QueryDict; `copy()` thaws it.
+    return query.urlencode()
 
 
 @register.simple_tag(name="report_url")

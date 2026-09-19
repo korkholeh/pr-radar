@@ -1,0 +1,56 @@
+{% load i18n %}
+{% comment %}
+Digg-style pager, rendered only through `{% digg_pager %}` (apps/dashboards/templatetags/pagination.py).
+`hx_target` is optional: with it the page links swap a fragment, without it they are plain links.
+The "Page N of M" summary stays — it is the only readout when the window hides most pages.
+{% endcomment %}
+{% if page %}
+  <nav class="pager" aria-label="{% translate 'Pagination' %}"{% if testid %} data-testid="{{ testid }}"{% endif %}>
+    {% if previous_url %}
+      <a
+        href="{{ previous_url }}"
+        class="pager-step"
+        {% if hx_target %}hx-get="{{ previous_url }}" hx-target="{{ hx_target }}" hx-swap="innerHTML"{% endif %}
+        rel="prev"
+      >{% translate "Previous" %}</a>
+    {% else %}
+      <span class="pager-step pager-step-disabled">{% translate "Previous" %}</span>
+    {% endif %}
+
+    <ol class="pager-pages">
+      {% for item in items %}
+        <li>
+          {% if item.ellipsis %}
+            <span class="pager-gap" aria-hidden="true">…</span>
+          {% elif item.current %}
+            <span class="pager-page pager-page-current" aria-current="page">{{ item.number }}</span>
+          {% else %}
+            <a
+              href="{{ item.url }}"
+              class="pager-page"
+              aria-label="{% blocktranslate with number=item.number %}Page {{ number }}{% endblocktranslate %}"
+              {% if hx_target %}hx-get="{{ item.url }}" hx-target="{{ hx_target }}" hx-swap="innerHTML"{% endif %}
+            >{{ item.number }}</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if next_url %}
+      <a
+        href="{{ next_url }}"
+        class="pager-step"
+        {% if hx_target %}hx-get="{{ next_url }}" hx-target="{{ hx_target }}" hx-swap="innerHTML"{% endif %}
+        rel="next"
+      >{% translate "Next" %}</a>
+    {% else %}
+      <span class="pager-step pager-step-disabled">{% translate "Next" %}</span>
+    {% endif %}
+
+    <span class="pager-summary">
+      {% blocktranslate trimmed with number=page.number total=page.paginator.num_pages %}
+        Page {{ number }} of {{ total }}
+      {% endblocktranslate %}
+    </span>
+  </nav>
+{% endif %}

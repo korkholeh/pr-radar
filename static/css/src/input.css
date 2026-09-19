@@ -276,11 +276,43 @@
   }
 
   .pager {
-    @apply flex items-center gap-3 text-sm text-text-muted;
+    @apply flex flex-wrap items-center gap-3 text-sm text-text-muted;
   }
 
   .pager a {
     @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  /* Digg-style page list: the first and last page stay reachable, a window of pages surrounds the
+     current one and each gap collapses into an ellipsis, so a long table is one click from any
+     end. `templates/partials/pager.html` is the only markup that uses these. */
+  .pager-pages {
+    @apply flex list-none items-center gap-1;
+  }
+
+  .pager-page {
+    @apply inline-flex min-w-8 items-center justify-center rounded-md border border-transparent
+           px-2 py-1 tabular-nums;
+  }
+
+  .pager a.pager-page {
+    @apply hover:border-border hover:bg-surface-2 hover:no-underline;
+  }
+
+  .pager .pager-page-current {
+    @apply border-border bg-surface-2 font-semibold text-text;
+  }
+
+  .pager-gap {
+    @apply px-1;
+  }
+
+  .pager-step-disabled {
+    @apply opacity-50;
+  }
+
+  .pager-summary {
+    @apply ml-auto text-xs;
   }
 
   /* Filters ---------------------------------------------------------------

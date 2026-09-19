@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n pagination %}
 <div class="mx-auto w-full max-w-5xl" id="identities-page">
   <div class="page-header">
     <h1 class="page-title">{% translate "Unmapped identities" %}</h1>
@@ -32,15 +32,7 @@
       </tbody>
     </table>
   </div>
-  {% if page.has_other_pages %}
-  <nav class="pager mt-4" aria-label="{% translate 'Pagination' %}">
-    {% if page.has_previous %}
-      <a href="?page={{ page.previous_page_number }}">{% translate "Previous" %}</a>
-    {% endif %}
-    <span>{% blocktranslate trimmed with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
-    {% if page.has_next %}
-      <a href="?page={{ page.next_page_number }}">{% translate "Next" %}</a>
-    {% endif %}
-  </nav>
-  {% endif %}
+  <div class="mt-4">
+    {% digg_pager page testid="identities-pagination" %}
+  </div>
 </div>

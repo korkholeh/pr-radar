@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 19:18+0000\n"
+"POT-Creation-Date: 2026-09-19 19:48+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -1443,29 +1443,6 @@ msgstr "Немає незіставлених ідентичностей."
 msgid "Everyone is accounted for."
 msgstr "Усі враховані."
 
-#: apps/catalog/templates/catalog/partials/identities_content.html:36
-#: apps/policy/templates/policy/partials/violations.html:91
-msgid "Pagination"
-msgstr "Сторінки"
-
-#: apps/catalog/templates/catalog/partials/identities_content.html:38
-#: apps/dashboards/templates/dashboards/partials/table.html:78
-#: apps/policy/templates/policy/partials/violations.html:99
-msgid "Previous"
-msgstr "Попередня"
-
-#: apps/catalog/templates/catalog/partials/identities_content.html:40
-#: apps/dashboards/templates/dashboards/partials/table.html:82
-#, python-format
-msgid "Page %(number)s of %(total)s"
-msgstr "Сторінка %(number)s з %(total)s"
-
-#: apps/catalog/templates/catalog/partials/identities_content.html:42
-#: apps/dashboards/templates/dashboards/partials/table.html:86
-#: apps/policy/templates/policy/partials/violations.html:114
-msgid "Next"
-msgstr "Наступна"
-
 #: apps/catalog/templates/catalog/partials/identity_row.html:9
 msgid "Assign"
 msgstr "Призначити"
@@ -1938,7 +1915,7 @@ msgstr "Без проєкту"
 #: apps/connections/templates/connections/partials/repositories_content.html:28
 #: apps/dashboards/exports/columns.py:110
 #: apps/dashboards/exports/columns.py:115
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:43
 #: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:85
 msgid "Repository"
 msgstr "Репозиторій"
@@ -2294,6 +2271,7 @@ msgid "Violations"
 msgstr "Порушення"
 
 #: apps/dashboards/charts.py:372 apps/dashboards/exports/columns.py:134
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:27
 msgid "Reviewer"
 msgstr "Ревʼюер"
 
@@ -2384,7 +2362,8 @@ msgstr "Заголовок"
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:15
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:46
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:136
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:43
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:20
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:45
 msgid "Author"
 msgstr "Автор"
 
@@ -2949,15 +2928,34 @@ msgstr "Коментар"
 msgid "Comment (required)"
 msgstr "Коментар (обов'язково)"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:8
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:10
 msgid "Author × reviewer"
 msgstr "Автор × ревʼюер"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:11
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:13
+msgid ""
+"Each row is a pull-request author, each column is one of their reviewers."
+msgstr ""
+"Кожен рядок — автор пул-реквестів, кожен стовпець — один із його ревʼюерів."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:16
 msgid "Reviews by author and reviewer"
 msgstr "Ревʼю за автором і ревʼюером"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:39
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:41
+#, python-format
+msgid "%(reviewer)s reviewed %(value)s pull request by %(author)s"
+msgid_plural "%(reviewer)s reviewed %(value)s pull requests by %(author)s"
+msgstr[0] ""
+"%(reviewer)s переглянув(-ла) %(value)s пул-реквест автора %(author)s"
+msgstr[1] ""
+"%(reviewer)s переглянув(-ла) %(value)s пул-реквести автора %(author)s"
+msgstr[2] ""
+"%(reviewer)s переглянув(-ла) %(value)s пул-реквестів автора %(author)s"
+msgstr[3] ""
+"%(reviewer)s переглянув(-ла) %(value)s пул-реквеста автора %(author)s"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:61
 msgid "No reviews in this period."
 msgstr "У цьому періоді немає ревʼю."
 
@@ -2966,24 +2964,24 @@ msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period."
 msgstr "Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:35
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:37
 msgid "Waiting for review"
 msgstr "Очікує ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:38
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
 msgid "Pull requests waiting for review"
 msgstr "Pull request-и, що очікують ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:42
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:44
 #: apps/policy/templates/policy/partials/violations.html:27
 msgid "Pull request"
 msgstr "Pull request"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:44
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:46
 msgid "Waiting"
 msgstr "Час очікування"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:66
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:68
 msgid "No pull request is waiting for review."
 msgstr "Жоден pull request не очікує ревʼю."
 
@@ -4395,17 +4393,6 @@ msgstr ""
 "Жодне порушення політики не відповідає цим фільтрам. Розширте фільтри, щоб "
 "побачити більше."
 
-#: apps/policy/templates/policy/partials/violations.html:103
-#, python-format
-msgid ""
-"\n"
-"      Page %(number)s of %(total)s\n"
-"    "
-msgstr ""
-"\n"
-"      Сторінка %(number)s з %(total)s\n"
-"    "
-
 #: templates/403.html:7
 msgid "You do not have access to this page."
 msgstr "У вас немає доступу до цієї сторінки."
@@ -4490,6 +4477,28 @@ msgstr "Налаштування людей"
 #: templates/partials/nav.html:61
 msgid "Log out"
 msgstr "Вийти"
+
+#: templates/partials/pager.html:8
+msgid "Pagination"
+msgstr "Сторінки"
+
+#: templates/partials/pager.html:15 templates/partials/pager.html:17
+msgid "Previous"
+msgstr "Попередня"
+
+#: templates/partials/pager.html:31
+#, python-format
+msgid "Page %(number)s"
+msgstr "Сторінка %(number)s"
+
+#: templates/partials/pager.html:45 templates/partials/pager.html:47
+msgid "Next"
+msgstr "Наступна"
+
+#: templates/partials/pager.html:51
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Сторінка %(number)s з %(total)s"
 
 #: templates/partials/theme_switcher.html:11
 msgid "Theme: light. Switch to dark."
@@ -4583,6 +4592,16 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:17
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "      Page %(number)s of %(total)s\n"
+#~ "    "
+#~ msgstr ""
+#~ "\n"
+#~ "      Сторінка %(number)s з %(total)s\n"
+#~ "    "
 
 #~ msgid "Theme"
 #~ msgstr "Тема"
