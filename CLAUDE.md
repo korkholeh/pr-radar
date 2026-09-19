@@ -11,8 +11,9 @@ logs, command output, documentation — is **English**. The UI ships in English 
 ## Stack
 
 Python 3.12 · Django 5.2 LTS · SQLite (WAL, ORM only so `DATABASE_URL` can point at PostgreSQL later) ·
-httpx + GraphQL · huey on its own SQLite file · Django templates + htmx + Alpine · Tailwind standalone CLI with the
-compiled CSS committed · vendored Chart.js · django-tables2 + django-filter · XlsxWriter ·
+httpx + GraphQL · huey on its own SQLite file · Django templates + htmx (no Alpine, no JS build step) ·
+Tailwind standalone CLI with the compiled CSS committed ·
+vendored Chart.js · django-tables2 + django-filter · XlsxWriter ·
 pytest / pytest-django / factory_boy / freezegun / respx · ruff + mypy · uv · Playwright for e2e.
 
 ## Commands
@@ -65,8 +66,13 @@ Management commands: `sync`, `recompute`, `compute_churn`, `seed_demo`, `seed_e2
 
 ## Docs
 
-`docs/SETUP.md`, `CONFIGURATION.md`, `METRICS.md`, `POLICY.md`, `GITHUB_CONNECTIONS.md`, `TRANSLATIONS.md`,
-`DECISIONS.md`, `PROGRESS.md`; architecture decision records in `docs/dev/adr/`. Task-shaped pages for leads
-under `docs/user/`. User-visible changes go in `CHANGELOG.md`.
+Start at `docs/dev/architecture.md` — components, contracts, where state lives, and where the built system
+diverged from the design of record. Decisions that are expensive to reverse are ADRs in `docs/dev/adr/`; narrower
+ones are in `docs/DECISIONS.md`. Operator references: `docs/SETUP.md`, `CONFIGURATION.md`, `METRICS.md`,
+`POLICY.md`, `GITHUB_CONNECTIONS.md`, `TRANSLATIONS.md`, `PROGRESS.md`. Task-shaped pages for leads under
+`docs/user/`, indexed by `docs/user/README.md`. User-visible changes go in `CHANGELOG.md`.
 
-Autodev docs: .autodev/ (ARCHITECTURE.md, RISKS.md, ROADMAP.md, PROGRESS.md, DECISIONS.md, phases/NN-*/PLAN.md)
+`docs/METRICS.md` is generated (`manage.py metrics_doc`); `docs/PROGRESS.md` covers phases 1–3, 10 and 11 only.
+
+Autodev docs: .autodev/ (HANDOFF.md, SCREENS.md, ARCHITECTURE.md, RISKS.md, ROADMAP.md, PROGRESS.md,
+DECISIONS.md, phases/NN-*/PLAN.md). `.autodev/HANDOFF.md` is the state-of-the-repo briefing.

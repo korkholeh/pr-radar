@@ -1,7 +1,8 @@
 # Getting started
 
-PR Radar is for team leads and managers. The ask your admin runs to set up your account with `manage.py
-createsuperuser` or through `/admin/` gives you a username and password.
+PR Radar is for team leads and managers. Ask your admin to create your account — they do it with `manage.py
+createsuperuser` or through `/admin/` — and they will give you a username and password. If you are installing
+PR Radar yourself, start from the [user guide index](README.md).
 
 ## Log in
 

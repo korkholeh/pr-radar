@@ -1,7 +1,8 @@
 # Find the right page
 
-This page is for a lead. It maps what you're trying to do to the page that does it — start here if you're not
-sure where to look, or use `getting-started.md` first if you haven't logged in yet.
+This page is for a lead. It maps what you're trying to do to the page that does it — use it once you know your
+way around. If this is your first time, read [the guide index](README.md) instead: it walks the same pages in the
+order a new user needs them.
 
 | I want to… | Page |
 |---|---|
