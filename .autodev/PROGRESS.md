@@ -1,18 +1,19 @@
 # Autodev progress — PR Radar
 
-- **Status:** running
-- **Current:** phase 11/11 · step `commit`
+- **Status:** done
+- **Current:** finished
 - **Spec:** `docs/SPEC.md` · **Branch:** `autodev/spec-20260917-0714` · **PR:** https://github.com/korkholeh/pr-radar/pull/1
 - **Stack:** Python 3.12 + Django 5.2 LTS + SQLite (WAL, ORM-only for Postgres portability) + httpx/GraphQL + huey/SqliteHuey + Django templates/htmx/Alpine + Tailwind standalone CLI (committed CSS) + vendored Chart.js + django-tables2/django-filter + XlsxWriter, tested with pytest/pytest-django/factory_boy/freezegun/respx, linted with ruff + mypy, managed by uv. · **Profile:** `django-htmx`
 - **Test command:** `uv run pytest -q` · **E2E:** `uv run pytest e2e -q`
-- **Usage:** 5h 42% (reset 19.09 07:40) · 7d 58%
-- **Totals:** 181 sessions · 29.4 h agent time · ≈$499.15 API-equivalent
-- **Clock:** 47.2 h since the run was created · 29.4 h working · 10.6 h paused on the usage limit · 7.2 h not running
-- **Updated:** 2026-09-19 06:28:22
+- **Usage:** 5h 60% (reset 19.09 07:40) · 7d 59%
+- **Totals:** 182 sessions · 30.1 h agent time · ≈$537.21 API-equivalent
+- **Clock:** 48.0 h since the run was created · 30.1 h working · 10.6 h paused on the usage limit · 7.2 h not running
+- **Updated:** 2026-09-19 07:12:40
 
 ## Run warnings
 
 - 2026-09-17 10:46:47 — GitHub stack not registered: Checking existing stacks... Looking up PRs for 2 branches... ✗ PR #2 (https://github.com/korkholeh/pr-radar/pull/2) cannot be added to a stack: it has been merged. The pull requests are still chained and still merge bottom-up.
+- 2026-09-19 06:28:46 — DECISIONS.md is 399 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it
 
 ## Phases
 
@@ -28,7 +29,7 @@
 | 8 | Dashboards, charts, themes and table export | yes | ✅ done | 482e896 | the audit of the round-2 fixes found blocker/major findings (see .autodev/phases/08-dashboards-and-charts/REVIEW-r2-audit.md); the round-2 audit's own findings were fixed and not re-checked; e2e skipped: the surfaces could not be started; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 9 | People, PRs, Reviews, scoped access and reports | yes | ✅ done | 7a54bc2 | 6 PLAN.md task(s) left unchecked; DECISIONS.md is 312 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; e2e skipped: the surfaces could not be started; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
 | 10 | CI first-pass, follow-up fixes and churn | yes | ✅ done | 65c44d2 | DECISIONS.md is 313 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 320 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 330 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 339 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 345 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 347 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; not committed: apps/connections/tests/test_crypto.py (it contains what looks like a GitHub token); not committed: tests/test_logging.py (it contains what looks like a GitHub token) |
-| 11 | Polish, performance and documentation | yes | 🔨 in_progress |  |  |
+| 11 | Polish, performance and documentation | yes | ✅ done | c577286 | DECISIONS.md is 349 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 354 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; 8 PLAN.md task(s) left unchecked; DECISIONS.md is 374 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 383 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 394 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 396 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; DECISIONS.md is 397 KB — sessions are told to read a slice, but anything that reads it whole is paying for all of it; not committed: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token) |
 
 ## Screens
 
@@ -39,16 +40,6 @@ What the product looked like at the end of each phase — the newest first.
 
 ## Timeline
 
-- `2026-09-17 09:03:33` **commit** — command files: this commit changes what the project's own commands run: Makefile, pyproject.toml
-- `2026-09-17 09:03:33` **p01-commit** — done: e8a30ee
-- `2026-09-17 09:03:35` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
-- `2026-09-17 09:03:39` **p01-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p01-skeleton
-- `2026-09-17 09:03:42` **p01-pr** — draft: https://github.com/korkholeh/pr-radar/pull/2
-- `2026-09-17 09:03:48` **p01-merge** — done: https://github.com/korkholeh/pr-radar/pull/2
-- `2026-09-17 09:12:38` **p02-plan** — done (8m, $2.9): Wrote .autodev/phases/02-data-model/PLAN.md: 19 ordered tasks covering the eight new apps' models, migrations, indexes and uniqueness constraints, the AppSetting registry with the §15 defaults, Django admin with a read-only mixin and a token-free GitHubConnection form, factories for every model, th…
-- `2026-09-17 09:27:17` **p02-implement** — handover: context reached 200,961 tokens — checkpointing for a fresh session
-- `2026-09-17 09:27:51` **p02-implement** — partial (15m, $5.94): Phase 2 (domain models, migrations, admin) is functionally complete: T1-T17 done and checked off in .autodev/phases/02-data-model/PLAN.md. Built all 8 new apps (connections, catalog, activity, ai_detection, policy, metrics, churn, github_sync) with models per spec §4, migrations from zero, factorie…
-- `2026-09-17 09:32:53` **usage** — paused: 5h usage 87% ≥ 85%; sleeping until ≈17.09 10:22
 - `2026-09-17 10:22:01` **usage** — resumed: 5h ? (reset ?) · 7d 23%
 - `2026-09-17 10:22:37` **p02-implement** — done (5m, $2.13): Phase 2 complete. All T1-T17 (models/migrations/admin/factories/i18n/CSS) were already done by the prior session; this session finished T18 (docs.PROGRESS.md phase-2 entry, DECISIONS.md p02-implement bullets) and T19 (full gate). Gate run found and fixed real issues: ~40 ruff E501/DJ001/DJ012 findi…
 - `2026-09-17 10:22:42` **p02-tests** — pass: exit 0: ................................................... [100%]
@@ -339,6 +330,16 @@ What the product looked like at the end of each phase — the newest first.
 - `2026-09-19 06:24:34` **p11-screens** — done (2m, $1.07): 4 frames captured via throwaway Playwright script against the already-running e2e surface (e2e-lead persona, 1280×800, seed_e2e fixture): page-level empty state, MIN_SAMPLE greying with text label, dark theme, and Ukrainian layout on the People table. All verified non-empty and visually correct. Fr…
 - `2026-09-19 06:24:34` **p11-screens** — done: 4 frame(s) → .autodev/phases/11-polish-and-performance/SCREENS.md
 - `2026-09-19 06:28:22` **p11-docs** — done (3m, $1.42): Verified all phase-11 documentation against the code. Fixed one real inaccuracy in docs/TRANSLATIONS.md (it attributed apps/connections/check_codes.py's render_message()/render_hint() to apps/policy/messages.py, whose actual functions are render_violation()/rule_label()). Everything else — CLAUDE.m…
+- `2026-09-19 06:28:22` **commit** — held back: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token)
+- `2026-09-19 06:28:22` **p11-commit** — done: c577286
+- `2026-09-19 06:28:25` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-19 06:28:29` **p11-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-p11-polish-and-performance
+- `2026-09-19 06:28:32` **p11-pr** — draft: https://github.com/korkholeh/pr-radar/pull/12
+- `2026-09-19 06:28:43` **p11-merge** — done: https://github.com/korkholeh/pr-radar/pull/12
+- `2026-09-19 07:12:40` **finalize** — done (43m, $38.05): Shippable: the whole product across 11 phases, with every gate green from this working tree — uv run pytest -q at PYTEST_EXIT=0 over 1,841 tests, e2e 63 passed, the full lint gate clean, and make css / make messages / runserver all executed rather than assumed. All seven finalize deliverables are w…
+- `2026-09-19 07:12:40` **commit** — held back: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token)
+- `2026-09-19 07:12:40` **finalize** — done: Shippable: the whole product across 11 phases, with every gate green from this working tree — uv run pytest -q at PYTEST_EXIT=0 over 1,841 tests, e2e 63 passed, the full lint gate clean, and make css…
+- `2026-09-19 07:12:40` **run** — done: all 11 phases completed
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

@@ -22,7 +22,9 @@ and edit it. `manage.py` defaults `DJANGO_SETTINGS_MODULE` to `config.settings.l
 
 Unlike the `.env` keys above, these live in the database (`catalog.AppSetting`), are seeded from the frozen
 registry `apps/catalog/setting_defs.py` by the data migration `catalog/0002_app_setting_defaults.py`, and are
-meant to be changed at runtime through the settings UI (phase 8) rather than by editing a file. Code reads them
+meant to be changed at runtime — through the Django admin (`/admin/` → Catalog → App settings) — rather
+than by editing a file. The settings that have a dedicated page of their own (the AI policy, sensitive paths,
+detection rules) are listed under Settings in the top bar instead. Code reads them
 through `apps/catalog/services.py` (`get_setting`/`get_int`/`get_bool`/`get_str`/`get_list`/`get_dict`), which
 raises `UnknownSettingError` for a typo'd key and falls back to the code default when a registered key's row is
 missing.

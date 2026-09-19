@@ -23,8 +23,10 @@ permissions (see `docs/dev/adr/0002-session-auth-two-roles-and-one-scope-functio
 uv run python manage.py createsuperuser
 ```
 
-Add that user to the `admin` group from `/admin/` (Django admin, `django.contrib.auth` → Users) if you want them to
-use the future admin-only pages; the Django admin site itself is reachable to any superuser regardless of group.
+Add that user to the `admin` group from `/admin/` (Django admin, `django.contrib.auth` → Users) so they can reach
+the admin-only pages — Connections, Repositories, Sync, People, Detection rules, AI policy and Sensitive paths.
+A user in the `lead` group sees the dashboards, the policy console and the people, PR and review pages, but none
+of Settings. The Django admin site itself is reachable to any superuser regardless of group.
 
 ## Connect GitHub
 
@@ -210,7 +212,7 @@ settings are already split so a future networked deployment only changes `config
 values and `DATABASE_URL` (the ORM is used exclusively — see ADR 0001 — so pointing `DATABASE_URL` at PostgreSQL
 needs no code change). `config/settings/prod.py` already sets `DEBUG=False`, HSTS, secure cookies and
 `SECURE_SSL_REDIRECT`; a real deployment still needs a WSGI/ASGI server (e.g. gunicorn/uvicorn) in front of it,
-which this phase does not add. Run `manage.py collectstatic --ignore=src` before serving (the manifest
+which this version does not ship. Run `manage.py collectstatic --ignore=src` before serving (the manifest
 post-processor chokes on `static/css/src/input.css`'s Tailwind-only `@import "tailwindcss"` otherwise — that
 directory holds the Tailwind CLI's input, never something the app serves directly).
 
