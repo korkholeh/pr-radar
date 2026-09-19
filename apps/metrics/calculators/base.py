@@ -41,6 +41,28 @@ class PeriodContext:
     date_to: datetime.date
 
 
+@dataclass(frozen=True)
+class DayContextMany:
+    """What `StateCalc.at_date_by_person` needs to compute every requested person's value in one
+    query instead of one `at_date()` call per person (T11 continuation: `compute_many()`'s
+    per-scope fallback for distribution/state metrics was the dominant remaining cost on the
+    people table — 600 raw queries for 60 people × 5 metrics at `--scale large`)."""
+
+    cohort: str
+    date: datetime.date
+    person_ids: frozenset[int]
+
+
+@dataclass(frozen=True)
+class PeriodContextMany:
+    """The `PeriodContext` counterpart of `DayContextMany`, for `DistributionCalc.period_by_person`."""
+
+    cohort: str
+    date_from: datetime.date
+    date_to: datetime.date
+    person_ids: frozenset[int]
+
+
 def percentile(values: Iterable[float | None], pct: float) -> MetricValue:
     """Linear-interpolation percentile (the same method `statistics.median` uses at pct=50),
     dropping `None`s from both the value and the sample size."""

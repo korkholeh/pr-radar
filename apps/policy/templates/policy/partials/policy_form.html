@@ -57,7 +57,11 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="6" class="text-[var(--text-muted)] py-4">{% translate "No policy versions yet." %}</td>
+          <td colspan="6">
+            {% translate "No policy versions yet." as empty_title %}
+            {% translate "Publish a policy version to start evaluating pull requests against it." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
         </tr>
       {% endfor %}
     </tbody>

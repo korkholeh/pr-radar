@@ -185,3 +185,63 @@ A UI trigger for churn (CLI/nightly only, per spec), rebase-merge churn (the pre
 garbage-collects), a `FollowupFix` link model naming *which* PR fixed which, clone garbage collection/disk caps
 for `DATA_DIR/repos` (documented as an operator concern instead). Empty-state/`MIN_SAMPLE` polish, the contrast
 audit, and `seed_demo --scale` → phase 11.
+
+## Phase 11 — Polish, performance and documentation
+
+The last phase. No new domain behaviour; it closes out empty states, the small-sample marker, colour contrast,
+dashboard performance at realistic scale, the Ukrainian long-string layout, and the documentation set.
+
+- **Empty states**: one shared partial (`templates/partials/empty_state.html`) and a `{% small_sample_note %}`
+  tag back every list-shaped page and chart card. Dashboard, Overview, Reviews and Person pages distinguish
+  "nothing has ever been synced" from "nothing matches this period/filter" via
+  `apps/dashboards/selectors.py::period_has_pull_requests()`, never by inspecting a KPI's value — a real zero
+  and "no data" render differently. Ten previously-bare list views (catalog people/identities, detection rules,
+  connections list/discovery, sync runs, policy versions/sensitive paths/violations, exports) gained an
+  explanation and, where there's an obvious next step, an action link.
+- **Small-sample marker reaches tables, not just KPI cards**: `rows.py::_metric_row()` now carries a
+  `f"{key}__low"` flag per cell, and `tables.py` renders a compact `≈` glyph (`data-testid="cell-small-sample"`,
+  with a `title`/`aria-label`, so the signal is never colour-only) — distinct from the fuller "Small sample"
+  sentence `{% small_sample_note %}` renders on a KPI card. A regression sweep (`tests/test_min_sample_surfaces.py`)
+  pins the exact set of templates/modules allowed to render a `MetricResult`'s below-sample state.
+- **WCAG-AA contrast retune** (`tests/test_token_contrast.py`, ADR 0008): two new tokens, `--border-strong`
+  (a control's own boundary, as opposed to a decorative divider, which keeps `--border`) and `--on-heat` (text
+  colour against a heat-map cell), plus retuned light-theme `accent`/`neutral`/`good`/`warning`/`heat-3` hex
+  values — every foreground/background pair in the token set now clears 4.5:1 (text) / 3:1 (UI boundaries) in
+  both themes, with two named, tested exemptions (`--border`/`--grid` decorative lines, `--heat-1..4` fills
+  below the marker text's own contrast requirement).
+- **`seed_demo --scale {demo,large}`** (`apps/dashboards/management/commands/seed_demo.py`): `large` seeds 50
+  repositories / 20,000 pull requests via a bulk write path in a separate, never-colliding namespace from the
+  existing demo scale, purely to have realistic volume to profile dashboards against; a second run without
+  `--reset` raises rather than mixing scales.
+- **Dashboard performance**: `scripts/profile_dashboard.py` (Django test client + `CaptureQueriesContext`,
+  wall time and the ten slowest SQL statements per page) measured the Overview page at 29.4s / 5,407 queries
+  cold on `--scale large` data — 20x over the architecture's 1.5s budget. Three independent root causes, found
+  by re-profiling after each fix rather than guessing: (1) every distribution/state metric built a per-bucket
+  `SeriesPoint` even where nothing read `.series` — a new `include_series=False` path through
+  `apps/metrics/services.py` and every dashboard call site that doesn't render a sparkline; (2) the People
+  table's `compute_many()` fallback cost one `compute()` call *per person* for 5 metrics — a new batched
+  `period_by_person`/`at_date_by_person` calculator interface (`PeriodContextMany`/`DayContextMany` in
+  `apps/metrics/calculators/base.py`) cut that to 2 queries per metric regardless of person count; (3)
+  `duration_hours()` re-read the `DURATION_MODE` setting from a pickled cache on every one of ~129,000 row
+  iterations for a value it always discards. Cold Overview now renders in roughly 1.3-1.5s at the same 50
+  repos/20,000 PRs, with every `assertNumQueries` pin moved and its new count justified in-place.
+- **Ukrainian long strings don't clip**: KPI card titles, buttons and table headers gained `break-words`/
+  `hyphens-auto`; metric table column headers lost `whitespace-nowrap`, which is what clipped a long Ukrainian
+  header. `django.po` had a terminology/casing proofread pass. `tests/test_pages_smoke.py` now sweeps every
+  named page (not just the 12 dashboard ones) for both roles, and `CANARY_ENGLISH_STRINGS` grew to match.
+- **Docs**: this phase's own documentation debt — `docs/SETUP.md` (Scheduling via launchd/cron, backup
+  verification and the `FIELD_ENCRYPTION_KEYS` warning, Future deployment, Performance), `docs/CONFIGURATION.md`
+  (`MIN_SAMPLE`/`STALE_DAYS`/theme-language reading notes), `docs/GITHUB_CONNECTIONS.md` (rate-limit budget),
+  `docs/TRANSLATIONS.md` (long-string rule, canary lists), `docs/POLICY.md` (reading a greyed number,
+  auto-resolve), `docs/user/index.md` and `docs/user/troubleshooting.md` (both linked from `README.md`), and
+  `tests/test_docs.py`'s path/link-resolution regression tests — closed out in a review round-1 follow-up
+  rather than the original implementation session; see `.autodev/DECISIONS.md`'s `p11/apply-review` entries for
+  what was inferred versus found explicit in the code.
+
+### Out of scope for phase 11
+
+A `DistributionCalc`/`StateCalc` execution-strategy redesign that would let a metric column's sort work without
+computing every row first (documented as a follow-up in `.autodev/DECISIONS.md` rather than attempted — the
+current fix set already meets the 1.5s budget without it). Fact-table denormalisation for state metrics (ADR
+0007's escape hatch, not needed). A fourth language. Multi-node deployment (documented in `docs/SETUP.md`'s
+Future deployment section as explicitly out of scope for v1, not implemented).

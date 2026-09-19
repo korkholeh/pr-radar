@@ -51,7 +51,11 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No people yet." %}</td>
+        <td colspan="7">
+          {% translate "No people yet." as empty_title %}
+          {% translate "People appear automatically once pull requests or reviews are synced from GitHub." as empty_explanation %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

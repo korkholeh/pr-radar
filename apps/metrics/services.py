@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import datetime
 import hashlib
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from django.core.cache import cache
 from django.db.models import F
@@ -16,7 +16,13 @@ from apps.accounts.selectors import ScopeFilter, scope_for_user
 from apps.activity.models import PullRequest, Review
 from apps.catalog.models import Repository
 from apps.catalog.services import get_int
-from apps.metrics.calculators.base import DayContext, PeriodContext, ratio_value
+from apps.metrics.calculators.base import (
+    DayContext,
+    DayContextMany,
+    PeriodContext,
+    PeriodContextMany,
+    ratio_value,
+)
 from apps.metrics.models import Cohort, DailyRollup, DataVersion, DirtyDay, ScopeType
 from apps.metrics.registry import (
     CounterCalc,
@@ -298,16 +304,25 @@ def _counter_ratio_result(
     previous_to: datetime.date,
     buckets: Sequence[tuple[datetime.date, datetime.date]],
     min_sample: int,
+    include_series: bool = True,
 ) -> MetricResult:
     """Builds one metric's full `MetricResult` (value, previous, delta, series) from
     already-fetched rollup rows — the code both `_compute_uncached()` (one scope) and
     `compute_many()` (many scopes sharing one widened query) share, so the two paths can never
-    silently disagree on what a counter/ratio result looks like."""
+    silently disagree on what a counter/ratio result looks like. `include_series=False` (T11: a
+    table row that only ever reads `.value`/`.delta`/`.below_min_sample`, never `.series`) skips
+    the per-bucket loop."""
     value_mv = _counter_ratio_value(metric_def, scope, rows_by_key, cohort, date_from, date_to)
     previous_mv = _counter_ratio_value(metric_def, scope, rows_by_key, cohort, previous_from, previous_to)
-    series = tuple(
-        SeriesPoint(b_from, b_to, *_counter_ratio_value(metric_def, scope, rows_by_key, cohort, b_from, b_to))
-        for b_from, b_to in buckets
+    series = (
+        tuple(
+            SeriesPoint(
+                b_from, b_to, *_counter_ratio_value(metric_def, scope, rows_by_key, cohort, b_from, b_to)
+            )
+            for b_from, b_to in buckets
+        )
+        if include_series
+        else ()
     )
     delta, delta_ratio = _delta(value_mv, previous_mv)
     return MetricResult(
@@ -366,12 +381,14 @@ def _cache_key(
     granularity: str,
     date_from: datetime.date,
     date_to: datetime.date,
+    include_series: bool = True,
 ) -> str:
     keys_digest = hashlib.sha1(",".join(sorted(set(metric_keys))).encode()).hexdigest()
+    series_flag = "series" if include_series else "noseries"
     return (
         f"metrics:v1:{data_version()}:{scope.scope_type}:{scope.scope_id}:"
         f"{_access_fingerprint(scope.access)}:{cohort}:{granularity}:"
-        f"{date_from.isoformat()}:{date_to.isoformat()}:{keys_digest}"
+        f"{date_from.isoformat()}:{date_to.isoformat()}:{keys_digest}:{series_flag}"
     )
 
 
@@ -415,21 +432,29 @@ def compute(
     date_to: datetime.date,
     cohort: str = Cohort.ALL,
     granularity: str = "day",
+    include_series: bool = True,
 ) -> MetricResultSet:
     """The single read entry point every dashboard, chart, table and export calls. Counters and
     ratios are read from `DailyRollup`; distributions and state metrics are computed straight from
     raw rows for the requested window — never from rollups, so a distribution can never be
     silently wrong because of a stale or missing rollup row. Read-through cached (T15): a second
     identical call is served from `FileBasedCache` at zero queries, and a bumped `data_version()`
-    (a sync or a recompute) changes the cache key, so a stale entry is never served."""
-    cache_key = _cache_key(metric_keys, scope, cohort, granularity, date_from, date_to)
+    (a sync or a recompute) changes the cache key, so a stale entry is never served.
+    `include_series=False` (T11, RISKS row 10) skips the per-bucket series for every metric —
+    for a distribution/state metric that means skipping the per-scope, per-bucket raw-row query
+    entirely, the dominant cost profiling found on the projects/repositories/people tables, whose
+    rows never read `.series`. `include_series` is part of the cache key so the two shapes never
+    collide."""
+    cache_key = _cache_key(metric_keys, scope, cohort, granularity, date_from, date_to, include_series)
     cached_payload = cache.get(cache_key)
     if cached_payload is not None:
         return MetricResultSet(
             {key: _deserialize_result(key, payload) for key, payload in cached_payload.items()}
         )
 
-    result_set = _compute_uncached(metric_keys, scope, date_from, date_to, cohort, granularity)
+    result_set = _compute_uncached(
+        metric_keys, scope, date_from, date_to, cohort, granularity, include_series
+    )
 
     ttl = get_int("METRICS_CACHE_TTL_SECONDS")
     cache.set(cache_key, {key: _serialize_result(result) for key, result in result_set.results.items()}, ttl)
@@ -443,6 +468,7 @@ def _compute_uncached(
     date_to: datetime.date,
     cohort: str,
     granularity: str,
+    include_series: bool = True,
 ) -> MetricResultSet:
     metric_defs = [get_metric(key) for key in metric_keys]
     for metric_def in metric_defs:
@@ -477,15 +503,22 @@ def _compute_uncached(
                 previous_to,
                 buckets,
                 min_sample,
+                include_series,
             )
             continue
 
         breakdown: tuple[BreakdownItem, ...] = ()
         value_mv = _distribution_or_state_value(metric_def, scope, cohort, date_from, date_to)
         previous_mv = _distribution_or_state_value(metric_def, scope, cohort, previous_from, previous_to)
-        series = tuple(
-            SeriesPoint(b_from, b_to, *_distribution_or_state_value(metric_def, scope, cohort, b_from, b_to))
-            for b_from, b_to in buckets
+        series = (
+            tuple(
+                SeriesPoint(
+                    b_from, b_to, *_distribution_or_state_value(metric_def, scope, cohort, b_from, b_to)
+                )
+                for b_from, b_to in buckets
+            )
+            if include_series
+            else ()
         )
         calculator = metric_def.calculator
         if isinstance(calculator, DistributionCalc) and calculator.breakdown is not None:
@@ -554,6 +587,74 @@ def _fetch_counter_ratio_rows_many(
     return by_scope
 
 
+def _has_person_batch(metric_def: MetricDef) -> bool:
+    calculator = metric_def.calculator
+    if isinstance(calculator, DistributionCalc):
+        return calculator.period_by_person is not None
+    if isinstance(calculator, StateCalc):
+        return calculator.at_date_by_person is not None
+    return False
+
+
+def _other_results_by_person(
+    metric_defs: Sequence[MetricDef],
+    scope_ids: Sequence[int],
+    cohort: str,
+    date_from: datetime.date,
+    date_to: datetime.date,
+    previous_from: datetime.date,
+    previous_to: datetime.date,
+    min_sample: int,
+) -> dict[int, dict[str, MetricResult]]:
+    """The batched counterpart of calling `compute(other_keys, ...)` once per scope id (T11
+    continuation, RISKS row 10): profiling found this per-scope fallback, not a missing index, was
+    the dominant remaining cost of the people table at `--scale large` (60 people x 5
+    distribution/state metrics x 2 raw queries = 600 round trips). Each metric here costs exactly
+    2 queries (value, previous) regardless of how many person ids are requested. Only called with
+    `include_series=False` (`compute_many()` below), so no per-bucket series is built."""
+    person_ids = frozenset(scope_ids)
+    result: dict[int, dict[str, MetricResult]] = {scope_id: {} for scope_id in scope_ids}
+    for metric_def in metric_defs:
+        calculator = metric_def.calculator
+        if isinstance(calculator, DistributionCalc):
+            assert calculator.period_by_person is not None
+            value_by_person = calculator.period_by_person(
+                PeriodContextMany(cohort=cohort, date_from=date_from, date_to=date_to, person_ids=person_ids)
+            )
+            previous_by_person = calculator.period_by_person(
+                PeriodContextMany(
+                    cohort=cohort, date_from=previous_from, date_to=previous_to, person_ids=person_ids
+                )
+            )
+        else:
+            assert isinstance(calculator, StateCalc)
+            assert calculator.at_date_by_person is not None
+            value_by_person = calculator.at_date_by_person(
+                DayContextMany(cohort=cohort, date=date_to, person_ids=person_ids)
+            )
+            previous_by_person = calculator.at_date_by_person(
+                DayContextMany(cohort=cohort, date=previous_to, person_ids=person_ids)
+            )
+        for scope_id in scope_ids:
+            value_mv = value_by_person.get(scope_id, MetricValue.empty())
+            previous_mv = previous_by_person.get(scope_id, MetricValue.empty())
+            delta, delta_ratio = _delta(value_mv, previous_mv)
+            result[scope_id][metric_def.key] = MetricResult(
+                key=metric_def.key,
+                definition=metric_def,
+                value=value_mv.value,
+                previous_value=previous_mv.value,
+                delta=delta,
+                delta_ratio=delta_ratio,
+                sample_size=value_mv.sample_size,
+                previous_sample_size=previous_mv.sample_size,
+                below_min_sample=value_mv.sample_size < min_sample,
+                series=(),
+                breakdown=(),
+            )
+    return result
+
+
 def compute_many(
     metric_keys: Sequence[str],
     scope_type: str,
@@ -563,6 +664,7 @@ def compute_many(
     date_to: datetime.date,
     cohort: str = Cohort.ALL,
     granularity: str = "day",
+    include_series: bool = True,
 ) -> dict[int, MetricResultSet]:
     """Batches `compute()` over many scope ids of the same level (a table of repositories, of
     projects, of people) so it costs one `DailyRollup` query for their counter/ratio metrics
@@ -571,7 +673,9 @@ def compute_many(
     under an unrestricted access (`calculators.base.GLOBAL_SCOPE`), so batch-reading them back for
     a narrowed caller would silently return the unrestricted number (RISKS row 3) — this is honest
     rather than clever, per the plan's deviation note; phase 10 owns profiling that path if it
-    becomes the bottleneck. An empty `scope_ids` returns `{}` without touching the database."""
+    becomes the bottleneck. An empty `scope_ids` returns `{}` without touching the database.
+    `include_series=False` (T11, RISKS row 10) skips the per-bucket series everywhere below —
+    the caller is a table row that only reads `.value`/`.delta`/`.below_min_sample`."""
     if not scope_ids:
         return {}
 
@@ -582,7 +686,13 @@ def compute_many(
     if not access.unrestricted:
         return {
             scope_id: compute(
-                metric_keys, Scope(scope_type, scope_id, access), date_from, date_to, cohort, granularity
+                metric_keys,
+                Scope(scope_type, scope_id, access),
+                date_from,
+                date_to,
+                cohort,
+                granularity,
+                include_series,
             )
             for scope_id in scope_ids
         }
@@ -592,13 +702,29 @@ def compute_many(
         for metric_def in metric_defs
         if isinstance(metric_def.calculator, (CounterCalc, RatioCalc))
     ]
-    other_keys = [metric_def.key for metric_def in metric_defs if metric_def not in counter_ratio_defs]
+    other_defs = [metric_def for metric_def in metric_defs if metric_def not in counter_ratio_defs]
+    other_keys = [metric_def.key for metric_def in other_defs]
 
     min_sample = get_int("MIN_SAMPLE")
     previous_from, previous_to = previous_period(date_from, date_to)
     buckets = bucket_ranges(date_from, date_to, granularity)
     rows_by_scope = _fetch_counter_ratio_rows_many(
         counter_ratio_defs, scope_type, scope_ids, cohort, previous_from, date_to
+    )
+
+    # T11 continuation: when every distribution/state metric requested has a batched
+    # implementation (`_has_person_batch`) and no series is needed, compute them all at once
+    # across every scope id instead of falling back to one `compute()` call per scope below —
+    # the fix for the people table's dominant remaining query-round-trip cost at `--scale large`.
+    other_by_scope = (
+        _other_results_by_person(
+            other_defs, scope_ids, cohort, date_from, date_to, previous_from, previous_to, min_sample
+        )
+        if other_defs
+        and not include_series
+        and scope_type == ScopeType.PERSON
+        and all(_has_person_batch(metric_def) for metric_def in other_defs)
+        else None
     )
 
     result_sets: dict[int, MetricResultSet] = {}
@@ -617,11 +743,18 @@ def compute_many(
                 previous_to,
                 buckets,
                 min_sample,
+                include_series,
             )
             for metric_def in counter_ratio_defs
         }
-        other = (
-            compute(other_keys, scope, date_from, date_to, cohort, granularity).results if other_keys else {}
-        )
+        other: Mapping[str, MetricResult]
+        if other_by_scope is not None:
+            other = other_by_scope.get(scope_id, {})
+        else:
+            other = (
+                compute(other_keys, scope, date_from, date_to, cohort, granularity, include_series).results
+                if other_keys
+                else {}
+            )
         result_sets[scope_id] = MetricResultSet({**batched, **other})
     return result_sets

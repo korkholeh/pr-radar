@@ -73,6 +73,41 @@ def _metrics_cache(settings, tmp_path):
     caches["default"].clear()
 
 
+@pytest.fixture(scope="session")
+def _large_scale_seed_refcount():
+    return {"count": 0}
+
+
+@pytest.fixture(scope="module")
+def large_scale_seed(django_db_setup, django_db_blocker, _large_scale_seed_refcount):
+    """`manage.py seed_demo --scale large` (50 repositories / 20,000 pull requests, ~4 minutes),
+    shared across every module that depends on it via a session-scoped reference count so the seed
+    runs once for the whole `pytest` session no matter how many modules need it, and is torn down
+    only after the last of them finishes (round 1 review MINOR:
+    `apps/dashboards/tests/test_seed_demo_scale.py` and `tests/test_performance.py` used to each own
+    an independent module-scoped seed of the same volume, roughly tripling the plan's own
+    "~3 minutes" budget for the added gate cost). Committed directly (`unblock()`), not inside a
+    per-test transaction, so it survives across the modules that share it — and is reset via
+    `reset_large_scale_data()` once the reference count reaches zero, so no later, unrelated module
+    in the same session sees leftover rows."""
+    from django.core.management import call_command
+
+    from apps.dashboards.management.commands.seed_demo import reset_large_scale_data
+
+    refcount = _large_scale_seed_refcount
+    if refcount["count"] == 0:
+        with django_db_blocker.unblock():
+            call_command("seed_demo", scale="large", reset=True)
+    refcount["count"] += 1
+
+    yield
+
+    refcount["count"] -= 1
+    if refcount["count"] == 0:
+        with django_db_blocker.unblock():
+            reset_large_scale_data()
+
+
 @pytest.fixture
 def lead_user(django_user_model):
     from django.contrib.auth.models import Group

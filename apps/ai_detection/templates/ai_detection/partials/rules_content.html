@@ -24,7 +24,11 @@
         {% include "ai_detection/partials/rule_row.html" %}
       {% empty %}
       <tr>
-        <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No detection rules yet." %}</td>
+        <td colspan="7">
+          {% translate "No detection rules yet." as empty_title %}
+          {% translate "Add a detection rule to start flagging AI-authored code automatically." as empty_explanation %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

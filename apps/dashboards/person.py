@@ -68,9 +68,14 @@ def build_comparison(scope: Scope, params: DashboardParams, person: Person) -> l
     `ScopeType.PERSON` only (no project/organization baseline exists for it in the registry), so it
     is excluded from the project/organization `compute()` calls and gets `None` baselines rather
     than raising `MetricNotAvailableAtLevel`."""
+    # `ComparisonRow` below only ever reads `.value`/`.sample_size`/`.previous_value`/
+    # `.below_min_sample` off each result — never `.series` — so all three calls pass
+    # `include_series=False` (T11) to skip their per-bucket series entirely.
     keys = list(PERSON_COMPARISON_METRIC_KEYS)
     baseline_keys = [key for key in keys if key != "reviewer_response_p50"]
-    person_set = compute(keys, scope, params.date_from, params.date_to, granularity=params.granularity)
+    person_set = compute(
+        keys, scope, params.date_from, params.date_to, granularity=params.granularity, include_series=False
+    )
 
     project_id = _primary_project_id(scope, params)
     project_set = (
@@ -80,6 +85,7 @@ def build_comparison(scope: Scope, params: DashboardParams, person: Person) -> l
             params.date_from,
             params.date_to,
             granularity=params.granularity,
+            include_series=False,
         )
         if project_id is not None
         else None
@@ -91,6 +97,7 @@ def build_comparison(scope: Scope, params: DashboardParams, person: Person) -> l
         params.date_from,
         params.date_to,
         granularity=params.granularity,
+        include_series=False,
     )
 
     return [

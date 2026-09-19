@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 16:16+0000\n"
+"POT-Creation-Date: 2026-09-18 20:14+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -145,7 +145,7 @@ msgid "Unknown"
 msgstr "Невідомо"
 
 #: apps/activity/models.py:14 apps/activity/models.py:323
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:155
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:163
 msgid "None"
 msgstr "Немає"
 
@@ -586,7 +586,7 @@ msgstr "Назва"
 
 #: apps/ai_detection/forms.py:13 apps/ai_detection/forms.py:38
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:14
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:164
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:172
 msgid "Detector"
 msgstr "Детектор"
 
@@ -596,13 +596,13 @@ msgstr "Патерн"
 
 #: apps/ai_detection/forms.py:15 apps/ai_detection/forms.py:40
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:15
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:165
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:173
 msgid "Tool"
 msgstr "Інструмент"
 
 #: apps/ai_detection/forms.py:16 apps/ai_detection/forms.py:41
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:16
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:166
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:174
 msgid "Confidence"
 msgstr "Впевненість"
 
@@ -786,8 +786,8 @@ msgid "AI signal"
 msgstr "сигнал ШІ"
 
 #: apps/ai_detection/models.py:113
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:144
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:161
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:152
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:169
 msgid "AI signals"
 msgstr "сигнали ШІ"
 
@@ -829,8 +829,8 @@ msgstr "Зберегти"
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:129
 #: apps/dashboards/exports/reports.py:347
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:56
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:60
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:64
 #: apps/policy/templates/policy/partials/policy_form.html:48
 #: apps/policy/templates/policy/partials/policy_form.html:50
 #: apps/policy/templates/policy/partials/policy_form.html:54
@@ -845,8 +845,8 @@ msgstr "Так"
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:129
 #: apps/dashboards/exports/reports.py:347
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:56
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:60
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:64
 #: apps/policy/templates/policy/partials/policy_form.html:48
 #: apps/policy/templates/policy/partials/policy_form.html:50
 #: apps/policy/templates/policy/partials/policy_form.html:54
@@ -893,15 +893,19 @@ msgstr "Нове правило"
 msgid "Actions"
 msgstr "Дії"
 
-#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:27
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:28
 msgid "No detection rules yet."
 msgstr "Ще немає правил детекції."
 
-#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:34
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:29
+msgid "Add a detection rule to start flagging AI-authored code automatically."
+msgstr "Додайте правило детекції, щоб автоматично позначати код, написаний ШІ."
+
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:38
 msgid "Dry run"
 msgstr "Пробний запуск"
 
-#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:36
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:40
 msgid ""
 "Test a pattern against recently stored pull requests before saving it as a "
 "rule."
@@ -909,7 +913,7 @@ msgstr ""
 "Перевірте патерн на нещодавно збережених PR, перш ніж зберегти його як "
 "правило."
 
-#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:54
+#: apps/ai_detection/templates/ai_detection/partials/rules_content.html:58
 msgid "Run"
 msgstr "Запустити"
 
@@ -1429,29 +1433,33 @@ msgid "Value"
 msgstr "Значення"
 
 #: apps/catalog/templates/catalog/partials/identities_content.html:25
-msgid "No unmapped identities. Everyone is accounted for."
-msgstr "Немає незіставлених ідентичностей. Усі враховані."
+msgid "No unmapped identities."
+msgstr "Немає незіставлених ідентичностей."
 
-#: apps/catalog/templates/catalog/partials/identities_content.html:32
-#: apps/policy/templates/policy/partials/violations.html:87
+#: apps/catalog/templates/catalog/partials/identities_content.html:26
+msgid "Everyone is accounted for."
+msgstr "Усі враховані."
+
+#: apps/catalog/templates/catalog/partials/identities_content.html:34
+#: apps/policy/templates/policy/partials/violations.html:89
 msgid "Pagination"
 msgstr "Сторінки"
 
-#: apps/catalog/templates/catalog/partials/identities_content.html:34
+#: apps/catalog/templates/catalog/partials/identities_content.html:36
 #: apps/dashboards/templates/dashboards/partials/table.html:78
-#: apps/policy/templates/policy/partials/violations.html:95
+#: apps/policy/templates/policy/partials/violations.html:97
 msgid "Previous"
 msgstr "Попередня"
 
-#: apps/catalog/templates/catalog/partials/identities_content.html:36
+#: apps/catalog/templates/catalog/partials/identities_content.html:38
 #: apps/dashboards/templates/dashboards/partials/table.html:82
 #, python-format
 msgid "Page %(number)s of %(total)s"
 msgstr "Сторінка %(number)s з %(total)s"
 
-#: apps/catalog/templates/catalog/partials/identities_content.html:38
+#: apps/catalog/templates/catalog/partials/identities_content.html:40
 #: apps/dashboards/templates/dashboards/partials/table.html:86
-#: apps/policy/templates/policy/partials/violations.html:110
+#: apps/policy/templates/policy/partials/violations.html:112
 msgid "Next"
 msgstr "Наступна"
 
@@ -1516,9 +1524,15 @@ msgstr "Виключено"
 msgid "PRs"
 msgstr "PR"
 
-#: apps/catalog/templates/catalog/partials/people_content.html:54
+#: apps/catalog/templates/catalog/partials/people_content.html:55
 msgid "No people yet."
 msgstr "Ще немає людей."
+
+#: apps/catalog/templates/catalog/partials/people_content.html:56
+msgid ""
+"People appear automatically once pull requests or reviews are synced from "
+"GitHub."
+msgstr "Люди з'являються автоматично після синхронізації pull request-ів або ревʼю з GitHub."
 
 #: apps/catalog/templates/catalog/partials/person_form.html:4
 #: apps/catalog/templates/catalog/person_form.html:3
@@ -1781,8 +1795,10 @@ msgid "Edit connection"
 msgstr "Редагувати підключення"
 
 #: apps/connections/templates/connections/form.html:3
+#: apps/connections/templates/connections/partials/discovery_content.html:127
 #: apps/connections/templates/connections/partials/form.html:4
 #: apps/connections/templates/connections/partials/list_content.html:6
+#: apps/connections/templates/connections/partials/list_content.html:41
 msgid "New connection"
 msgstr "Нове підключення"
 
@@ -1824,7 +1840,7 @@ msgstr "Без проєкту"
 #: apps/connections/templates/connections/partials/discovery_content.html:57
 #: apps/dashboards/exports/columns.py:110
 #: apps/dashboards/exports/columns.py:115
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:38
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:39
 #: apps/metrics/models.py:8 apps/policy/templates/policy/console.html:48
 msgid "Repository"
 msgstr "Репозиторій"
@@ -1866,9 +1882,32 @@ msgstr "не прив'язано"
 msgid "No repositories found for this connection."
 msgstr "Для цього підключення не знайдено репозиторіїв."
 
-#: apps/connections/templates/connections/partials/discovery_content.html:100
+#: apps/connections/templates/connections/partials/discovery_content.html:97
+msgid ""
+"Check the connection's token scopes, or that the account has access to any "
+"repositories."
+msgstr "Перевірте права токена підключення або доступ облікового запису до репозиторіїв."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:102
 msgid "Add selected repositories"
 msgstr "Додати вибрані репозиторії"
+
+#: apps/connections/templates/connections/partials/discovery_content.html:121
+msgid "Choose a connection to discover its repositories."
+msgstr "Виберіть підключення, щоб виявити його репозиторії."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:122
+msgid "Pick a connection above to list the repositories it can see."
+msgstr "Виберіть підключення вище, щоб побачити список доступних йому репозиторіїв."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:125
+#: apps/connections/templates/connections/partials/list_content.html:39
+msgid "No GitHub connections yet."
+msgstr "Ще немає підключень GitHub."
+
+#: apps/connections/templates/connections/partials/discovery_content.html:126
+msgid "Create a connection first, then come back to discover its repositories."
+msgstr "Спочатку створіть підключення, потім повертайтеся, щоб виявити його репозиторії."
 
 #: apps/connections/templates/connections/partials/form.html:30
 #, python-format
@@ -1895,8 +1934,8 @@ msgstr ""
 #: apps/connections/templates/connections/partials/list_content.html:28
 #: apps/dashboards/templates/dashboards/partials/exports_list.html:19
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:35
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:103
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:146
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:107
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:154
 #: apps/github_sync/templates/github_sync/partials/runs.html:8
 #: apps/policy/templates/policy/console.html:36
 #: apps/policy/templates/policy/partials/violations.html:29
@@ -1907,9 +1946,10 @@ msgstr "Статус"
 msgid "Active"
 msgstr "Активний"
 
-#: apps/connections/templates/connections/partials/list_content.html:39
-msgid "No GitHub connections yet."
-msgstr "Ще немає підключень GitHub."
+#: apps/connections/templates/connections/partials/list_content.html:40
+msgid ""
+"Add a connection to let PR Radar sync pull requests and reviews from GitHub."
+msgstr "Додайте підключення, щоб PR Radar синхронізував pull request-и та ревʼю з GitHub."
 
 #: apps/connections/templates/connections/partials/row.html:14
 msgid "none"
@@ -2097,7 +2137,7 @@ msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
 #: apps/dashboards/charts.py:392
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:18
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:19
 msgid "Reviewer load"
 msgstr "Навантаження ревʼюерів"
 
@@ -2151,7 +2191,7 @@ msgstr "Заголовок"
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:14
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:43
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:115
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
 msgid "Author"
 msgstr "Автор"
 
@@ -2166,17 +2206,17 @@ msgid "Created"
 msgstr "Створено"
 
 #: apps/dashboards/exports/columns.py:129
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:148
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:156
 msgid "Disclosure"
 msgstr "Розкриття"
 
 #: apps/dashboards/exports/columns.py:130
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:50
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:54
 msgid "Review rounds"
 msgstr "Раунди ревʼю"
 
 #: apps/dashboards/exports/columns.py:131
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:66
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:70
 msgid "Churn"
 msgstr "Churn"
 
@@ -2327,6 +2367,12 @@ msgstr "Перший коміт"
 msgid "Ready for review"
 msgstr "Готовий до ревʼю"
 
+#: apps/dashboards/tables.py:78 apps/dashboards/tables.py:79
+#: apps/dashboards/templates/dashboards/partials/kpi_card.html:54
+#: apps/dashboards/templatetags/dashboards.py:201
+msgid "Small sample"
+msgstr "Мала вибірка"
+
 #: apps/dashboards/templates/dashboards/dashboard.html:4
 #: apps/dashboards/templates/dashboards/dashboard.html:8
 #: templates/partials/nav.html:6
@@ -2421,9 +2467,14 @@ msgstr "Рядків"
 msgid "Download"
 msgstr "Завантажити"
 
-#: apps/dashboards/templates/dashboards/partials/exports_list.html:48
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:49
 msgid "No exports yet."
 msgstr "Ще немає експортів."
+
+#: apps/dashboards/templates/dashboards/partials/exports_list.html:50
+msgid ""
+"Download a CSV or XLSX report from a dashboard table to see it listed here."
+msgstr "Завантажте звіт CSV або XLSX з таблиці дашборду, щоб побачити його тут."
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:18
 msgid "Mode"
@@ -2543,7 +2594,7 @@ msgstr "Немає відкритих порушень"
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:191
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:81
-#: apps/policy/templates/policy/partials/violations.html:81
+#: apps/policy/templates/policy/partials/violations.html:83
 msgid "Apply"
 msgstr "Застосувати"
 
@@ -2551,10 +2602,27 @@ msgstr "Застосувати"
 msgid "Download report (XLSX)"
 msgstr "Завантажити звіт (XLSX)"
 
-#: apps/dashboards/templates/dashboards/partials/kpi_card.html:54
-#: apps/dashboards/templates/dashboards/partials/person_comparison.html:26
-msgid "Small sample"
-msgstr "Мала вибірка"
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:11
+msgid "No data yet."
+msgstr "Ще немає даних."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:12
+msgid "Nothing has been synced from GitHub yet. Run a sync to see data here."
+msgstr "Ще нічого не синхронізовано з GitHub. Запустіть синхронізацію, щоб побачити дані тут."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:13
+msgid "Go to Sync"
+msgstr "Перейти до синхронізації"
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:17
+msgid "No pull requests in this period."
+msgstr "Немає pull request-ів за цей період."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
+msgid ""
+"No pull requests match this period and filter. Widen the period or clear the "
+"filters."
+msgstr "Жоден pull request не відповідає цьому періоду та фільтру. Розширте період або очистіть фільтри."
 
 #: apps/dashboards/templates/dashboards/partials/person_notes.html:8
 msgid "Private notes"
@@ -2598,30 +2666,30 @@ msgstr "На цьому pull request немає порушень політик�
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:71
 #: apps/policy/forms.py:104
-#: apps/policy/templates/policy/partials/violations.html:71
+#: apps/policy/templates/policy/partials/violations.html:73
 msgid "Action"
 msgstr "Дія"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:72
 #: apps/policy/forms.py:97
-#: apps/policy/templates/policy/partials/violations.html:72
+#: apps/policy/templates/policy/partials/violations.html:74
 msgid "Acknowledge"
 msgstr "Взяти до відома"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:73
 #: apps/policy/forms.py:98
-#: apps/policy/templates/policy/partials/violations.html:73
+#: apps/policy/templates/policy/partials/violations.html:75
 msgid "Waive"
 msgstr "Прийняти ризик"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:77
 #: apps/policy/forms.py:106
-#: apps/policy/templates/policy/partials/violations.html:77
+#: apps/policy/templates/policy/partials/violations.html:79
 msgid "Comment"
 msgstr "Коментар"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:78
-#: apps/policy/templates/policy/partials/violations.html:78
+#: apps/policy/templates/policy/partials/violations.html:80
 msgid "Comment (required)"
 msgstr "Коментар (обов'язково)"
 
@@ -2637,29 +2705,29 @@ msgstr "Ревʼю за автором і ревʼюером"
 msgid "No reviews in this period."
 msgstr "У цьому періоді немає ревʼю."
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:20
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:21
 msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period."
 msgstr "Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:33
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:34
 msgid "Waiting for review"
 msgstr "Очікує ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:35
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:36
 msgid "Pull requests waiting for review"
 msgstr "Pull request-и, що очікують ревʼю"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:39
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
 #: apps/policy/templates/policy/partials/violations.html:26
 msgid "Pull request"
 msgstr "Pull request"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:41
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:42
 msgid "Waiting"
 msgstr "Час очікування"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:63
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:64
 msgid "No pull request is waiting for review."
 msgstr "Жоден pull request не очікує ревʼю."
 
@@ -2693,51 +2761,57 @@ msgstr "Переглянути на GitHub"
 msgid "Timeline"
 msgstr "Хронологія"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:32
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:33
 msgid "No timeline events."
 msgstr "Немає подій хронології."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:38
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:34
+msgid ""
+"Events populate as this pull request moves through review, sync and policy "
+"checks."
+msgstr "Події з'являються, коли цей pull request проходить ревʼю, синхронізацію та перевірки політики."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
 msgid "Metrics"
 msgstr "Метрики"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:40
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:44
 msgid "Lead time"
 msgstr "Час виконання"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:46
 msgid "Time to first review"
 msgstr "Час до першого ревʼю"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:44
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:48
 msgid "Cycle time"
 msgstr "Час циклу"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:46
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:50
 msgid "Effective size"
 msgstr "Ефективний розмір"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:48
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:52
 msgid "Size bucket"
 msgstr "Категорія розміру"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:52
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:56
 msgid "Commits after first review"
 msgstr "Коміти після першого ревʼю"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:54
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:58
 msgid "Rubber-stamp review"
 msgstr "Формальне ревʼю"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:58
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:62
 msgid "Self-merged"
 msgstr "Самомердж"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:68
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:72
 msgid "Churn not computed yet."
 msgstr "Churn ще не обчислено."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:71
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:75
 #, python-format
 msgid ""
 "\n"
@@ -2750,15 +2824,16 @@ msgstr ""
 "присутні через %(days)s днів.\n"
 "        "
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:77
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:81
 msgid "This PR had no measurable lines at merge; churn was not computed."
-msgstr "Цей PR не мав вимірюваних рядків на момент злиття; churn не обчислювався."
+msgstr ""
+"Цей PR не мав вимірюваних рядків на момент злиття; churn не обчислювався."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:80
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:84
 msgid "Churn is not measured for rebase merges."
 msgstr "Churn не вимірюється для злиттів методом rebase."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:83
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:87
 #, python-format
 msgid ""
 "\n"
@@ -2770,47 +2845,51 @@ msgstr ""
 "          Цей PR змінює більше ніж %(limit)s файлів; churn не вимірювався.\n"
 "        "
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:88
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:92
 msgid "Churn could not be measured."
 msgstr "Не вдалося виміряти churn."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:97
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:101
 msgid "Files"
 msgstr "Файли"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:99
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:103
 msgid "Changed files"
 msgstr "Змінені файли"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:102
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:106
 msgid "Path"
 msgstr "Шлях"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:104
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:108
 msgid "+/-"
 msgstr "+/-"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:105
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:109
 msgid "Flags"
 msgstr "Позначки"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:118
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:122
 msgid "test"
 msgstr "тест"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:119
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:123
 msgid "excluded"
 msgstr "виключено"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:120
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:124
 msgid "sensitive"
 msgstr "чутливий"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:125
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:130
 msgid "No files recorded."
 msgstr "Файлів не зафіксовано."
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:132
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:131
+msgid "File changes are recorded the next time this pull request is synced."
+msgstr "Зміни у файлах будуть зафіксовані під час наступної синхронізації цього pull request-а."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:140
 #, python-format
 msgid ""
 "\n"
@@ -2837,21 +2916,26 @@ msgstr[3] ""
 "          +%(count)s файла\n"
 "        "
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:150
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:158
 msgid "Tools"
 msgstr "Інструменти"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:167
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:175
 msgid "Evidence"
 msgstr "Доказ"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:168
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:176
 msgid "Commit"
 msgstr "Коміт"
 
-#: apps/dashboards/templates/dashboards/pull_request_detail.html:182
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:191
 msgid "No AI signals detected."
 msgstr "Сигналів ШІ не виявлено."
+
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:192
+msgid ""
+"No AI-authorship pattern matched any commit or file in this pull request."
+msgstr "Жоден патерн авторства ШІ не збігся з жодним коммітом чи файлом цього pull request-а."
 
 #: apps/dashboards/templates/dashboards/reviews.html:4
 #: apps/dashboards/templates/dashboards/reviews.html:7
@@ -2859,36 +2943,36 @@ msgstr "Сигналів ШІ не виявлено."
 msgid "Reviews"
 msgstr "Ревʼю"
 
-#: apps/dashboards/views.py:51
+#: apps/dashboards/views.py:52
 msgid ""
 "No commit was found on the default branch before the churn window ended."
 msgstr "Не знайдено жодного коміту в основній гілці до завершення вікна churn."
 
-#: apps/dashboards/views.py:52
+#: apps/dashboards/views.py:53
 msgid "The repository could not be fetched."
 msgstr "Не вдалося отримати репозиторій (fetch)."
 
-#: apps/dashboards/views.py:53
+#: apps/dashboards/views.py:54
 msgid "Measuring surviving lines with git blame failed."
 msgstr "Не вдалося виміряти рядки, що збереглися, за допомогою git blame."
 
-#: apps/dashboards/views.py:54
+#: apps/dashboards/views.py:55
 msgid "No commits could be attributed to this pull request."
 msgstr "Жодного коміту не вдалося співвіднести із цим pull request."
 
-#: apps/dashboards/views.py:55
+#: apps/dashboards/views.py:56
 msgid "The GitHub connection for this repository is not usable."
 msgstr "З'єднання GitHub для цього репозиторію непридатне для використання."
 
-#: apps/dashboards/views.py:56
+#: apps/dashboards/views.py:57
 msgid "The churn computation timed out."
 msgstr "Обчислення churn перевищило час очікування."
 
-#: apps/dashboards/views.py:57
+#: apps/dashboards/views.py:58
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:435 apps/policy/views.py:100
+#: apps/dashboards/views.py:446 apps/policy/views.py:100
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -2902,7 +2986,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:439 apps/policy/views.py:104
+#: apps/dashboards/views.py:450 apps/policy/views.py:104
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -2997,9 +3081,13 @@ msgstr ""
 "%(name)s: синхронізовано %(repositories)s, пропущено %(skipped)s, помилок "
 "%(errors)s"
 
-#: apps/github_sync/templates/github_sync/partials/runs.html:45
+#: apps/github_sync/templates/github_sync/partials/runs.html:46
 msgid "No sync has run yet."
 msgstr "Синхронізація ще не запускалася."
+
+#: apps/github_sync/templates/github_sync/partials/runs.html:47
+msgid "Run a sync to pull pull requests and reviews from GitHub."
+msgstr "Запустіть синхронізацію, щоб отримати pull request-и та ревʼю з GitHub."
 
 #: apps/github_sync/templates/github_sync/partials/status.html:9
 #, python-format
@@ -3062,7 +3150,7 @@ msgstr ""
 "часткове або суттєве (на відміну від відсутнього чи неоднозначного)."
 
 #: apps/metrics/calculators/adoption.py:274
-#: apps/policy/templates/policy/partials/kpis.html:37
+#: apps/policy/templates/policy/partials/kpis.html:38
 #: apps/policy/templates/policy/partials/mismatch_list.html:3
 msgid "Disclosure mismatches"
 msgstr "Невідповідності розкриття"
@@ -3860,7 +3948,7 @@ msgstr ""
 msgid "N/A"
 msgstr "Н/Д"
 
-#: apps/policy/templates/policy/partials/kpis.html:29
+#: apps/policy/templates/policy/partials/kpis.html:30
 #, python-format
 msgid ""
 "\n"
@@ -3905,9 +3993,13 @@ msgstr "Вимагати тести"
 msgid "Max effective lines"
 msgstr "Макс. ефективних рядків"
 
-#: apps/policy/templates/policy/partials/policy_form.html:60
+#: apps/policy/templates/policy/partials/policy_form.html:61
 msgid "No policy versions yet."
 msgstr "Ще немає версій політики."
+
+#: apps/policy/templates/policy/partials/policy_form.html:62
+msgid "Publish a policy version to start evaluating pull requests against it."
+msgstr "Опублікуйте версію політики, щоб почати оцінювати pull request-и за нею."
 
 #: apps/policy/templates/policy/partials/rule_chart.html:17
 msgid "Violations by rule (data table)"
@@ -3942,19 +4034,28 @@ msgstr "Чутливі шляхи"
 msgid "Glob"
 msgstr "Glob-шаблон"
 
-#: apps/policy/templates/policy/partials/sensitive_paths_content.html:29
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:30
 msgid "No sensitive-path rules yet."
 msgstr "Ще немає правил чутливих шляхів."
+
+#: apps/policy/templates/policy/partials/sensitive_paths_content.html:31
+msgid "Add a rule to flag pull requests that touch sensitive paths."
+msgstr "Додайте правило, щоб позначати pull request-и, які торкаються чутливих шляхів."
 
 #: apps/policy/templates/policy/partials/violations.html:22
 msgid "Policy violations"
 msgstr "Порушення політики"
 
 #: apps/policy/templates/policy/partials/violations.html:62
-msgid "No policy violations match these filters."
-msgstr "Жодне порушення політики не відповідає цим фільтрам."
+msgid "No policy violations."
+msgstr "Немає порушень політики."
 
-#: apps/policy/templates/policy/partials/violations.html:99
+#: apps/policy/templates/policy/partials/violations.html:63
+msgid ""
+"No policy violations match these filters. Widen the filters to see more."
+msgstr "Жодне порушення політики не відповідає цим фільтрам. Розширте фільтри, щоб побачити більше."
+
+#: apps/policy/templates/policy/partials/violations.html:101
 #, python-format
 msgid ""
 "\n"
@@ -4101,48 +4202,3 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:16
 msgid "Send reset link"
 msgstr "Надіслати посилання"
-
-#~ msgid "Dashboards will appear here as they are built."
-#~ msgstr "Панелі з'являтимуться тут у міру їх створення."
-
-#, python-format
-#~ msgid ""
-#~ "This AI pull request touches %(path_count)s files forbidden by a "
-#~ "sensitive-path rule: %(paths)s."
-#~ msgstr ""
-#~ "Цей AI pull request зачіпає %(path_count)s файлів, заборонених правилом "
-#~ "чутливого шляху: %(paths)s."
-
-#, python-format
-#~ msgid ""
-#~ "This AI pull request touches %(path_count)s files needing extra review "
-#~ "(%(paths)s) and has %(approvals)s of %(required)s required human "
-#~ "approvals."
-#~ msgstr ""
-#~ "Цей AI pull request зачіпає %(path_count)s файлів, що потребують "
-#~ "додаткової перевірки (%(paths)s), і має %(approvals)s із %(required)s "
-#~ "необхідних підтверджень людини."
-
-#, python-format
-#~ msgid ""
-#~ "This merged AI pull request has %(approvals)s of %(required)s required "
-#~ "human approvals."
-#~ msgstr ""
-#~ "Цей злитий AI pull request має %(approvals)s із %(required)s необхідних "
-#~ "підтверджень людини."
-
-#, python-format
-#~ msgid ""
-#~ "Changes %(non_test_lines)s lines of non-test code with no test changes "
-#~ "(threshold %(threshold)s)."
-#~ msgstr ""
-#~ "Змінює %(non_test_lines)s рядків коду поза тестами без змін у тестах "
-#~ "(поріг %(threshold)s)."
-
-#, python-format
-#~ msgid ""
-#~ "This AI pull request changes %(effective_lines)s effective lines, over "
-#~ "the limit of %(limit)s."
-#~ msgstr ""
-#~ "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
-#~ "перевищує ліміт %(limit)s."

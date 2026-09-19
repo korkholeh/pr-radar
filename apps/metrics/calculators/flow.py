@@ -12,11 +12,12 @@ from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from apps.activity.models import PullRequest, Review
-from apps.catalog.services import get_int
+from apps.catalog.services import get_int, get_str
 from apps.metrics.calculators.base import (
     GLOBAL_SCOPE,
     DayContext,
     PeriodContext,
+    PeriodContextMany,
     batch_count,
     breakdown_value,
     count_value,
@@ -233,7 +234,15 @@ def _merged_population(ctx: PeriodContext) -> QuerySet:
 
 
 def _durations(queryset: QuerySet, start_field: str, end_field: str) -> list[float | None]:
-    return [duration_hours(start, end) for start, end in queryset.values_list(start_field, end_field)]
+    # `get_str("DURATION_MODE")` read once for the whole population, not once per row (T11
+    # continuation: profiling on `--scale large` found `duration_hours()`'s per-row default
+    # `mode=None` was reading this setting up to once per merged PR, ~129,000 settings reads for
+    # one Overview render — by far the largest remaining cost once the people table's own N+1 was
+    # fixed).
+    mode = get_str("DURATION_MODE")
+    return [
+        duration_hours(start, end, mode=mode) for start, end in queryset.values_list(start_field, end_field)
+    ]
 
 
 def _make_duration_distribution(
@@ -248,6 +257,18 @@ def _make_duration_distribution(
     def _period(ctx: PeriodContext) -> MetricValue:
         return percentile(_durations(_merged_population(ctx), start_field, end_field), pct)
 
+    def _period_by_person(ctx: PeriodContextMany) -> dict[int, MetricValue]:
+        population = scoped_pull_requests(GLOBAL_SCOPE, ctx.cohort).filter(
+            merged_at__gte=day_start(ctx.date_from),
+            merged_at__lt=day_end_exclusive(ctx.date_to),
+            author__person_id__in=ctx.person_ids,
+        )
+        mode = get_str("DURATION_MODE")
+        durations_by_person: dict[int, list[float | None]] = {}
+        for person_id, start, end in population.values_list("author__person_id", start_field, end_field):
+            durations_by_person.setdefault(person_id, []).append(duration_hours(start, end, mode=mode))
+        return {person_id: percentile(values, pct) for person_id, values in durations_by_person.items()}
+
     _register(
         MetricDef(
             key=key,
@@ -258,7 +279,7 @@ def _make_duration_distribution(
             kind="distribution",
             levels=_ALL_LEVELS,
             supports_cohorts=True,
-            calculator=DistributionCalc(period=_period),
+            calculator=DistributionCalc(period=_period, period_by_person=_period_by_person),
             formula=formula,
         )
     )
@@ -323,6 +344,21 @@ def _pr_size_p50_period(ctx: PeriodContext) -> MetricValue:
     return percentile(_pr_sizes(ctx), 50)
 
 
+def _pr_size_p50_period_by_person(ctx: PeriodContextMany) -> dict[int, MetricValue]:
+    population = scoped_pull_requests(GLOBAL_SCOPE, ctx.cohort).filter(
+        merged_at__gte=day_start(ctx.date_from),
+        merged_at__lt=day_end_exclusive(ctx.date_to),
+        author__person_id__in=ctx.person_ids,
+    )
+    sizes_by_person: dict[int, list[float | None]] = {}
+    for person_id, additions, deletions in population.values_list(
+        "author__person_id", "effective_additions", "effective_deletions"
+    ):
+        size = None if additions is None or deletions is None else float(additions + deletions)
+        sizes_by_person.setdefault(person_id, []).append(size)
+    return {person_id: percentile(values, 50) for person_id, values in sizes_by_person.items()}
+
+
 _register(
     MetricDef(
         key="pr_size_p50",
@@ -333,7 +369,9 @@ _register(
         kind="distribution",
         levels=_ALL_LEVELS,
         supports_cohorts=True,
-        calculator=DistributionCalc(period=_pr_size_p50_period),
+        calculator=DistributionCalc(
+            period=_pr_size_p50_period, period_by_person=_pr_size_p50_period_by_person
+        ),
         formula="median(effective_additions + effective_deletions) over PRs merged in the period",
     )
 )
@@ -410,17 +448,39 @@ def _reviewer_response_hours(ctx: PeriodContext) -> list[float | None]:
     queryset = _reviews_given_in_scope(ctx.scope, ctx.cohort).filter(
         submitted_at__gte=day_start(ctx.date_from), submitted_at__lt=day_end_exclusive(ctx.date_to)
     )
+    mode = get_str("DURATION_MODE")
     durations: list[float | None] = []
     for ready_for_review_at, created_at, submitted_at in queryset.values_list(
         "pull_request__ready_for_review_at", "pull_request__created_at", "submitted_at"
     ):
         requested_at = ready_for_review_at if ready_for_review_at is not None else created_at
-        durations.append(duration_hours(requested_at, submitted_at))
+        durations.append(duration_hours(requested_at, submitted_at, mode=mode))
     return durations
 
 
 def _reviewer_response_p50_period(ctx: PeriodContext) -> MetricValue:
     return percentile(_reviewer_response_hours(ctx), 50)
+
+
+def _reviewer_response_p50_period_by_person(ctx: PeriodContextMany) -> dict[int, MetricValue]:
+    """The batched counterpart of `_reviewer_response_hours()`, grouped by the *reviewer*
+    (`_reviews_given_in_scope`'s own PERSON-level distinction: reviews given, not reviews
+    received) — `scoped_reviews` at `GLOBAL_SCOPE` is the population before reviewer narrowing."""
+    queryset = scoped_reviews(GLOBAL_SCOPE, ctx.cohort).filter(
+        submitted_at__gte=day_start(ctx.date_from),
+        submitted_at__lt=day_end_exclusive(ctx.date_to),
+        reviewer__person_id__in=ctx.person_ids,
+    )
+    mode = get_str("DURATION_MODE")
+    durations_by_person: dict[int, list[float | None]] = {}
+    for reviewer_id, ready_for_review_at, created_at, submitted_at in queryset.values_list(
+        "reviewer__person_id", "pull_request__ready_for_review_at", "pull_request__created_at", "submitted_at"
+    ):
+        requested_at = ready_for_review_at if ready_for_review_at is not None else created_at
+        durations_by_person.setdefault(reviewer_id, []).append(
+            duration_hours(requested_at, submitted_at, mode=mode)
+        )
+    return {person_id: percentile(values, 50) for person_id, values in durations_by_person.items()}
 
 
 _register(
@@ -437,7 +497,9 @@ _register(
         kind="distribution",
         levels=frozenset({ScopeType.PERSON}),
         supports_cohorts=True,
-        calculator=DistributionCalc(period=_reviewer_response_p50_period),
+        calculator=DistributionCalc(
+            period=_reviewer_response_p50_period, period_by_person=_reviewer_response_p50_period_by_person
+        ),
         formula="median(submitted_at - (ready_for_review_at or created_at)) over reviews given in the period",
     )
 )

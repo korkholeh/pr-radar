@@ -93,7 +93,9 @@
           </tbody>
         </table>
       {% empty %}
-        <p class="text-[var(--text-muted)]">{% translate "No repositories found for this connection." %}</p>
+        {% translate "No repositories found for this connection." as empty_title %}
+        {% translate "Check the connection's token scopes, or that the account has access to any repositories." as empty_explanation %}
+        {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
       {% endfor %}
 
       <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
@@ -115,5 +117,15 @@
         {% endif %}
       {% endfor %}
     {% endfor %}
+  {% elif connections %}
+    {% translate "Choose a connection to discover its repositories." as empty_title %}
+    {% translate "Pick a connection above to list the repositories it can see." as empty_explanation %}
+    {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+  {% else %}
+    {% translate "No GitHub connections yet." as empty_title %}
+    {% translate "Create a connection first, then come back to discover its repositories." as empty_explanation %}
+    {% translate "New connection" as empty_action_label %}
+    {% url "connections:create" as empty_action_url %}
+    {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
   {% endif %}
 </div>

@@ -93,3 +93,27 @@ so judging it would be meaningless — and is reported as skipped rather than si
 | `acknowledged` | A lead has seen it and recorded a reason, without disputing that it happened. |
 | `waived` | A lead has recorded a reason for accepting the risk anyway. |
 | `resolved` | The condition no longer holds — either because a human fixed the code, or automatically because it re-evaluated to gone (`resolved_automatically=True`). |
+
+## Reading a greyed compliance number
+
+A KPI or table cell showing the `≈` marker (or the fuller "Small sample" sentence on the Policy console's own
+KPIs) means the underlying count is below `MIN_SAMPLE` (default 5, see `docs/CONFIGURATION.md`) — the number
+shown is still the real value, not a placeholder, but a rate or share computed from fewer than five PRs swings
+wildly on the next PR and should not be read as a trend on its own. Treat it as "not enough evidence yet" rather
+than "good" or "bad": a project with one AI PR and zero violations is not meaningfully more compliant than one
+with one AI PR and one violation, and a leadership conversation built on either number alone will not survive the
+sixth PR arriving. Widening the period or looking at a parent scope (project instead of repository, organisation
+instead of project) is usually how a greyed number stops being greyed — the underlying population growing large
+enough, not a setting to change.
+
+## Reading auto-resolve
+
+An auto-resolved violation (`resolved_automatically=True`, `resolved_by=None`) is not deleted and not the same as
+a lead waiving it — it means the *condition* went away on its own (a later push added the missing tests, a
+sensitive-path rule was deactivated, the policy version governing that PR changed), not that anyone judged it. It
+is visible in the violation's own history and in the audit trail like any other status change, so "why did this
+disappear from the open list" always has an answer to point to. Two things it deliberately does **not** do:
+overwrite an `acknowledged`/`waived` row (a lead's own judgement always outranks a re-evaluation), and reopen a
+`resolved` row if the same condition recurs later — a recurrence shows up as a fresh violation on the PR instead,
+so the history stays append-only and a lead reading the violation table never has to wonder whether "resolved"
+quietly became "open" again behind their back.

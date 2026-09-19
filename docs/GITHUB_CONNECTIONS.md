@@ -27,6 +27,24 @@ changed, on every repository the connection will sync.
    archived ones hidden by default), tick the ones to sync, optionally assign a project, and add them. Nothing is
    persisted until you submit a selection.
 4. **Sync → Sync now**, or `uv run python manage.py sync`.
+5. Budget the rate limit for that first sync — see "Rate-limit budget" below — and afterwards check
+   **Settings → Connections** shows `ok` (or a known, already-understood `degraded`); if it shows anything else,
+   look up the code under "Verification codes" below and re-check once you've acted on it.
+
+## Rate-limit budget
+
+GitHub's GraphQL API meters primary rate limit in points, not requests: **5,000 points/hour** for an
+authenticated token (both PAT kinds get the same budget). Nested connections cost more per pull request — a PR
+with many reviews, commits and files is pricier to fetch than a small one — so the exact number of PRs a full
+hourly budget covers varies by repository. `RATE_LIMIT_MIN_REMAINING` (default 200, see `docs/CONFIGURATION.md`)
+is the remaining-points floor below which the client pauses and waits for GitHub's hourly reset instead of
+pushing through and risking a hard 403.
+
+The **first** sync on a connection is the most expensive one: it walks `BACKFILL_DAYS` (default 180) of history
+for every repository you added. A connection with many repositories, or a long backfill window, can spend its
+whole hourly budget before finishing one pass — expect a large first sync to pause and resume across more than
+one hour, which is normal, not a stuck sync. The `RATE_LIMIT` code (below) reports the remaining budget and reset
+time after every check; the Sync page's run history shows the same numbers per connection once a sync has run.
 
 ## Verification codes
 

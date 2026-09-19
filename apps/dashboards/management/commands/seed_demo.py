@@ -21,10 +21,12 @@ import random
 from typing import Any
 
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.activity.derive import derive_pull_requests
+from apps.activity.followup import update_followup_fixes_for
 from apps.activity.models import (
     CheckStatus,
     Commit,
@@ -34,15 +36,18 @@ from apps.activity.models import (
     Review,
     ReviewComment,
 )
-from apps.ai_detection.models import Tool
+from apps.ai_detection.models import AISignal, DetectionRule, Tool
+from apps.ai_detection.services import detect_pull_requests
 from apps.catalog.models import Identity, Organization, Person, Project, Repository
 from apps.connections.models import GitHubConnection
 from apps.github_sync.models import SyncRun
 from apps.github_sync.pipeline import process_pull_request
+from apps.metrics.models import DataVersion
 from apps.metrics.rollups import rebuild
 from apps.metrics.services import bump_data_version
 from apps.metrics.timeframe import day_start, today
 from apps.policy.models import AIPolicy
+from apps.policy.services import evaluate_pull_requests
 
 SEED = 20260918
 DEFAULT_DAYS = 120
@@ -124,6 +129,20 @@ FILE_POOL = [
 LABEL_POOL = ["bug", "enhancement", "chore", "hotfix"]
 AI_TOOL_LINES = ["Claude Code", "GitHub Copilot", "Cursor, Claude Code", "Codex", "Claude"]
 
+# `--scale large` (plan T9, phase 11 §4): a separate namespace from the demo constants above so
+# the two scales never collide in the same database -- `large` is create-only and never merged
+# with the demo dataset.
+LARGE_CONNECTION_NAME = "PR Radar large-scale connection"
+LARGE_ORG_DEFS: list[dict[str, str]] = [
+    {"login": "pr-radar-large-alpha", "github_id": "LARGE_ORG_ALPHA"},
+    {"login": "pr-radar-large-beta", "github_id": "LARGE_ORG_BETA"},
+]
+LARGE_REPO_COUNT = 50
+LARGE_PROJECT_COUNT = 5
+LARGE_PEOPLE_COUNT = 60
+LARGE_PR_COUNT = 20_000
+LARGE_BATCH_SIZE = 2_000
+
 
 class Command(BaseCommand):
     help = (
@@ -145,10 +164,26 @@ class Command(BaseCommand):
             default=DEFAULT_DAYS,
             help=f"Number of days of history to spread the seeded PRs across (default {DEFAULT_DAYS}).",
         )
+        parser.add_argument(
+            "--scale",
+            choices=["demo", "large"],
+            default="demo",
+            help=(
+                "'demo' (default): today's 6 repos / 250 PRs, idempotent. "
+                "'large': 50 repos / 20,000 PRs via a bulk write path for performance testing "
+                "(plan T9/T10) -- create-only, requires --reset on a database that already has "
+                "large-scale rows."
+            ),
+        )
 
     def handle(self, *args: object, **options: object) -> None:
         days = int(options["days"])  # type: ignore[call-overload]
         reset = bool(options["reset"])
+        scale = str(options["scale"])
+
+        if scale == "large":
+            self._handle_large(days=days, reset=reset)
+            return
 
         date_to = today()
         date_from = date_to - datetime.timedelta(days=days - 1)
@@ -518,6 +553,20 @@ class Command(BaseCommand):
             )
         return files
 
+    def _build_files_large(self, rng: random.Random) -> list[dict[str, Any]]:
+        """Leaner than `_build_files` (plan §4: 1-3 files at `--scale large`, vs 1-6 at demo
+        scale) -- the acceptance criterion is repository/PR volume, not child row density."""
+        paths = rng.sample(FILE_POOL, k=rng.randint(1, 3))
+        return [
+            {
+                "path": path,
+                "status": rng.choice(["added", "modified", "modified", "removed"]),
+                "additions": rng.randint(1, 150),
+                "deletions": rng.randint(0, 80),
+            }
+            for path in paths
+        ]
+
     def _deterministic_sha(self, seed: str) -> str:
         return hashlib.sha1(f"seed-demo-{seed}".encode()).hexdigest()
 
@@ -655,3 +704,397 @@ class Command(BaseCommand):
                 "observed_at": pull_request.created_at + datetime.timedelta(minutes=rng.randint(5, 90)),
             },
         )
+
+    # -- --scale large -----------------------------------------------------------------------------
+    #
+    # 50 repositories / 20,000 PRs (plan §4): `get_or_create` per child row is exactly what makes
+    # the demo-scale path too slow at this volume (measured ~14s/250 PRs, ~18min/20,000), so this
+    # path writes with `bulk_create` in batches of `LARGE_BATCH_SIZE` and then runs the same batch
+    # functions `recompute` uses over the freshly written PRs, rather than a second, hand-rolled
+    # implementation of derive/detect/evaluate. Create-only: a second run without --reset raises
+    # `CommandError` instead of silently duplicating or half-reseeding 20,000 rows.
+
+    def _handle_large(self, *, days: int, reset: bool) -> None:
+        date_to = today()
+        date_from = date_to - datetime.timedelta(days=days - 1)
+        policy_effective_from = day_start(date_from) - datetime.timedelta(days=1)
+
+        if reset:
+            self._reset_large(policy_effective_from)
+        elif Organization.objects.filter(login__in=[org["login"] for org in LARGE_ORG_DEFS]).exists():
+            raise CommandError(
+                "seed_demo --scale large: large-scale data already exists in this database. "
+                "Pass --reset to wipe and reseed it (it is create-only and never merges with an "
+                "existing run)."
+            )
+
+        with transaction.atomic():
+            connection = self._seed_large_connection()
+            organizations = self._seed_large_organizations()
+            repositories = self._seed_large_repositories(organizations, connection)
+            self._seed_large_projects(repositories)
+            people, identities = self._seed_large_people()
+            call_command("seed_detection_rules")
+            self._seed_policy(policy_effective_from)
+
+        rng = random.Random(SEED)
+        pull_request_ids = self._seed_large_pull_requests(rng, repositories, identities, date_from, date_to)
+
+        derived = derive_pull_requests(PullRequest.objects.filter(pk__in=pull_request_ids))
+        update_followup_fixes_for(PullRequest.objects.filter(pk__in=pull_request_ids))
+        detect_pull_requests(PullRequest.objects.filter(pk__in=pull_request_ids))
+        evaluate_pull_requests(PullRequest.objects.filter(pk__in=pull_request_ids))
+        rebuild(date_from, date_to)
+        bump_data_version()
+        self._seed_large_sync_run(repositories, len(pull_request_ids))
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"seed_demo --scale large: {len(organizations)} organizations, "
+                f"{len(repositories)} repositories, {LARGE_PROJECT_COUNT} projects, {len(people)} "
+                f"people, {derived} pull requests over {date_from.isoformat()}..{date_to.isoformat()}."
+            )
+        )
+
+    def _reset_large(self, policy_effective_from: datetime.datetime) -> None:
+        """Mirrors `_reset()` for the large-scale namespace: deleting `Organization` cascades to
+        `Repository` and from there to every `PullRequest` and its dependents."""
+        org_logins = [org["login"] for org in LARGE_ORG_DEFS]
+        person_display_names = [f"Large Demo Dev {i:03d}" for i in range(LARGE_PEOPLE_COUNT)]
+        identity_values = [f"large-dev-{i:03d}" for i in range(LARGE_PEOPLE_COUNT)]
+
+        Organization.objects.filter(login__in=org_logins).delete()
+        GitHubConnection.objects.filter(name=LARGE_CONNECTION_NAME).delete()
+        Project.objects.filter(slug__startswith="demo-project-large-").delete()
+        Identity.objects.filter(kind=Identity.Kind.GITHUB_LOGIN, value__in=identity_values).delete()
+        Person.objects.filter(display_name__in=person_display_names).delete()
+        AIPolicy.objects.filter(effective_from=policy_effective_from).delete()
+        SyncRun.objects.filter(stats__seed_demo_large=True).delete()
+
+    def _seed_large_sync_run(self, repositories: list[Repository], pull_request_count: int) -> None:
+        sync_run = SyncRun.objects.filter(stats__seed_demo_large=True).first()
+        finished_at = timezone.now()
+        if sync_run is None:
+            sync_run = SyncRun.objects.create(
+                trigger=SyncRun.Trigger.CLI,
+                status=SyncRun.Status.SUCCESS,
+                started_at=finished_at - datetime.timedelta(minutes=5),
+                finished_at=finished_at,
+                stats={
+                    "seed_demo_large": True,
+                    "repositories": len(repositories),
+                    "pull_requests": pull_request_count,
+                },
+            )
+        else:
+            sync_run.status = SyncRun.Status.SUCCESS
+            sync_run.finished_at = finished_at
+            sync_run.save(update_fields=["status", "finished_at"])
+        sync_run.repositories.set(repositories)
+
+    def _seed_large_connection(self) -> GitHubConnection:
+        connection, _created = GitHubConnection.objects.get_or_create(
+            name=LARGE_CONNECTION_NAME,
+            defaults={
+                "kind": GitHubConnection.Kind.FINE_GRAINED_PAT,
+                "owner_login": LARGE_ORG_DEFS[0]["login"],
+                "status": GitHubConnection.Status.OK,
+                "is_active": True,
+            },
+        )
+        return connection
+
+    def _seed_large_organizations(self) -> list[Organization]:
+        organizations = []
+        for org_def in LARGE_ORG_DEFS:
+            organization, _created = Organization.objects.get_or_create(
+                login=org_def["login"],
+                defaults={"type": Organization.Type.ORG, "github_id": org_def["github_id"]},
+            )
+            organizations.append(organization)
+        return organizations
+
+    def _seed_large_repositories(
+        self, organizations: list[Organization], connection: GitHubConnection
+    ) -> list[Repository]:
+        repositories = []
+        for index in range(LARGE_REPO_COUNT):
+            organization = organizations[index % len(organizations)]
+            slug = f"repo-{index:03d}"
+            full_name = f"{organization.login}/{slug}"
+            repository, _created = Repository.objects.get_or_create(
+                full_name=full_name,
+                defaults={
+                    "organization": organization,
+                    "connection": connection,
+                    "name": slug,
+                    "github_id": f"LARGE_REPO_{index:03d}",
+                    "default_branch": "main",
+                    "is_active": True,
+                },
+            )
+            repositories.append(repository)
+        return repositories
+
+    def _seed_large_projects(self, repositories: list[Repository]) -> None:
+        per_project = -(-len(repositories) // LARGE_PROJECT_COUNT)  # ceil division
+        for project_index in range(LARGE_PROJECT_COUNT):
+            chunk = repositories[project_index * per_project : (project_index + 1) * per_project]
+            if not chunk:
+                continue
+            project, _created = Project.objects.get_or_create(
+                slug=f"demo-project-large-{project_index:02d}",
+                defaults={"name": f"Large Demo Project {project_index:02d}"},
+            )
+            project.repositories.set(chunk)
+
+    def _seed_large_people(self) -> tuple[list[Person], list[Identity]]:
+        people = []
+        identities = []
+        for index in range(LARGE_PEOPLE_COUNT):
+            login = f"large-dev-{index:03d}"
+            person, _created = Person.objects.get_or_create(
+                display_name=f"Large Demo Dev {index:03d}",
+                defaults={"team": "Large demo team"},
+            )
+            identity, _created = Identity.objects.get_or_create(
+                kind=Identity.Kind.GITHUB_LOGIN,
+                value=login,
+                defaults={"person": person, "github_id": f"LARGE_IDENT_{index:03d}"},
+            )
+            people.append(person)
+            identities.append(identity)
+        return people, identities
+
+    def _seed_large_pull_requests(
+        self,
+        rng: random.Random,
+        repositories: list[Repository],
+        identities: list[Identity],
+        date_from: datetime.date,
+        date_to: datetime.date,
+    ) -> list[int]:
+        """Builds every PR and its lean set of children (plan §4: 1-2 commits, 1-3 files, one
+        review on 40% of PRs, one check status on 80%) in memory and writes each in
+        `LARGE_BATCH_SIZE` chunks with `bulk_create`, so 20,000 rows never sit fully materialised
+        as unsaved objects and no batch triggers SQLite's variable-count limits."""
+        window_days = max((date_to - date_from).days, 0) + 1
+        repo_number_counters: dict[int, int] = dict.fromkeys((repo.pk for repo in repositories), 0)
+        all_pull_request_ids: list[int] = []
+
+        for batch_start in range(0, LARGE_PR_COUNT, LARGE_BATCH_SIZE):
+            batch_indexes = range(batch_start, min(batch_start + LARGE_BATCH_SIZE, LARGE_PR_COUNT))
+            batch_prs: list[PullRequest] = []
+            batch_meta: list[tuple[list[dict[str, Any]], Repository, Identity, int]] = []
+
+            for index in batch_indexes:
+                repository = rng.choice(repositories)
+                repo_number_counters[repository.pk] += 1
+                number = repo_number_counters[repository.pk]
+                author_identity = identities[rng.randrange(len(identities))]
+                created_at = self._random_created_at(rng, date_from, window_days)
+                state, merged_at, closed_at = self._pick_lifecycle(rng, created_at)
+                merged_by = None
+                if state == PullRequest.State.MERGED and rng.random() < 0.7:
+                    merged_by = identities[rng.randrange(len(identities))]
+
+                files = self._build_files_large(rng)
+                additions = sum(f["additions"] for f in files)
+                deletions = sum(f["deletions"] for f in files)
+
+                batch_prs.append(
+                    PullRequest(
+                        repository=repository,
+                        number=number,
+                        github_id=f"LARGE_PR_{index:06d}",
+                        author=author_identity,
+                        title=f"{rng.choice(TITLE_VERBS)} {rng.choice(TITLE_NOUNS)}",
+                        body="",
+                        state=state,
+                        is_draft=state == PullRequest.State.OPEN and rng.random() < 0.25,
+                        base_ref="main",
+                        head_ref=f"feature/{rng.choice(TITLE_NOUNS).replace(' ', '-')}-{index}",
+                        created_at=created_at,
+                        merged_at=merged_at,
+                        closed_at=closed_at,
+                        merged_by=merged_by,
+                        merge_commit_sha=self._deterministic_sha(f"large-merge-{index}") if merged_at else "",
+                        merge_method=(
+                            rng.choice(
+                                [
+                                    PullRequest.MergeMethod.MERGE,
+                                    PullRequest.MergeMethod.SQUASH,
+                                    PullRequest.MergeMethod.REBASE,
+                                ]
+                            )
+                            if merged_at
+                            else PullRequest.MergeMethod.UNKNOWN
+                        ),
+                        additions=additions,
+                        deletions=deletions,
+                        changed_files=len(files),
+                        labels=self._build_labels(rng),
+                    )
+                )
+                batch_meta.append((files, repository, author_identity, index))
+
+            PullRequest.objects.bulk_create(batch_prs, batch_size=LARGE_BATCH_SIZE)
+            all_pull_request_ids.extend(pr.pk for pr in batch_prs)
+
+            self._seed_large_children(rng, batch_prs, batch_meta, identities)
+
+        return all_pull_request_ids
+
+    def _seed_large_children(
+        self,
+        rng: random.Random,
+        batch_prs: list[PullRequest],
+        batch_meta: list[tuple[list[dict[str, Any]], Repository, Identity, int]],
+        identities: list[Identity],
+    ) -> None:
+        pr_files: list[PRFile] = []
+        commits: list[Commit] = []
+        commit_owners: list[tuple[PullRequest, int]] = []  # parallel to `commits`: (pr, position)
+        reviews: list[Review] = []
+        check_statuses: list[CheckStatus] = []
+
+        # (pull_request, commit_shas) collected during the main pass, consumed for check statuses
+        # after commits are known -- a check status is observed against the PR's last commit sha.
+        pending_check_statuses: list[tuple[PullRequest, list[str]]] = []
+
+        for pull_request, (files, repository, author_identity, index) in zip(
+            batch_prs, batch_meta, strict=True
+        ):
+            for file_def in files:
+                pr_files.append(
+                    PRFile(
+                        pull_request=pull_request,
+                        path=file_def["path"],
+                        status=file_def["status"],
+                        additions=file_def["additions"],
+                        deletions=file_def["deletions"],
+                    )
+                )
+
+            commit_count = rng.randint(1, 2)
+            commit_shas: list[str] = []
+            for position in range(commit_count):
+                sha = self._deterministic_sha(f"large-pr-{index}-commit-{position}")
+                committed_at = pull_request.created_at - datetime.timedelta(
+                    hours=rng.randint(0, 48), minutes=rng.randint(0, 59)
+                )
+                commits.append(
+                    Commit(
+                        repository=repository,
+                        sha=sha,
+                        author_identity=author_identity,
+                        committer_identity=author_identity,
+                        authored_at=committed_at,
+                        committed_at=committed_at,
+                        message=f"Commit {position} for large PR {index}",
+                        additions=rng.randint(1, 100),
+                        deletions=rng.randint(0, 50),
+                    )
+                )
+                commit_owners.append((pull_request, position))
+                commit_shas.append(sha)
+
+            end_bound = pull_request.closed_at or pull_request.merged_at
+            if end_bound is not None and rng.random() < 0.4:
+                reviewer = identities[rng.randrange(len(identities))]
+                reviews.append(
+                    Review(
+                        github_id=f"LARGE_REVIEW_{pull_request.github_id}",
+                        pull_request=pull_request,
+                        reviewer=reviewer,
+                        state=rng.choices(
+                            [Review.State.APPROVED, Review.State.CHANGES_REQUESTED, Review.State.COMMENTED],
+                            weights=[60, 20, 20],
+                        )[0],
+                        submitted_at=self._random_between(rng, pull_request.created_at, end_bound),
+                        body_length=rng.randint(0, 400),
+                        comments_count=rng.randint(0, 5),
+                    )
+                )
+
+            if commit_shas and rng.random() < 0.8:
+                pending_check_statuses.append((pull_request, commit_shas))
+
+        if pr_files:
+            PRFile.objects.bulk_create(pr_files, batch_size=LARGE_BATCH_SIZE)
+
+        if commits:
+            Commit.objects.bulk_create(commits, batch_size=LARGE_BATCH_SIZE)
+            pr_commits = [
+                PullRequestCommit(pull_request=pull_request, commit=commit, position=position)
+                for commit, (pull_request, position) in zip(commits, commit_owners, strict=True)
+            ]
+            PullRequestCommit.objects.bulk_create(pr_commits, batch_size=LARGE_BATCH_SIZE)
+
+        if reviews:
+            Review.objects.bulk_create(reviews, batch_size=LARGE_BATCH_SIZE)
+
+        for pull_request, commit_shas in pending_check_statuses:
+            check_statuses.append(
+                CheckStatus(
+                    pull_request=pull_request,
+                    commit_sha=commit_shas[-1],
+                    is_first_ci_commit=True,
+                    rollup_state=rng.choices(
+                        [
+                            CheckStatus.RollupState.SUCCESS,
+                            CheckStatus.RollupState.FAILURE,
+                            CheckStatus.RollupState.PENDING,
+                            CheckStatus.RollupState.ERROR,
+                        ],
+                        weights=[75, 15, 5, 5],
+                    )[0],
+                    observed_at=pull_request.created_at + datetime.timedelta(minutes=rng.randint(5, 90)),
+                )
+            )
+        if check_statuses:
+            CheckStatus.objects.bulk_create(check_statuses, batch_size=LARGE_BATCH_SIZE)
+
+
+def reset_large_scale_data(days: int = DEFAULT_DAYS) -> None:
+    """Deletes every `--scale large` row without reseeding — the teardown a module-scoped test
+    fixture that commits `--scale large` data directly (via `django_db_blocker.unblock()`, outside
+    any per-test transaction, the pattern `test_seed_demo_scale.py`/`test_performance.py` both use
+    to share one ~4-minute seed across their module) needs to leave the shared test database clean
+    for whatever test module the pytest session collects next — `_reset_large()` is a `Command`
+    instance method and needs the same `policy_effective_from` its own `_handle_large()` computed
+    from `days`, so this recomputes it the same way rather than making every caller duplicate the
+    date math.
+
+    `_reset_large()` only deletes the entities (`Organization` and what cascades from it, plus
+    `AIPolicy`/`SyncRun`) — `DailyRollup` rows carry no foreign key to any of them (`scope_id` is a
+    loose int, not a relation), so they would otherwise survive as orphans (found the hard way: a
+    later test module counting `DailyRollup` rows saw hundreds of thousands left over). `rebuild()`
+    deletes and recomputes every rollup row in `[date_from, date_to]` from whatever `PullRequest`
+    data remains after the entity deletion above — the same call `_handle_large()` itself makes
+    after a normal reseed, so this reuses that behaviour instead of guessing which rows are safe to
+    delete. `DataVersion`'s singleton row (bumped by `bump_data_version()` during the seed, itself
+    committed the same non-transactional way) is deleted outright rather than reconciled — it is a
+    derived counter with no content of its own, and the next `data_version()` call anywhere in the
+    session recreates it via `get_or_create` at version 1, which is exactly what a test expecting a
+    fresh read (`apps/metrics/tests/test_data_version.py`) assumes. `DetectionRule` rows (seeded by
+    `call_command("seed_detection_rules")` inside `_handle_large()`, same as the default `demo`
+    scale seeds them) are global config with no org/scale of their own — not "large-scale data" in
+    any real sense — but the only thing that ever creates them in this codebase is idempotent
+    seeding, so deleting them here is fully recoverable and is what lets
+    `tests/test_empty_states.py`'s `ai_detection:rules` case see a genuinely empty table.
+    `AISignal.rule` is `on_delete=PROTECT`, so any `AISignal` row still pointing at a rule (e.g.
+    from `tests/test_pages_smoke.py`'s own committed `--scale demo` seed, which shares these same
+    global rule rows and — a separate, pre-existing gap logged in DECISIONS — is never torn down
+    either) must go first, or the `DetectionRule` delete raises `ProtectedError` instead of
+    quietly leaving stale rows behind. Safe only because this whole function's only callers are
+    test-fixture teardowns against a throwaway `pytest` database — the real `--scale large --reset`
+    CLI path uses `_reset_large()` directly, without this function, and is unaffected."""
+    date_to = today()
+    date_from = date_to - datetime.timedelta(days=days - 1)
+    policy_effective_from = day_start(date_from) - datetime.timedelta(days=1)
+    Command()._reset_large(policy_effective_from)
+    rebuild(date_from, date_to)
+    DataVersion.objects.all().delete()
+    AISignal.objects.all().delete()
+    DetectionRule.objects.all().delete()

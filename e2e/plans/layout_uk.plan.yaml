@@ -1,0 +1,56 @@
+feature: layout-uk
+surfaces: [app]
+entry: "/ — Overview, switched to Ukrainian"
+
+under_test:
+  - static/css/tokens.css, static/css/app.css (no `whitespace-nowrap` left on a metric table header)
+  - apps/dashboards/templates/dashboards/partials/{kpi_card,table}.html (break-words/hyphens-auto, two-line
+    KPI title with a full-string title attribute)
+  - apps/policy/templates/policy/partials/kpis.html
+
+oracle: >
+  Plan §6 / CLAUDE.md's translation-parity rule and spec §10.7: 143 uk strings in this catalogue run 40%+ longer
+  than their English source. A lead who switches the UI to Ukrainian must never see the page itself grow wider
+  than the viewport (horizontal scroll on `<html>`), nor a KPI card title or a table header clipped by its own
+  box — at both a desktop and a narrow-phone width, on every dashboard surface that carries the KPI/table
+  components this phase touched.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e, DEBUG=False) with the seeded e2e-lead persona. Checked at
+  1280x800 (desktop) and 390x844 (a narrow phone, iPhone 12-class) per plan §6. `document.documentElement`'s
+  `scrollWidth <= clientWidth + 1` is the page-wide check (the `+1` absorbs sub-pixel rounding some browsers
+  report); a second, per-element check walks every `[data-testid="kpi-card"] .kpi-title`-shaped title and every
+  `table th` and asserts none individually overflows its own box either, since a page can stay narrow overall
+  while one flex/grid child still clips.
+
+cases:
+  - id: overview-no-horizontal-overflow
+    priority: high
+    steps: ["log in as e2e-lead", "switch language to Ukrainian", "open /", "resize to each viewport"]
+    expected: "document.documentElement.scrollWidth <= clientWidth + 1 at both viewports"
+
+  - id: reviews-no-horizontal-overflow
+    priority: high
+    steps: ["log in as e2e-lead", "switch language to Ukrainian", "open /reviews/", "resize to each viewport"]
+    expected: "document.documentElement.scrollWidth <= clientWidth + 1 at both viewports"
+
+  - id: people-no-horizontal-overflow
+    priority: high
+    steps: ["log in as e2e-lead", "switch language to Ukrainian", "open /people/", "resize to each viewport"]
+    expected: "document.documentElement.scrollWidth <= clientWidth + 1 at both viewports"
+
+  - id: policy-console-no-horizontal-overflow
+    priority: high
+    steps: ["log in as e2e-admin", "switch language to Ukrainian", "open /policy/", "resize to each viewport"]
+    expected: "document.documentElement.scrollWidth <= clientWidth + 1 at both viewports"
+
+  - id: no-clipped-kpi-card-or-table-header
+    priority: high
+    steps:
+      - "log in as e2e-lead"
+      - "switch language to Ukrainian"
+      - "open / and /reviews/ and /people/, at both viewports"
+    expected: "no KPI card title element and no table header cell has scrollWidth > clientWidth"
+
+findings: []
+deferred_not_authored: []

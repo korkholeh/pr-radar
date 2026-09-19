@@ -42,7 +42,11 @@
     {% endif %}
     {% empty %}
     <tr>
-      <td colspan="7" class="text-[var(--text-muted)] py-4">{% translate "No sync has run yet." %}</td>
+      <td colspan="7">
+        {% translate "No sync has run yet." as empty_title %}
+        {% translate "Run a sync to pull pull requests and reviews from GitHub." as empty_explanation %}
+        {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>

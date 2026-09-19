@@ -26,7 +26,11 @@
         {% include "policy/partials/sensitive_path_row.html" %}
       {% empty %}
         <tr>
-          <td colspan="6" class="text-[var(--text-muted)] py-4">{% translate "No sensitive-path rules yet." %}</td>
+          <td colspan="6">
+            {% translate "No sensitive-path rules yet." as empty_title %}
+            {% translate "Add a rule to flag pull requests that touch sensitive paths." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
         </tr>
       {% endfor %}
     </tbody>

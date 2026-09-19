@@ -217,6 +217,8 @@ def _build_latency(scope: Scope, params: DashboardParams) -> ChartPayload:
 
 
 def _build_pr_size_distribution(scope: Scope, params: DashboardParams) -> ChartPayload:
+    # Only `.breakdown` is read below (a bucketed bar chart, not a time series): `include_series=False`
+    # (T11) skips the per-bucket raw-row query this distribution metric would otherwise pay for.
     ai_result = compute(
         ["pr_size_buckets"],
         scope,
@@ -224,6 +226,7 @@ def _build_pr_size_distribution(scope: Scope, params: DashboardParams) -> ChartP
         params.date_to,
         cohort=Cohort.AI,
         granularity=params.granularity,
+        include_series=False,
     )["pr_size_buckets"]
     non_ai_result = compute(
         ["pr_size_buckets"],
@@ -232,6 +235,7 @@ def _build_pr_size_distribution(scope: Scope, params: DashboardParams) -> ChartP
         params.date_to,
         cohort=Cohort.NON_AI,
         granularity=params.granularity,
+        include_series=False,
     )["pr_size_buckets"]
     ai_by_label = {item.label: item.value or 0.0 for item in ai_result.breakdown}
     non_ai_by_label = {item.label: item.value or 0.0 for item in non_ai_result.breakdown}
@@ -262,11 +266,25 @@ def _build_pr_size_distribution(scope: Scope, params: DashboardParams) -> ChartP
 
 def _build_churn_rework(scope: Scope, params: DashboardParams) -> ChartPayload:
     keys = ["churn_21d", "rework_rate"]
+    # Only `.value` is read below (two static bars, not a time series): `include_series=False`
+    # (T11) skips the per-bucket series `churn_21d` (a distribution metric) would otherwise pay for.
     ai_set = compute(
-        keys, scope, params.date_from, params.date_to, cohort=Cohort.AI, granularity=params.granularity
+        keys,
+        scope,
+        params.date_from,
+        params.date_to,
+        cohort=Cohort.AI,
+        granularity=params.granularity,
+        include_series=False,
     )
     non_ai_set = compute(
-        keys, scope, params.date_from, params.date_to, cohort=Cohort.NON_AI, granularity=params.granularity
+        keys,
+        scope,
+        params.date_from,
+        params.date_to,
+        cohort=Cohort.NON_AI,
+        granularity=params.granularity,
+        include_series=False,
     )
     datasets = [
         ChartDataset(gettext("AI"), "--series-ai", [ai_set[key].value for key in keys]),
@@ -295,10 +313,19 @@ def _build_violations_by_rule(scope: Scope, params: DashboardParams) -> ChartPay
         # more than CHART_MAX_BUCKETS months (~2.6 years) cannot be coarsened further — keep the
         # most recent buckets instead, which is what a "how did this move recently" chart wants.
         buckets = buckets[-CHART_MAX_BUCKETS:]
+    # Only `.breakdown` is read below, once per outer bucket: `include_series=False` (T11) skips the
+    # nested per-inner-bucket series each of these ~31 calls would otherwise build (previously the
+    # dominant cost of this chart — see DECISIONS p11/implement).
     per_bucket = [
-        compute(["violations_by_rule"], scope, bucket_from, bucket_to, cohort=Cohort.ALL, granularity="day")[
-            "violations_by_rule"
-        ]
+        compute(
+            ["violations_by_rule"],
+            scope,
+            bucket_from,
+            bucket_to,
+            cohort=Cohort.ALL,
+            granularity="day",
+            include_series=False,
+        )["violations_by_rule"]
         for bucket_from, bucket_to in buckets
     ]
     rule_codes = sorted({item.label for result in per_bucket for item in result.breakdown})

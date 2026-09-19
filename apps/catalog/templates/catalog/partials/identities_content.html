@@ -21,8 +21,10 @@
         {% include "catalog/partials/identity_row.html" %}
       {% empty %}
       <tr>
-        <td colspan="3" class="text-[var(--text-muted)] py-4">
-          {% translate "No unmapped identities. Everyone is accounted for." %}
+        <td colspan="3">
+          {% translate "No unmapped identities." as empty_title %}
+          {% translate "Everyone is accounted for." as empty_explanation %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
         </td>
       </tr>
       {% endfor %}

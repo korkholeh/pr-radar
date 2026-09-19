@@ -127,7 +127,10 @@ def test_queue_empty_state_renders(client, admin_user):
     client.force_login(admin_user)
     response = client.get(reverse("catalog:identity_queue"))
     assert response.status_code == 200
-    assert "No unmapped identities" in response.content.decode()
+    content = response.content.decode()
+    assert 'data-testid="empty-state"' in content
+    assert "No unmapped identities" in content
+    assert "Everyone is accounted for." in content
 
 
 @pytest.mark.django_db

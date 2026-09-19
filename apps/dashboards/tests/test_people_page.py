@@ -88,12 +88,21 @@ def test_people_table_defaults_to_name_order(client, lead_user):
 
 @pytest.mark.django_db
 def test_people_index_query_count_is_bounded(client, lead_user, django_assert_num_queries):
-    """Pinned, not derived: `PEOPLE_METRIC_KEYS` includes distribution/state metrics that cost one
-    query per person (documented, accepted cost — see
+    """Pinned, not derived. `PEOPLE_METRIC_KEYS`'s five distribution/state metrics used to cost one
+    query per person (documented cost — see
     `test_query_counts.py::test_people_table_query_count_grows_by_the_known_per_person_cost`), so
-    this bound moves with the fixture's person count, not with an unrelated N+1."""
+    this bound used to move with the fixture's person count; T11 continuation gave every one of
+    those five metrics a batched `period_by_person`/`at_date_by_person` implementation, so
+    `compute_many()` now costs a fixed number of queries regardless of person count and this bound
+    no longer scales with the fixture either.
+
+    Down from 131 (stale since phase 9, predating T11's `rows.py::people_rows()` ->
+    `compute_many(..., include_series=False)` fix, which this test never had updated for) to 42
+    (T11 continuation session 6), to 22 now that the per-person fallback itself is gone: see
+    `test_query_counts.py::test_people_table_query_count_grows_by_the_known_per_person_cost` for
+    the batching."""
     _seed_people()
     client.force_login(lead_user)
 
-    with django_assert_num_queries(131):
+    with django_assert_num_queries(22):
         client.get(reverse("dashboards:people_index") + f"?{PERIOD_QS}")

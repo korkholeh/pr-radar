@@ -21,6 +21,10 @@ CANARY_ENGLISH_STRINGS = [
     "Export",
     "Throughput",
     "Small sample",
+    "No data in this period.",
+    "Sync",
+    "Violations",
+    "Settings",
 ]
 
 

@@ -18,6 +18,7 @@
   id="violation-bulk-form"
 >
   {% csrf_token %}
+  <div class="overflow-x-auto">
   <table class="w-full text-sm mb-4" id="violations-table">
     <caption class="sr-only">{% translate "Policy violations" %}</caption>
     <thead>
@@ -58,13 +59,16 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="6" class="text-[var(--text-muted)] py-4">
-            {% translate "No policy violations match these filters." %}
+          <td colspan="6">
+            {% translate "No policy violations." as empty_title %}
+            {% translate "No policy violations match these filters. Widen the filters to see more." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
           </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 
   {% if page_obj.paginator.count %}
     <div class="flex items-center gap-3 mb-4" id="violation-action-bar">

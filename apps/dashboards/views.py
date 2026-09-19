@@ -27,6 +27,7 @@ from apps.dashboards.exports.xlsx import write_xlsx
 from apps.dashboards.kpis import KpiSpec, build_kpi_row
 from apps.dashboards.models import ExportJob
 from apps.dashboards.person import build_comparison
+from apps.dashboards.selectors import nothing_ever_synced, period_has_pull_requests
 from apps.dashboards.services import (
     Export,
     build_chart_cards,
@@ -96,6 +97,10 @@ def dashboard(
             "show_report_link": True,
         }
     )
+    if params.mode != "day":
+        period_is_empty = not period_has_pull_requests(scope, params)
+        context["period_is_empty"] = period_is_empty
+        context["nothing_synced"] = period_is_empty and nothing_ever_synced()
     if scope_type == ScopeType.PERSON and scope_object is not None:
         context["comparison"] = [
             {"definition": get_metric(row.metric), "row": row}
@@ -170,6 +175,7 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
     )
     scope = params_module.narrow_scope(scope, params)
     heat_map = reviews.author_reviewer_matrix(scope, params)
+    period_is_empty = not period_has_pull_requests(scope, params)
 
     context = {
         "params": params,
@@ -178,6 +184,8 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
         "scope_object": None,
         "projects": projects_in_scope(access) if scope_type == ScopeType.GLOBAL else None,
         "repositories": repositories_in_scope(access) if scope_type == ScopeType.GLOBAL else None,
+        "period_is_empty": period_is_empty,
+        "nothing_synced": period_is_empty and nothing_ever_synced(),
         "kpi_rows": [
             build_kpi_row(
                 scope, REVIEWS_ROW, params.date_from, params.date_to, params.granularity, params.cohort
@@ -206,6 +214,7 @@ def _index_context(
         people=people_in_scope(access),
     )
     scope = params_module.narrow_scope(scope, params)
+    period_is_empty = not period_has_pull_requests(scope, params)
     context: dict[str, object] = {
         "params": params,
         "table_ctx": build_table_context(table_key, scope, params),
@@ -214,6 +223,8 @@ def _index_context(
         "scope_object": None,
         "projects": projects_in_scope(access),
         "repositories": repositories_in_scope(access),
+        "period_is_empty": period_is_empty,
+        "nothing_synced": period_is_empty and nothing_ever_synced(),
     }
     if extra:
         context.update(extra)
