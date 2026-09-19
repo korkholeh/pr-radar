@@ -36,6 +36,9 @@ dev = [
 DJANGO_SETTINGS_MODULE = "config.settings.local"
 testpaths = ["apps", "tests"]
 addopts = "-q --strict-markers"
+markers = [
+    "slow: seeds seed_demo --scale large (50 repos / 20,000 PRs) — not deselected by default, only lets a developer opt out with `-m 'not slow'`",
+]
 
 [tool.ruff]
 target-version = "py312"

@@ -23,7 +23,7 @@ Every cell carries the count as visible text as well as its `--heat-0`..`--heat-
             <th scope="row" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ row.author.label }}</th>
             {% for cell in row.cells %}
               <td
-                class="px-2 py-1 text-center text-[var(--text)]"
+                class="px-2 py-1 text-center {% if cell.level >= 3 %}text-[var(--on-heat)]{% else %}text-[var(--text)]{% endif %}"
                 style="background-color: var(--heat-{{ cell.level }})"
                 data-testid="heat-cell"
                 data-heat-level="{{ cell.level }}"

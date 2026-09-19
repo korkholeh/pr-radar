@@ -14,6 +14,7 @@ from apps.activity.models import AIDisclosure, PullRequest
 from apps.metrics.calculators.base import (
     GLOBAL_SCOPE,
     DayContext,
+    DayContextMany,
     PeriodContext,
     batch_count,
     breakdown_value,
@@ -332,6 +333,19 @@ def _violations_open_at_date(ctx: DayContext) -> MetricValue:
     return count_value(count)
 
 
+def _violations_open_at_date_by_person(ctx: DayContextMany) -> dict[int, MetricValue]:
+    counts = Counter(
+        scoped_violations(GLOBAL_SCOPE)
+        .filter(
+            status=PolicyViolation.Status.OPEN,
+            created_at__lt=day_end_exclusive(ctx.date),
+            pull_request__author__person_id__in=ctx.person_ids,
+        )
+        .values_list("pull_request__author__person_id", flat=True)
+    )
+    return {person_id: count_value(count) for person_id, count in counts.items()}
+
+
 _register(
     MetricDef(
         key="violations_open",
@@ -345,7 +359,9 @@ _register(
         kind="state",
         levels=_ALL_LEVELS,
         supports_cohorts=False,
-        calculator=StateCalc(at_date=_violations_open_at_date),
+        calculator=StateCalc(
+            at_date=_violations_open_at_date, at_date_by_person=_violations_open_at_date_by_person
+        ),
         formula="open violations with created_at <= end of the day",
     )
 )

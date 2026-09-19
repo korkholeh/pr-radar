@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+Page-level empty state (plan T2): `period_is_empty` comes from one `EXISTS` query on the scoped
+PR queryset (`selectors.period_has_pull_requests()`), never from inspecting KPI values — a real
+zero and "no data" must not read the same way. KPI cards, charts and tables still render below
+this (the filter bar must stay usable); this adds a sentence, it does not hide content.
+{% endcomment %}
+{% if period_is_empty %}
+  <div data-testid="period-empty-state">
+    {% if nothing_synced %}
+      {% translate "No data yet." as empty_title %}
+      {% translate "Nothing has been synced from GitHub yet. Run a sync to see data here." as empty_explanation %}
+      {% translate "Go to Sync" as empty_action_label %}
+      {% url "github_sync:sync" as empty_action_url %}
+      {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
+    {% else %}
+      {% translate "No pull requests in this period." as empty_title %}
+      {% translate "No pull requests match this period and filter. Widen the period or clear the filters." as empty_explanation %}
+      {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+    {% endif %}
+  </div>
+{% endif %}

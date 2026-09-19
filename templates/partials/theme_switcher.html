@@ -3,7 +3,7 @@
   {% csrf_token %}
   <input type="hidden" name="next" value="{{ request.get_full_path }}">
   <label class="sr-only" for="theme-select">{% translate "Theme" %}</label>
-  <select id="theme-select" name="theme" onchange="this.form.requestSubmit()" class="bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded px-2 py-1">
+  <select id="theme-select" name="theme" onchange="this.form.requestSubmit()" class="bg-[var(--surface)] text-[var(--text)] border border-[var(--border-strong)] rounded px-2 py-1">
     <option value="system" {% if theme_preference == "system" %}selected{% endif %}>{% translate "System" %}</option>
     <option value="light" {% if theme_preference == "light" %}selected{% endif %}>{% translate "Light" %}</option>
     <option value="dark" {% if theme_preference == "dark" %}selected{% endif %}>{% translate "Dark" %}</option>

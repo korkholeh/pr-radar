@@ -93,6 +93,9 @@ def _summary_metric_keys(scope: Scope, params: DashboardParams) -> list[str]:
 def _summary_rows(scope: Scope, params: DashboardParams, metric_keys: list[str]) -> list[dict[str, object]]:
     if not metric_keys:
         return []
+    # The Summary sheet row below only reads `.value`/`.previous_value`/`.delta`/`.sample_size`/
+    # `.below_min_sample` off each result — never `.series` — so all three calls pass
+    # `include_series=False` (T11) to skip their per-bucket series entirely.
     all_set = compute(
         metric_keys,
         scope,
@@ -100,9 +103,16 @@ def _summary_rows(scope: Scope, params: DashboardParams, metric_keys: list[str])
         params.date_to,
         cohort=Cohort.ALL,
         granularity=params.granularity,
+        include_series=False,
     )
     ai_set = compute(
-        metric_keys, scope, params.date_from, params.date_to, cohort=Cohort.AI, granularity=params.granularity
+        metric_keys,
+        scope,
+        params.date_from,
+        params.date_to,
+        cohort=Cohort.AI,
+        granularity=params.granularity,
+        include_series=False,
     )
     non_ai_set = compute(
         metric_keys,
@@ -111,6 +121,7 @@ def _summary_rows(scope: Scope, params: DashboardParams, metric_keys: list[str])
         params.date_to,
         cohort=Cohort.NON_AI,
         granularity=params.granularity,
+        include_series=False,
     )
     rows = []
     for key in metric_keys:

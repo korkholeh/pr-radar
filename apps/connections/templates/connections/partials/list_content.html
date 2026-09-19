@@ -35,8 +35,12 @@
         {% include "connections/partials/row.html" %}
       {% empty %}
       <tr>
-        <td colspan="6" class="text-[var(--text-muted)] py-4">
-          {% translate "No GitHub connections yet." %}
+        <td colspan="6">
+          {% translate "No GitHub connections yet." as empty_title %}
+          {% translate "Add a connection to let PR Radar sync pull requests and reviews from GitHub." as empty_explanation %}
+          {% translate "New connection" as empty_action_label %}
+          {% url "connections:create" as empty_action_url %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
         </td>
       </tr>
       {% endfor %}

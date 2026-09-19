@@ -191,6 +191,17 @@ def metric_title(definition: MetricDef) -> str:
     return gettext(str(definition.title))
 
 
+@register.simple_tag(name="small_sample_note")
+def small_sample_note() -> SafeString:
+    """The one rendering of the below-`MIN_SAMPLE` label (plan T4/T5): every `MetricResult`
+    surface shares this sentence and `data-testid` rather than spelling its own, so the four call
+    sites (KPI card, person comparison, policy console KPI, metric table cell) cannot drift."""
+    return format_html(
+        '<span class="text-xs text-[var(--warning)]" role="note" data-testid="small-sample-note">{}</span>',
+        gettext("Small sample"),
+    )
+
+
 @register.simple_tag(name="table_sort_url", takes_context=True)
 def table_sort_url(context: dict, params: DashboardParams, table_key: str, column_key: str) -> str:
     """The href for a sortable table header: toggles ascending/descending on repeated clicks and

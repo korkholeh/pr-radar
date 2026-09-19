@@ -81,6 +81,7 @@ def test_empty_state_renders_with_no_violations(client, lead_user):
     client.force_login(lead_user)
     response = client.get(reverse("policy:console"))
     assert response.status_code == 200
+    assert b'data-testid="empty-state"' in response.content
     assert b"No policy violations match these filters." in response.content
 
 

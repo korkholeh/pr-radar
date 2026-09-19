@@ -79,6 +79,7 @@ def _metric_row(
         result = result_set[key] if result_set is not None else None
         row[key] = result.value if result is not None else None
         row[f"{key}__delta"] = result.delta if result is not None else None
+        row[f"{key}__low"] = result.below_min_sample if result is not None else False
     return row
 
 
@@ -93,6 +94,7 @@ def project_rows(access: ScopeFilter, params: DashboardParams) -> list[dict[str,
         params.date_to,
         cohort=_resolve_table_cohort(params),
         granularity=params.granularity,
+        include_series=False,
     )
     return [
         _metric_row(
@@ -122,6 +124,7 @@ def repository_rows(
         params.date_to,
         cohort=_resolve_table_cohort(params),
         granularity=params.granularity,
+        include_series=False,
     )
     return [
         _metric_row(
@@ -180,11 +183,31 @@ def people_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]
         params.date_to,
         cohort=_resolve_table_cohort(params),
         granularity=params.granularity,
+        include_series=False,
     )
     return [
         _metric_row(person.id, person.display_name, None, PEOPLE_METRIC_KEYS, results.get(person.id))
         for person in people
     ]
+
+
+_PR_ROW_ONLY_FIELDS = (
+    "id",
+    "number",
+    "title",
+    "state",
+    "created_at",
+    "merged_at",
+    "size_bucket",
+    "ai_status",
+    "ai_tools",
+    "repository__full_name",
+    "author__person__display_name",
+)
+"""`PullRequest` carries several large columns `_pr_row()` never renders (`raw`, `body`, `labels`
+— T11, RISKS row 10): profiling on `seed_demo --scale large` found the default `SELECT *` behind
+the Overview page's `prs` table the single slowest statement on the page. Both row builders below
+`.only()` down to this set (plus whatever each adds of its own)."""
 
 
 def _pr_row(pull_request) -> dict[str, object]:
@@ -229,6 +252,7 @@ def pull_request_rows(scope: Scope, params: DashboardParams) -> list[dict[str, o
     queryset = params.pr_filters.apply(queryset)
     queryset = (
         queryset.select_related("repository", "author__person")
+        .only(*_PR_ROW_ONLY_FIELDS, "ai_disclosure", "review_rounds")
         .annotate(
             violations_count=Count("violations", filter=Q(violations__status=PolicyViolation.Status.OPEN)),
             churn_ratio=Subquery(churn_subquery),
@@ -287,9 +311,16 @@ def reviewer_load_rows(scope: Scope, params: DashboardParams) -> list[dict[str, 
     ]
 
 
-def recent_pr_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
+def recent_pr_rows(
+    scope: Scope, params: DashboardParams, *, limit: int | None = None, offset: int = 0
+) -> list[dict[str, object]]:
     """A real queryset (`select_related`/`annotate`), not `compute()` — PRs touched in the period,
-    ordered most-recent-first."""
+    ordered most-recent-first. `limit`/`offset` (T11 continuation, RISKS row 10: profiling on
+    `--scale large` found this the single largest remaining cost on the Overview page — ~15,000
+    `PullRequest` rows, each paying a `reverse()` call in `_pr_row()`, materialized just to show
+    the first page of 25) let `tables.build_table_context()` paginate at the SQL level instead of
+    building every row: safe only because this table's default order already matches the page's
+    display order, unlike a `compute()`-backed table a reader can sort by any metric column."""
     cohort = _resolve_table_cohort(params)
     queryset = (
         scoped_pull_requests(scope, cohort)
@@ -298,7 +329,10 @@ def recent_pr_rows(scope: Scope, params: DashboardParams) -> list[dict[str, obje
             last_activity_at__lt=day_end_exclusive(params.date_to),
         )
         .select_related("repository", "author__person")
+        .only(*_PR_ROW_ONLY_FIELDS)
         .annotate(violations_count=Count("violations"))
         .order_by("-last_activity_at")
     )
+    if limit is not None:
+        queryset = queryset[offset : offset + limit]
     return [_pr_row(pull_request) for pull_request in queryset]

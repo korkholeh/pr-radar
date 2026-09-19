@@ -89,3 +89,20 @@
   rebase merges", "too large to measure", or a retried error — never a fake `0%`). See `docs/user/churn.md`.
 - `followup_fix_rate` (heuristic): flags a merged PR as likely followed by a fix, by title/branch pattern and
   file overlap within a configurable window; shown labelled "(heuristic)" on the Person page's comparison table.
+- Page-level empty states: every dashboard, list and chart card now explains *why* it's empty — nothing has ever
+  been synced, or nothing matches the current period and filters — instead of showing a blank area, with an
+  action link ("Go to Sync") where there's an obvious next step.
+- The small-sample `≈` marker now also appears directly on metric table cells (projects, repositories, people,
+  recent PRs), not only on KPI cards — a title/aria-label carries the full explanation, never colour alone.
+- A colour-contrast retune for WCAG AA: two new design tokens (`--border-strong` for a control's own boundary,
+  `--on-heat` for text on a heat-map cell) and a retuned light-theme palette, so every foreground/background
+  pairing used in the app clears the 4.5:1 (text) / 3:1 (UI) contrast ratio in both themes.
+- `manage.py seed_demo --scale large`: seeds 50 repositories and 20,000 pull requests for trying out the
+  dashboards, and the app itself, at a realistic scale rather than the small demo dataset.
+- `scripts/profile_dashboard.py`, a developer/operator tool that renders the Overview, Project, Repository,
+  People and Reviews pages and reports wall time, query count and the slowest SQL statements per page.
+- Dashboard performance: the Overview page now renders well under its 1.5-second budget at 50 repositories /
+  20,000 pull requests, down from roughly 29 seconds before this release's profiling and query-shape fixes.
+- Long Ukrainian strings no longer clip or overflow on KPI cards or table headers.
+- `docs/user/index.md` (a task → page map) and `docs/user/troubleshooting.md` (empty dashboards, small-sample
+  greying, a stale "Data as of" banner, a failed sync, a missing churn number), both linked from `README.md`.

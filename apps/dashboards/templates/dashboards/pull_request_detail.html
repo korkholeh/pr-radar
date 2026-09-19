@@ -29,7 +29,11 @@
           <span class="text-[var(--text-muted)]">{{ event.at }}</span>
         </li>
       {% empty %}
-        <li class="text-[var(--text-muted)] py-4">{% translate "No timeline events." %}</li>
+        <li class="py-4">
+          {% translate "No timeline events." as empty_title %}
+          {% translate "Events populate as this pull request moves through review, sync and policy checks." as empty_explanation %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+        </li>
       {% endfor %}
     </ol>
   </section>
@@ -122,7 +126,11 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="4" class="text-[var(--text-muted)] py-4">{% translate "No files recorded." %}</td>
+            <td colspan="4">
+              {% translate "No files recorded." as empty_title %}
+              {% translate "File changes are recorded the next time this pull request is synced." as empty_explanation %}
+              {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -179,7 +187,11 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" class="text-[var(--text-muted)] py-4">{% translate "No AI signals detected." %}</td>
+          <td colspan="5">
+            {% translate "No AI signals detected." as empty_title %}
+            {% translate "No AI-authorship pattern matched any commit or file in this pull request." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

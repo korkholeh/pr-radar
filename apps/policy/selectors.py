@@ -49,6 +49,15 @@ def repositories_in_scope(scope: ScopeFilter) -> QuerySet[Repository]:
 
 
 def violations_in_scope(scope: ScopeFilter) -> QuerySet[PolicyViolation]:
+    """`pull_request__in=` is skipped for an unrestricted caller (T11, RISKS row 10): every
+    `PolicyViolation.pull_request_id` references an existing `PullRequest` row (a `NOT NULL`
+    `ForeignKey`), so `pull_request__in=pull_requests_in_scope(scope)` with an unfiltered
+    population is a redundant `WHERE ... IN (SELECT id FROM activity_pullrequest)` subquery —
+    profiling on 50 repos/20,000 PRs found this the dominant cost of the `violations_open` state
+    metric's per-bucket series (one such subquery per day bucket). Same "unrestricted skips the
+    filter" shape already used by `apps.catalog.selectors`/`apps.activity.selectors`."""
+    if scope.unrestricted:
+        return PolicyViolation.objects.all()
     return PolicyViolation.objects.filter(pull_request__in=pull_requests_in_scope(scope))
 
 

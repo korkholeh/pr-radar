@@ -45,7 +45,11 @@ polling) once every job is terminal.
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5" class="text-[var(--text-muted)] py-4">{% translate "No exports yet." %}</td>
+        <td colspan="5">
+          {% translate "No exports yet." as empty_title %}
+          {% translate "Download a CSV or XLSX report from a dashboard table to see it listed here." as empty_explanation %}
+          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

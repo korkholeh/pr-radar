@@ -18,8 +18,10 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeString
 from django.utils.timezone import localtime
+from django.utils.translation import gettext
 
 from apps.catalog.services import get_int
+from apps.dashboards import rows as row_builders
 from apps.dashboards.exports.columns import TABLE_SPECS, ExportColumn, TableSpec, extract_value
 from apps.dashboards.formatting import EM_DASH, format_duration
 from apps.dashboards.params import DashboardParams
@@ -66,7 +68,17 @@ def _cell_html(column: ExportColumn, value: object) -> str | SafeString:
 
 def _make_render(column: ExportColumn):
     def render(self: tables.Table, record: dict[str, object]) -> str | SafeString:  # noqa: ARG001
-        return _cell_html(column, extract_value(column, record))
+        html = _cell_html(column, extract_value(column, record))
+        if not record.get(f"{column.key}__low"):
+            return html
+        return format_html(
+            '<span class="text-[var(--text-muted)]">{}</span> '
+            '<span class="text-[var(--warning)]" title="{}" aria-label="{}" '
+            'data-testid="cell-small-sample">≈</span>',
+            html,
+            gettext("Small sample"),
+            gettext("Small sample"),
+        )
 
     return render
 
@@ -136,12 +148,43 @@ def _export_query(scope: Scope, params: DashboardParams, table_key: str, sort: s
 def build_table_context(table_key: str, scope: Scope, params: DashboardParams) -> TableContext:
     """The one function every dashboard/index view and `views.export_table` calls to get a
     table's current page: `row_builder(scope, params)` — unfiltered, unsorted — then search, sort
-    and paginate in Python (plan §5), all driven by the current query string."""
+    and paginate in Python (plan §5), all driven by the current query string.
+
+    `recent_prs`, unsearched and unsorted, instead paginates at the SQL level (T11 continuation,
+    RISKS row 10): profiling on `--scale large` found materializing every matching PR (~15,000 at
+    a 90-day GLOBAL scope, each paying a `reverse()` call) just to show the first 25 was the
+    largest remaining cost on the Overview page. Safe only for this one table: its natural DB
+    order (`-last_activity_at`) already matches the page's display order, and it is the only table
+    with no per-row `compute()` cost a reader could ask to sort by — every other table keeps the
+    build-then-paginate path so sorting by a metric column stays correct."""
     spec = TABLE_SPECS[table_key]
     active = params.table == table_key
     sort = params.sort if active else ""
     q = params.q if active else ""
     page_number = params.page if active else 1
+
+    if table_key == "recent_prs" and not sort and not q:
+        page_size = get_int("DASHBOARD_TABLE_PAGE_SIZE")
+        total = row_builders.recent_pr_row_count(scope, params)
+        # `range(total)`'s only job is to give `Paginator` a cheap, correctly-sized stand-in to
+        # compute `num_pages`/`has_next`/etc. from — its `object_list` is never read; the actual
+        # page of rows is fetched separately below, sliced at the database.
+        page = Paginator(range(total), page_size).get_page(page_number)
+        offset = (page.number - 1) * page_size
+        table_instance = _TABLE_CLASSES[table_key](
+            row_builders.recent_pr_rows(scope, params, limit=page_size, offset=offset)
+        )
+        export_query = _export_query(scope, params, table_key, sort, q)
+        return TableContext(
+            table_key=table_key,
+            table=table_instance,
+            page=page,
+            spec=spec,
+            q=q,
+            sort=sort,
+            export_csv_url=f"{reverse('dashboards:export', args=[table_key, 'csv'])}?{export_query}",
+            export_xlsx_url=f"{reverse('dashboards:export', args=[table_key, 'xlsx'])}?{export_query}",
+        )
 
     rows = spec.row_builder(scope, params)
     rows = search_rows(rows, q, SEARCH_KEYS[table_key])

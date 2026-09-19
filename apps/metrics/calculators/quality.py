@@ -18,6 +18,7 @@ from apps.metrics.calculators.base import (
     GLOBAL_SCOPE,
     DayContext,
     PeriodContext,
+    PeriodContextMany,
     batch_count,
     batch_sum,
     batch_value_over_population,
@@ -379,6 +380,21 @@ def _churn_21d_period(ctx: PeriodContext) -> MetricValue:
     return median(list(ratios))
 
 
+def _churn_21d_period_by_person(ctx: PeriodContextMany) -> dict[int, MetricValue]:
+    population = scoped_pull_requests(GLOBAL_SCOPE, ctx.cohort).filter(
+        merged_at__gte=day_start(ctx.date_from),
+        merged_at__lt=day_end_exclusive(ctx.date_to),
+        author__person_id__in=ctx.person_ids,
+    )
+    rows = ChurnResult.objects.filter(
+        pull_request__in=population, window_days=21, status=ChurnResult.Status.OK
+    ).values_list("pull_request__author__person_id", "churn_ratio")
+    ratios_by_person: dict[int, list[float | None]] = {}
+    for person_id, ratio in rows:
+        ratios_by_person.setdefault(person_id, []).append(ratio)
+    return {person_id: median(values) for person_id, values in ratios_by_person.items()}
+
+
 _register(
     MetricDef(
         key="churn_21d",
@@ -392,7 +408,7 @@ _register(
         kind="distribution",
         levels=_ALL_LEVELS,
         supports_cohorts=True,
-        calculator=DistributionCalc(period=_churn_21d_period),
+        calculator=DistributionCalc(period=_churn_21d_period, period_by_person=_churn_21d_period_by_person),
         formula="median(churn_ratio) over 21-day ChurnResult rows for PRs merged in the period",
     )
 )

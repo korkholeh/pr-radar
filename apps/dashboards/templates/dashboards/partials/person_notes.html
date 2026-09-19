@@ -17,12 +17,12 @@ back to a full-page redirect. The note text itself never reaches `AuditEntry` (C
     <textarea
       name="notes"
       rows="4"
-      class="w-full rounded border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] p-2"
+      class="w-full rounded border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text)] p-2"
       data-testid="person-notes-input"
     >{{ scope_object.notes }}</textarea>
     <button
       type="submit"
-      class="mt-2 rounded border border-[var(--border)] px-3 py-1 text-sm text-[var(--text)]"
+      class="mt-2 rounded border border-[var(--border-strong)] px-3 py-1 text-sm text-[var(--text)]"
       data-testid="person-notes-save"
     >
       {% translate "Save" %}

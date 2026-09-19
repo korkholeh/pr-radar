@@ -12,7 +12,10 @@ row's `compare_cohorts` is true or the filter bar's `cohort=compare` is active.
   data-testid="kpi-card"
   data-metric-key="{{ result.key }}"
 >
-  <div class="text-sm text-[var(--text-muted)] flex items-center gap-1" title="{% metric_title result.definition %}">
+  <div
+    class="text-sm text-[var(--text-muted)] flex items-center gap-1 line-clamp-2 break-words hyphens-auto"
+    title="{% metric_title result.definition %}"
+  >
     {% metric_title result.definition %}
   </div>
 

@@ -9,7 +9,13 @@ from dataclasses import dataclass, field
 
 from django.utils.functional import Promise
 
-from apps.metrics.calculators.base import BatchFunction, DayContext, PeriodContext
+from apps.metrics.calculators.base import (
+    BatchFunction,
+    DayContext,
+    DayContextMany,
+    PeriodContext,
+    PeriodContextMany,
+)
 from apps.metrics.models import ScopeType
 from apps.metrics.types import BreakdownItem, MetricValue
 
@@ -37,11 +43,17 @@ class RatioCalc:
 class DistributionCalc:
     period: Callable[[PeriodContext], MetricValue]
     breakdown: Callable[[PeriodContext], tuple[BreakdownItem, ...]] | None = None
+    # Optional: computes this metric for every person in `PeriodContextMany.person_ids` in O(1)
+    # queries instead of one `period()` call per person — what `compute_many()` uses for the
+    # PERSON-level table builders (`rows.py::people_rows()`) when available (T11 continuation).
+    period_by_person: Callable[[PeriodContextMany], dict[int, MetricValue]] | None = None
 
 
 @dataclass(frozen=True)
 class StateCalc:
     at_date: Callable[[DayContext], MetricValue]
+    # The `StateCalc` counterpart of `DistributionCalc.period_by_person`.
+    at_date_by_person: Callable[[DayContextMany], dict[int, MetricValue]] | None = None
 
 
 Calculator = CounterCalc | RatioCalc | DistributionCalc | StateCalc

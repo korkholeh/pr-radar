@@ -95,6 +95,11 @@ def build_kpi_row(
     secondary_keys = sorted({spec.secondary_key for spec in row if spec.secondary_key})
 
     resolved_cohort = cohort if cohort in (Cohort.ALL, Cohort.AI, Cohort.NON_AI) else Cohort.ALL
+    # `normal_set`/`compare_all_set` back a card's `result` (kpi_card.html reads `result.series` for
+    # the sparkline), so both keep the default `include_series=True`. `ai_set`/`non_ai_set` only ever
+    # feed `compare.ai.value`/`compare.non_ai.value` (a sub-line, no sparkline) and `secondary_set`
+    # only feeds `secondary_result.value` — none of the three read `.series`, so `include_series=False`
+    # (T11) skips their per-bucket series entirely.
     normal_set = (
         compute(normal_keys, scope, date_from, date_to, cohort=resolved_cohort, granularity=granularity)
         if normal_keys
@@ -106,17 +111,41 @@ def build_kpi_row(
         else None
     )
     ai_set = (
-        compute(compare_keys, scope, date_from, date_to, cohort=Cohort.AI, granularity=granularity)
+        compute(
+            compare_keys,
+            scope,
+            date_from,
+            date_to,
+            cohort=Cohort.AI,
+            granularity=granularity,
+            include_series=False,
+        )
         if compare_keys
         else None
     )
     non_ai_set = (
-        compute(compare_keys, scope, date_from, date_to, cohort=Cohort.NON_AI, granularity=granularity)
+        compute(
+            compare_keys,
+            scope,
+            date_from,
+            date_to,
+            cohort=Cohort.NON_AI,
+            granularity=granularity,
+            include_series=False,
+        )
         if compare_keys
         else None
     )
     secondary_set = (
-        compute(secondary_keys, scope, date_from, date_to, cohort=Cohort.ALL, granularity=granularity)
+        compute(
+            secondary_keys,
+            scope,
+            date_from,
+            date_to,
+            cohort=Cohort.ALL,
+            granularity=granularity,
+            include_series=False,
+        )
         if secondary_keys
         else None
     )

@@ -83,6 +83,25 @@ missing.
 | export | `EXPORT_SYNC_MAX_ROWS` | int | `20000` | Maximum rows a synchronous export may return. |
 | export | `EXPORT_RETENTION_DAYS` | int | `7` | Days a background export file is kept before cleanup deletes it. |
 
+### Reading `MIN_SAMPLE`, `STALE_DAYS` and the UI defaults
+
+`MIN_SAMPLE` (default 5) is not a cosmetic threshold — it decides when a rate or median is greyed with the `≈`
+small-sample marker across every KPI card, table cell and comparison row (see `docs/POLICY.md`'s reading notes
+and CLAUDE.md's `MIN_SAMPLE` rule). Lowering it makes more small-population numbers appear "confident" than the
+statistics actually support; raising it greys out more of the dashboard, especially at the repository/person
+level where sample sizes are naturally small. Change it only with that trade-off in mind, and expect the change
+to be visible immediately (it bumps `last_data_version`) without needing `manage.py recompute`.
+
+`STALE_DAYS` (default 5) feeds the "stale" flag on an open PR with no recent activity, used by the flow metrics
+and the PRs list filter — it is a judgement call about your team's own cadence, not a GitHub-derived constant;
+a team that reviews slowly by design will see everything flagged stale at the default. Unlike `MIN_SAMPLE`,
+`STALE_DAYS` changes rollup-derived counters, so run `manage.py recompute` after changing it to make historical
+rows agree with the new definition (see the note above the settings-modules section).
+
+`DEFAULT_UI_LANGUAGE` (`en`) and `DEFAULT_THEME` (`system`) only apply to a **new** `UserPreference` row — an
+existing user's own saved choice always wins, so changing either default has no effect on anyone who has already
+logged in and picked a theme/language once.
+
 Changing any `metrics`-group setting bumps `last_data_version`, so `compute()`'s cache stops serving pre-change
 results immediately (this is what keeps a `MIN_SAMPLE` change visible right away). It does **not** rewrite
 `DailyRollup` rows already on disk: `AI_COHORT_INCLUDE_SUSPECTED` decides which PRs land in the `ai`/`non_ai`
