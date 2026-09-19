@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 03:44+0000\n"
+"POT-Creation-Date: 2026-09-19 08:02+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -1972,7 +1972,7 @@ msgstr "Перевірити"
 msgid "Delete"
 msgstr "Видалити"
 
-#: apps/connections/views.py:62
+#: apps/connections/views.py:68
 msgid ""
 "Could not reach GitHub to verify this token. Try again, or tick “save "
 "without verifying”."
@@ -1980,7 +1980,7 @@ msgstr ""
 "Не вдалося звʼязатися з GitHub, щоб перевірити цей токен. Спробуйте ще раз "
 "або позначте «зберегти без перевірки»."
 
-#: apps/connections/views.py:71
+#: apps/connections/views.py:77
 msgid ""
 "GitHub rejected this token. Fix it and try again, or tick “save without "
 "verifying”."
@@ -1988,7 +1988,7 @@ msgstr ""
 "GitHub відхилив цей токен. Виправте його і спробуйте ще раз, або позначте "
 "«зберегти без перевірки»."
 
-#: apps/connections/views.py:132
+#: apps/connections/views.py:139
 msgid ""
 "Could not reach GitHub to check this connection. Check your network and try "
 "again."
@@ -1996,7 +1996,7 @@ msgstr ""
 "Не вдалося з'єднатися з GitHub, щоб перевірити це підключення. Перевірте "
 "мережу і спробуйте ще раз."
 
-#: apps/connections/views.py:245 apps/connections/views.py:288
+#: apps/connections/views.py:252 apps/connections/views.py:295
 msgid ""
 "Could not reach GitHub to list repositories for this connection. Try again "
 "in a moment."
@@ -2004,11 +2004,11 @@ msgstr ""
 "Не вдалося з'єднатися з GitHub, щоб отримати список репозиторіїв для цього "
 "підключення. Спробуйте ще раз за мить."
 
-#: apps/connections/views.py:274
+#: apps/connections/views.py:281
 msgid "Choose a connection to rebind to."
 msgstr "Виберіть підключення, до якого прив'язати."
 
-#: apps/connections/views.py:276
+#: apps/connections/views.py:283
 msgid "Tick the confirmation box to rebind this repository."
 msgstr "Позначте підтвердження, щоб прив'язати цей репозиторій."
 
@@ -2612,25 +2612,49 @@ msgstr "Застосувати"
 msgid "Download report (XLSX)"
 msgstr "Завантажити звіт (XLSX)"
 
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:11
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:16
+msgid "No repositories yet."
+msgstr "Ще немає репозиторіїв."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
+msgid ""
+"PR Radar has no repositories to report on. Add some from a GitHub connection "
+"to get started."
+msgstr ""
+"PR Radar не має репозиторіїв для звітів. Додайте їх із підключення GitHub, "
+"щоб почати."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:19
+msgid "Add repositories"
+msgstr "Додати репозиторії"
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:23
+msgid ""
+"PR Radar has no repositories to report on. Ask an administrator to add them "
+"in Settings."
+msgstr ""
+"PR Radar не має репозиторіїв для звітів. Попросіть адміністратора додати їх "
+"у налаштуваннях."
+
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:27
 msgid "No data yet."
 msgstr "Ще немає даних."
 
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:12
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:28
 msgid "Nothing has been synced from GitHub yet. Run a sync to see data here."
 msgstr ""
 "Ще нічого не синхронізовано з GitHub. Запустіть синхронізацію, щоб побачити "
 "дані тут."
 
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:13
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:29
 msgid "Go to Sync"
 msgstr "Перейти до синхронізації"
 
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:17
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:33
 msgid "No pull requests in this period."
 msgstr "Немає pull request-ів за цей період."
 
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:34
 msgid ""
 "No pull requests match this period and filter. Widen the period or clear the "
 "filters."
@@ -2963,36 +2987,36 @@ msgstr ""
 msgid "Reviews"
 msgstr "Ревʼю"
 
-#: apps/dashboards/views.py:52
+#: apps/dashboards/views.py:56
 msgid ""
 "No commit was found on the default branch before the churn window ended."
 msgstr "Не знайдено жодного коміту в основній гілці до завершення вікна churn."
 
-#: apps/dashboards/views.py:53
+#: apps/dashboards/views.py:57
 msgid "The repository could not be fetched."
 msgstr "Не вдалося отримати репозиторій (fetch)."
 
-#: apps/dashboards/views.py:54
+#: apps/dashboards/views.py:58
 msgid "Measuring surviving lines with git blame failed."
 msgstr "Не вдалося виміряти рядки, що збереглися, за допомогою git blame."
 
-#: apps/dashboards/views.py:55
+#: apps/dashboards/views.py:59
 msgid "No commits could be attributed to this pull request."
 msgstr "Жодного коміту не вдалося співвіднести із цим pull request."
 
-#: apps/dashboards/views.py:56
+#: apps/dashboards/views.py:60
 msgid "The GitHub connection for this repository is not usable."
 msgstr "З'єднання GitHub для цього репозиторію непридатне для використання."
 
-#: apps/dashboards/views.py:57
+#: apps/dashboards/views.py:61
 msgid "The churn computation timed out."
 msgstr "Обчислення churn перевищило час очікування."
 
-#: apps/dashboards/views.py:58
+#: apps/dashboards/views.py:62
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:446 apps/policy/views.py:100
+#: apps/dashboards/views.py:453 apps/policy/views.py:100
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -3006,7 +3030,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:450 apps/policy/views.py:104
+#: apps/dashboards/views.py:457 apps/policy/views.py:104
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."

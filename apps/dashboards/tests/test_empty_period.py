@@ -1,5 +1,6 @@
 """T2: the page-level empty state on Overview/Project/Repository/Person, the index pages and
-Reviews — empty period vs a real zero vs nothing-ever-synced, and scope isolation (plan §1)."""
+Reviews — empty period vs a real zero vs nothing-ever-synced vs nothing-configured, and scope
+isolation (plan §1)."""
 
 from __future__ import annotations
 
@@ -39,6 +40,7 @@ def _seed_pr_in_august() -> None:
 
 @pytest.mark.django_db
 def test_nothing_ever_synced_shows_the_run_a_sync_explanation(client, lead_user):
+    RepositoryFactory()  # configured but never synced — otherwise this is the no-repositories case
     client.force_login(lead_user)
     response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
     content = response.content.decode()
@@ -49,6 +51,7 @@ def test_nothing_ever_synced_shows_the_run_a_sync_explanation(client, lead_user)
 
 @pytest.mark.django_db
 def test_synced_but_empty_period_shows_the_widen_period_explanation(client, lead_user):
+    RepositoryFactory()
     SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
     client.force_login(lead_user)
     response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
@@ -90,6 +93,7 @@ def test_restricted_lead_gets_an_explanation_not_a_403_or_blank_page(client, lea
     SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
     _seed_pr_in_august()  # all data lives in a project the restricted lead cannot see
     own_project = ProjectFactory()
+    own_project.repositories.add(RepositoryFactory())  # in scope, but with no PRs in the period
     UserProjectAccessFactory(user=lead_user, project=own_project)
     client.force_login(lead_user)
     response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
@@ -141,3 +145,78 @@ def test_day_mode_is_unaffected_by_the_period_empty_state(client, lead_user):
     client.force_login(lead_user)
     response = client.get(reverse("dashboards:overview"), {"mode": "day", "day": "2020-01-01"})
     assert 'data-testid="period-empty-state"' not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_no_repositories_beats_the_sync_explanation_for_an_admin(client, admin_user):
+    """A sync over zero repositories still finishes `success`, so `nothing_ever_synced()` alone
+    sends a fresh install to "widen the period" — advice that can never work. The regression this
+    guards: the configured-nothing case must win, and must offer the page that fixes it."""
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    client.force_login(admin_user)
+    response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
+    content = response.content.decode()
+    assert 'data-testid="period-empty-state"' in content
+    assert "No repositories yet." in content
+    assert reverse("connections:discover") in content
+    assert "Widen the period" not in content
+    assert "Nothing has been synced" not in content
+
+
+@pytest.mark.django_db
+def test_no_repositories_offers_no_settings_link_to_a_lead(client, lead_user):
+    """A lead cannot reach Settings (`catalog.manage_settings` is admin-only), so the same state
+    names who can instead of linking somewhere they would be refused."""
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    client.force_login(lead_user)
+    response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
+    content = response.content.decode()
+    assert "No repositories yet." in content
+    assert "Ask an administrator" in content
+    assert reverse("connections:discover") not in content
+
+
+@pytest.mark.django_db
+def test_a_repository_with_no_pull_requests_is_not_the_no_repositories_case(client, admin_user):
+    """The boundary between the two states: one configured repository is enough to make "widen
+    the period" the honest advice again, even with no PR anywhere."""
+    RepositoryFactory()
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    client.force_login(admin_user)
+    response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
+    content = response.content.decode()
+    assert "No repositories yet." not in content
+    assert "No pull requests match this period and filter." in content
+
+
+@pytest.mark.django_db
+def test_restricted_lead_with_no_repository_in_scope_gets_the_no_repositories_state(client, lead_user):
+    """Scope isolation: the check runs through `repositories_in_scope()`, so a restricted lead
+    whose projects hold no repository is told that — never someone else's repository count."""
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    _seed_pr_in_august()  # repositories exist, but none of them in this lead's scope
+    own_project = ProjectFactory()
+    UserProjectAccessFactory(user=lead_user, project=own_project)
+    client.force_login(lead_user)
+    response = client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
+    assert response.status_code == 200
+    assert "No repositories yet." in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_repositories_index_shows_the_no_repositories_state(client, admin_user):
+    """The page the reporter was actually looking at (`/repos/`) — an index, not the dashboard."""
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    client.force_login(admin_user)
+    response = client.get(reverse("dashboards:repositories_index") + f"?{PERIOD_QS}")
+    content = response.content.decode()
+    assert "No repositories yet." in content
+    assert reverse("connections:discover") in content
+
+
+@pytest.mark.django_db
+def test_reviews_page_shows_the_no_repositories_state(client, admin_user):
+    SyncRunFactory(status=SyncRun.Status.SUCCESS, finished_at=timezone.now())
+    client.force_login(admin_user)
+    response = client.get(reverse("dashboards:reviews") + f"?{PERIOD_QS}")
+    assert "No repositories yet." in response.content.decode()

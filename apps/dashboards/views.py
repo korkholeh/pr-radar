@@ -27,7 +27,11 @@ from apps.dashboards.exports.xlsx import write_xlsx
 from apps.dashboards.kpis import KpiSpec, build_kpi_row
 from apps.dashboards.models import ExportJob
 from apps.dashboards.person import build_comparison
-from apps.dashboards.selectors import nothing_ever_synced, period_has_pull_requests
+from apps.dashboards.selectors import (
+    no_repositories_configured,
+    nothing_ever_synced,
+    period_has_pull_requests,
+)
 from apps.dashboards.services import (
     Export,
     build_chart_cards,
@@ -100,7 +104,11 @@ def dashboard(
     if params.mode != "day":
         period_is_empty = not period_has_pull_requests(scope, params)
         context["period_is_empty"] = period_is_empty
-        context["nothing_synced"] = period_is_empty and nothing_ever_synced()
+        no_repositories = period_is_empty and no_repositories_configured(access)
+        context["no_repositories"] = no_repositories
+        # The template picks the first of the three that is true, so the sync check is only worth
+        # a query when something is actually configured — this keeps the pinned query counts flat.
+        context["nothing_synced"] = period_is_empty and not no_repositories and nothing_ever_synced()
     if scope_type == ScopeType.PERSON and scope_object is not None:
         context["comparison"] = [
             {"definition": get_metric(row.metric), "row": row}
@@ -176,6 +184,7 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
     scope = params_module.narrow_scope(scope, params)
     heat_map = reviews.author_reviewer_matrix(scope, params)
     period_is_empty = not period_has_pull_requests(scope, params)
+    no_repositories = period_is_empty and no_repositories_configured(access)
 
     context = {
         "params": params,
@@ -185,7 +194,8 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
         "projects": projects_in_scope(access) if scope_type == ScopeType.GLOBAL else None,
         "repositories": repositories_in_scope(access) if scope_type == ScopeType.GLOBAL else None,
         "period_is_empty": period_is_empty,
-        "nothing_synced": period_is_empty and nothing_ever_synced(),
+        "no_repositories": no_repositories,
+        "nothing_synced": period_is_empty and not no_repositories and nothing_ever_synced(),
         "kpi_rows": [
             build_kpi_row(
                 scope, REVIEWS_ROW, params.date_from, params.date_to, params.granularity, params.cohort
@@ -215,6 +225,11 @@ def _index_context(
     )
     scope = params_module.narrow_scope(scope, params)
     period_is_empty = not period_has_pull_requests(scope, params)
+    # Materialised once: the filter bar iterates this list anyway, so asking it whether anything
+    # is configured costs nothing on top — an extra `EXISTS` here would move the pinned query
+    # counts for every index page (`test_query_counts`).
+    repositories = list(repositories_in_scope(access))
+    no_repositories = period_is_empty and not repositories
     context: dict[str, object] = {
         "params": params,
         "table_ctx": build_table_context(table_key, scope, params),
@@ -222,9 +237,10 @@ def _index_context(
         "scope_id": None,
         "scope_object": None,
         "projects": projects_in_scope(access),
-        "repositories": repositories_in_scope(access),
+        "repositories": repositories,
         "period_is_empty": period_is_empty,
-        "nothing_synced": period_is_empty and nothing_ever_synced(),
+        "no_repositories": no_repositories,
+        "nothing_synced": period_is_empty and not no_repositories and nothing_ever_synced(),
     }
     if extra:
         context.update(extra)

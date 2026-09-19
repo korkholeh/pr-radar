@@ -10,9 +10,10 @@ from collections import Counter
 
 from django.db.models import Q, QuerySet
 
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.models import PullRequest
 from apps.catalog.models import Person
-from apps.catalog.selectors import people_in_scope
+from apps.catalog.selectors import people_in_scope, repositories_in_scope
 from apps.dashboards.params import DashboardParams
 from apps.github_sync.models import SyncRun
 from apps.metrics.models import Cohort
@@ -48,6 +49,16 @@ def period_has_pull_requests(scope: Scope, params: DashboardParams) -> bool:
         | Q(last_activity_at__gte=period_from, last_activity_at__lt=period_to)
     )
     return params.pr_filters.apply(queryset).exists()
+
+
+def no_repositories_configured(access: ScopeFilter) -> bool:
+    """Whether the caller can see no repository at all — "the tool is not set up yet", which is a
+    different emptiness from "synced, but this period is empty". A sync over zero repositories
+    still finishes `success`, so `nothing_ever_synced()` cannot tell the two apart and a fresh
+    install reads as "widen the period", advice that can never work. Starts from
+    `repositories_in_scope()` so a restricted lead with no repository in their projects gets the
+    same honest answer rather than someone else's repository count."""
+    return not repositories_in_scope(access).exists()
 
 
 def nothing_ever_synced() -> bool:

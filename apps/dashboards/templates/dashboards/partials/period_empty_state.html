@@ -4,10 +4,26 @@ Page-level empty state (plan T2): `period_is_empty` comes from one `EXISTS` quer
 PR queryset (`selectors.period_has_pull_requests()`), never from inspecting KPI values — a real
 zero and "no data" must not read the same way. KPI cards, charts and tables still render below
 this (the filter bar must stay usable); this adds a sentence, it does not hide content.
+
+Three emptinesses, most specific first. `no_repositories` (nothing is configured) outranks
+`nothing_synced` because a sync over zero repositories still finishes `success`, so the sync
+check alone sends a fresh install to "widen the period" — advice that can never work. Only an
+admin gets the Discover link; a lead cannot reach Settings and is told who can.
 {% endcomment %}
 {% if period_is_empty %}
   <div data-testid="period-empty-state">
-    {% if nothing_synced %}
+    {% if no_repositories %}
+      {% translate "No repositories yet." as empty_title %}
+      {% if perms.catalog.manage_settings %}
+        {% translate "PR Radar has no repositories to report on. Add some from a GitHub connection to get started." as empty_explanation %}
+        {% translate "Add repositories" as empty_action_label %}
+        {% url "connections:discover" as empty_action_url %}
+        {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
+      {% else %}
+        {% translate "PR Radar has no repositories to report on. Ask an administrator to add them in Settings." as empty_explanation %}
+        {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+      {% endif %}
+    {% elif nothing_synced %}
       {% translate "No data yet." as empty_title %}
       {% translate "Nothing has been synced from GitHub yet. Run a sync to see data here." as empty_explanation %}
       {% translate "Go to Sync" as empty_action_label %}
