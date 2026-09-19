@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 import httpx
@@ -18,6 +19,8 @@ from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token, verify_connection
 from apps.github_sync.errors import GitHubError, require
 from config.htmx import is_htmx
+
+logger = logging.getLogger(__name__)
 
 PERMISSION = "catalog.manage_settings"
 DISCOVERY_PAGE_SIZE = 100
@@ -55,6 +58,9 @@ def _save_connection(
         try:
             verify_connection(connection, force=True)
         except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+            # The exception carries no token (see apps/github_sync/errors.py), so it is safe to log,
+            # and it is the only place an operator can see why verification failed.
+            logger.exception("Verification of connection %s failed.", connection.pk)
             transaction.set_rollback(True)
             form.add_error(
                 None,
@@ -129,6 +135,7 @@ def connection_check(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         verify_connection(connection, force=True)
     except (GitHubError, ConnectionNotUsableError, httpx.TransportError):
+        logger.exception("Check of connection %s failed.", connection.pk)
         check_error = _("Could not reach GitHub to check this connection. Check your network and try again.")
     if is_htmx(request):
         return render(
@@ -175,29 +182,38 @@ def connection_delete(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 def _discover_nodes(connection: GitHubConnection) -> list[dict[str, Any]]:
+    """Every repository the connection's token can read, whoever owns it. A lead working on a
+    client-owned repository has access but not ownership, so the list is never narrowed to the
+    connection's owner_login — that field labels the connection, it does not scope discovery."""
     from apps.connections.auth import auth_for_connection
     from apps.github_sync.client import GitHubClient
-    from apps.github_sync.queries import REPOSITORIES_BY_OWNER_QUERY, VIEWER_REPOSITORIES_QUERY
+    from apps.github_sync.queries import VIEWER_REPOSITORIES_QUERY
     from apps.github_sync.rate_limit import RateBudget
 
     auth = auth_for_connection(connection)
     client = GitHubClient(auth, RateBudget(key=auth.rate_limit_key))
-    if connection.owner_login:
-        document, page_path, variables = (
-            REPOSITORIES_BY_OWNER_QUERY,
-            "repositoryOwner.repositories",
-            {"login": connection.owner_login},
+    return list(
+        client.paginate(
+            VIEWER_REPOSITORIES_QUERY, {}, page_path="viewer.repositories", page_size=DISCOVERY_PAGE_SIZE
         )
-    else:
-        document, page_path, variables = VIEWER_REPOSITORIES_QUERY, "viewer.repositories", {}
-    return list(client.paginate(document, variables, page_path=page_path, page_size=DISCOVERY_PAGE_SIZE))
+    )
+
+
+def _discovery_owners(nodes: list[dict[str, Any]]) -> list[str]:
+    return sorted({require(node, "owner.login") for node in nodes})
 
 
 def _discovery_rows(
-    nodes: list[dict[str, Any]], connection: GitHubConnection, *, show_archived: bool
+    nodes: list[dict[str, Any]],
+    connection: GitHubConnection,
+    *,
+    show_archived: bool,
+    owner: str = "",
 ) -> list[tuple[str, list[dict[str, Any]]]]:
     if not show_archived:
         nodes = [node for node in nodes if not require(node, "isArchived")]
+    if owner:
+        nodes = [node for node in nodes if require(node, "owner.login") == owner]
     github_ids = [require(node, "id") for node in nodes]
     bound_elsewhere = {
         github_id: {"connection_name": connection_name, "repository_pk": repository_pk}
@@ -220,6 +236,7 @@ def repository_discover(request: HttpRequest) -> HttpResponse:
     connection_id = params.get("connection")
     connection = get_object_or_404(GitHubConnection, pk=connection_id) if connection_id else None
     show_archived = params.get("show_archived") == "1"
+    owner = params.get("owner", "")
     projects = Project.objects.order_by("name")
     created = None
 
@@ -245,11 +262,18 @@ def repository_discover(request: HttpRequest) -> HttpResponse:
                 "Could not reach GitHub to list repositories for this connection. Try again in a moment."
             )
 
+    owners = _discovery_owners(nodes)
+    if owner not in owners:
+        owner = ""
     context = {
         "connections": GitHubConnection.objects.filter(is_active=True).order_by("name"),
         "connection": connection,
-        "rows": _discovery_rows(nodes, connection, show_archived=show_archived) if connection else [],
+        "rows": (
+            _discovery_rows(nodes, connection, show_archived=show_archived, owner=owner) if connection else []
+        ),
         "show_archived": show_archived,
+        "owners": owners,
+        "owner": owner,
         "projects": projects,
         "created": created,
         "error": error,
@@ -293,6 +317,8 @@ def repository_rebind(request: HttpRequest, pk: int) -> HttpResponse:
         "connection": connection,
         "rows": _discovery_rows(nodes, connection, show_archived=False),
         "show_archived": False,
+        "owners": _discovery_owners(nodes),
+        "owner": "",
         "projects": Project.objects.order_by("name"),
         "created": None,
         "error": error,

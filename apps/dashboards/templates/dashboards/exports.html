@@ -4,8 +4,8 @@
 {% block title %}{% translate "My exports" %}{% endblock %}
 
 {% block content %}
-<div class="py-6" id="exports-page">
-  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "My exports" %}</h1>
+<div class="mx-auto w-full max-w-6xl" id="exports-page">
+  <h1 class="page-title mb-4">{% translate "My exports" %}</h1>
   {% include "dashboards/partials/exports_list.html" %}
 </div>
 {% endblock %}

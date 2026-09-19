@@ -11,18 +11,18 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
   hx-target="#dashboard-content"
   hx-swap="innerHTML"
   hx-push-url="true"
-  class="mb-4 flex flex-wrap gap-3 items-end"
+  class="card card-body form-stack grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
   id="dashboard-filters"
 >
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-mode">{% translate "Mode" %}</label>
+    <label class="label" for="filter-mode">{% translate "Mode" %}</label>
     <select id="filter-mode" name="mode">
       <option value="period" {% if params.mode == "period" %}selected{% endif %}>{% translate "Period" %}</option>
       <option value="day" {% if params.mode == "day" %}selected{% endif %}>{% translate "Day" %}</option>
     </select>
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-preset">{% translate "Preset" %}</label>
+    <label class="label" for="filter-preset">{% translate "Preset" %}</label>
     <select id="filter-preset" name="preset">
       <option value="7d" {% if params.preset == "7d" %}selected{% endif %}>{% translate "Last 7 days" %}</option>
       <option value="30d" {% if params.preset == "30d" %}selected{% endif %}>{% translate "Last 30 days" %}</option>
@@ -42,19 +42,19 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
     </select>
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-from">{% translate "From" %}</label>
+    <label class="label" for="filter-from">{% translate "From" %}</label>
     <input type="date" id="filter-from" name="from" value="{{ params.date_from|date:'Y-m-d' }}">
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-to">{% translate "To" %}</label>
+    <label class="label" for="filter-to">{% translate "To" %}</label>
     <input type="date" id="filter-to" name="to" value="{{ params.date_to|date:'Y-m-d' }}">
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-day">{% translate "Day" %}</label>
+    <label class="label" for="filter-day">{% translate "Day" %}</label>
     <input type="date" id="filter-day" name="day" value="{{ params.day|date:'Y-m-d' }}">
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-granularity">
+    <label class="label" for="filter-granularity">
       {% translate "Granularity" %}
     </label>
     <select id="filter-granularity" name="granularity">
@@ -71,7 +71,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
     </select>
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-cohort">{% translate "Cohort" %}</label>
+    <label class="label" for="filter-cohort">{% translate "Cohort" %}</label>
     <select id="filter-cohort" name="cohort">
       <option value="all" {% if params.cohort == "all" %}selected{% endif %}>{% translate "All" %}</option>
       <option value="ai" {% if params.cohort == "ai" %}selected{% endif %}>{% translate "AI" %}</option>
@@ -83,7 +83,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
   </div>
   {% if projects %}
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-project">
+      <label class="label" for="filter-project">
         {% translate "Projects" %}
       </label>
       <select id="filter-project" name="project" multiple>
@@ -97,7 +97,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
   {% endif %}
   {% if repositories %}
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-repository">
+      <label class="label" for="filter-repository">
         {% translate "Repositories" %}
       </label>
       <select id="filter-repository" name="repository" multiple>
@@ -111,7 +111,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
   {% endif %}
   {% if table_ctx.table_key == "pull_requests" %}
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-author">
+      <label class="label" for="filter-author">
         {% translate "Author" %}
       </label>
       <select id="filter-author" name="author" multiple>
@@ -123,7 +123,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-state">
+      <label class="label" for="filter-state">
         {% translate "State" %}
       </label>
       <select id="filter-state" name="state" multiple>
@@ -135,7 +135,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-ai-status">
+      <label class="label" for="filter-ai-status">
         {% translate "AI status" %}
       </label>
       <select id="filter-ai-status" name="ai_status" multiple>
@@ -147,7 +147,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-tool">
+      <label class="label" for="filter-tool">
         {% translate "AI tool" %}
       </label>
       <select id="filter-tool" name="tool" multiple>
@@ -159,7 +159,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-size">
+      <label class="label" for="filter-size">
         {% translate "Size" %}
       </label>
       <select id="filter-size" name="size" multiple>
@@ -171,7 +171,7 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="filter-has-violations">
+      <label class="label" for="filter-has-violations">
         {% translate "Violations" %}
       </label>
       <select id="filter-has-violations" name="has_violations">
@@ -187,16 +187,16 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
       </select>
     </div>
   {% endif %}
-  <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
-    {% translate "Apply" %}
-  </button>
-  {% if show_report_link %}
-    <a
-      href="{% report_url scope_type scope_id params %}"
-      class="rounded border border-[var(--border-strong)] px-4 py-2 text-sm text-[var(--accent)] hover:underline"
-      data-testid="download-report-link"
-    >
-      {% translate "Download report (XLSX)" %}
-    </a>
-  {% endif %}
+  <div class="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-3 lg:col-span-6">
+    <button type="submit" class="btn btn-primary">{% translate "Apply" %}</button>
+    {% if show_report_link %}
+      <a
+        href="{% report_url scope_type scope_id params %}"
+        class="btn btn-secondary"
+        data-testid="download-report-link"
+      >
+        {% translate "Download report (XLSX)" %}
+      </a>
+    {% endif %}
+  </div>
 </form>

@@ -452,6 +452,52 @@ Full detail — the churn algorithm, the credential handoff, the test fixture th
 repository instead of a JSON fixture, and every review-round fix — is in
 `.autodev/phases/10-ci-and-churn/PLAN.md`'s Design section and the `## p10-*` entries of `.autodev/DECISIONS.md`.
 
+## Post-1.0 fixes
+
+**Repository discovery lists everything a token can read, not what its account owns.** A tech lead usually
+tracks repositories owned by a client or by an organization they merely belong to; access is the condition
+worth checking, ownership is not. Discovery therefore always runs `VIEWER_REPOSITORIES_QUERY` with both
+`affiliations` and `ownerAffiliations` widened to `[OWNER, COLLABORATOR, ORGANIZATION_MEMBER]`, and the
+owner-scoped query it used whenever a connection carried an `owner_login` is gone. `owner_login` survives as a
+label on the connection (and for the fine-grained token that was issued per resource owner) but no longer
+filters anything; the discovery page groups by owner as before and offers an **Owner** dropdown, defaulting to
+all owners, when more than one shows up. The previous behaviour hid a client's repositories entirely and looked
+like an empty list rather than a filter.
+
+**A token that can see no repository verifies as `degraded`, not `ok`.** `REPOS_VISIBLE` with `count: 0` was
+recorded as a passing check, so the only symptom of a token without repository access was an empty discovery
+page. Zero visible repositories is now its own code, `REPOS_VISIBLE_NONE`, with the hint that names the two
+usual causes (repositories not selected on a fine-grained token, SSO not authorized).
+
+**A backfill is an ordinary sync with the watermark forced back, not a second code path.** The Sync page's
+**Load historical data** panel resolves its preset window or explicit date into one `since` date and hands it to
+the same `run_sync(since=...)` that `manage.py sync --since` already used, through a huey task that swallows
+`SyncAlreadyRunning` exactly like `sync_task`. So a backfill inherits the global lock, the per-connection rate
+budgets, the per-PR transaction and the rollup rebuild for free, and it cannot race an incremental sync. The
+alternative — a dedicated backfill pipeline that paginates backwards — would have needed its own lock story and
+its own error containment for no behavioural gain, since `pullRequests(orderBy: UPDATED_AT DESC)` already walks
+history in the direction a backfill wants.
+
+`SyncRun` gained `since` so the run list can say what a run actually asked for (the **Since** column) and a
+`backfill` trigger so it is distinguishable from **Sync now**. The date is stored as the UTC instant that
+`day_start()` produces from the operator's Kyiv calendar day, and rendered back through `day_of()` — storing the
+raw date would have made "from the 5th" mean 03:00 on the 5th Kyiv time for every user east of UTC.
+
+A backfill deliberately does **not** widen `Repository.sync_since`. That field is the discovery-time backfill
+floor a later `--full` starts from; moving it on every ad-hoc backfill would silently turn a one-off look at old
+data into a permanent, ever-growing full-sync window.
+
+## UI redesign
+
+**The UI is built from component classes, not ad-hoc utilities.** `static/css/src/input.css` defines a small
+vocabulary — `.card`, `.btn`/`.btn-primary`/`.btn-secondary`, `.input`/`.select`/`.textarea`/`.label`, `.badge`,
+`.data-table`/`.table-wrap`, `.nav-link`, `.pager`, `.filter-grid`, `.form-stack`, `.page-title` — and templates
+compose those instead of repeating long utility strings. Two reasons: a visual change is then one edit rather
+than 80, and the classes hide no colour literal, because each one is written in terms of the tokens. The base
+layer also styles bare `<input>`/`<select>/<textarea>` elements, since most controls in this app are rendered by
+Django forms and carry no class of their own. `@apply` cannot reference another component class in Tailwind v4,
+so a composite like `.filter-grid` spells its own declarations out.
+
 ## Read-only guarantee
 
 **The read-only promise is enforced on the GraphQL document, not on the HTTP verb.** PR Radar reads GitHub and

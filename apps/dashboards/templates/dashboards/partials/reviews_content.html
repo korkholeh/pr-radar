@@ -16,8 +16,8 @@ says so explicitly.
 </div>
 
 <section class="mb-6" data-testid="reviewer-load">
-  <h2 class="text-lg font-semibold text-[var(--text)] mb-1">{% translate "Reviewer load" %}</h2>
-  <p class="text-sm text-[var(--text-muted)] mb-2">
+  <h2 class="section-title mb-1">{% translate "Reviewer load" %}</h2>
+  <p class="muted mb-3">
     {% translate "Workload, not a ranking — how many reviews each person gave in the period." %}
   </p>
   <div data-testid="charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -31,40 +31,42 @@ says so explicitly.
 {% include "dashboards/partials/reviewer_heat_map.html" %}
 
 <section class="mb-6" data-testid="waiting-for-review">
-  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Waiting for review" %}</h2>
-  <table class="w-full text-sm">
-    <caption class="sr-only">{% translate "Pull requests waiting for review" %}</caption>
-    <thead>
-      <tr class="text-left text-[var(--text-muted)]">
-        <th scope="col">{% translate "Repository" %}</th>
-        <th scope="col">{% translate "Pull request" %}</th>
-        <th scope="col">{% translate "Author" %}</th>
-        <th scope="col">{% translate "Waiting" %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in waiting %}
-        <tr class="border-t border-[var(--border)]">
-          <td>{{ item.pull_request.repository.full_name }}</td>
-          <td>
-            <a href="{% url 'dashboards:pull_request_detail' item.pull_request.pk %}">
-              #{{ item.pull_request.number }} {{ item.pull_request.title }}
-            </a>
-          </td>
-          <td>
-            {% if item.pull_request.author.person %}{{ item.pull_request.author.person.display_name }}{% endif %}
-          </td>
-          <td>
-            {% if item.hours_waited is not None %}{{ item.hours_waited|floatformat:0 }}h{% endif %}
-          </td>
-        </tr>
-      {% empty %}
+  <h2 class="section-title mb-3">{% translate "Waiting for review" %}</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="sr-only">{% translate "Pull requests waiting for review" %}</caption>
+      <thead>
         <tr>
-          <td colspan="4" class="text-[var(--text-muted)] py-4">
-            {% translate "No pull request is waiting for review." %}
-          </td>
+          <th scope="col">{% translate "Repository" %}</th>
+          <th scope="col">{% translate "Pull request" %}</th>
+          <th scope="col">{% translate "Author" %}</th>
+          <th scope="col">{% translate "Waiting" %}</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for item in waiting %}
+          <tr>
+            <td>{{ item.pull_request.repository.full_name }}</td>
+            <td>
+              <a href="{% url 'dashboards:pull_request_detail' item.pull_request.pk %}">
+                #{{ item.pull_request.number }} {{ item.pull_request.title }}
+              </a>
+            </td>
+            <td>
+              {% if item.pull_request.author.person %}{{ item.pull_request.author.person.display_name }}{% endif %}
+            </td>
+            <td>
+              {% if item.hours_waited is not None %}{{ item.hours_waited|floatformat:0 }}h{% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="py-6 text-center text-text-muted">
+              {% translate "No pull request is waiting for review." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>

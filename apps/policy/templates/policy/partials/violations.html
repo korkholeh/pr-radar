@@ -1,9 +1,9 @@
 {% load i18n policy_extras %}
 {% if notice %}
-  <div class="mb-4 text-[var(--good)]" role="status">{{ notice }}</div>
+  <div class="mb-4 rounded-lg border border-good/40 bg-surface-2 px-3 py-2 text-sm text-good" role="status">{{ notice }}</div>
 {% endif %}
 {% if action_errors %}
-  <div class="mb-4 text-[var(--bad)]" role="alert">
+  <div class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
     {% for field, errors in action_errors.items %}
       {% for error in errors %}<p>{{ error }}</p>{% endfor %}
     {% endfor %}
@@ -19,10 +19,10 @@
 >
   {% csrf_token %}
   <div class="overflow-x-auto">
-  <table class="w-full text-sm mb-4" id="violations-table">
+  <table class="data-table" id="violations-table">
     <caption class="sr-only">{% translate "Policy violations" %}</caption>
     <thead>
-      <tr class="text-left text-[var(--text-muted)]">
+      <tr>
         <th scope="col"><span class="sr-only">{% translate "Select" %}</span></th>
         <th scope="col">{% translate "Pull request" %}</th>
         <th scope="col">{% translate "Rule" %}</th>
@@ -33,7 +33,7 @@
     </thead>
     <tbody>
       {% for violation in page_obj %}
-        <tr class="border-t border-[var(--border)]" id="violation-row-{{ violation.pk }}">
+        <tr id="violation-row-{{ violation.pk }}">
           <td>
             <input
               type="checkbox"
@@ -48,8 +48,8 @@
             </a>
           </td>
           <td>
-            <div class="text-[var(--text)]">{{ violation.rule_code|rule_label }}</div>
-            <div class="text-[var(--text-muted)]">
+            <div class="text-text">{{ violation.rule_code|rule_label }}</div>
+            <div class="text-text-muted">
               {% render_violation_message violation.rule_code violation.details_params %}
             </div>
           </td>
@@ -81,14 +81,14 @@
         aria-label="{% translate 'Comment' %}"
         placeholder="{% translate 'Comment (required)' %}"
       ></textarea>
-      <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+      <button type="submit" class="btn btn-primary">
         {% translate "Apply" %}
       </button>
     </div>
   {% endif %}
 </form>
 
-<nav class="flex items-center gap-3" aria-label="{% translate 'Pagination' %}">
+<nav class="pager" aria-label="{% translate 'Pagination' %}">
   {% if page_obj.has_previous %}
     <a
       href="?{{ querystring }}&page={{ page_obj.previous_page_number }}"
@@ -99,7 +99,7 @@
       {% translate "Previous" %}
     </a>
   {% endif %}
-  <span class="text-[var(--text-muted)]">
+  <span class="text-text-muted">
     {% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}
       Page {{ number }} of {{ total }}
     {% endblocktranslate %}

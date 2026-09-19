@@ -6,8 +6,11 @@ page can render an empty state and the accessible data-table twin without waitin
 `charts.js` re-fetches the same JSON to draw the `<canvas>` (acceptance criterion #3: the two
 can never disagree, since both call `spec.build()`/the endpoint with the same params).
 {% endcomment %}
-<div class="mb-6" id="chart-{{ card.key }}" data-testid="chart-card" data-chart-key="{{ card.key }}">
-  <h3 class="text-lg font-semibold text-[var(--text)] mb-2">{{ card.title }}</h3>
+<div class="card" id="chart-{{ card.key }}" data-testid="chart-card" data-chart-key="{{ card.key }}">
+  <div class="card-header">
+    <h3 class="card-title">{{ card.title }}</h3>
+  </div>
+  <div class="card-body">
   {% if card.payload.empty %}
     {% include "partials/empty_state.html" with title=card.payload.empty_message explanation="" %}
   {% else %}
@@ -22,6 +25,7 @@ can never disagree, since both call `spec.build()`/the endpoint with the same pa
       ></canvas>
     </div>
   {% endif %}
+  </div>
   {% comment %}
   The `sr-only` class goes on this wrapping `div`, not the `table` itself (round 1 review finding,
   layout e2e spec): a `<table>`'s used width is `max(specified width, minimum width its columns'

@@ -1,11 +1,11 @@
 {% load i18n %}
-<tr class="border-t border-[var(--border)]" id="sensitive-path-row-{{ rule.pk }}">
+<tr id="sensitive-path-row-{{ rule.pk }}">
   <td>{% if rule.project %}{{ rule.project.name }}{% else %}{% translate "Global" %}{% endif %}</td>
   <td>{{ rule.glob }}</td>
   <td>{{ rule.get_ai_mode_display }}</td>
   <td>{{ rule.description|truncatechars:60 }}</td>
   <td>{% if rule.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
-  <td class="flex gap-2">
+  <td class="flex flex-wrap items-center gap-2">
     <a href="{% url 'policy:sensitive_path_edit' rule.pk %}">{% translate "Edit" %}</a>
     <form
       method="post"
@@ -15,7 +15,7 @@
       hx-swap="outerHTML"
     >
       {% csrf_token %}
-      <button type="submit">
+      <button type="submit" class="btn btn-secondary btn-sm">
         {% if rule.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
       </button>
     </form>

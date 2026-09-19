@@ -8,7 +8,7 @@
 - **Usage:** 5h 60% (reset 19.09 07:40) · 7d 59%
 - **Totals:** 182 sessions · 30.1 h agent time · ≈$537.21 API-equivalent
 - **Clock:** 48.0 h since the run was created · 30.1 h working · 10.6 h paused on the usage limit · 7.2 h not running
-- **Updated:** 2026-09-19 07:12:40
+- **Updated:** 2026-09-19 07:13:03
 
 ## Run warnings
 
@@ -40,11 +40,6 @@ What the product looked like at the end of each phase — the newest first.
 
 ## Timeline
 
-- `2026-09-17 10:22:01` **usage** — resumed: 5h ? (reset ?) · 7d 23%
-- `2026-09-17 10:22:37` **p02-implement** — done (5m, $2.13): Phase 2 complete. All T1-T17 (models/migrations/admin/factories/i18n/CSS) were already done by the prior session; this session finished T18 (docs.PROGRESS.md phase-2 entry, DECISIONS.md p02-implement bullets) and T19 (full gate). Gate run found and fixed real issues: ~40 ruff E501/DJ001/DJ012 findi…
-- `2026-09-17 10:22:42` **p02-tests** — pass: exit 0: ................................................... [100%]
-- `2026-09-17 10:29:41` **p02-review1** — changes_requested (6m, $3.36): Phase 2 delivers every spec §4 table with good constraints, indexes, factories, admin classification and i18n discipline, and I independently confirmed the whole gate: pytest (247 passed), ruff, ruff format, mypy, makemigrations --check, manage.py check, and migrate from an empty SQLite file both f…
-- `2026-09-17 10:35:02` **p02-review_fix1** — done (5m, $1.75): Fixed both majors and all minors from REVIEW-r1. Fixed: - [MAJOR] Admin N+1 on pull_request→repository: added `pull_request__repository` to `list_select_related` on 8 admins (policy.PolicyViolationAdmin, churn.ChurnResultAdmin, ai_detection.AISignalAdmin, activity.{PullRequestCommitAdmin,PRFileAdmi…
 - `2026-09-17 10:35:07` **p02-tests** — pass: exit 0: ................................................................ [100%]
 - `2026-09-17 10:39:02` **p02-review2** — changes_requested (3m, $2.4): Round-2 verification: every r1 blocker/major and all three r1 minors are really fixed, each with a test that can fail (the admin N+1 select_related plus a 3-vs-12-row query-count test; AppSetting descriptions no longer persisted and rendered from the lazy registry instead; migration decoupled from …
 - `2026-09-17 10:42:34` **p02-review_fix2** — done (3m, $0.84): Applied all r2 findings. Fixed: - [MAJOR] Added `raw` JSONField to `activity.Commit`, `activity.Review`, `activity.ReviewComment` (each is a first-class GitHub node with a unique `github_id`, matching Organization/Repository/PullRequest). Hand-edited `apps/activity/migrations/0001_initial.py` in pl…
@@ -340,6 +335,11 @@ What the product looked like at the end of each phase — the newest first.
 - `2026-09-19 07:12:40` **commit** — held back: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token)
 - `2026-09-19 07:12:40` **finalize** — done: Shippable: the whole product across 11 phases, with every gate green from this working tree — uv run pytest -q at PYTEST_EXIT=0 over 1,841 tests, e2e 63 passed, the full lint gate clean, and make css…
 - `2026-09-19 07:12:40` **run** — done: all 11 phases completed
+- `2026-09-19 07:12:40` **commit** — held back: .autodev/phases/11-polish-and-performance/REVIEW-r1.md (it contains what looks like a GitHub token)
+- `2026-09-19 07:12:42` **push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714 as korkholeh
+- `2026-09-19 07:12:47` **finalize-push** — done: korkholeh/pr-radar@autodev/spec-20260917-0714-finalize
+- `2026-09-19 07:12:50` **finalize-pr** — draft: https://github.com/korkholeh/pr-radar/pull/13
+- `2026-09-19 07:13:01` **finalize-merge** — done: https://github.com/korkholeh/pr-radar/pull/13
 
 ---
 Docs: `ARCHITECTURE.md` · `RISKS.md` · `ROADMAP.md` · `DECISIONS.md` · `phases/*/PLAN.md` · `phases/*/REVIEW-r*.md` · `HANDOFF.md` (written at the end) · project docs in `docs/dev/` and `docs/user/` · raw session logs in `logs/`. Stop gracefully: `touch .autodev/STOP`.

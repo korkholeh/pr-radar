@@ -1,31 +1,67 @@
 {% load i18n %}
-<nav class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
-  <a href="{% url 'dashboards:overview' %}" class="font-semibold text-[var(--text)]">{% translate "PR Radar" %}</a>
-  <div class="flex flex-wrap items-center gap-3">
+{% comment %}
+Application header: brand, the primary destinations, and a Settings menu that folds the
+admin-only pages away from the everyday ones. Every control appears exactly once in the DOM —
+the primary strip scrolls sideways on a narrow screen instead of being duplicated into a second,
+hidden mobile menu (duplicate ids and doubled links break both HTML validity and the e2e
+selectors). The menu is a plain <details> element: no JS beyond what htmx already ships.
+{% endcomment %}
+<header class="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
+  <div class="page-shell flex min-h-14 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 lg:flex-nowrap lg:py-0">
+    <a href="{% url 'dashboards:overview' %}" class="flex shrink-0 items-center gap-2 rounded-lg py-1 text-text">
+      <span class="text-accent" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round">
+          <circle cx="12" cy="12" r="9" opacity=".35"/>
+          <circle cx="12" cy="12" r="4.5" opacity=".6"/>
+          <path d="M12 12 19 7"/>
+          <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="hidden text-base font-semibold tracking-tight sm:inline">{% translate "PR Radar" %}</span>
+    </a>
+
     {% if request.user.is_authenticated %}
-      <a href="{% url 'dashboards:overview' %}" class="text-[var(--text-muted)]">{% translate "Overview" %}</a>
-      <a href="{% url 'dashboards:projects_index' %}" class="text-[var(--text-muted)]">{% translate "Projects" %}</a>
-      <a href="{% url 'dashboards:repositories_index' %}" class="text-[var(--text-muted)]">{% translate "Repositories" %}</a>
-      <a href="{% url 'dashboards:people_index' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
-      <a href="{% url 'dashboards:pull_requests_index' %}" class="text-[var(--text-muted)]">{% translate "Pull requests" %}</a>
-      <a href="{% url 'dashboards:reviews' %}" class="text-[var(--text-muted)]">{% translate "Reviews" %}</a>
-      <a href="{% url 'dashboards:exports_index' %}" class="text-[var(--text-muted)]">{% translate "My exports" %}</a>
-      <a href="{% url 'github_sync:sync' %}" class="text-[var(--text-muted)]">{% translate "Sync" %}</a>
-      <a href="{% url 'policy:console' %}" class="text-[var(--text-muted)]">{% translate "Policy" %}</a>
-      {% if perms.catalog.manage_settings %}
-        <a href="{% url 'connections:list' %}" class="text-[var(--text-muted)]">{% translate "Connections" %}</a>
-        <a href="{% url 'connections:discover' %}" class="text-[var(--text-muted)]">{% translate "Discover repositories" %}</a>
-        <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People settings" %}</a>
-        <a href="{% url 'ai_detection:rules' %}" class="text-[var(--text-muted)]">{% translate "Detection rules" %}</a>
-        <a href="{% url 'policy:policy_settings' %}" class="text-[var(--text-muted)]">{% translate "AI policy" %}</a>
-        <a href="{% url 'policy:sensitive_paths' %}" class="text-[var(--text-muted)]">{% translate "Sensitive paths" %}</a>
-      {% endif %}
-      {% include "partials/theme_switcher.html" %}
-      {% include "partials/language_switcher.html" %}
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="text-[var(--text-muted)]">{% translate "Log out" %}</button>
-      </form>
+      <nav class="nav-strip order-3 -mx-1 basis-full px-1 pb-1 lg:order-none lg:mx-0 lg:flex-1 lg:basis-auto lg:px-0 lg:pb-0"
+           aria-label="{% translate "Main" %}">
+        {% include "partials/nav_items.html" with item_class="nav-link" %}
+        <a href="{% url 'github_sync:sync' %}"
+           class="nav-link{% if request.resolver_match.view_name == 'github_sync:sync' %} nav-link-active{% endif %}">
+          {% translate "Sync" %}
+        </a>
+      </nav>
+
+      <div class="ml-auto flex shrink-0 items-center gap-1.5">
+        {% include "partials/theme_switcher.html" %}
+        {% include "partials/language_switcher.html" %}
+
+        <details class="relative" data-menu>
+          <summary class="btn btn-secondary btn-sm list-none marker:hidden" title="{% translate "Settings" %}">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+            <span class="hidden sm:inline">{% translate "Settings" %}</span>
+            <span class="sr-only sm:hidden">{% translate "Settings" %}</span>
+          </summary>
+          <div class="menu-panel max-h-[80vh] overflow-y-auto">
+            <a href="{% url 'dashboards:exports_index' %}" class="menu-item">{% translate "My exports" %}</a>
+            {% if perms.catalog.manage_settings %}
+              <p class="menu-label">{% translate "Administration" %}</p>
+              <a href="{% url 'connections:list' %}" class="menu-item">{% translate "Connections" %}</a>
+              <a href="{% url 'connections:discover' %}" class="menu-item">{% translate "Discover repositories" %}</a>
+              <a href="{% url 'catalog:people' %}" class="menu-item">{% translate "People settings" %}</a>
+              <a href="{% url 'ai_detection:rules' %}" class="menu-item">{% translate "Detection rules" %}</a>
+              <a href="{% url 'policy:policy_settings' %}" class="menu-item">{% translate "AI policy" %}</a>
+              <a href="{% url 'policy:sensitive_paths' %}" class="menu-item">{% translate "Sensitive paths" %}</a>
+            {% endif %}
+            <form method="post" action="{% url 'accounts:logout' %}" class="mt-2 border-t border-border px-1 pt-2">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary btn-sm w-full">{% translate "Log out" %}</button>
+            </form>
+          </div>
+        </details>
+      </div>
     {% endif %}
   </div>
-</nav>
+</header>

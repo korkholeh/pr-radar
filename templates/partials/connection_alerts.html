@@ -1,9 +1,10 @@
 {% load i18n %}
 {% if connection_alerts %}
-<div class="bg-[var(--bad)] text-[var(--on-accent)] px-4 py-2" role="alert">
-  <ul>
+<div class="page-shell pt-4" role="alert">
+  <ul class="space-y-2">
     {% for connection in connection_alerts %}
-      <li>
+      <li class="flex flex-wrap items-center gap-2 rounded-xl border border-bad/40 bg-surface px-4 py-3 text-sm text-text shadow-card">
+        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-bad" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5"/><path d="M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg>
         {% if connection.status == "invalid" %}
           {% blocktranslate trimmed with name=connection.name %}
             {{ name }}: this connection's token is invalid.
@@ -17,7 +18,7 @@
             {{ name }}: this connection's token expires on {{ expires_at }}.
           {% endblocktranslate %}
         {% endif %}
-        <a href="{% url 'connections:edit' connection.pk %}" class="underline">{% translate "Review" %}</a>
+        <a href="{% url 'connections:edit' connection.pk %}" class="link ml-auto">{% translate "Review" %}</a>
       </li>
     {% endfor %}
   </ul>

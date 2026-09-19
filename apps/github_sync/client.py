@@ -13,6 +13,7 @@ from apps.catalog.services import get_int
 from apps.github_sync.errors import (
     GitHubAuthError,
     GitHubError,
+    GitHubNotFoundError,
     GitHubServerError,
     GitHubSSOError,
     GitHubWriteAttemptError,
@@ -181,6 +182,9 @@ class GitHubClient:
 
             if response.status_code == 403:
                 raise GitHubAuthError("Request was forbidden.")
+
+            if response.status_code == 404:
+                raise GitHubNotFoundError("Resource not found, or not visible to this token.")
 
             if response.status_code in _RETRYABLE_STATUSES:
                 if attempt >= self._max_retries:

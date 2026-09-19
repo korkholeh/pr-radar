@@ -151,32 +151,17 @@ query PullRequestTimeline($id: ID!, $first: Int!, $after: String) {{
 }}
 """
 
-REPOSITORIES_BY_OWNER_QUERY = f"""
-query RepositoriesByOwner($login: String!, $first: Int!, $after: String) {{
-  repositoryOwner(login: $login) {{
-    repositories(first: $first, after: $after, ownerAffiliations: [OWNER]) {{
-      totalCount
-      pageInfo {{ hasNextPage endCursor }}
-      nodes {{
-        id
-        name
-        nameWithOwner
-        isPrivate
-        isArchived
-        defaultBranchRef {{ name }}
-        owner {{ id login __typename }}
-      }}
-    }}
-  }}
-  {RATE_LIMIT_FIELD}
-}}
-"""
-
+# Access is the only condition for a repository to be listed: a lead who can read a client-owned
+# repository must be able to track it, so both the viewer's affiliation and the owner's are widened
+# to everything GitHub offers instead of narrowing the list to repositories the account owns.
 VIEWER_REPOSITORIES_QUERY = f"""
 query ViewerRepositories($first: Int!, $after: String) {{
   viewer {{
     repositories(
-      first: $first, after: $after, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+      first: $first
+      after: $after
+      affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+      ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
     ) {{
       totalCount
       pageInfo {{ hasNextPage endCursor }}

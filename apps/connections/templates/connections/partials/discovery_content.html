@@ -1,8 +1,8 @@
 {% load i18n %}
-<div class="py-6 max-w-4xl mx-auto" id="discovery-page">
-  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "Discover repositories" %}</h1>
+<div class="mx-auto w-full max-w-5xl" id="discovery-page">
+  <h1 class="page-title mb-4">{% translate "Discover repositories" %}</h1>
 
-  <form method="get" action="{% url 'connections:discover' %}" class="mb-6 flex items-center gap-4">
+  <form method="get" action="{% url 'connections:discover' %}" class="card card-body form-stack mb-6 flex flex-wrap items-end gap-4">
     <label for="id_discovery_connection">{% translate "Connection" %}</label>
     <select name="connection" id="id_discovery_connection" onchange="this.form.submit()">
       <option value="">{% translate "Choose a connection…" %}</option>
@@ -12,6 +12,15 @@
         </option>
       {% endfor %}
     </select>
+    {% if owners %}
+      <label for="id_discovery_owner">{% translate "Owner" %}</label>
+      <select name="owner" id="id_discovery_owner" onchange="this.form.submit()">
+        <option value="">{% translate "All owners" %}</option>
+        {% for candidate in owners %}
+          <option value="{{ candidate }}" {% if candidate == owner %}selected{% endif %}>{{ candidate }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
     <label class="flex items-center gap-1">
       <input type="checkbox" name="show_archived" value="1" {% if show_archived %}checked{% endif %} onchange="this.form.submit()">
       {% translate "Show archived" %}
@@ -19,10 +28,10 @@
   </form>
 
   {% if error %}
-    <p class="text-[var(--bad)] mb-4" role="alert">{{ error }}</p>
+    <p class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">{{ error }}</p>
   {% endif %}
   {% if created is not None %}
-    <p class="text-[var(--good)] mb-4">
+    <p class="mb-4 rounded-lg border border-good/40 bg-surface-2 px-3 py-2 text-sm text-good" role="status">
       {% blocktranslate trimmed count counter=created %}
         Added {{ created }} repository.
       {% plural %}
@@ -36,8 +45,9 @@
       {% csrf_token %}
       <input type="hidden" name="connection" value="{{ connection.pk }}">
       <input type="hidden" name="show_archived" value="{% if show_archived %}1{% else %}0{% endif %}">
+      <input type="hidden" name="owner" value="{{ owner }}">
 
-      <div class="mb-4">
+      <div class="field">
         <label for="id_discovery_project">{% translate "Add to project" %}</label>
         <select name="project" id="id_discovery_project">
           <option value="">{% translate "No project" %}</option>
@@ -48,57 +58,66 @@
       </div>
 
       {% for owner_login, rows in rows %}
-        <h2 class="text-lg font-semibold text-[var(--text)] mt-4 mb-2">{{ owner_login }}</h2>
-        <table class="w-full text-sm mb-4">
-          <caption class="sr-only">{{ owner_login }}</caption>
-          <thead>
-            <tr class="text-left text-[var(--text-muted)]">
-              <th scope="col"></th>
-              <th scope="col">{% translate "Repository" %}</th>
-              <th scope="col">{% translate "Visibility" %}</th>
-              <th scope="col">{% translate "Archived" %}</th>
-              <th scope="col">{% translate "Connection" %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in rows %}
+        <h2 class="section-title mt-6 mb-3">{{ owner_login }}</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption class="sr-only">{{ owner_login }}</caption>
+            <thead>
               <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    name="repo"
-                    value="{{ row.node.id }}"
-                    {% if row.bound_to %}disabled{% endif %}
-                  >
-                </td>
-                <td>{{ row.node.nameWithOwner }}</td>
-                <td>{% if row.node.isPrivate %}{% translate "Private" %}{% else %}{% translate "Public" %}{% endif %}</td>
-                <td>{% if row.node.isArchived %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
-                <td>
-                  {% if row.bound_to %}
-                    <span class="text-[var(--text-muted)]">
-                      {% blocktranslate trimmed with name=row.bound_to.connection_name %}Bound to {{ name }}{% endblocktranslate %}
-                    </span>
-                    <label class="flex items-center gap-1">
-                      <input type="checkbox" name="confirm" value="1" form="rebind-{{ row.bound_to.repository_pk }}">
-                      {% translate "Confirm" %}
-                    </label>
-                    <button type="submit" form="rebind-{{ row.bound_to.repository_pk }}">{% translate "Rebind here" %}</button>
-                  {% else %}
-                    {% translate "unbound" %}
-                  {% endif %}
-                </td>
+                <th scope="col"></th>
+                <th scope="col">{% translate "Repository" %}</th>
+                <th scope="col">{% translate "Visibility" %}</th>
+                <th scope="col">{% translate "Archived" %}</th>
+                <th scope="col">{% translate "Connection" %}</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td>
+                    <input
+                      type="checkbox"
+                      name="repo"
+                      value="{{ row.node.id }}"
+                      {% if row.bound_to %}disabled{% endif %}
+                    >
+                  </td>
+                  <td>{{ row.node.nameWithOwner }}</td>
+                  <td>{% if row.node.isPrivate %}{% translate "Private" %}{% else %}{% translate "Public" %}{% endif %}</td>
+                  <td>{% if row.node.isArchived %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+                  <td>
+                    {% if row.bound_to %}
+                      <span class="text-text-muted">
+                        {% blocktranslate trimmed with name=row.bound_to.connection_name %}Bound to {{ name }}{% endblocktranslate %}
+                      </span>
+                      <label class="flex items-center gap-1">
+                        <input type="checkbox" name="confirm" value="1" form="rebind-{{ row.bound_to.repository_pk }}">
+                        {% translate "Confirm" %}
+                      </label>
+                      <button type="submit" form="rebind-{{ row.bound_to.repository_pk }}" class="btn btn-secondary btn-sm">{% translate "Rebind here" %}</button>
+                    {% else %}
+                      {% translate "unbound" %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       {% empty %}
         {% translate "No repositories found for this connection." as empty_title %}
-        {% translate "Check the connection's token scopes, or that the account has access to any repositories." as empty_explanation %}
+        {% if owner %}
+          {% blocktranslate trimmed with login=owner asvar empty_explanation %}
+            No repository owned by {{ login }} is visible to this token. Pick "All owners" to see
+            everything the token can reach.
+          {% endblocktranslate %}
+        {% else %}
+          {% translate "This token cannot read any repository. Check that it has repository read access — for a fine-grained token, that the repositories are selected on it, and for an organization, that single sign-on is authorized." as empty_explanation %}
+        {% endif %}
         {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
       {% endfor %}
 
-      <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+      <button type="submit" class="btn btn-primary">
         {% translate "Add selected repositories" %}
       </button>
     </form>

@@ -1,8 +1,8 @@
 {
   "data": {
-    "repositoryOwner": {
+    "viewer": {
       "repositories": {
-        "totalCount": 3,
+        "totalCount": 4,
         "pageInfo": {
           "hasNextPage": true,
           "endCursor": "cursor-page-1"

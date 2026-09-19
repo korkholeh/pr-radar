@@ -4,12 +4,12 @@ literal, translated `title`/`explanation` strings (and an optional `action_label
 supplied at the call site — never a variable holding a rendered sentence, never concatenation
 (CLAUDE.md). `title` is required; `explanation` and the action link are optional.
 {% endcomment %}
-<div class="rounded border border-[var(--border)] p-6 text-center" data-testid="empty-state">
-  <p class="text-[var(--text)]">{{ title }}</p>
+<div class="card card-body flex flex-col items-center gap-1 py-10 text-center" data-testid="empty-state">
+  <p class="text-base font-medium text-text">{{ title }}</p>
   {% if explanation %}
-    <p class="mt-1 text-sm text-[var(--text-muted)]">{{ explanation }}</p>
+    <p class="max-w-prose text-sm text-text-muted">{{ explanation }}</p>
   {% endif %}
   {% if action_url %}
-    <a href="{{ action_url }}" class="mt-3 inline-block text-[var(--accent)] hover:underline">{{ action_label }}</a>
+    <a href="{{ action_url }}" class="btn btn-primary btn-sm mt-3">{{ action_label }}</a>
   {% endif %}
 </div>

@@ -4,7 +4,7 @@
 {% block title %}{% if scope_object %}{{ scope_object }}{% else %}{% translate "Overview" %}{% endif %}{% endblock %}
 
 {% block heading %}
-  <h1 class="text-xl font-semibold text-[var(--text)]">
+  <h1 class="page-title">
     {% if scope_object %}{{ scope_object }}{% else %}{% translate "Overview" %}{% endif %}
   </h1>
 {% endblock %}

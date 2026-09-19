@@ -4,11 +4,11 @@ Shown for an htmx export request that exceeded `EXPORT_SYNC_MAX_ROWS` and was qu
 background `ExportJob` (plan §6/T22) instead of streaming a file — a normal request instead
 redirects straight to "My exports" (`views._queued_response`).
 {% endcomment %}
-<div id="export-queued" class="rounded border border-[var(--border)] p-4" data-testid="export-queued">
-  <p class="text-[var(--text)]">
+<div id="export-queued" class="card card-body" data-testid="export-queued">
+  <p class="text-text">
     {% translate "This export is large and was queued as a background job." %}
   </p>
-  <a href="{% url 'dashboards:exports_index' %}" class="text-[var(--accent)]">
+  <a href="{% url 'dashboards:exports_index' %}" class="text-accent">
     {% translate "View my exports" %}
   </a>
 </div>

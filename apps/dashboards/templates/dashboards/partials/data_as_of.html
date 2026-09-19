@@ -1,5 +1,7 @@
 {% load i18n %}
-<p class="text-xs text-[var(--text-muted)]" data-testid="data-as-of">
+<p class="page-subtitle flex items-center gap-1.5" data-testid="data-as-of">
+  <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
   {% if finished_at %}
     {% blocktranslate with timestamp=finished_at %}Data as of {{ timestamp }}{% endblocktranslate %}
   {% else %}

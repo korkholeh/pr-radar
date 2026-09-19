@@ -1,13 +1,13 @@
 {% load i18n %}
 {% if dry_run_form.errors %}
-  <div class="text-[var(--bad)]" role="alert">
+  <div class="rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
     {% for field in dry_run_form %}
       {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
     {% endfor %}
     {% for error in dry_run_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
   </div>
 {% elif matches is not None %}
-  <p class="text-[var(--text)] mb-2">
+  <p class="mb-2 text-text">
     {% blocktranslate trimmed count counter=matches|length with limit=limit %}
       {{ counter }} match in the last {{ limit }} PRs
     {% plural %}
@@ -17,13 +17,13 @@
   {% if matches %}
     <ul class="text-sm">
       {% for match in matches %}
-        <li class="border-t border-[var(--border)] py-2">
-          <span class="text-[var(--text)]">{{ match.pull_request }}</span>
-          <span class="text-[var(--text-muted)]">— {{ match.evidence }}</span>
+        <li class="border-t border-border py-2 first:border-t-0">
+          <span class="text-text">{{ match.pull_request }}</span>
+          <span class="text-text-muted">— {{ match.evidence }}</span>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p class="text-[var(--text-muted)]">{% translate "No matches." %}</p>
+    <p class="muted">{% translate "No matches." %}</p>
   {% endif %}
 {% endif %}

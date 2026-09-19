@@ -1,8 +1,8 @@
 {
   "data": {
-    "repositoryOwner": {
+    "viewer": {
       "repositories": {
-        "totalCount": 3,
+        "totalCount": 4,
         "pageInfo": {
           "hasNextPage": false,
           "endCursor": null
@@ -21,6 +21,21 @@
               "login": "acme",
               "__typename": "Organization",
               "id": "O_kgDOacme"
+            }
+          },
+          {
+            "id": "R_kgDOA4",
+            "name": "client-portal",
+            "nameWithOwner": "client-co/client-portal",
+            "isPrivate": true,
+            "isArchived": false,
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "owner": {
+              "login": "client-co",
+              "__typename": "Organization",
+              "id": "O_kgDOclientco"
             }
           }
         ]

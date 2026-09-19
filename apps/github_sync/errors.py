@@ -38,6 +38,12 @@ class GitHubSSOError(GitHubError):
         super().__init__(f"SSO authorization required for org {org}")
 
 
+class GitHubNotFoundError(GitHubError):
+    """GitHub answers 404 both for a resource that does not exist and for one the token may not
+    see: it refuses to confirm a private repository's existence to a token without access to it.
+    A connection check must therefore read 404 as "no access", exactly like 403."""
+
+
 class GitHubServerError(GitHubError):
     pass
 

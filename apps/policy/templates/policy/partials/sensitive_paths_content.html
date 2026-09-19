@@ -1,38 +1,40 @@
 {% load i18n %}
-<div class="py-6 max-w-5xl mx-auto" id="sensitive-paths-page">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Sensitive paths" %}</h1>
+<div class="mx-auto w-full max-w-6xl" id="sensitive-paths-page">
+  <div class="page-header">
+    <h1 class="page-title">{% translate "Sensitive paths" %}</h1>
     <a
       href="{% url 'policy:sensitive_path_create' %}"
-      class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]"
+      class="btn btn-primary"
     >
       {% translate "New rule" %}
     </a>
   </div>
-  <table class="w-full text-sm" id="sensitive-paths-table">
-    <caption class="sr-only">{% translate "Sensitive paths" %}</caption>
-    <thead>
-      <tr class="text-left text-[var(--text-muted)]">
-        <th scope="col">{% translate "Project" %}</th>
-        <th scope="col">{% translate "Glob" %}</th>
-        <th scope="col">{% translate "AI mode" %}</th>
-        <th scope="col">{% translate "Description" %}</th>
-        <th scope="col">{% translate "Is active" %}</th>
-        <th scope="col">{% translate "Actions" %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for rule in rules %}
-        {% include "policy/partials/sensitive_path_row.html" %}
-      {% empty %}
+  <div class="table-wrap">
+    <table class="data-table" id="sensitive-paths-table">
+      <caption class="sr-only">{% translate "Sensitive paths" %}</caption>
+      <thead>
         <tr>
-          <td colspan="6">
-            {% translate "No sensitive-path rules yet." as empty_title %}
-            {% translate "Add a rule to flag pull requests that touch sensitive paths." as empty_explanation %}
-            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
-          </td>
+          <th scope="col">{% translate "Project" %}</th>
+          <th scope="col">{% translate "Glob" %}</th>
+          <th scope="col">{% translate "AI mode" %}</th>
+          <th scope="col">{% translate "Description" %}</th>
+          <th scope="col">{% translate "Is active" %}</th>
+          <th scope="col">{% translate "Actions" %}</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for rule in rules %}
+          {% include "policy/partials/sensitive_path_row.html" %}
+        {% empty %}
+          <tr>
+            <td colspan="6">
+              {% translate "No sensitive-path rules yet." as empty_title %}
+              {% translate "Add a rule to flag pull requests that touch sensitive paths." as empty_explanation %}
+              {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>

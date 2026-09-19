@@ -1,49 +1,51 @@
 {% load i18n %}
-<div class="py-6 max-w-4xl mx-auto" id="connections-page">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "GitHub connections" %}</h1>
-    <a href="{% url 'connections:create' %}" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+<div class="mx-auto w-full max-w-5xl" id="connections-page">
+  <div class="page-header">
+    <h1 class="page-title">{% translate "GitHub connections" %}</h1>
+    <a href="{% url 'connections:create' %}" class="btn btn-primary">
       {% translate "New connection" %}
     </a>
   </div>
   {% if blocked_connection %}
-    <p class="text-[var(--bad)] mb-4" role="alert">
+    <p class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
       {% blocktranslate trimmed with name=blocked_connection.name %}
         “{{ name }}” has repositories and cannot be deleted. Rebind or deactivate these first:
       {% endblocktranslate %}
     </p>
-    <ul class="list-disc pl-4 mb-4 text-[var(--text-muted)]">
+    <ul class="mb-4 list-disc space-y-1 pl-5 text-sm text-text-muted">
       {% for repository in blocking_repositories %}
         <li>{{ repository.full_name }}</li>
       {% endfor %}
     </ul>
   {% endif %}
-  <table class="w-full text-sm" id="connections-table">
-    <caption class="sr-only">{% translate "GitHub connections" %}</caption>
-    <thead>
-      <tr class="text-left text-[var(--text-muted)]">
-        <th scope="col">{% translate "Name" %}</th>
-        <th scope="col">{% translate "Kind" %}</th>
-        <th scope="col">{% translate "Token" %}</th>
-        <th scope="col">{% translate "Status" %}</th>
-        <th scope="col">{% translate "Active" %}</th>
-        <th scope="col">{% translate "Actions" %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for connection in connections %}
-        {% include "connections/partials/row.html" %}
-      {% empty %}
-      <tr>
-        <td colspan="6">
-          {% translate "No GitHub connections yet." as empty_title %}
-          {% translate "Add a connection to let PR Radar sync pull requests and reviews from GitHub." as empty_explanation %}
-          {% translate "New connection" as empty_action_label %}
-          {% url "connections:create" as empty_action_url %}
-          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="data-table" id="connections-table">
+      <caption class="sr-only">{% translate "GitHub connections" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Name" %}</th>
+          <th scope="col">{% translate "Kind" %}</th>
+          <th scope="col">{% translate "Token" %}</th>
+          <th scope="col">{% translate "Status" %}</th>
+          <th scope="col">{% translate "Active" %}</th>
+          <th scope="col">{% translate "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for connection in connections %}
+          {% include "connections/partials/row.html" %}
+        {% empty %}
+        <tr>
+          <td colspan="6">
+            {% translate "No GitHub connections yet." as empty_title %}
+            {% translate "Add a connection to let PR Radar sync pull requests and reviews from GitHub." as empty_explanation %}
+            {% translate "New connection" as empty_action_label %}
+            {% url "connections:create" as empty_action_url %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>

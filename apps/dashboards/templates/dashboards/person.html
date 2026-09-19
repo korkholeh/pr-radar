@@ -4,7 +4,7 @@
 {% block title %}{{ scope_object }}{% endblock %}
 
 {% block heading %}
-  <h1 class="text-xl font-semibold text-[var(--text)]">
+  <h1 class="page-title">
     {{ scope_object }}
     {% if params.mode == "day" %}&middot; {{ params.day }}{% endif %}
   </h1>

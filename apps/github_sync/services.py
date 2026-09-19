@@ -258,7 +258,7 @@ def run_sync(
     actor: Any | None = None,
     sleep: Callable[[float], None] = time.sleep,
 ) -> SyncRun:
-    run = SyncRun.objects.create(trigger=trigger, status=SyncRun.Status.RUNNING)
+    run = SyncRun.objects.create(trigger=trigger, status=SyncRun.Status.RUNNING, since=since)
     try:
         _acquire_lock(run)
     except SyncAlreadyRunning:

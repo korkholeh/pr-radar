@@ -1,12 +1,12 @@
 {% load i18n %}
-<tr class="border-t border-[var(--border)]" id="rule-row-{{ rule.pk }}">
+<tr id="rule-row-{{ rule.pk }}">
   <td>{{ rule.name }}</td>
   <td>{{ rule.get_detector_display }}</td>
   <td>{{ rule.get_tool_display }}</td>
   <td>{{ rule.get_confidence_display }}</td>
   <td>{% if rule.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
   <td>{{ rule.notes|truncatechars:60 }}</td>
-  <td class="flex gap-2">
+  <td class="flex flex-wrap items-center gap-2">
     <a href="{% url 'ai_detection:rule_edit' rule.pk %}">{% translate "Edit" %}</a>
     <form
       method="post"
@@ -16,7 +16,7 @@
       hx-swap="outerHTML"
     >
       {% csrf_token %}
-      <button type="submit">
+      <button type="submit" class="btn btn-secondary btn-sm">
         {% if rule.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
       </button>
     </form>

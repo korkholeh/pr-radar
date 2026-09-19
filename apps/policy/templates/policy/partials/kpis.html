@@ -1,31 +1,31 @@
 {% load i18n dashboards %}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="policy-kpis">
-  <div class="rounded border border-[var(--border)] p-4">
-    <div class="text-sm text-[var(--text-muted)]">{% translate "Open violations" %}</div>
-    <div class="text-2xl text-[var(--text)]">{{ kpis.violations_open }}</div>
+  <div class="card card-body">
+    <div class="card-title font-medium text-text-muted">{% translate "Open violations" %}</div>
+    <div class="text-3xl font-semibold tracking-tight tabular-nums text-text" data-testid="policy-kpi-value">{{ kpis.violations_open }}</div>
   </div>
-  <div class="rounded border border-[var(--border)] p-4">
-    <div class="text-sm text-[var(--text-muted)]">{% translate "New violations (30 days)" %}</div>
-    <div class="text-2xl text-[var(--text)]">{{ kpis.violations_new }}</div>
+  <div class="card card-body">
+    <div class="card-title font-medium text-text-muted">{% translate "New violations (30 days)" %}</div>
+    <div class="text-3xl font-semibold tracking-tight tabular-nums text-text" data-testid="policy-kpi-value">{{ kpis.violations_new }}</div>
   </div>
-  <div class="rounded border border-[var(--border)] p-4">
-    <div class="text-sm text-[var(--text-muted)] flex items-center gap-1">
+  <div class="card card-body">
+    <div class="card-title flex items-center gap-1 font-medium text-text-muted">
       {% translate "AI PR compliance rate" %}
       <span title="{% translate 'Share of AI-cohort pull requests created in the period with no open violation.' %}">
         &#x24D8;
       </span>
     </div>
     {% if kpis.ai_pr_compliance_rate is None %}
-      <div class="text-2xl text-[var(--text-muted)]" data-compliance-rate="none">{% translate "N/A" %}</div>
+      <div class="text-3xl font-semibold tracking-tight text-text-muted" data-compliance-rate="none">{% translate "N/A" %}</div>
     {% else %}
       <div
-        class="text-2xl {% if kpi_low_sample %}text-[var(--text-muted)]{% else %}text-[var(--text)]{% endif %}"
+        class="text-3xl font-semibold tracking-tight tabular-nums {% if kpi_low_sample %}text-text-muted{% else %}text-text{% endif %}"
         {% if kpi_low_sample %}data-low-sample="true"{% endif %}
       >
         {% widthratio kpis.ai_pr_compliance_rate 1 100 %}%
       </div>
       {% if kpi_low_sample %}
-        <div class="text-xs text-[var(--text-muted)]" role="note">
+        <div class="help" role="note">
           {% blocktranslate with sample=kpis.sample_size min_sample=min_sample %}
             Sample too small ({{ sample }} below {{ min_sample }}) to be reliable.
           {% endblocktranslate %}
@@ -33,8 +33,8 @@
       {% endif %}
     {% endif %}
   </div>
-  <div class="rounded border border-[var(--border)] p-4">
-    <div class="text-sm text-[var(--text-muted)]">{% translate "Disclosure mismatches" %}</div>
-    <div class="text-2xl text-[var(--text)]">{{ kpis.disclosure_mismatch_count }}</div>
+  <div class="card card-body">
+    <div class="card-title font-medium text-text-muted">{% translate "Disclosure mismatches" %}</div>
+    <div class="text-3xl font-semibold tracking-tight tabular-nums text-text" data-testid="policy-kpi-value">{{ kpis.disclosure_mismatch_count }}</div>
   </div>
 </div>

@@ -50,10 +50,14 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
     Throttled to once per CONNECTION_RECHECK_MIN_MINUTES unless force=True."""
     from apps.connections.auth import auth_for_connection
     from apps.github_sync.client import GitHubClient
-    from apps.github_sync.errors import GitHubAuthError, GitHubSSOError, require
+    from apps.github_sync.errors import (
+        GitHubAuthError,
+        GitHubNotFoundError,
+        GitHubSSOError,
+        require,
+    )
     from apps.github_sync.queries import (
         RATE_LIMIT_QUERY,
-        REPOSITORIES_BY_OWNER_QUERY,
         VIEWER_REPOSITORIES_QUERY,
     )
     from apps.github_sync.rate_limit import RateBudget
@@ -93,23 +97,31 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
         )
         scopes_header = user_headers.get("X-OAuth-Scopes", "")
         scopes = [s.strip() for s in scopes_header.split(",") if s.strip()]
-        if connection.kind == GitHubConnection.Kind.CLASSIC_PAT and _WRITE_SCOPE in scopes:
-            checks.append(
-                {"code": "CLASSIC_PAT_WRITE_SCOPE", "outcome": "fail", "params": {"scopes": scopes}}
-            )
+        if connection.kind == GitHubConnection.Kind.CLASSIC_PAT:
+            if _WRITE_SCOPE in scopes:
+                checks.append(
+                    {"code": "CLASSIC_PAT_WRITE_SCOPE", "outcome": "fail", "params": {"scopes": scopes}}
+                )
+            elif connection.repositories.filter(is_active=True, is_private=True).exists():
+                # 'public_repo' reads public repositories only, and GitHub reports no error when
+                # it is asked for a private one: GraphQL returns the repository with empty
+                # connections (zero branches, zero pull requests) and REST returns 404. Without
+                # this check the connection verifies as ok and every sync reports success with
+                # nothing synced.
+                checks.append(
+                    {
+                        "code": "CLASSIC_PAT_NO_PRIVATE_SCOPE",
+                        "outcome": "fail",
+                        "params": {"scopes": scopes},
+                    }
+                )
 
     if auth_ok:
         sso_blocked = False
         try:
-            if connection.owner_login:
-                data = client.graphql(
-                    REPOSITORIES_BY_OWNER_QUERY,
-                    {"login": connection.owner_login, "first": 5, "after": None},
-                )
-                repos = require(data, "repositoryOwner.repositories")
-            else:
-                data = client.graphql(VIEWER_REPOSITORIES_QUERY, {"first": 5, "after": None})
-                repos = require(data, "viewer.repositories")
+            # Counted the way discovery lists them: everything the token can read, whoever owns it.
+            data = client.graphql(VIEWER_REPOSITORIES_QUERY, {"first": 5, "after": None})
+            repos = require(data, "viewer.repositories")
         except GitHubSSOError as exc:
             sso_blocked = True
             checks.append(
@@ -122,18 +134,35 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
         else:
             count = require(repos, "totalCount")
             sample = [node["nameWithOwner"] for node in require(repos, "nodes")[:5]]
-            checks.append(
-                {"code": "REPOS_VISIBLE", "outcome": "ok", "params": {"count": count, "sample": sample}}
-            )
-            checks.append({"code": "PERM_PULL_REQUESTS", "outcome": "ok", "params": {}})
+            if count:
+                checks.append(
+                    {"code": "REPOS_VISIBLE", "outcome": "ok", "params": {"count": count, "sample": sample}}
+                )
+            else:
+                # A token that sees nothing cannot sync anything; saying "ok, 0 repositories" hid
+                # the real problem behind an empty discovery page.
+                checks.append({"code": "REPOS_VISIBLE_NONE", "outcome": "fail", "params": {}})
 
+        # Both probes below are answered with 404 rather than 403 when the token may not see the
+        # repository — GitHub will not confirm a private repository's existence — so 404 and 403
+        # mean the same thing here. Pull request access used to be reported as ok without being
+        # probed at all, which is what let a 'public_repo' token look healthy.
         repository = connection.repositories.filter(is_active=True).first()
         if repository is None:
+            checks.append({"code": "PERM_PULL_REQUESTS_UNAVAILABLE", "outcome": "unavailable", "params": {}})
             checks.append({"code": "PERM_CONTENTS_UNAVAILABLE", "outcome": "unavailable", "params": {}})
         else:
+            params = {"repository": repository.full_name}
+            try:
+                client.rest_get(f"/repos/{repository.full_name}/pulls?state=all&per_page=1")
+            except (GitHubAuthError, GitHubNotFoundError):
+                checks.append({"code": "PERM_PULL_REQUESTS_DENIED", "outcome": "fail", "params": params})
+            else:
+                checks.append({"code": "PERM_PULL_REQUESTS", "outcome": "ok", "params": params})
+
             try:
                 client.rest_get(f"/repos/{repository.full_name}/contents/")
-            except GitHubAuthError:
+            except (GitHubAuthError, GitHubNotFoundError):
                 checks.append({"code": "PERM_CONTENTS_DENIED", "outcome": "fail", "params": {}})
             else:
                 checks.append({"code": "PERM_CONTENTS_OK", "outcome": "ok", "params": {}})
@@ -155,7 +184,13 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
                 reset_at_raw.replace("Z", "+00:00")
             )
 
-    degraded_codes = {"SSO_AUTHORIZATION_REQUIRED", "CLASSIC_PAT_WRITE_SCOPE"}
+    degraded_codes = {
+        "SSO_AUTHORIZATION_REQUIRED",
+        "CLASSIC_PAT_WRITE_SCOPE",
+        "CLASSIC_PAT_NO_PRIVATE_SCOPE",
+        "REPOS_VISIBLE_NONE",
+        "PERM_PULL_REQUESTS_DENIED",
+    }
     codes = {check["code"] for check in checks}
     if "AUTH_FAILED" in codes:
         status = GitHubConnection.Status.INVALID

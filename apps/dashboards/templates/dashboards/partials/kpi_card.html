@@ -8,52 +8,52 @@ draws as a sub-value on the same card (e.g. `open_prs` + `stale_prs`); optional 
 row's `compare_cohorts` is true or the filter bar's `cohort=compare` is active.
 {% endcomment %}
 <div
-  class="rounded border border-[var(--border)] p-4 {% if result.below_min_sample %}opacity-60{% endif %}"
+  class="card card-body flex flex-col gap-1 transition-shadow hover:shadow-raised{% if result.below_min_sample %} opacity-60{% endif %}"
   data-testid="kpi-card"
   data-metric-key="{{ result.key }}"
 >
   <div
-    class="text-sm text-[var(--text-muted)] flex items-center gap-1 line-clamp-2 break-words hyphens-auto"
+    class="card-title flex items-center gap-1 line-clamp-2 font-medium break-words text-text-muted hyphens-auto"
     title="{% metric_title result.definition %}"
   >
     {% metric_title result.definition %}
   </div>
 
-  <div class="text-2xl text-[var(--text)]" data-testid="kpi-value">
+  <div class="text-3xl font-semibold tracking-tight tabular-nums text-text" data-testid="kpi-value">
     {{ result.value|metric_value:result.definition.unit }}
   </div>
   {% if result.delta is not None %}
-    <div class="text-sm {{ result|direction_class }}" data-testid="kpi-delta">
+    <div class="flex items-center gap-1 text-sm font-medium tabular-nums {{ result|direction_class }}" data-testid="kpi-delta">
       <span aria-hidden="true">{{ result.delta|delta_arrow }}</span>
       <span>{{ result.delta_ratio|percent }}</span>
     </div>
   {% endif %}
-  <div class="mt-1" data-testid="kpi-sparkline">{% sparkline_svg result.series %}</div>
+  <div class="mt-1 text-text-muted" data-testid="kpi-sparkline">{% sparkline_svg result.series %}</div>
 
   {% if compare %}
-    <div class="flex gap-4 mt-2 pt-2 border-t border-[var(--border)]" data-testid="kpi-compare">
+    <div class="mt-2 flex gap-6 border-t border-border pt-2" data-testid="kpi-compare">
       <div>
-        <div class="text-xs text-[var(--text-muted)]">{% translate "AI" %}</div>
-        <div class="text-lg text-[var(--text)]">{{ compare.ai.value|metric_value:result.definition.unit }}</div>
+        <div class="text-xs text-text-muted">{% translate "AI" %}</div>
+        <div class="text-lg font-semibold tabular-nums text-text">{{ compare.ai.value|metric_value:result.definition.unit }}</div>
       </div>
       <div>
-        <div class="text-xs text-[var(--text-muted)]">{% translate "Non-AI" %}</div>
-        <div class="text-lg text-[var(--text)]">{{ compare.non_ai.value|metric_value:result.definition.unit }}</div>
+        <div class="text-xs text-text-muted">{% translate "Non-AI" %}</div>
+        <div class="text-lg font-semibold tabular-nums text-text">{{ compare.non_ai.value|metric_value:result.definition.unit }}</div>
       </div>
     </div>
   {% endif %}
 
   {% if secondary_result %}
-    <div class="mt-2 pt-2 border-t border-[var(--border)]">
-      <div class="text-xs text-[var(--text-muted)]">{% metric_title secondary_result.definition %}</div>
-      <div class="text-lg text-[var(--text)]">
+    <div class="mt-2 border-t border-border pt-2">
+      <div class="text-xs text-text-muted">{% metric_title secondary_result.definition %}</div>
+      <div class="text-lg font-semibold tabular-nums text-text">
         {{ secondary_result.value|metric_value:secondary_result.definition.unit }}
       </div>
     </div>
   {% endif %}
 
   {% if result.below_min_sample %}
-    <div class="mt-2 text-xs text-[var(--warning)]" role="note" data-testid="kpi-small-sample">
+    <div class="badge badge-warning mt-2 self-start" role="note" data-testid="kpi-small-sample">
       {% translate "Small sample" %}
     </div>
   {% endif %}

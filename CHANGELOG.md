@@ -1,5 +1,42 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **The interface has been redesigned.** Every page now shares one visual system: a sticky application header
+  with the primary destinations, a Settings menu holding the admin-only pages, a page container with consistent
+  width and spacing, and cards for KPIs, charts, filters, forms and tables. Buttons, inputs, labels, badges,
+  tables, links, empty states and alerts are shared component classes (`static/css/src/input.css`) rather than
+  ad-hoc utility strings, so a change lands everywhere at once. On a narrow screen the header keeps every
+  control — the navigation moves to its own scrollable row instead of a duplicated mobile menu. Colours still
+  come only from `static/css/tokens.css`; the new surface, accent-tint and shadow tokens are defined there for
+  both themes.
+
+### Added
+
+- **Load historical data** on the Sync page (admins): re-fetch every pull request updated in the last 7, 14, 30
+  or 90 days, or since a date you pick, for all active repositories or only the ones you select. It shares the
+  lock, rate-limit budget and rollup rebuild with an ordinary sync, and its runs are listed as `Backfill` with
+  the start date they used. The command-line equivalent, `manage.py sync --since`, is unchanged.
+
+### Fixed
+
+- A connection whose token cannot read the repositories it tracks is no longer reported as healthy. The
+  `PERM_PULL_REQUESTS` check now actually lists pull requests on one of the connection's repositories instead of
+  being recorded as passing without a request behind it, and a 404 — GitHub's answer for a private repository a
+  token may not see — is read as denied access (`PERM_PULL_REQUESTS_DENIED`, `PERM_CONTENTS_DENIED`) rather than
+  an unexpected error. A classic token that lacks the `repo` scope while private repositories are tracked is
+  flagged as `CLASSIC_PAT_NO_PRIVATE_SCOPE`. Previously such a connection verified as `ok` and every sync
+  reported success having synced nothing.
+- Repository discovery now lists every repository a connection's token can read, whoever owns it — a
+  client-owned or other-organization repository you have access to is no longer hidden. A connection's owner
+  login is a label only; it no longer filters the list. When the list spans several owners, an **Owner**
+  dropdown narrows it, defaulting to all owners.
+- A connection whose token can see no repository at all is now reported as `degraded` with the new
+  `REPOS_VISIBLE_NONE` check and a hint, instead of passing verification with "0 repositories" and leaving an
+  empty discovery page as the only symptom.
+
 ## 0.1.0 — 2026-09-19
 
 The first release. Everything below is new.

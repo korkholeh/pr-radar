@@ -4,31 +4,34 @@
 {% block title %}{% translate "Log in" %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-sm py-16">
-  <h1 class="text-xl font-semibold text-[var(--text)] mb-6">{% translate "Log in" %}</h1>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-      <div class="mb-4 text-[var(--bad)]" role="alert">
-        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+<div class="auth-card">
+  <div class="card card-body form-stack">
+    <h1 class="page-title mb-1">{% translate "Log in" %}</h1>
+    <p class="page-subtitle mb-6">{% translate "Sign in to see your team's pull-request dashboards." %}</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="field">
+        <label class="label" for="{{ form.username.id_for_label }}">{% translate "Username" %}</label>
+        {{ form.username }}
+        {% for error in form.username.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
       </div>
-    {% endif %}
-    <div class="mb-4">
-      <label class="block mb-1 text-[var(--text)]" for="{{ form.username.id_for_label }}">{% translate "Username" %}</label>
-      {{ form.username }}
-      {% for error in form.username.errors %}<p class="text-[var(--bad)]">{{ error }}</p>{% endfor %}
+      <div class="field">
+        <label class="label" for="{{ form.password.id_for_label }}">{% translate "Password" %}</label>
+        {{ form.password }}
+        {% for error in form.password.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary w-full">{% translate "Log in" %}</button>
+    </form>
+    <div class="mt-6 flex items-center justify-between gap-2 border-t border-border pt-4">
+      {% include "partials/theme_switcher.html" %}
+      {% include "partials/language_switcher.html" %}
     </div>
-    <div class="mb-4">
-      <label class="block mb-1 text-[var(--text)]" for="{{ form.password.id_for_label }}">{% translate "Password" %}</label>
-      {{ form.password }}
-      {% for error in form.password.errors %}<p class="text-[var(--bad)]">{{ error }}</p>{% endfor %}
-    </div>
-    <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">{% translate "Log in" %}</button>
-  </form>
-  <div class="mt-6 flex items-center justify-between">
-    {% include "partials/theme_switcher.html" %}
-    {% include "partials/language_switcher.html" %}
   </div>
 </div>
 {% endblock %}

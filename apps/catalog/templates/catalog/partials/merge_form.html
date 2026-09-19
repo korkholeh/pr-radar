@@ -1,24 +1,24 @@
 {% load i18n %}
-<div class="py-6 max-w-lg mx-auto" id="merge-form-page">
-  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "Merge people" %}</h1>
-  <p class="text-[var(--text-muted)] mb-4">
+<div class="mx-auto w-full max-w-2xl" id="merge-form-page">
+  <h1 class="page-title mb-4">{% translate "Merge people" %}</h1>
+  <p class="muted mb-4">
     {% translate "Every identity of the source person moves to the target person. The source person is then deleted. This cannot be undone." %}
   </p>
-  <form method="post" novalidate>
+  <form method="post" novalidate class="card card-body form-stack">
     {% csrf_token %}
     {% if form.non_field_errors %}
-      <div class="mb-4 text-[var(--bad)]" role="alert">
+      <div class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
         {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
       </div>
     {% endif %}
     {% for field in form %}
-      <div class="mb-4">
-        <label class="block mb-1 text-[var(--text)]" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      <div class="field">
+        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% for error in field.errors %}<p class="text-[var(--bad)]" role="alert">{{ error }}</p>{% endfor %}
+        {% for error in field.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
       </div>
     {% endfor %}
-    <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+    <button type="submit" class="btn btn-primary">
       {% translate "Merge" %}
     </button>
   </form>

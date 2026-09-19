@@ -1,11 +1,11 @@
 {% load i18n %}
-<div class="mb-6" id="policy-mismatch-list">
-  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Disclosure mismatches" %}</h2>
+<div class="card card-body mb-6" id="policy-mismatch-list">
+  <h2 class="section-title mb-3">{% translate "Disclosure mismatches" %}</h2>
   {% if mismatch_prs %}
-    <ul class="text-sm space-y-1">
+    <ul class="space-y-1 text-sm">
       {% for pr in mismatch_prs %}
         <li>
-          <a href="{% url 'dashboards:pull_request_detail' pr.pk %}">
+          <a class="link" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
             {{ pr.repository.full_name }}#{{ pr.number }}
           </a>
           — {{ pr.title }}
@@ -13,6 +13,6 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p class="text-[var(--text-muted)]">{% translate "No disclosure mismatches in this period." %}</p>
+    <p class="muted">{% translate "No disclosure mismatches in this period." %}</p>
   {% endif %}
 </div>

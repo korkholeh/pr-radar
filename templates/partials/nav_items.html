@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}
+The primary navigation items, rendered once for the desktop bar and once inside the mobile
+menu. `item_class` is the caller's base class; the active item — matched on the resolved view
+name so an htmx `hx-push-url` swap and a full page load agree — adds `nav-link-active`.
+{% endcomment %}
+{% with view_name=request.resolver_match.view_name %}
+  <a href="{% url 'dashboards:overview' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:overview' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:overview' %}aria-current="page"{% endif %}>{% translate "Overview" %}</a>
+  <a href="{% url 'dashboards:projects_index' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:projects_index' or view_name == 'dashboards:project' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:projects_index' %}aria-current="page"{% endif %}>{% translate "Projects" %}</a>
+  <a href="{% url 'dashboards:repositories_index' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:repositories_index' or view_name == 'dashboards:repository' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:repositories_index' %}aria-current="page"{% endif %}>{% translate "Repositories" %}</a>
+  <a href="{% url 'dashboards:people_index' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:people_index' or view_name == 'dashboards:person' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:people_index' %}aria-current="page"{% endif %}>{% translate "People" %}</a>
+  <a href="{% url 'dashboards:pull_requests_index' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:pull_requests_index' or view_name == 'dashboards:pull_request_detail' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:pull_requests_index' %}aria-current="page"{% endif %}>{% translate "Pull requests" %}</a>
+  <a href="{% url 'dashboards:reviews' %}"
+     class="{{ item_class }}{% if view_name == 'dashboards:reviews' %} nav-link-active{% endif %}"
+     {% if view_name == 'dashboards:reviews' %}aria-current="page"{% endif %}>{% translate "Reviews" %}</a>
+  <a href="{% url 'policy:console' %}"
+     class="{{ item_class }}{% if view_name == 'policy:console' %} nav-link-active{% endif %}"
+     {% if view_name == 'policy:console' %}aria-current="page"{% endif %}>{% translate "Policy" %}</a>
+{% endwith %}

@@ -1,0 +1,60 @@
+{% load i18n %}
+<form
+  id="sync-backfill"
+  class="card card-body mb-6"
+  method="post"
+  action="{% url 'github_sync:backfill' %}"
+  novalidate
+  hx-post="{% url 'github_sync:backfill' %}"
+  hx-target="#sync-page"
+  hx-swap="outerHTML"
+>
+  {% csrf_token %}
+  <h2 class="section-title mb-1">{% translate "Load historical data" %}</h2>
+  <p class="muted mb-4">
+    {% blocktranslate trimmed %}
+      Fetches every pull request updated since the chosen date again, instead of only the ones changed
+      since the last sync. Use it after adding a repository, or when a sync window was too narrow.
+    {% endblocktranslate %}
+  </p>
+  {% if backfill_form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
+      {% for error in backfill_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+  {% endif %}
+  <fieldset class="mb-4">
+    <legend class="label">{{ backfill_form.window.label }}</legend>
+    {{ backfill_form.window }}
+    {% for error in backfill_form.window.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+  </fieldset>
+  <div class="field">
+    <label class="label" for="{{ backfill_form.since.id_for_label }}">
+      {{ backfill_form.since.label }}
+    </label>
+    {{ backfill_form.since }}
+    <p class="help">{{ backfill_form.since.help_text }}</p>
+    {% for error in backfill_form.since.errors %}
+      <p class="error-text" role="alert">{{ error }}</p>
+    {% endfor %}
+  </div>
+  <div class="field">
+    <label class="label" for="{{ backfill_form.repositories.id_for_label }}">
+      {{ backfill_form.repositories.label }}
+    </label>
+    {{ backfill_form.repositories }}
+    <p class="help">{{ backfill_form.repositories.help_text }}</p>
+    {% for error in backfill_form.repositories.errors %}
+      <p class="error-text" role="alert">{{ error }}</p>
+    {% endfor %}
+  </div>
+  <button
+    type="submit"
+    class="btn btn-primary"
+    {% if running %}disabled{% endif %}
+  >{% translate "Start backfill" %}</button>
+  {% if running %}
+    <p class="text-text-muted text-xs mt-2">
+      {% translate "A sync is running. Wait for it to finish before starting a backfill." %}
+    </p>
+  {% endif %}
+</form>

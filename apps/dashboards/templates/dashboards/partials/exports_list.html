@@ -10,48 +10,50 @@ polling) once every job is terminal.
   data-testid="exports-list"
   data-polling="{{ polling|yesno:'true,false' }}"
 >
-  <table class="w-full text-sm" id="exports-table">
-    <caption class="sr-only">{% translate "My exports" %}</caption>
-    <thead>
-      <tr class="text-left text-[var(--text-muted)]">
-        <th scope="col">{% translate "Created" %}</th>
-        <th scope="col">{% translate "Kind" %}</th>
-        <th scope="col">{% translate "Status" %}</th>
-        <th scope="col">{% translate "Rows" %}</th>
-        <th scope="col"><span class="sr-only">{% translate "Download" %}</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for job in jobs %}
-      <tr class="border-t border-[var(--border)]" data-testid="export-job-row" data-job-status="{{ job.status }}">
-        <td>{{ job.created_at }}</td>
-        <td>{{ job.get_kind_display }}</td>
-        <td>
-          {{ job.get_status_display }}
-          {% if job.status == "failed" %}
-            <div class="text-[var(--bad)]">{{ job.error_code|export_error_message }}</div>
-          {% endif %}
-        </td>
-        <td>{{ job.rows|default_if_none:"—" }}</td>
-        <td>
-          {% if job.status == "done" %}
-            <a
-              href="{% url 'dashboards:export_download' job.pk %}"
-              class="text-[var(--accent)]"
-              data-testid="export-download-link"
-            >{% translate "Download" %}</a>
-          {% endif %}
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5">
-          {% translate "No exports yet." as empty_title %}
-          {% translate "Download a CSV or XLSX report from a dashboard table to see it listed here." as empty_explanation %}
-          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="data-table" id="exports-table">
+      <caption class="sr-only">{% translate "My exports" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Created" %}</th>
+          <th scope="col">{% translate "Kind" %}</th>
+          <th scope="col">{% translate "Status" %}</th>
+          <th scope="col">{% translate "Rows" %}</th>
+          <th scope="col"><span class="sr-only">{% translate "Download" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        <tr data-testid="export-job-row" data-job-status="{{ job.status }}">
+          <td>{{ job.created_at }}</td>
+          <td>{{ job.get_kind_display }}</td>
+          <td>
+            {{ job.get_status_display }}
+            {% if job.status == "failed" %}
+              <div class="text-xs text-bad">{{ job.error_code|export_error_message }}</div>
+            {% endif %}
+          </td>
+          <td>{{ job.rows|default_if_none:"—" }}</td>
+          <td>
+            {% if job.status == "done" %}
+              <a
+                href="{% url 'dashboards:export_download' job.pk %}"
+                class="link"
+                data-testid="export-download-link"
+              >{% translate "Download" %}</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            {% translate "No exports yet." as empty_title %}
+            {% translate "Download a CSV or XLSX report from a dashboard table to see it listed here." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>

@@ -110,7 +110,7 @@ def test_search_by_pr_number_narrows_table(page: Page) -> None:
 def test_acknowledge_updates_status_decrements_open_kpi_and_writes_audit_entry(page: Page) -> None:
     log_in(page, USER_LEAD)
     page.goto("/policy/")
-    open_before = int(page.locator("#policy-kpis").locator("div.text-2xl").first.inner_text())
+    open_before = int(page.locator("#policy-kpis [data-testid='policy-kpi-value']").first.inner_text())
 
     _violation_row(page, 940).get_by_role("checkbox").check()
     page.locator("#violation-bulk-form").get_by_label("Action").select_option(label="Acknowledge")
@@ -128,7 +128,7 @@ def test_acknowledge_updates_status_decrements_open_kpi_and_writes_audit_entry(p
     expect(_violation_row(page, 940)).to_contain_text("Acknowledged")
 
     page.goto("/policy/")
-    open_after = int(page.locator("#policy-kpis").locator("div.text-2xl").first.inner_text())
+    open_after = int(page.locator("#policy-kpis [data-testid='policy-kpi-value']").first.inner_text())
     assert open_after == open_before - 1
 
     log_in(page, USER_ADMIN)

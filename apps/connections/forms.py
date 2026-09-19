@@ -7,7 +7,15 @@ from apps.connections.models import GitHubConnection
 class ConnectionForm(forms.Form):
     name = forms.CharField(label=_("Name"), max_length=200)
     kind = forms.ChoiceField(label=_("Kind"), choices=GitHubConnection.Kind.choices)
-    owner_login = forms.CharField(label=_("Owner login"), max_length=200, required=False)
+    owner_login = forms.CharField(
+        label=_("Owner login"),
+        max_length=200,
+        required=False,
+        help_text=_(
+            "Optional label for the organization or account this connection belongs to. It does not "
+            "limit discovery: every repository the token can read is listed, whoever owns it."
+        ),
+    )
     token = forms.CharField(
         label=_("Token"),
         widget=forms.PasswordInput(render_value=False),

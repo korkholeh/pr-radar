@@ -34,6 +34,11 @@
   --heat-2: #93bffa;
   --heat-3: #4174c5;
   --heat-4: #2f6feb;
+  --accent-soft: #e8effc;
+  --accent-hover: #1f4fae;
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 14px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(16 24 40 / 0.12);
 }
 
 [data-theme="dark"] {
@@ -68,4 +73,9 @@
   --heat-2: #275693;
   --heat-3: #447fc8;
   --heat-4: #6ea8fe;
+  --accent-soft: #1b2b47;
+  --accent-hover: #9cc4ff;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 14px rgb(0 0 0 / 0.55);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.65);
 }

@@ -2,14 +2,17 @@
 {% load i18n dashboards %}
 {% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number }}{% endblock %}
 {% block content %}
-<div class="py-6 max-w-3xl mx-auto" id="pull-request-detail">
-  <div class="mb-4">
-    <h1 class="text-xl font-semibold text-[var(--text)]">
-      {{ pull_request.repository.full_name }}#{{ pull_request.number }} — {{ pull_request.title }}
-    </h1>
+<div class="mx-auto w-full max-w-4xl" id="pull-request-detail">
+  <div class="page-header">
+    <div>
+      <p class="text-sm font-medium text-text-muted">
+        {{ pull_request.repository.full_name }}#{{ pull_request.number }}
+      </p>
+      <h1 class="page-title">{{ pull_request.title }}</h1>
+    </div>
     <a
       href="https://github.com/{{ pull_request.repository.full_name }}/pull/{{ pull_request.number }}"
-      class="text-[var(--text-muted)]"
+      class="btn btn-secondary btn-sm"
       target="_blank"
       rel="noopener"
     >
@@ -17,16 +20,16 @@
     </a>
   </div>
 
-  <section class="mb-6" id="pr-timeline">
-    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Timeline" %}</h2>
+  <section class="card card-body mb-6" id="pr-timeline">
+    <h2 class="section-title mb-3">{% translate "Timeline" %}</h2>
     <ol class="text-sm">
       {% for event in timeline %}
-        <li class="border-t border-[var(--border)] py-1 flex justify-between">
-          <span class="text-[var(--text)]">
+        <li class="flex justify-between gap-4 border-t border-border py-2 first:border-t-0">
+          <span class="text-text">
             {{ event.label }}
             {% if event.actor %}&middot; {{ event.actor }}{% endif %}
           </span>
-          <span class="text-[var(--text-muted)]">{{ event.at }}</span>
+          <span class="text-text-muted">{{ event.at }}</span>
         </li>
       {% empty %}
         <li class="py-4">
@@ -38,105 +41,107 @@
     </ol>
   </section>
 
-  <section class="mb-6" id="pr-metrics">
-    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Metrics" %}</h2>
-    <dl class="grid grid-cols-2 gap-2 text-sm">
-      <dt class="text-[var(--text-muted)]">{% translate "Lead time" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.lead_time_hours|humanize_duration_hours }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Time to first review" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.time_to_first_review_hours|humanize_duration_hours }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Cycle time" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.cycle_time_hours|humanize_duration_hours }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Effective size" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.effective_size|format_lines }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Size bucket" %}</dt>
-      <dd class="text-[var(--text)]">{{ pull_request.get_size_bucket_display|default:"—" }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Review rounds" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.review_rounds|format_count }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Commits after first review" %}</dt>
-      <dd class="text-[var(--text)]">{{ pr_metrics.commits_after_first_review|format_count }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Rubber-stamp review" %}</dt>
-      <dd class="text-[var(--text)]">
+  <section class="card card-body mb-6" id="pr-metrics">
+    <h2 class="section-title mb-3">{% translate "Metrics" %}</h2>
+    <dl class="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[minmax(0,14rem)_1fr]">
+      <dt class="text-text-muted">{% translate "Lead time" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.lead_time_hours|humanize_duration_hours }}</dd>
+      <dt class="text-text-muted">{% translate "Time to first review" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.time_to_first_review_hours|humanize_duration_hours }}</dd>
+      <dt class="text-text-muted">{% translate "Cycle time" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.cycle_time_hours|humanize_duration_hours }}</dd>
+      <dt class="text-text-muted">{% translate "Effective size" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.effective_size|format_lines }}</dd>
+      <dt class="text-text-muted">{% translate "Size bucket" %}</dt>
+      <dd class="font-medium text-text">{{ pull_request.get_size_bucket_display|default:"—" }}</dd>
+      <dt class="text-text-muted">{% translate "Review rounds" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.review_rounds|format_count }}</dd>
+      <dt class="text-text-muted">{% translate "Commits after first review" %}</dt>
+      <dd class="font-medium text-text">{{ pr_metrics.commits_after_first_review|format_count }}</dd>
+      <dt class="text-text-muted">{% translate "Rubber-stamp review" %}</dt>
+      <dd class="font-medium text-text">
         {% if pr_metrics.is_rubber_stamp %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
       </dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Self-merged" %}</dt>
-      <dd class="text-[var(--text)]">
+      <dt class="text-text-muted">{% translate "Self-merged" %}</dt>
+      <dd class="font-medium text-text">
         {% if pr_metrics.is_self_merged %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}
       </dd>
     </dl>
   </section>
 
-  <section class="mb-6" id="pr-churn">
-    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Churn" %}</h2>
+  <section class="card card-body mb-6" id="pr-churn">
+    <h2 class="section-title mb-3">{% translate "Churn" %}</h2>
     {% if not churn_result %}
-      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn not computed yet." %}</p>
+      <p class="text-sm text-text-muted">{% translate "Churn not computed yet." %}</p>
     {% elif churn_result.status == "ok" and churn_result.churn_ratio is not None %}
-      <p class="text-sm text-[var(--text)]">
+      <p class="text-sm text-text">
         {% blocktranslate with ratio=churn_result.churn_ratio|percent surviving=churn_result.lines_surviving at_merge=churn_result.lines_at_merge days=churn_result.window_days %}
           {{ ratio }} churn — {{ surviving }} of {{ at_merge }} lines still present after {{ days }} days.
         {% endblocktranslate %}
       </p>
     {% elif churn_result.status == "ok" %}
-      <p class="text-sm text-[var(--text-muted)]">
+      <p class="text-sm text-text-muted">
         {% translate "This PR had no measurable lines at merge; churn was not computed." %}
       </p>
     {% elif churn_result.status == "unsupported_merge_method" %}
-      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn is not measured for rebase merges." %}</p>
+      <p class="text-sm text-text-muted">{% translate "Churn is not measured for rebase merges." %}</p>
     {% elif churn_result.status == "too_large" %}
-      <p class="text-sm text-[var(--text-muted)]">
+      <p class="text-sm text-text-muted">
         {% blocktranslate with limit=churn_too_large_limit %}
           This PR changes more than {{ limit }} files; churn was not measured.
         {% endblocktranslate %}
       </p>
     {% else %}
-      <p class="text-sm text-[var(--text-muted)]">{% translate "Churn could not be measured." %}</p>
-      <p class="text-sm text-[var(--text-muted)]">{{ churn_error_reason }}</p>
+      <p class="text-sm text-text-muted">{% translate "Churn could not be measured." %}</p>
+      <p class="text-sm text-text-muted">{{ churn_error_reason }}</p>
       {% if churn_error_detail %}
-        <p class="text-xs text-[var(--text-muted)]">{{ churn_error_detail }}</p>
+        <p class="help">{{ churn_error_detail }}</p>
       {% endif %}
     {% endif %}
   </section>
 
-  <section class="mb-6" id="pr-files">
-    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Files" %}</h2>
-    <table class="w-full text-sm" id="pr-files-table">
-      <caption class="sr-only">{% translate "Changed files" %}</caption>
-      <thead>
-        <tr class="text-left text-[var(--text-muted)]">
-          <th scope="col">{% translate "Path" %}</th>
-          <th scope="col">{% translate "Status" %}</th>
-          <th scope="col">{% translate "+/-" %}</th>
-          <th scope="col">{% translate "Flags" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for file in files %}
-          <tr class="border-t border-[var(--border)]">
-            <td class="text-[var(--text)]">{{ file.path }}</td>
-            <td>{{ file.status }}</td>
-            <td>
-              <span class="text-[var(--good)]">+{{ file.additions|default:0 }}</span>
-              <span class="text-[var(--bad)]">-{{ file.deletions|default:0 }}</span>
-            </td>
-            <td class="text-[var(--text-muted)]">
-              {% if file.is_test %}{% translate "test" %}{% endif %}
-              {% if file.is_excluded %}{% translate "excluded" %}{% endif %}
-              {% if file.matched_sensitive_rule %}{% translate "sensitive" %}{% endif %}
-            </td>
-          </tr>
-        {% empty %}
+  <section class="card card-body mb-6" id="pr-files">
+    <h2 class="section-title mb-3">{% translate "Files" %}</h2>
+    <div class="table-wrap">
+      <table class="data-table" id="pr-files-table">
+        <caption class="sr-only">{% translate "Changed files" %}</caption>
+        <thead>
           <tr>
-            <td colspan="4">
-              {% translate "No files recorded." as empty_title %}
-              {% translate "File changes are recorded the next time this pull request is synced." as empty_explanation %}
-              {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
-            </td>
+            <th scope="col">{% translate "Path" %}</th>
+            <th scope="col">{% translate "Status" %}</th>
+            <th scope="col">{% translate "+/-" %}</th>
+            <th scope="col">{% translate "Flags" %}</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for file in files %}
+            <tr>
+              <td class="text-text">{{ file.path }}</td>
+              <td>{{ file.status }}</td>
+              <td>
+                <span class="text-good">+{{ file.additions|default:0 }}</span>
+                <span class="text-bad">-{{ file.deletions|default:0 }}</span>
+              </td>
+              <td class="text-text-muted">
+                {% if file.is_test %}{% translate "test" %}{% endif %}
+                {% if file.is_excluded %}{% translate "excluded" %}{% endif %}
+                {% if file.matched_sensitive_rule %}{% translate "sensitive" %}{% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4">
+                {% translate "No files recorded." as empty_title %}
+                {% translate "File changes are recorded the next time this pull request is synced." as empty_explanation %}
+                {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% if extra_files_count %}
-      <p class="text-sm text-[var(--text-muted)] mt-2">
+      <p class="text-sm text-text-muted mt-2">
         {% blocktranslate count count=extra_files_count %}
           +{{ count }} more file
         {% plural %}
@@ -148,15 +153,15 @@
 
   {% include "dashboards/partials/pr_violations.html" %}
 
-  <section class="mb-6" id="ai-section">
-    <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "AI signals" %}</h2>
-    <dl class="grid grid-cols-2 gap-2 mb-4 text-sm">
-      <dt class="text-[var(--text-muted)]">{% translate "Status" %}</dt>
-      <dd class="text-[var(--text)]">{{ pull_request.get_ai_status_display }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Disclosure" %}</dt>
-      <dd class="text-[var(--text)]">{{ pull_request.get_ai_disclosure_display }}</dd>
-      <dt class="text-[var(--text-muted)]">{% translate "Tools" %}</dt>
-      <dd class="text-[var(--text)]">
+  <section class="card card-body mb-6" id="ai-section">
+    <h2 class="section-title mb-3">{% translate "AI signals" %}</h2>
+    <dl class="mb-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[minmax(0,14rem)_1fr]">
+      <dt class="text-text-muted">{% translate "Status" %}</dt>
+      <dd class="font-medium text-text">{{ pull_request.get_ai_status_display }}</dd>
+      <dt class="text-text-muted">{% translate "Disclosure" %}</dt>
+      <dd class="font-medium text-text">{{ pull_request.get_ai_disclosure_display }}</dd>
+      <dt class="text-text-muted">{% translate "Tools" %}</dt>
+      <dd class="font-medium text-text">
         {% if ai_tools_display %}
           {{ ai_tools_display|join:", " }}
         {% else %}
@@ -165,37 +170,39 @@
       </dd>
     </dl>
 
-    <table class="w-full text-sm" id="ai-signals-table">
-      <caption class="sr-only">{% translate "AI signals" %}</caption>
-      <thead>
-        <tr class="text-left text-[var(--text-muted)]">
-          <th scope="col">{% translate "Detector" %}</th>
-          <th scope="col">{% translate "Tool" %}</th>
-          <th scope="col">{% translate "Confidence" %}</th>
-          <th scope="col">{% translate "Evidence" %}</th>
-          <th scope="col">{% translate "Commit" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for signal in signals %}
-        <tr class="border-t border-[var(--border)]">
-          <td>{{ signal.rule.get_detector_display }}</td>
-          <td>{{ signal.get_tool_display }}</td>
-          <td>{{ signal.get_confidence_display }}</td>
-          <td>{{ signal.evidence }}</td>
-          <td>{% if signal.commit %}{{ signal.commit.sha|slice:":12" }}{% endif %}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5">
-            {% translate "No AI signals detected." as empty_title %}
-            {% translate "No AI-authorship pattern matched any commit or file in this pull request." as empty_explanation %}
-            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="data-table" id="ai-signals-table">
+        <caption class="sr-only">{% translate "AI signals" %}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{% translate "Detector" %}</th>
+            <th scope="col">{% translate "Tool" %}</th>
+            <th scope="col">{% translate "Confidence" %}</th>
+            <th scope="col">{% translate "Evidence" %}</th>
+            <th scope="col">{% translate "Commit" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for signal in signals %}
+          <tr>
+            <td>{{ signal.rule.get_detector_display }}</td>
+            <td>{{ signal.get_tool_display }}</td>
+            <td>{{ signal.get_confidence_display }}</td>
+            <td>{{ signal.evidence }}</td>
+            <td>{% if signal.commit %}{{ signal.commit.sha|slice:":12" }}{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              {% translate "No AI signals detected." as empty_title %}
+              {% translate "No AI-authorship pattern matched any commit or file in this pull request." as empty_explanation %}
+              {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 </div>
 {% endblock %}

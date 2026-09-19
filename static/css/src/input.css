@@ -8,13 +8,21 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
   --color-good: var(--good);
   --color-bad: var(--bad);
   --color-neutral: var(--neutral);
   --color-warning: var(--warning);
+
+  --shadow-card: var(--shadow-sm);
+  --shadow-raised: var(--shadow-md);
+  --shadow-pop: var(--shadow-lg);
 }
 
 @source "../../../templates";
@@ -22,3 +30,283 @@
 @source not "../../../apps/*/migrations";
 @source not "../../../apps/*/tests";
 @source "../../../static/js";
+
+/* ---------------------------------------------------------------------------
+   Base: element defaults so a control with no class still looks like the rest
+   of the app (most filter and form controls in this project are unclassed).
+   --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg text-text antialiased;
+  }
+
+  :where(a):focus-visible,
+  :where(button):focus-visible,
+  :where(input):focus-visible,
+  :where(select):focus-visible,
+  :where(textarea):focus-visible,
+  :where(summary):focus-visible,
+  :where([tabindex]):focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"])),
+  :where(select),
+  :where(textarea) {
+    @apply rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text;
+  }
+
+  :where(select[multiple]) {
+    @apply px-2 py-1;
+  }
+
+  :where(input[type="checkbox"]),
+  :where(input[type="radio"]) {
+    @apply accent-accent h-4 w-4 align-middle;
+  }
+
+  :where(summary) {
+    @apply cursor-pointer;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components: the shared vocabulary every template composes from. Colours come
+   from tokens only (tokens.css is the single place a literal is allowed).
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* Layout ---------------------------------------------------------------- */
+  .page-shell {
+    @apply mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-header {
+    @apply mb-6 flex flex-wrap items-end justify-between gap-3;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-text;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-text-muted;
+  }
+
+  .section-title {
+    @apply text-base font-semibold tracking-tight text-text;
+  }
+
+  .muted {
+    @apply text-sm text-text-muted;
+  }
+
+  /* Surfaces -------------------------------------------------------------- */
+  .card {
+    @apply rounded-xl border border-border bg-surface shadow-card;
+  }
+
+  .card-body {
+    @apply p-4 sm:p-5;
+  }
+
+  .card-header {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5;
+  }
+
+  .card-title {
+    @apply text-sm font-semibold tracking-tight text-text;
+  }
+
+  /* Buttons --------------------------------------------------------------- */
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent
+           px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed
+           disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-on-accent hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply border-border-strong bg-surface text-text hover:bg-surface-2;
+  }
+
+  .btn-ghost {
+    @apply text-text-muted hover:bg-surface-2 hover:text-text;
+  }
+
+  .btn-danger {
+    @apply border-border-strong bg-surface text-bad hover:bg-surface-2;
+  }
+
+  .btn-sm {
+    @apply gap-1.5 px-2.5 py-1.5 text-xs;
+  }
+
+  .link {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  /* Forms ----------------------------------------------------------------- */
+  .field {
+    @apply mb-4;
+  }
+
+  .label {
+    @apply mb-1 block text-xs font-medium text-text-muted;
+  }
+
+  .input,
+  .select,
+  .textarea {
+    @apply block w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text;
+  }
+
+  .input-sm {
+    @apply px-2.5 py-1.5 text-xs;
+  }
+
+  /* A vertical stack of Django-rendered widgets: the widgets carry no class of their own, so
+     the stack gives them their width. */
+  .form-stack :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"])),
+  .form-stack :where(select),
+  .form-stack :where(textarea) {
+    @apply w-full;
+  }
+
+  .auth-card {
+    @apply mx-auto w-full max-w-sm py-10 sm:py-16;
+  }
+
+  .help {
+    @apply mt-1 text-xs text-text-muted;
+  }
+
+  .error-text {
+    @apply mt-1 text-sm text-bad;
+  }
+
+  /* Badges ---------------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border border-border bg-surface-2 px-2 py-0.5
+           text-xs font-medium text-text-muted;
+  }
+
+  .badge-good {
+    @apply border-good/40 text-good;
+  }
+
+  .badge-bad {
+    @apply border-bad/40 text-bad;
+  }
+
+  .badge-warning {
+    @apply border-warning/40 text-warning;
+  }
+
+  .badge-accent {
+    @apply border-accent/40 text-accent;
+  }
+
+  /* Tables ---------------------------------------------------------------- */
+  .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-border bg-surface shadow-card;
+  }
+
+  /* A table already inside a card carries the card's frame; it must not draw a second one. */
+  .card .table-wrap {
+    @apply rounded-lg shadow-none;
+  }
+
+  /* Same for an empty state nested inside a card or a table: keep the message, drop the frame. */
+  .card [data-testid="empty-state"],
+  .table-wrap [data-testid="empty-state"] {
+    @apply border-0 bg-transparent shadow-none;
+  }
+
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .data-table thead th {
+    @apply border-b border-border bg-surface-2 px-3 py-2 text-left text-xs font-semibold tracking-wide
+           text-text-muted;
+  }
+
+  .data-table tbody td {
+    @apply border-b border-border px-3 py-2 align-top text-text;
+  }
+
+  .data-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .data-table tbody tr:hover {
+    @apply bg-surface-2;
+  }
+
+  /* Table cells hold plain links (a PR, a person, an edit action); give them the link look
+     without every row having to say so. */
+  .data-table tbody a:not(.btn),
+  .data-table tfoot a:not(.btn) {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  .pager {
+    @apply flex items-center gap-3 text-sm text-text-muted;
+  }
+
+  .pager a {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  /* A filter form: the same surface as a card, laid out as a responsive grid. */
+  .filter-grid {
+    @apply grid grid-cols-2 gap-3 rounded-xl border border-border bg-surface p-4 shadow-card
+           sm:grid-cols-3 sm:p-5 lg:grid-cols-4;
+  }
+
+  .filter-grid :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"])),
+  .filter-grid :where(select),
+  .filter-grid :where(textarea) {
+    @apply w-full;
+  }
+
+  /* Navigation ------------------------------------------------------------ */
+  /* The primary navigation strip scrolls sideways on a narrow screen rather than wrapping or
+     being duplicated into a hidden mobile copy; its own scrollbar stays out of the chrome. */
+  .nav-strip {
+    @apply flex min-w-0 items-center gap-0.5 overflow-x-auto;
+    scrollbar-width: none;
+  }
+
+  .nav-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    @apply shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap text-text-muted
+           transition-colors hover:bg-surface-2 hover:text-text;
+  }
+
+  .nav-link-active {
+    @apply bg-accent-soft text-accent;
+  }
+
+  .menu-panel {
+    @apply absolute right-0 z-30 mt-2 w-64 rounded-xl border border-border bg-surface p-2 shadow-pop;
+  }
+
+  .menu-item {
+    @apply block rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-2 hover:text-text;
+  }
+
+  .menu-label {
+    @apply px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-text-muted uppercase;
+  }
+}

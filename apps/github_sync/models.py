@@ -1,6 +1,10 @@
+import datetime
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.metrics.timeframe import day_of
 
 
 class SyncRun(models.Model):
@@ -8,6 +12,7 @@ class SyncRun(models.Model):
         CLI = "cli", _("CLI")
         UI = "ui", _("UI")
         SCHEDULE = "schedule", _("Schedule")
+        BACKFILL = "backfill", _("Backfill")
 
     class Status(models.TextChoices):
         RUNNING = "running", _("Running")
@@ -18,6 +23,12 @@ class SyncRun(models.Model):
     started_at = models.DateTimeField(_("started at"), default=timezone.now)
     finished_at = models.DateTimeField(_("finished at"), null=True, blank=True)
     trigger = models.CharField(_("trigger"), max_length=10, choices=Trigger.choices)
+    since = models.DateTimeField(
+        _("since"),
+        null=True,
+        blank=True,
+        help_text=_("The watermark override this run used, if any (a backfill sets it)."),
+    )
     status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.RUNNING)
     repositories = models.ManyToManyField(
         "catalog.Repository", related_name="sync_runs", blank=True, verbose_name=_("repositories")
@@ -34,6 +45,13 @@ class SyncRun(models.Model):
 
     def __str__(self) -> str:
         return f"sync {self.started_at:%Y-%m-%d %H:%M} ({self.status})"
+
+    @property
+    def since_date(self) -> datetime.date | None:
+        """The stored UTC watermark as the REPORT_TIMEZONE calendar day the operator picked — the
+        inverse of the `day_start()` the backfill form put in. Rendering `since` directly would
+        show the previous day for every date chosen east of UTC."""
+        return day_of(self.since) if self.since else None
 
 
 class SyncLock(models.Model):

@@ -2,11 +2,16 @@
 {% load i18n dashboards %}
 
 {% block content %}
-<div class="py-6" id="dashboard-page">
-  {% block heading %}{% endblock %}
-  {% data_as_of_banner %}
+<div id="dashboard-page">
+  <div class="page-header">
+    <div>
+      {% block heading %}{% endblock %}
+      {% data_as_of_banner %}
+    </div>
+    {% block heading_actions %}{% endblock %}
+  </div>
   {% include "dashboards/partials/filter_bar.html" %}
-  <div id="dashboard-content">
+  <div id="dashboard-content" class="mt-6 space-y-6">
     {% block dashboard_content %}{% endblock %}
   </div>
 </div>

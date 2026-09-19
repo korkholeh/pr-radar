@@ -5,7 +5,22 @@ shows dashboards on AI adoption / AI-policy compliance and on delivery quality a
 project, repository and person level.
 
 The developers whose pull requests are measured are not users: they have no account and are never notified.
-PR Radar only reads from GitHub — it never comments, labels, approves or changes anything there.
+
+## Read-only on GitHub
+
+PR Radar never writes to GitHub. It has no feature that comments, labels, approves, merges, opens or closes
+anything, and none is planned — the tool reads pull-request data and nothing else.
+
+- **GraphQL.** Every operation in `apps/github_sync/queries.py` is a `query`. The codebase contains no
+  `mutation`, and the only `POST` the client makes is the one GitHub's GraphQL API requires for a query.
+- **REST.** Used for a handful of reads only, through a `GET`-only helper.
+- **Git.** Churn analysis runs `git clone --bare` and `git fetch --prune` against a local cache. There is no
+  `push`, and the token reaches `git` through `GIT_ASKPASS` and the environment, never in a remote URL, a log or
+  a process argument.
+- **Token scopes.** A fine-grained personal access token with read-only **Pull requests**, **Contents** and
+  **Metadata** is enough, and is what `docs/GITHUB_CONNECTIONS.md` recommends. A classic token carrying the full
+  `repo` scope also grants write access that PR Radar never uses, so connection verification flags it
+  (`CLASSIC_PAT_WRITE_SCOPE`) and marks the connection `degraded` until you narrow it.
 
 ## Run it
 

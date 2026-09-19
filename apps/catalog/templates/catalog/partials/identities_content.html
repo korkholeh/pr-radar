@@ -1,37 +1,39 @@
 {% load i18n %}
-<div class="py-6 max-w-4xl mx-auto" id="identities-page">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold text-[var(--text)]">{% translate "Unmapped identities" %}</h1>
-    <a href="{% url 'catalog:people' %}" class="text-[var(--text-muted)]">{% translate "People" %}</a>
+<div class="mx-auto w-full max-w-5xl" id="identities-page">
+  <div class="page-header">
+    <h1 class="page-title">{% translate "Unmapped identities" %}</h1>
+    <a href="{% url 'catalog:people' %}" class="btn btn-secondary btn-sm">{% translate "People" %}</a>
   </div>
   {% if error %}
-    <p class="text-[var(--bad)] mb-4" role="alert">{{ error }}</p>
+    <p class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">{{ error }}</p>
   {% endif %}
-  <table class="w-full text-sm" id="identities-table">
-    <caption class="sr-only">{% translate "Unmapped identities" %}</caption>
-    <thead>
-      <tr class="text-left text-[var(--text-muted)]">
-        <th scope="col">{% translate "Kind" %}</th>
-        <th scope="col">{% translate "Value" %}</th>
-        <th scope="col">{% translate "Actions" %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for identity in identities %}
-        {% include "catalog/partials/identity_row.html" %}
-      {% empty %}
-      <tr>
-        <td colspan="3">
-          {% translate "No unmapped identities." as empty_title %}
-          {% translate "Everyone is accounted for." as empty_explanation %}
-          {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="data-table" id="identities-table">
+      <caption class="sr-only">{% translate "Unmapped identities" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Kind" %}</th>
+          <th scope="col">{% translate "Value" %}</th>
+          <th scope="col">{% translate "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for identity in identities %}
+          {% include "catalog/partials/identity_row.html" %}
+        {% empty %}
+        <tr>
+          <td colspan="3">
+            {% translate "No unmapped identities." as empty_title %}
+            {% translate "Everyone is accounted for." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% if page.has_other_pages %}
-  <nav class="flex gap-2 mt-4 text-[var(--text-muted)]" aria-label="{% translate 'Pagination' %}">
+  <nav class="pager mt-4" aria-label="{% translate 'Pagination' %}">
     {% if page.has_previous %}
       <a href="?page={{ page.previous_page_number }}">{% translate "Previous" %}</a>
     {% endif %}

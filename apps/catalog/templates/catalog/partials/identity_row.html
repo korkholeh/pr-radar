@@ -1,24 +1,24 @@
 {% load i18n %}
-<tr id="identity-row-{{ identity.pk }}" class="border-t border-[var(--border)]">
+<tr id="identity-row-{{ identity.pk }}">
   <td>{{ identity.get_kind_display }}</td>
   <td>{{ identity.value }}</td>
   <td class="flex flex-wrap gap-2 items-center">
     <form method="post" action="{% url 'catalog:identity_assign' identity.pk %}" class="flex gap-2 items-center">
       {% csrf_token %}
       {{ assign_form.person }}
-      <button type="submit">{% translate "Assign" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "Assign" %}</button>
     </form>
     <form method="post" action="{% url 'catalog:identity_create_person' identity.pk %}">
       {% csrf_token %}
-      <button type="submit">{% translate "New person" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "New person" %}</button>
     </form>
     <form method="post" action="{% url 'catalog:identity_mark_bot' identity.pk %}">
       {% csrf_token %}
-      <button type="submit">{% translate "Mark as bot" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "Mark as bot" %}</button>
     </form>
     <form method="post" action="{% url 'catalog:identity_exclude' identity.pk %}">
       {% csrf_token %}
-      <button type="submit">{% translate "Exclude" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "Exclude" %}</button>
     </form>
   </td>
 </tr>

@@ -2,72 +2,72 @@
 {% load i18n %}
 {% block title %}{% translate "Policy" %}{% endblock %}
 {% block content %}
-<div class="py-6 max-w-5xl mx-auto" id="policy-console">
-  <h1 class="text-xl font-semibold text-[var(--text)] mb-4">{% translate "Policy" %}</h1>
+<div class="mx-auto w-full max-w-6xl" id="policy-console">
+  <h1 class="page-title mb-4">{% translate "Policy" %}</h1>
 
   {% include "policy/partials/kpis.html" %}
   {% include "policy/partials/rule_chart.html" %}
   {% include "policy/partials/mismatch_list.html" %}
 
-  <h2 class="text-lg font-semibold text-[var(--text)] mt-8 mb-2">{% translate "Violations" %}</h2>
+  <h2 class="section-title mt-8 mb-3">{% translate "Violations" %}</h2>
   <form
     method="get"
     hx-get="{% url 'policy:console' %}"
     hx-target="#violations"
     hx-swap="innerHTML"
     hx-push-url="true"
-    class="mb-4 flex flex-wrap gap-3 items-end"
+    class="filter-grid mb-6"
     id="violation-filters"
   >
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.rule_code.id_for_label }}">
+      <label class="label" for="{{ filter_form.rule_code.id_for_label }}">
         {% translate "Rule" %}
       </label>
       {{ filter_form.rule_code }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.severity.id_for_label }}">
+      <label class="label" for="{{ filter_form.severity.id_for_label }}">
         {% translate "Severity" %}
       </label>
       {{ filter_form.severity }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.status.id_for_label }}">
+      <label class="label" for="{{ filter_form.status.id_for_label }}">
         {% translate "Status" %}
       </label>
       {{ filter_form.status }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.project.id_for_label }}">
+      <label class="label" for="{{ filter_form.project.id_for_label }}">
         {% translate "Project" %}
       </label>
       {{ filter_form.project }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.repository.id_for_label }}">
+      <label class="label" for="{{ filter_form.repository.id_for_label }}">
         {% translate "Repository" %}
       </label>
       {{ filter_form.repository }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.date_from.id_for_label }}">
+      <label class="label" for="{{ filter_form.date_from.id_for_label }}">
         {% translate "From" %}
       </label>
       {{ filter_form.date_from }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.date_to.id_for_label }}">
+      <label class="label" for="{{ filter_form.date_to.id_for_label }}">
         {% translate "To" %}
       </label>
       {{ filter_form.date_to }}
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-muted)]" for="{{ filter_form.q.id_for_label }}">
+      <label class="label" for="{{ filter_form.q.id_for_label }}">
         {% translate "Search" %}
       </label>
       {{ filter_form.q }}
     </div>
-    <button type="submit" class="rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]">
+    <button type="submit" class="btn btn-primary">
       {% translate "Filter" %}
     </button>
   </form>

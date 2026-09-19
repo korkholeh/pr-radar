@@ -24,13 +24,17 @@
 <script src="{% static 'js/charts.js' %}" defer></script>
 </head>
 <body
-  class="bg-[var(--bg)] text-[var(--text)] min-h-screen"
+  class="bg-bg text-text min-h-screen flex flex-col"
   hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
 >
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2 focus:text-text">{% translate "Skip to content" %}</a>
 {% include "partials/nav.html" %}
 {% include "partials/connection_alerts.html" %}
-<main class="px-4">
+<main id="main" class="page-shell flex-1 py-6">
 {% block content %}{% endblock %}
 </main>
+<footer class="border-t border-border py-4">
+  <div class="page-shell text-xs text-text-muted">{% translate "PR Radar" %}</div>
+</footer>
 </body>
 </html>

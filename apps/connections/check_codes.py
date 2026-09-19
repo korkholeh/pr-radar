@@ -27,9 +27,27 @@ CHECK_CODES: dict[str, CheckCode] = {
         message=_("The token can see %(count)s repositories."),
         hint=_("No action needed."),
     ),
+    "REPOS_VISIBLE_NONE": CheckCode(
+        message=_("The token cannot see any repository."),
+        hint=_(
+            "Grant the token read access to the repositories you track. A fine-grained token lists "
+            "them explicitly, and an organization may also require single sign-on authorization."
+        ),
+    ),
     "PERM_PULL_REQUESTS": CheckCode(
-        message=_("The token can read pull requests."),
+        message=_("The token can read pull requests on %(repository)s."),
         hint=_("No action needed."),
+    ),
+    "PERM_PULL_REQUESTS_DENIED": CheckCode(
+        message=_("The token cannot read pull requests on %(repository)s."),
+        hint=_(
+            "Grant the token read access to pull requests on that repository and re-check. A "
+            "private repository needs more than a classic token's 'public_repo' scope."
+        ),
+    ),
+    "PERM_PULL_REQUESTS_UNAVAILABLE": CheckCode(
+        message=_("Pull request access was not checked."),
+        hint=_("Add a repository to this connection, then re-check."),
     ),
     "PERM_CONTENTS_OK": CheckCode(
         message=_("The token can read repository contents."),
@@ -46,6 +64,17 @@ CHECK_CODES: dict[str, CheckCode] = {
     "SSO_AUTHORIZATION_REQUIRED": CheckCode(
         message=_("Organization %(org)s requires SSO authorization for this token."),
         hint=_("Authorize the token for single sign-on at %(url)s."),
+    ),
+    "CLASSIC_PAT_NO_PRIVATE_SCOPE": CheckCode(
+        message=_(
+            "The classic token carries only 'public_repo', so it cannot read the private "
+            "repositories on this connection."
+        ),
+        hint=_(
+            "Replace it with a fine-grained token that has read access to those repositories, or "
+            "add the 'repo' scope to this one. GitHub reports no error for this: a private "
+            "repository simply syncs zero pull requests."
+        ),
     ),
     "CLASSIC_PAT_WRITE_SCOPE": CheckCode(
         message=_("The classic token carries the full 'repo' scope, which grants write access."),

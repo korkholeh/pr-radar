@@ -26,22 +26,29 @@ def _connection(**kwargs) -> GitHubConnection:
     return connection
 
 
-def _owner_node(node_id: str, name: str, *, is_archived: bool = False, is_private: bool = False) -> dict:
+def _repo_node(
+    node_id: str,
+    name: str,
+    *,
+    is_archived: bool = False,
+    is_private: bool = False,
+    owner: str = "acme",
+) -> dict:
     return {
         "id": node_id,
         "name": name,
-        "nameWithOwner": f"acme/{name}",
+        "nameWithOwner": f"{owner}/{name}",
         "isPrivate": is_private,
         "isArchived": is_archived,
         "defaultBranchRef": {"name": "main"},
-        "owner": {"id": "O_acme", "login": "acme", "__typename": "Organization"},
+        "owner": {"id": f"O_{owner}", "login": owner, "__typename": "Organization"},
     }
 
 
-def _owner_page(nodes: list[dict], *, has_next: bool = False) -> dict:
+def _repos_page(nodes: list[dict], *, has_next: bool = False) -> dict:
     return {
         "data": {
-            "repositoryOwner": {
+            "viewer": {
                 "repositories": {
                     "totalCount": len(nodes),
                     "pageInfo": {"hasNextPage": has_next, "endCursor": "next" if has_next else None},
@@ -53,7 +60,7 @@ def _owner_page(nodes: list[dict], *, has_next: bool = False) -> dict:
     }
 
 
-def _mock_owner_pages(*pages: dict) -> respx.Route:
+def _mock_repo_pages(*pages: dict) -> respx.Route:
     return respx.post(settings.GITHUB_GRAPHQL_URL).mock(
         side_effect=[httpx.Response(200, json=page) for page in pages]
     )
@@ -71,11 +78,11 @@ def test_discovery_groups_by_owner_hides_archived_and_marks_bound_elsewhere(clie
         full_name="acme/gadget",
         github_id="R_gadget",
     )
-    page1 = _owner_page([_owner_node("R_widget", "widget")], has_next=True)
-    page2 = _owner_page(
-        [_owner_node("R_gadget", "gadget"), _owner_node("R_archived", "archived-tool", is_archived=True)]
+    page1 = _repos_page([_repo_node("R_widget", "widget")], has_next=True)
+    page2 = _repos_page(
+        [_repo_node("R_gadget", "gadget"), _repo_node("R_archived", "archived-tool", is_archived=True)]
     )
-    _mock_owner_pages(page1, page2)
+    _mock_repo_pages(page1, page2)
     client.force_login(admin_user)
 
     response = client.get(reverse("connections:discover"), {"connection": connection.pk})
@@ -89,10 +96,62 @@ def test_discovery_groups_by_owner_hides_archived_and_marks_bound_elsewhere(clie
 
 
 @pytest.mark.django_db
+def test_discovery_lists_repositories_owned_by_someone_else(client, admin_user):
+    """Access is the only condition: a lead who collaborates on a client-owned repository must see
+    it, even though the connection is labelled with a different owner login."""
+    connection = _connection(owner_login="acme")
+    page = _repos_page(
+        [
+            _repo_node("R_widget", "widget"),
+            _repo_node("R_portal", "client-portal", owner="client-co", is_private=True),
+        ]
+    )
+    _mock_repo_pages(page)
+    client.force_login(admin_user)
+
+    response = client.get(reverse("connections:discover"), {"connection": connection.pk})
+
+    content = response.content.decode()
+    assert "acme/widget" in content
+    assert "client-co/client-portal" in content
+
+
+@pytest.mark.django_db
+def test_owner_filter_narrows_the_list_and_keeps_the_other_owners_selectable(client, admin_user):
+    connection = _connection(owner_login="acme")
+    page = _repos_page(
+        [_repo_node("R_widget", "widget"), _repo_node("R_portal", "client-portal", owner="client-co")]
+    )
+    _mock_repo_pages(page)
+    client.force_login(admin_user)
+
+    response = client.get(
+        reverse("connections:discover"), {"connection": connection.pk, "owner": "client-co"}
+    )
+
+    content = response.content.decode()
+    assert "client-co/client-portal" in content
+    assert "acme/widget" not in content
+    assert '<option value="acme"' in content
+
+
+@pytest.mark.django_db
+def test_unknown_owner_filter_falls_back_to_every_owner(client, admin_user):
+    connection = _connection(owner_login="acme")
+    page = _repos_page([_repo_node("R_widget", "widget")])
+    _mock_repo_pages(page)
+    client.force_login(admin_user)
+
+    response = client.get(reverse("connections:discover"), {"connection": connection.pk, "owner": "ghost"})
+
+    assert "acme/widget" in response.content.decode()
+
+
+@pytest.mark.django_db
 def test_show_archived_reveals_archived_repositories(client, admin_user):
     connection = _connection(owner_login="acme")
-    page = _owner_page([_owner_node("R_archived", "archived-tool", is_archived=True)])
-    _mock_owner_pages(page)
+    page = _repos_page([_repo_node("R_archived", "archived-tool", is_archived=True)])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.get(
@@ -106,8 +165,8 @@ def test_show_archived_reveals_archived_repositories(client, admin_user):
 def test_submitting_selection_creates_repository_with_sync_since_and_project(client, admin_user):
     connection = _connection(owner_login="acme")
     project = ProjectFactory()
-    page = _owner_page([_owner_node("R_widget", "widget")])
-    _mock_owner_pages(page)
+    page = _repos_page([_repo_node("R_widget", "widget")])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.post(
@@ -127,8 +186,8 @@ def test_submitting_selection_creates_repository_with_sync_since_and_project(cli
 @pytest.mark.django_db
 def test_resubmitting_the_same_selection_creates_no_second_row(client, admin_user):
     connection = _connection(owner_login="acme")
-    page = _owner_page([_owner_node("R_widget", "widget")])
-    _mock_owner_pages(page, page)
+    page = _repos_page([_repo_node("R_widget", "widget")])
+    _mock_repo_pages(page, page)
     client.force_login(admin_user)
 
     for _ in range(2):
@@ -141,8 +200,8 @@ def test_resubmitting_the_same_selection_creates_no_second_row(client, admin_use
 @pytest.mark.django_db
 def test_resubmitting_an_existing_repository_does_not_reset_sync_since(client, admin_user):
     connection = _connection(owner_login="acme")
-    page = _owner_page([_owner_node("R_widget", "widget")])
-    _mock_owner_pages(page, page)
+    page = _repos_page([_repo_node("R_widget", "widget")])
+    _mock_repo_pages(page, page)
     client.force_login(admin_user)
 
     client.post(reverse("connections:discover"), {"connection": connection.pk, "repo": ["R_widget"]})
@@ -169,8 +228,8 @@ def test_bulk_add_does_not_silently_rebind_a_repository_bound_elsewhere(client, 
         full_name="acme/gadget",
         github_id="R_gadget",
     )
-    page = _owner_page([_owner_node("R_gadget", "gadget")])
-    _mock_owner_pages(page)
+    page = _repos_page([_repo_node("R_gadget", "gadget")])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.post(
@@ -217,8 +276,8 @@ def test_discovery_page_has_no_nested_forms(client, admin_user):
         full_name="acme/gadget",
         github_id="R_gadget",
     )
-    page = _owner_page([_owner_node("R_gadget", "gadget")])
-    _mock_owner_pages(page)
+    page = _repos_page([_repo_node("R_gadget", "gadget")])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.get(reverse("connections:discover"), {"connection": connection.pk})
@@ -236,8 +295,8 @@ def test_rebind_moves_connection_keeps_prs_and_writes_audit_entry(client, admin_
         organization=organization, connection=old_connection, github_id="R_widget", full_name="acme/widget"
     )
     pr = PullRequestFactory(repository=repository)
-    page = _owner_page([_owner_node("R_widget", "widget")])
-    _mock_owner_pages(page)
+    page = _repos_page([_repo_node("R_widget", "widget")])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.post(
@@ -259,8 +318,8 @@ def test_rebind_without_confirm_does_not_move_repository(client, admin_user):
     old_connection = GitHubConnectionFactory(owner_login="acme")
     new_connection = _connection(owner_login="acme")
     repository = RepositoryFactory(organization=organization, connection=old_connection)
-    page = _owner_page([])
-    _mock_owner_pages(page)
+    page = _repos_page([])
+    _mock_repo_pages(page)
     client.force_login(admin_user)
 
     response = client.post(

@@ -1,10 +1,10 @@
 {% load i18n %}
 {% if check_error %}
   <tr>
-    <td colspan="6" role="alert" class="text-[var(--bad)]">{{ check_error }}</td>
+    <td colspan="6" role="alert" class="text-bad">{{ check_error }}</td>
   </tr>
 {% endif %}
-<tr id="connection-row-{{ connection.pk }}" class="border-t border-[var(--border)]">
+<tr id="connection-row-{{ connection.pk }}">
   <td>{{ connection.name }}</td>
   <td>{{ connection.get_kind_display }}</td>
   <td>
@@ -16,7 +16,7 @@
   </td>
   <td>{{ connection.get_status_display }}</td>
   <td>{% if connection.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
-  <td class="flex gap-2">
+  <td class="flex flex-wrap items-center gap-2">
     <a href="{% url 'connections:edit' connection.pk %}">{% translate "Edit" %}</a>
     <form
       hx-post="{% url 'connections:check' connection.pk %}"
@@ -24,7 +24,7 @@
       hx-swap="outerHTML"
     >
       {% csrf_token %}
-      <button type="submit">{% translate "Check" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "Check" %}</button>
     </form>
     <form
       hx-post="{% url 'connections:deactivate' connection.pk %}"
@@ -32,7 +32,7 @@
       hx-swap="outerHTML"
     >
       {% csrf_token %}
-      <button type="submit">
+      <button type="submit" class="btn btn-secondary btn-sm">
         {% if connection.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
       </button>
     </form>
@@ -42,7 +42,7 @@
       hx-swap="outerHTML"
     >
       {% csrf_token %}
-      <button type="submit">{% translate "Delete" %}</button>
+      <button type="submit" class="btn btn-secondary btn-sm">{% translate "Delete" %}</button>
     </form>
   </td>
 </tr>
