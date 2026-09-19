@@ -15,6 +15,7 @@ from apps.github_sync.errors import (
     GitHubError,
     GitHubServerError,
     GitHubSSOError,
+    GitHubWriteAttemptError,
     SecondaryRateLimitError,
 )
 from apps.github_sync.errors import require as require_path
@@ -28,6 +29,37 @@ _SSO_HEADER = "X-GitHub-SSO"
 
 def _parse_iso8601(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
+_WRITE_KEYWORDS = ("mutation", "subscription")
+
+
+def assert_read_only(document: str) -> None:
+    """Refuses any GraphQL document that is not a plain query. PR Radar reads GitHub and never
+    writes to it (ADR 0003, and the read-only PAT in the architecture diagram). REST is read-only
+    by construction -- `rest_get()` is the only REST entry point -- but GraphQL sends reads and
+    writes alike as a POST, so nothing about the request itself carries the promise. This puts it
+    on the document: every operation definition must be a `query`.
+
+    The check is line-based because every document in `queries.py` opens its operations at the
+    start of a line. That makes it strict rather than clever: an operation keyword indented into
+    a selection set is rejected too, which is the safe direction for a guard whose whole job is
+    to fail closed."""
+    seen_operation = False
+    for line in document.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        head = stripped.split("(")[0].split("{")[0].strip()
+        # A line that opens with a brace -- the anonymous `{ viewer { login } }` shorthand --
+        # leaves `head` empty; fall back to the raw first token so it is judged, not skipped.
+        keyword = head.split()[0] if head else stripped.split()[0]
+        if keyword in _WRITE_KEYWORDS:
+            raise GitHubWriteAttemptError(keyword)
+        if not seen_operation:
+            if keyword != "query":
+                raise GitHubWriteAttemptError(keyword)
+            seen_operation = True
 
 
 def _parse_sso_header(value: str) -> tuple[str, str]:
@@ -61,6 +93,7 @@ class GitHubClient:
         self._min_remaining = get_int("RATE_LIMIT_MIN_REMAINING")
 
     def graphql(self, document: str, variables: dict) -> dict:
+        assert_read_only(document)
         self._wait_for_budget()
         response = self._request_with_retries(
             "POST", self.graphql_url, json={"query": document, "variables": variables}

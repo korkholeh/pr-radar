@@ -21,6 +21,16 @@ class GitHubAuthError(GitHubError):
     pass
 
 
+class GitHubWriteAttemptError(GitHubError):
+    """PR Radar reads GitHub and never writes to it. GraphQL carries reads and writes over the
+    same POST, so the read-only promise cannot be read off the HTTP verb; `assert_read_only()`
+    enforces it on the document instead, and this is what it raises."""
+
+    def __init__(self, keyword: str):
+        self.keyword = keyword
+        super().__init__(f"Refused a GraphQL document whose operation is {keyword!r}, not a query.")
+
+
 class GitHubSSOError(GitHubError):
     def __init__(self, org: str, url: str):
         self.org = org

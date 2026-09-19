@@ -451,3 +451,22 @@ this absent often enough to matter) is instead resolved by asking `git` directly
 Full detail — the churn algorithm, the credential handoff, the test fixture that builds a real temporary git
 repository instead of a JSON fixture, and every review-round fix — is in
 `.autodev/phases/10-ci-and-churn/PLAN.md`'s Design section and the `## p10-*` entries of `.autodev/DECISIONS.md`.
+
+## Read-only guarantee
+
+**The read-only promise is enforced on the GraphQL document, not on the HTTP verb.** PR Radar reads GitHub and
+never writes to it, but GraphQL sends a read and a write over the same `POST /graphql`, so the request carries
+nothing that could be checked. `GitHubClient.graphql()` therefore runs `assert_read_only()` over the document
+before it leaves: every operation definition must be a `query`, and a `mutation` or `subscription` keyword raises
+`GitHubWriteAttemptError` without a request being made. REST needs no equivalent — `rest_get()` is the only REST
+entry point and hardcodes `GET`.
+
+The check is deliberately blunt and line-based rather than a real GraphQL parse: it also rejects the legal
+anonymous `{ viewer { login } }` shorthand, which no document in `queries.py` uses. A guard whose job is to fail
+closed should reject a shape it cannot confidently classify, and pulling in a GraphQL parser to be permissive
+about a form the project does not use would be the wrong trade.
+
+`apps/github_sync/tests/test_read_only.py` pins both halves: it walks the documents in `queries.py` by reflection,
+so a document added later is covered without anyone remembering to list it, and it asserts the public surface of
+`GitHubClient` is exactly `graphql`/`rest_get`/`paginate` — a `rest_post()` added beside them would be a new write
+path that no other test would notice.
