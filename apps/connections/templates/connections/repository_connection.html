@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Change connection" %}{% endblock %}
+{% block content %}
+{% include "connections/partials/repository_connection_form.html" %}
+{% endblock %}

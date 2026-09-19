@@ -1,0 +1,71 @@
+{% load i18n %}
+<div class="mx-auto w-full max-w-5xl" id="repositories-settings-page">
+  <div class="page-header">
+    <h1 class="page-title">{% translate "Repositories" %}</h1>
+    <a href="{% url 'connections:discover' %}" class="btn btn-primary">
+      {% translate "Discover repositories" %}
+    </a>
+  </div>
+
+  <form method="get" action="{% url 'connections:repositories' %}" class="card card-body form-stack mb-6 flex flex-wrap items-end gap-4">
+    <label for="id_repositories_connection">{% translate "Connection" %}</label>
+    <select name="connection" id="id_repositories_connection" onchange="this.form.submit()">
+      <option value="">{% translate "All connections" %}</option>
+      {% for candidate in connections %}
+        <option value="{{ candidate.pk }}" {% if connection and candidate.pk == connection.pk %}selected{% endif %}>
+          {{ candidate.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if repositories %}
+    <div class="table-wrap">
+      <table class="data-table" id="repositories-settings-table">
+        <caption class="sr-only">{% translate "Repositories" %}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{% translate "Repository" %}</th>
+            <th scope="col">{% translate "Connection" %}</th>
+            <th scope="col">{% translate "Status" %}</th>
+            <th scope="col">{% translate "Active" %}</th>
+            <th scope="col">{% translate "Last synced" %}</th>
+            <th scope="col">{% translate "Actions" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for repository in repositories %}
+            <tr id="repository-row-{{ repository.pk }}">
+              <td>{{ repository.full_name }}</td>
+              <td>{{ repository.connection.name }}</td>
+              <td>{{ repository.connection.get_status_display }}</td>
+              <td>{% if repository.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+              <td>
+                {% if repository.last_synced_at %}
+                  {{ repository.last_synced_at }}
+                {% else %}
+                  <span class="text-text-muted">{% translate "never" %}</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'connections:repository_connection' repository.pk %}" class="btn btn-secondary btn-sm">
+                  {% translate "Change connection" %}
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif connection %}
+    {% translate "No repositories on this connection." as empty_title %}
+    {% translate "Pick another connection above, or discover repositories to add some." as empty_explanation %}
+    {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+  {% else %}
+    {% translate "No repositories yet." as empty_title %}
+    {% translate "Discover the repositories a connection can read, then add the ones you want to measure." as empty_explanation %}
+    {% translate "Discover repositories" as empty_action_label %}
+    {% url "connections:discover" as empty_action_url %}
+    {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
+  {% endif %}
+</div>

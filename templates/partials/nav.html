@@ -49,6 +49,7 @@ selectors). The menu is a plain <details> element: no JS beyond what htmx alread
             {% if perms.catalog.manage_settings %}
               <p class="menu-label">{% translate "Administration" %}</p>
               <a href="{% url 'connections:list' %}" class="menu-item">{% translate "Connections" %}</a>
+              <a href="{% url 'connections:repositories' %}" class="menu-item">{% translate "Repository settings" %}</a>
               <a href="{% url 'connections:discover' %}" class="menu-item">{% translate "Discover repositories" %}</a>
               <a href="{% url 'catalog:people' %}" class="menu-item">{% translate "People settings" %}</a>
               <a href="{% url 'ai_detection:rules' %}" class="menu-item">{% translate "Detection rules" %}</a>

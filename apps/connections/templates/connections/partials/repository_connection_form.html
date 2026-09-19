@@ -1,0 +1,46 @@
+{% load i18n %}
+<div class="mx-auto w-full max-w-2xl" id="repository-connection-page">
+  <h1 class="page-title mb-1">{% translate "Change connection" %}</h1>
+  <p class="mb-4 text-sm text-text-muted">{{ repository.full_name }}</p>
+
+  <p class="mb-4 text-sm text-text-muted">
+    {% blocktranslate trimmed with name=repository.connection.name %}
+      This repository is synced through {{ name }} today.
+    {% endblocktranslate %}
+  </p>
+
+  {% if has_targets %}
+    <form method="post" novalidate class="card card-body form-stack">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="mb-4 rounded-lg border border-bad/40 bg-surface-2 px-3 py-2 text-sm text-bad" role="alert">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="field">
+        <label class="label" for="{{ form.connection.id_for_label }}">{{ form.connection.label }}</label>
+        {{ form.connection }}
+        <p class="help">{{ form.connection.help_text }}</p>
+        {% for error in form.connection.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="field">
+        <div class="flex items-center gap-2">
+          {{ form.confirm }}
+          <label for="{{ form.confirm.id_for_label }}">{{ form.confirm.label }}</label>
+        </div>
+        <p class="help">{{ form.confirm.help_text }}</p>
+        {% for error in form.confirm.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="submit" class="btn btn-primary">{% translate "Change connection" %}</button>
+        <a href="{% url 'connections:repositories' %}" class="btn btn-secondary">{% translate "Cancel" %}</a>
+      </div>
+    </form>
+  {% else %}
+    {% translate "No other connection to move this repository to." as empty_title %}
+    {% translate "Add a second connection with the new token, then come back and pick it here." as empty_explanation %}
+    {% translate "New connection" as empty_action_label %}
+    {% url "connections:create" as empty_action_url %}
+    {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation action_label=empty_action_label action_url=empty_action_url %}
+  {% endif %}
+</div>

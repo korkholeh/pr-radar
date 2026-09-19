@@ -14,7 +14,7 @@ from apps.accounts.services import record_audit
 from apps.catalog.models import Project, Repository
 from apps.catalog.services import create_repositories_from_discovery, rebind_repository
 from apps.connections.auth import ConnectionNotUsableError
-from apps.connections.forms import ConnectionForm
+from apps.connections.forms import ConnectionForm, RepositoryConnectionForm
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token, verify_connection
 from apps.github_sync.errors import GitHubError, require
@@ -178,6 +178,60 @@ def connection_delete(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         context = _connections_context()
     template = "connections/partials/list_content.html" if is_htmx(request) else "connections/list.html"
+    return render(request, template, context)
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def repository_list(request: HttpRequest) -> HttpResponse:
+    """Every repository already added, with the connection whose token syncs it. Discovery lists what
+    a token can see on GitHub; this lists what PR Radar holds, so a repository can be moved to another
+    connection without that connection having to see it first."""
+    connection_id = request.GET.get("connection", "")
+    connection = (
+        GitHubConnection.objects.filter(pk=connection_id).first() if connection_id.isdigit() else None
+    )
+    repositories = Repository.objects.select_related("connection", "organization").order_by("full_name")
+    if connection is not None:
+        repositories = repositories.filter(connection=connection)
+    context = {
+        "repositories": list(repositories),
+        "connections": list(GitHubConnection.objects.order_by("name")),
+        "connection": connection,
+    }
+    template = (
+        "connections/partials/repositories_content.html"
+        if is_htmx(request)
+        else "connections/repositories.html"
+    )
+    return render(request, template, context)
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def repository_connection(request: HttpRequest, pk: int) -> HttpResponse:
+    """Rebinds one repository from its own page. The confirmation lives in the form, so a stray POST
+    cannot move a repository without it."""
+    repository = get_object_or_404(Repository.objects.select_related("connection", "organization"), pk=pk)
+
+    if request.method == "POST":
+        form = RepositoryConnectionForm(request.POST, repository=repository)
+        if form.is_valid():
+            rebind_repository(repository, form.cleaned_data["connection"], actor=request.user)
+            return redirect("connections:repositories")
+    else:
+        form = RepositoryConnectionForm(repository=repository)
+
+    template = (
+        "connections/partials/repository_connection_form.html"
+        if is_htmx(request)
+        else "connections/repository_connection.html"
+    )
+    context = {
+        "form": form,
+        "repository": repository,
+        "has_targets": form.fields["connection"].queryset.exists(),
+    }
     return render(request, template, context)
 
 

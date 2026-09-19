@@ -11,6 +11,12 @@ urlpatterns = [
     path("settings/connections/<int:pk>/check/", views.connection_check, name="check"),
     path("settings/connections/<int:pk>/deactivate/", views.connection_deactivate, name="deactivate"),
     path("settings/connections/<int:pk>/delete/", views.connection_delete, name="delete"),
+    path("settings/repositories/", views.repository_list, name="repositories"),
     path("settings/repositories/discover/", views.repository_discover, name="discover"),
+    path(
+        "settings/repositories/<int:pk>/connection/",
+        views.repository_connection,
+        name="repository_connection",
+    ),
     path("settings/repositories/<int:pk>/rebind/", views.repository_rebind, name="rebind"),
 ]

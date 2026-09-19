@@ -15,6 +15,12 @@
 
 ### Added
 
+- **Repository settings** (admins, Settings menu): every repository PR Radar holds, the connection that syncs it
+  and that connection's status, filterable by connection. **Change connection** moves one repository to any
+  other active connection behind an explicit confirmation — useful when a replacement token is added as a new
+  connection. Until now a repository could only be rebound from **Discover repositories**, which requires the
+  new token to already see it. Rebinding changes only which credentials future syncs use; everything already
+  synced is kept, and the move is recorded in the audit log.
 - **Load historical data** on the Sync page (admins): re-fetch every pull request updated in the last 7, 14, 30
   or 90 days, or since a date you pick, for all active repositories or only the ones you select. It shares the
   lock, rate-limit budget and rollup rebuild with an ordinary sync, and its runs are listed as `Backfill` with

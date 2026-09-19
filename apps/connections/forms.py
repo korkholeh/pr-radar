@@ -37,3 +37,28 @@ class ConnectionForm(forms.Form):
         if self.require_token and not cleaned.get("token"):
             self.add_error("token", _("A token is required."))
         return cleaned
+
+
+class RepositoryConnectionForm(forms.Form):
+    """Moves one already-added repository to another connection. Only active connections are
+    offered, and never the one the repository already uses — rebinding to itself is a no-op that
+    would still write an audit entry."""
+
+    connection = forms.ModelChoiceField(
+        label=_("New connection"),
+        queryset=GitHubConnection.objects.none(),
+        empty_label=None,
+        help_text=_("Only active connections are listed."),
+    )
+    confirm = forms.BooleanField(
+        label=_("Yes, use this connection for future syncs"),
+        help_text=_("Pull requests, reviews and commits already synced are kept."),
+        error_messages={"required": _("Tick the confirmation box to change the connection.")},
+    )
+
+    def __init__(self, *args, repository=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        queryset = GitHubConnection.objects.filter(is_active=True).order_by("name")
+        if repository is not None:
+            queryset = queryset.exclude(pk=repository.connection_id)
+        self.fields["connection"].queryset = queryset

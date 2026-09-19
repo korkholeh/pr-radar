@@ -3,8 +3,8 @@
 This page is for a lead or admin setting up PR Radar for the first time, or adding a new repository. It assumes
 you already have an account (see `getting-started.md`) and that whoever runs the server has followed
 `docs/SETUP.md`'s "Connect GitHub" step. Connecting, discovering repositories and triggering a sync are
-admin-only; if you don't see **Connections** or **Repositories** in the top bar, or the **Sync now** button on
-the **Sync** page, ask an admin. Any lead can still open **Sync** to see progress and history — it shows no
+admin-only; if you don't see **Connections**, **Repository settings** or **Discover repositories** in the
+Settings menu, or the **Sync now** button on the **Sync** page, ask an admin. Any lead can still open **Sync** to see progress and history — it shows no
 per-project data.
 
 ## Connect
@@ -21,7 +21,7 @@ per-project data.
 
 ## Discover and add repositories
 
-1. Open **Repositories**.
+1. Open **Settings → Discover repositories**.
 2. Pick the connection you just created from the dropdown. PR Radar lists every repository that token can see,
    grouped by owner — including repositories owned by a client or another organization, as long as the token
    can read them. Use the **Owner** dropdown to narrow a long list to one owner. Archived repositories are
@@ -30,6 +30,21 @@ per-project data.
    **Add selected repositories**.
 4. A repository already synced through a different connection shows which one — you can rebind it here instead
    of adding a duplicate.
+
+## Move a repository to another connection
+
+When you issue a replacement token, add it as a second connection and move the repositories over rather than
+removing and re-adding them — re-adding would lose nothing already synced, but moving is one step and keeps the
+repository's sync state.
+
+1. Open **Settings → Repository settings**. It lists every repository PR Radar holds, the connection that syncs
+   it and that connection's status. Use the **Connection** dropdown to see only one connection's repositories.
+2. Select **Change connection** on the repository you want to move.
+3. Pick the new connection, tick the confirmation and save.
+
+Only active connections are offered, and the new connection's token must be able to read the repository — check
+it from **Connections** if a sync starts failing afterwards. Everything already synced stays: pull requests,
+reviews, commits, metrics and history are untouched, and only future syncs use the new token.
 
 ## Sync
 

@@ -116,10 +116,20 @@ lost, replace the affected connections' tokens: **Settings → Connections → E
 
 ## Rebinding a repository
 
-A repository's connection can change without losing its history: on **Settings → Repositories**, a repository
-already bound to a different connection shows that connection's name and a **Rebind here** control with an
-explicit confirmation checkbox. Rebinding only changes which credentials future syncs use — every pull request,
-review, commit and file already synced stays exactly as it is.
+A repository's connection can change without losing its history, from either of two places. **Settings →
+Repository settings** lists every repository already added with the connection that syncs it; **Change
+connection** opens a form offering every other active connection, and the move needs an explicit confirmation.
+**Settings → Discover repositories** covers the other direction: a repository the chosen connection can see but
+that is bound elsewhere shows that connection's name and a **Rebind here** control, also behind a confirmation.
+Both go through `rebind_repository()` and write a `repository.rebind` audit entry.
+
+Rebinding only changes which credentials future syncs use — every pull request, review, commit and file already
+synced stays exactly as it is. Nothing checks that the new token can actually read the repository, so verify the
+connection afterwards if you are not sure; a token that cannot read it fails at the next sync, not at the move.
+
+Replacing a token on an existing connection (**Settings → Connections → Edit**) needs no rebinding at all — the
+repositories keep pointing at the same connection. Rebinding is for moving repositories onto a *different*
+connection, such as one issued for a different owner or with a narrower repository selection.
 
 Deleting a connection that still has repositories is refused (`Repository.connection` is a protected foreign
 key); the UI shows which repositories block the delete so you can rebind or deactivate them first.

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 12:08+0000\n"
+"POT-Creation-Date: 2026-09-19 17:56+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -826,6 +826,7 @@ msgstr "Зберегти"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/catalog/templates/catalog/partials/people_content.html:49
 #: apps/connections/templates/connections/partials/discovery_content.html:87
+#: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
 #: apps/dashboards/exports/reports.py:358
@@ -842,6 +843,7 @@ msgstr "Так"
 #: apps/catalog/templates/catalog/partials/people_content.html:48
 #: apps/catalog/templates/catalog/partials/people_content.html:49
 #: apps/connections/templates/connections/partials/discovery_content.html:87
+#: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
 #: apps/dashboards/exports/reports.py:358
@@ -876,7 +878,7 @@ msgstr "Активувати"
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:4
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:11
 #: apps/ai_detection/templates/ai_detection/rules.html:3
-#: templates/partials/nav.html:53
+#: templates/partials/nav.html:55
 msgid "Detection rules"
 msgstr "Правила детекції"
 
@@ -889,6 +891,7 @@ msgstr "Нове правило"
 #: apps/catalog/templates/catalog/partials/identities_content.html:17
 #: apps/catalog/templates/catalog/partials/people_content.html:37
 #: apps/connections/templates/connections/partials/list_content.html:31
+#: apps/connections/templates/connections/partials/repositories_content.html:33
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:22
 msgid "Actions"
 msgstr "Дії"
@@ -1757,6 +1760,32 @@ msgstr "Пропустити перевірку GitHub і зберегти це�
 msgid "A token is required."
 msgstr "Токен обов'язковий."
 
+#: apps/connections/forms.py:48
+#: apps/connections/templates/connections/form.html:3
+#: apps/connections/templates/connections/partials/discovery_content.html:146
+#: apps/connections/templates/connections/partials/form.html:4
+#: apps/connections/templates/connections/partials/list_content.html:6
+#: apps/connections/templates/connections/partials/list_content.html:42
+#: apps/connections/templates/connections/partials/repository_connection_form.html:42
+msgid "New connection"
+msgstr "Нове підключення"
+
+#: apps/connections/forms.py:51
+msgid "Only active connections are listed."
+msgstr "Показано лише активні підключення."
+
+#: apps/connections/forms.py:54
+msgid "Yes, use this connection for future syncs"
+msgstr "Так, використовувати це підключення для майбутніх синхронізацій"
+
+#: apps/connections/forms.py:55
+msgid "Pull requests, reviews and commits already synced are kept."
+msgstr "Уже синхронізовані PR, рев'ю та коміти зберігаються."
+
+#: apps/connections/forms.py:56
+msgid "Tick the confirmation box to change the connection."
+msgstr "Позначте підтвердження, щоб змінити підключення."
+
 #: apps/connections/models.py:8
 msgid "Fine-grained personal access token"
 msgstr "Fine-grained персональний токен доступу"
@@ -1849,7 +1878,9 @@ msgstr "Підключення GitHub"
 
 #: apps/connections/templates/connections/discovery.html:3
 #: apps/connections/templates/connections/partials/discovery_content.html:3
-#: templates/partials/nav.html:51
+#: apps/connections/templates/connections/partials/repositories_content.html:6
+#: apps/connections/templates/connections/partials/repositories_content.html:67
+#: templates/partials/nav.html:53
 msgid "Discover repositories"
 msgstr "Знайти репозиторії"
 
@@ -1858,21 +1889,15 @@ msgstr "Знайти репозиторії"
 msgid "Edit connection"
 msgstr "Редагувати підключення"
 
-#: apps/connections/templates/connections/form.html:3
-#: apps/connections/templates/connections/partials/discovery_content.html:146
-#: apps/connections/templates/connections/partials/form.html:4
-#: apps/connections/templates/connections/partials/list_content.html:6
-#: apps/connections/templates/connections/partials/list_content.html:42
-msgid "New connection"
-msgstr "Нове підключення"
-
 #: apps/connections/templates/connections/list.html:3
-#: templates/partials/nav.html:50
+#: templates/partials/nav.html:51
 msgid "Connections"
 msgstr "Підключення"
 
 #: apps/connections/templates/connections/partials/discovery_content.html:6
 #: apps/connections/templates/connections/partials/discovery_content.html:71
+#: apps/connections/templates/connections/partials/repositories_content.html:11
+#: apps/connections/templates/connections/partials/repositories_content.html:29
 msgid "Connection"
 msgstr "Підключення"
 
@@ -1910,6 +1935,7 @@ msgid "No project"
 msgstr "Без проєкту"
 
 #: apps/connections/templates/connections/partials/discovery_content.html:68
+#: apps/connections/templates/connections/partials/repositories_content.html:28
 #: apps/dashboards/exports/columns.py:110
 #: apps/dashboards/exports/columns.py:115
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:40
@@ -2020,6 +2046,7 @@ msgstr ""
 "іншого підключення або деактивуйте:"
 
 #: apps/connections/templates/connections/partials/list_content.html:29
+#: apps/connections/templates/connections/partials/repositories_content.html:30
 #: apps/dashboards/templates/dashboards/partials/exports_list.html:20
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:36
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:111
@@ -2031,6 +2058,7 @@ msgid "Status"
 msgstr "Статус"
 
 #: apps/connections/templates/connections/partials/list_content.html:30
+#: apps/connections/templates/connections/partials/repositories_content.html:31
 msgid "Active"
 msgstr "Активний"
 
@@ -2040,6 +2068,74 @@ msgid ""
 msgstr ""
 "Додайте підключення, щоб PR Radar синхронізував pull request-и та ревʼю з "
 "GitHub."
+
+#: apps/connections/templates/connections/partials/repositories_content.html:4
+#: apps/connections/templates/connections/partials/repositories_content.html:25
+#: apps/connections/templates/connections/repositories.html:3
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:101
+#: apps/dashboards/templates/dashboards/repositories_index.html:4
+#: apps/dashboards/templates/dashboards/repositories_index.html:7
+#: apps/github_sync/forms.py:39
+#: apps/github_sync/templates/github_sync/partials/runs.html:11
+#: templates/partials/nav_items.html:16
+msgid "Repositories"
+msgstr "Репозиторії"
+
+#: apps/connections/templates/connections/partials/repositories_content.html:13
+msgid "All connections"
+msgstr "Усі підключення"
+
+#: apps/connections/templates/connections/partials/repositories_content.html:32
+msgid "Last synced"
+msgstr "Остання синхронізація"
+
+#: apps/connections/templates/connections/partials/repositories_content.html:47
+msgid "never"
+msgstr "ніколи"
+
+#: apps/connections/templates/connections/partials/repositories_content.html:52
+#: apps/connections/templates/connections/partials/repository_connection_form.html:3
+#: apps/connections/templates/connections/partials/repository_connection_form.html:35
+#: apps/connections/templates/connections/repository_connection.html:3
+msgid "Change connection"
+msgstr "Змінити підключення"
+
+#: apps/connections/templates/connections/partials/repositories_content.html:61
+msgid "No repositories on this connection."
+msgstr "Для цього підключення немає репозиторіїв."
+
+#: apps/connections/templates/connections/partials/repositories_content.html:62
+msgid "Pick another connection above, or discover repositories to add some."
+msgstr "Виберіть інше підключення вище або виявіть репозиторії, щоб додати їх."
+
+#: apps/connections/templates/connections/partials/repositories_content.html:65
+#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:16
+msgid "No repositories yet."
+msgstr "Ще немає репозиторіїв."
+
+#: apps/connections/templates/connections/partials/repositories_content.html:66
+msgid ""
+"Discover the repositories a connection can read, then add the ones you want "
+"to measure."
+msgstr "Перегляньте репозиторії, доступні підключенню, і додайте ті, які хочете вимірювати."
+
+#: apps/connections/templates/connections/partials/repository_connection_form.html:7
+#, python-format
+msgid "This repository is synced through %(name)s today."
+msgstr "Зараз цей репозиторій синхронізується через %(name)s."
+
+#: apps/connections/templates/connections/partials/repository_connection_form.html:36
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: apps/connections/templates/connections/partials/repository_connection_form.html:40
+msgid "No other connection to move this repository to."
+msgstr "Немає іншого підключення, до якого можна перепривʼязати цей репозиторій."
+
+#: apps/connections/templates/connections/partials/repository_connection_form.html:41
+msgid ""
+"Add a second connection with the new token, then come back and pick it here."
+msgstr "Додайте друге підключення з новим токеном, а потім поверніться й виберіть його тут."
 
 #: apps/connections/templates/connections/partials/row.html:14
 msgid "none"
@@ -2077,7 +2173,7 @@ msgstr ""
 "Не вдалося з'єднатися з GitHub, щоб перевірити це підключення. Перевірте "
 "мережу і спробуйте ще раз."
 
-#: apps/connections/views.py:262 apps/connections/views.py:312
+#: apps/connections/views.py:316 apps/connections/views.py:366
 msgid ""
 "Could not reach GitHub to list repositories for this connection. Try again "
 "in a moment."
@@ -2085,11 +2181,11 @@ msgstr ""
 "Не вдалося з'єднатися з GitHub, щоб отримати список репозиторіїв для цього "
 "підключення. Спробуйте ще раз за мить."
 
-#: apps/connections/views.py:298
+#: apps/connections/views.py:352
 msgid "Choose a connection to rebind to."
 msgstr "Виберіть підключення, до якого прив'язати."
 
-#: apps/connections/views.py:300
+#: apps/connections/views.py:354
 msgid "Tick the confirmation box to rebind this repository."
 msgstr "Позначте підтвердження, щоб прив'язати цей репозиторій."
 
@@ -2495,7 +2591,7 @@ msgstr "Повернутися до моїх експортів"
 #: apps/dashboards/templates/dashboards/exports.html:4
 #: apps/dashboards/templates/dashboards/exports.html:8
 #: apps/dashboards/templates/dashboards/partials/exports_list.html:15
-#: templates/partials/nav.html:47
+#: templates/partials/nav.html:48
 msgid "My exports"
 msgstr "Мої експорти"
 
@@ -2663,15 +2759,6 @@ msgstr "ШІ проти не-ШІ"
 msgid "Projects"
 msgstr "Проєкти"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:101
-#: apps/dashboards/templates/dashboards/repositories_index.html:4
-#: apps/dashboards/templates/dashboards/repositories_index.html:7
-#: apps/github_sync/forms.py:39
-#: apps/github_sync/templates/github_sync/partials/runs.html:11
-#: templates/partials/nav_items.html:16
-msgid "Repositories"
-msgstr "Репозиторії"
-
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:151
 msgid "AI tool"
 msgstr "Інструмент ШІ"
@@ -2697,10 +2784,6 @@ msgstr "Застосувати"
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:198
 msgid "Download report (XLSX)"
 msgstr "Завантажити звіт (XLSX)"
-
-#: apps/dashboards/templates/dashboards/partials/period_empty_state.html:16
-msgid "No repositories yet."
-msgstr "Ще немає репозиторіїв."
 
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
 msgid ""
@@ -3242,7 +3325,7 @@ msgstr ""
 
 #: apps/github_sync/templates/github_sync/partials/content.html:4
 #: apps/github_sync/templates/github_sync/sync.html:3
-#: templates/partials/nav.html:29
+#: templates/partials/nav.html:30
 msgid "Sync"
 msgstr "Синхронізація"
 
@@ -3998,7 +4081,7 @@ msgstr "діє з"
 #: apps/policy/models.py:23
 #: apps/policy/templates/policy/partials/policy_form.html:3
 #: apps/policy/templates/policy/policy_settings.html:3
-#: templates/partials/nav.html:54
+#: templates/partials/nav.html:56
 msgid "AI policy"
 msgstr "Політика ШІ"
 
@@ -4230,7 +4313,7 @@ msgstr "Новий чутливий шлях"
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:4
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:14
 #: apps/policy/templates/policy/sensitive_paths.html:3
-#: templates/partials/nav.html:55
+#: templates/partials/nav.html:57
 msgid "Sensitive paths"
 msgstr "Чутливі шляхи"
 
@@ -4326,24 +4409,28 @@ msgstr "Переглянути"
 msgid "Language"
 msgstr "Мова"
 
-#: templates/partials/nav.html:25
+#: templates/partials/nav.html:26
 msgid "Main"
 msgstr "Основна навігація"
 
-#: templates/partials/nav.html:38 templates/partials/nav.html:43
-#: templates/partials/nav.html:44
+#: templates/partials/nav.html:39 templates/partials/nav.html:44
+#: templates/partials/nav.html:45
 msgid "Settings"
 msgstr "Налаштування"
 
-#: templates/partials/nav.html:49
+#: templates/partials/nav.html:50
 msgid "Administration"
 msgstr "Адміністрування"
 
 #: templates/partials/nav.html:52
+msgid "Repository settings"
+msgstr "Налаштування репозиторіїв"
+
+#: templates/partials/nav.html:54
 msgid "People settings"
 msgstr "Налаштування людей"
 
-#: templates/partials/nav.html:59
+#: templates/partials/nav.html:61
 msgid "Log out"
 msgstr "Вийти"
 
