@@ -95,3 +95,71 @@ rules:
       different pattern. Comments by the pull request's own author are ignored, and each comment
       and each commit is counted at most once. An attentive developer sitting in the review will
       trip it, which is why it is low confidence.
+
+  # --- Author baselines -----------------------------------------------------------------------
+  #
+  # These four ask a different question from the six above: not "is this pull request an odd
+  # shape?" but "is this author's recent work an odd shape *for them*?". A developer who has
+  # always shipped fast is not evidence of anything; a developer whose output changed shape last
+  # month might be.
+  #
+  # They are recomputed nightly over a rolling window (`manage.py compute_baselines`), because a
+  # baseline verdict changes when other pull requests arrive. None of them emits anything for an
+  # author with fewer than MIN_SAMPLE pull requests of history.
+  #
+  # Read every match before acting on one. These describe a change in how somebody works, and
+  # there are many innocent reasons for that: a new project, a new team, a holiday, a move, a
+  # different kind of task. They are a prompt to ask, never an answer.
+  - name: "Throughput jumped against the author's own history"
+    kind: throughput_shift
+    params:
+      window_weeks: 8
+      ratio: 2.5
+      sustained_weeks: 2
+    tool: other
+    confidence: low
+    notes: >
+      Normalised by the team's own change over the same two windows, so a sprint or a release
+      crunch that moved everybody moves nobody into a signal. Someone returning from leave, or
+      finishing a long-running piece of work, will trip it legitimately.
+
+  - name: "Volume moved outside the author's usual hours"
+    kind: off_hours_volume
+    params:
+      window_weeks: 8
+      percentile: 0.9
+      min_share: 0.4
+    tool: other
+    confidence: low
+    notes: >
+      "Usual hours" is the author's own, taken from their earlier commits — nothing here assumes
+      a nine-to-five, and a night owl's baseline is their own nights. A change of timezone, a
+      newborn or a switch to part-time will trip it. Hours are read in REPORT_TIMEZONE.
+
+  - name: "Test-to-code ratio barely varies"
+    kind: test_ratio_lockstep
+    params:
+      window_weeks: 8
+      min_prs: 10
+      max_variance: 0.15
+    tool: other
+    confidence: low
+    notes: >
+      Real work varies: a bug fix is mostly test, a migration mostly not. A ratio that holds
+      across a dozen changes is a generator's habit. Pull requests with no implementation lines
+      are skipped rather than counted as zero, and an author who never writes tests does not trip
+      it — that is a policy question, not an authorship signal.
+
+  - name: "Pull-request descriptions broke from the author's own style"
+    kind: body_style_shift
+    params:
+      window_weeks: 8
+      min_prs: 10
+      length_ratio: 4
+    tool: other
+    confidence: low
+    notes: >
+      Measured in both directions against the author's own median length, not against any idea of
+      a good description: somebody who wrote two lines and now writes forty is as interesting as
+      the reverse. A new PR template will trip it for the whole team at once, which is the first
+      thing to check before reading anything into it.

@@ -14,6 +14,32 @@
 
 ### Added
 
+- **Author baselines: is this person's recent work unusual *for them*?** Four more structural kinds, computed
+  nightly (`compute_baselines`, 01:00) rather than during a sync, because the answer changes when other pull
+  requests arrive: **throughput jumped** against the author's own trailing rate, **volume moved outside their
+  usual hours**, the **test-to-code ratio stopped varying**, and **descriptions broke from their own style**.
+
+  These are the most consequential heuristics in the product and they are built to be hard to misuse:
+
+  - **A team-wide change fires nothing.** `throughput_shift` divides the author's change by the team's over the
+    same two windows, so a sprint, a release crunch or a return from holidays moves everybody and flags nobody.
+  - **"Usual hours" are the author's own**, taken from their earlier commits and read in your reporting
+    timezone. Nothing assumes a nine-to-five; a night owl's baseline is their own nights, and only a change
+    away from it counts.
+  - **No baseline below `MIN_SAMPLE` pull requests of history.** A person with four pull requests has no
+    baseline, and the tool does not invent one for them.
+  - **An author who never writes tests does not trip the ratio rule** — that is a policy question, not an
+    authorship signal — and a bot never gets a baseline at all.
+
+  They are `low` confidence, they ship deactivated like every structural rule, and each one's notes say what
+  will trip it innocently: a new project, a new timezone, a newborn, a changed PR template. Read every match
+  before you act on one; these describe a change in how somebody works, and most reasons for that are ordinary.
+
+  **This can change `ai_status` on pull requests you already have.** A structural signal alone still changes
+  nothing, but a baseline signal plus a per-PR one is two distinct kinds, which is the default threshold for
+  `AI suspected`. Nothing moves until you activate a rule; after you do, run `manage.py recompute --baselines`
+  and expect some historical pull requests — and therefore some AI metrics — to shift.
+
 - **A second kind of evidence: what a pull request's shape says.** Detection rules match text a tool wrote.
   The new **structural signals** read the pull request itself — a large change merged within two hours of its
   first commit, five substantial commits ninety seconds apart, a whole change in one commit, ten new files

@@ -6,7 +6,7 @@ from django.db.models.functions import Coalesce
 from apps.activity.derive import derive_pull_requests
 from apps.activity.followup import update_followup_fixes_for
 from apps.activity.models import PullRequest
-from apps.ai_detection.services import detect_pull_requests
+from apps.ai_detection.services import detect_pull_requests, run_baselines
 from apps.metrics.rollups import rebuild
 from apps.metrics.services import bump_data_version
 from apps.metrics.timeframe import day_end_exclusive, day_of, day_start, today
@@ -39,6 +39,13 @@ class Command(BaseCommand):
             "--skip-rollups",
             action="store_true",
             help="Skip rollup rebuilding; only run derive/detect/evaluate.",
+        )
+        parser.add_argument(
+            "--baselines",
+            action="store_true",
+            help="Also recompute the author-baseline structural signals. Off by default because "
+            "they are whole-window, not per pull request: the date and repository filters above "
+            "do not narrow them, so a filtered recompute would silently recompute everything.",
         )
 
     @staticmethod
@@ -74,6 +81,14 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"Recomputed {derived} pull request(s) "
                 f"(derive={derived}, followup={followup}, detect={detected}, evaluate={evaluated})."
+            )
+
+        if options["baselines"]:
+            baseline_result = run_baselines()
+            self.stdout.write(
+                f"Baseline signals: {baseline_result.authors} author(s), "
+                f"{baseline_result.created} created, {baseline_result.deleted} deleted, "
+                f"{baseline_result.pull_requests_restatused} pull request(s) restatused."
             )
 
         if options["skip_rollups"]:

@@ -101,6 +101,49 @@ class SignalKind(models.TextChoices):
     MASS_FILE_CREATION = "mass_file_creation", _("Many files created across many directories")
     UNUSED_NEW_DEPENDENCY = "unused_new_dependency", _("New dependency nothing in the diff uses")
     INSTANT_REVIEW_RESPONSE = "instant_review_response", _("Repeated commits moments after review comments")
+    # Baseline kinds (phase 12, stage 5). These read an author's *own history* rather than one
+    # pull request, so their truth changes when other pull requests arrive — which is why they are
+    # recomputed nightly over a rolling window instead of during one PR's sync.
+    THROUGHPUT_SHIFT = "throughput_shift", _("Throughput jumped against the author's own history")
+    OFF_HOURS_VOLUME = "off_hours_volume", _("Volume moved outside the author's usual hours")
+    TEST_RATIO_LOCKSTEP = "test_ratio_lockstep", _("Test-to-code ratio barely varies across pull requests")
+    BODY_STYLE_SHIFT = "body_style_shift", _("Pull-request descriptions broke from the author's own style")
+
+
+class SignalFamily(models.TextChoices):
+    """Where a kind's inputs come from, which decides where it runs and what may delete its rows.
+
+    The split is forced, not stylistic. A `BASELINE` kind's verdict changes when *other* pull
+    requests arrive, so computing it during one PR's sync would freeze a stale answer. A `DIFF`
+    kind needs file contents that are not in the database at all, and the only place those bytes
+    exist locally is the churn clone.
+
+    It also keeps the three writers from deleting each other's work: each reconciles only the
+    signals of its own family, so a nightly baseline run cannot wipe the per-PR signals the sync
+    just wrote, and vice versa.
+    """
+
+    PER_PR = "per_pr", _("Per pull request")
+    BASELINE = "baseline", _("Author baseline")
+    DIFF = "diff", _("Diff contents")
+
+
+SIGNAL_KIND_FAMILY: dict[str, str] = {
+    SignalKind.FAST_LARGE_PR: SignalFamily.PER_PR,
+    SignalKind.COMMIT_BURST: SignalFamily.PER_PR,
+    SignalKind.SINGLE_LARGE_COMMIT: SignalFamily.PER_PR,
+    SignalKind.MASS_FILE_CREATION: SignalFamily.PER_PR,
+    SignalKind.UNUSED_NEW_DEPENDENCY: SignalFamily.PER_PR,
+    SignalKind.INSTANT_REVIEW_RESPONSE: SignalFamily.PER_PR,
+    SignalKind.THROUGHPUT_SHIFT: SignalFamily.BASELINE,
+    SignalKind.OFF_HOURS_VOLUME: SignalFamily.BASELINE,
+    SignalKind.TEST_RATIO_LOCKSTEP: SignalFamily.BASELINE,
+    SignalKind.BODY_STYLE_SHIFT: SignalFamily.BASELINE,
+}
+
+
+def kinds_in_family(family: str) -> frozenset[str]:
+    return frozenset(kind for kind, value in SIGNAL_KIND_FAMILY.items() if value == family)
 
 
 # Which `params` keys each kind understands, and the default every seeded rule starts from. A key
@@ -113,6 +156,10 @@ SIGNAL_PARAM_DEFAULTS: dict[str, dict[str, object]] = {
     SignalKind.MASS_FILE_CREATION: {"min_added_files": 10, "min_directories": 3},
     SignalKind.UNUSED_NEW_DEPENDENCY: {"manifests": ["pyproject.toml", "package.json", "requirements*.txt"]},
     SignalKind.INSTANT_REVIEW_RESPONSE: {"max_minutes": 5, "min_occurrences": 3},
+    SignalKind.THROUGHPUT_SHIFT: {"window_weeks": 8, "ratio": 2.5, "sustained_weeks": 2},
+    SignalKind.OFF_HOURS_VOLUME: {"window_weeks": 8, "percentile": 0.9, "min_share": 0.4},
+    SignalKind.TEST_RATIO_LOCKSTEP: {"window_weeks": 8, "min_prs": 10, "max_variance": 0.15},
+    SignalKind.BODY_STYLE_SHIFT: {"window_weeks": 8, "min_prs": 10, "length_ratio": 4},
 }
 
 

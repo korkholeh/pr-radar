@@ -209,6 +209,9 @@ def _prefetch_for_detection(queryset: QuerySet[PullRequest]) -> QuerySet[PullReq
     The two `Prefetch`es also fix the order the detectors iterate in — a rule that matches two
     paths must always report the same one — and drop excluded files before they reach a rule."""
     return queryset.select_related("author", "merged_by").prefetch_related(
+        # `services.detect_pull_request` reads each stored signal's `signal_rule.kind` to tell the
+        # three signal families apart; without this it would be a query per signal per PR.
+        "ai_signals__signal_rule",
         "pull_request_commits__commit__author_identity",
         "pull_request_commits__commit__author_email_identity",
         "pull_request_commits__commit__committer_identity",

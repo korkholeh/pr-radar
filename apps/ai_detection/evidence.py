@@ -34,6 +34,10 @@ class EvidenceCode:
     MASS_FILE_CREATION = "mass_file_creation"
     UNUSED_NEW_DEPENDENCY = "unused_new_dependency"
     INSTANT_REVIEW_RESPONSE = "instant_review_response"
+    THROUGHPUT_SHIFT = "throughput_shift"
+    OFF_HOURS_VOLUME = "off_hours_volume"
+    TEST_RATIO_LOCKSTEP = "test_ratio_lockstep"
+    BODY_STYLE_SHIFT = "body_style_shift"
 
 
 class _MessageDef(TypedDict, total=False):
@@ -87,6 +91,33 @@ EVIDENCE_MESSAGES: dict[str, _MessageDef] = {
             "(the rule flags %(min_occurrences)s such times)."
         ),
         "count_key": "occurrences",
+    },
+    EvidenceCode.THROUGHPUT_SHIFT: {
+        "singular": gettext_noop(
+            "This author opened %(recent_per_week)s pull requests a week recently, against "
+            "%(earlier_per_week)s a week before that — %(ratio)s times their own rate once the "
+            "team's own change of %(team_ratio)s is divided out (the rule flags %(min_ratio)s)."
+        ),
+    },
+    EvidenceCode.OFF_HOURS_VOLUME: {
+        "singular": gettext_noop(
+            "%(share)s%% of this author's recent volume landed outside the hours they usually "
+            "commit in (%(usual_hours)s); the rule flags %(min_share)s%%."
+        ),
+    },
+    EvidenceCode.TEST_RATIO_LOCKSTEP: {
+        "singular": gettext_noop(
+            "Across %(pr_count)s pull requests the test-to-code ratio stayed at about "
+            "%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under "
+            "%(max_variance)s)."
+        ),
+    },
+    EvidenceCode.BODY_STYLE_SHIFT: {
+        "singular": gettext_noop(
+            "This author's pull-request descriptions run about %(recent_length)s characters "
+            "recently, against %(earlier_length)s before — %(ratio)s times the difference the "
+            "rule flags at %(min_ratio)s."
+        ),
     },
 }
 

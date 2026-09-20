@@ -34,7 +34,7 @@ All run from the repository root, all non-interactive.
 
 Management commands: `sync`, `recompute`, `compute_churn`, `seed_demo`, `seed_e2e`, `metrics_doc`,
 `bootstrap_connection`, `rotate_encryption_key`, `seed_detection_rules`, `seed_signal_rules`,
-`reclassify_bots`, `process_exports`, `cleanup_exports`.
+`compute_baselines`, `reclassify_bots`, `process_exports`, `cleanup_exports`.
 
 ## Conventions
 

@@ -137,6 +137,46 @@ pull request keeps a sentence quoting a threshold you no longer use.
 AI cohort. They are deliberately not inputs to deciding who is in that cohort — otherwise the AI-quality
 dashboards would be proving themselves. A test enforces it.
 
+## Author baselines: judged against themselves, not against each other
+
+Four of the structural kinds are different in a way worth understanding before you switch any of them on.
+They do not ask "is this pull request unusual?" but "is this person's recent work unusual **for them**?":
+
+| Kind | Fires when |
+|---|---|
+| Throughput jumped against the author's own history | their pull requests per week rose sharply — after the team's own change is divided out |
+| Volume moved outside the author's usual hours | most recent volume landed in hours they did not previously commit in |
+| Test-to-code ratio barely varies | the ratio holds nearly constant across a dozen pull requests |
+| Descriptions broke from the author's own style | their PR descriptions changed length by a large factor, in either direction |
+
+They are recomputed every night (`manage.py compute_baselines`, 01:00), not during a sync, because the answer
+changes as more work arrives: somebody who looked unusual in March may look ordinary once April lands, and
+the signal disappears on its own when that happens.
+
+**What they refuse to do.** No baseline is computed for an author with fewer than `MIN_SAMPLE` pull requests
+of history — a person with four pull requests has no baseline and the tool will not invent one. A team-wide
+change fires nothing, because the throughput rule is normalised against the team over the same two windows.
+"Usual hours" means the author's own hours, in your reporting timezone, so a night owl's baseline is their
+own nights. An author who never writes tests does not trip the ratio rule. Bots get no baseline at all.
+
+**What will trip them innocently.** A new project. A new team. A different kind of task. Coming back from
+leave. Finishing something long-running. A move, a new timezone, a newborn, a switch to part-time. A changed
+PR template — which will trip the description rule for your whole team at once, and is the first thing to
+check before reading anything into it.
+
+None of these is evidence of anything on its own. They are a reason to ask a person about their work, and
+asking is a conversation you should be willing to have before you turn the rule on.
+
+**They can change AI status on pull requests you already have.** One structural signal still changes nothing,
+but a baseline signal plus a per-PR one is two distinct kinds — the default threshold for `AI suspected`.
+After activating a baseline rule, run:
+
+```
+uv run python manage.py recompute --baselines
+```
+
+and expect some historical pull requests, and therefore some AI metrics, to move.
+
 ## What the repository page tells you instead
 
 Some evidence is about the **repository**, not about any one pull request. If a repository has a `CLAUDE.md`,

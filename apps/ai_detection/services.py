@@ -11,15 +11,24 @@ import logging
 import re
 from collections.abc import Collection
 from dataclasses import dataclass
+from datetime import date
 from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import QuerySet
 
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest
+from apps.ai_detection.baselines import load_author_baselines, run_baseline_kind
 from apps.ai_detection.detectors import DETECTORS, load_context, load_contexts
 from apps.ai_detection.disclosure import DisclosureConfig, load_config, parse_disclosure
-from apps.ai_detection.models import AISignal, Confidence, DetectionRule, SignalRule
+from apps.ai_detection.models import (
+    AISignal,
+    Confidence,
+    DetectionRule,
+    SignalFamily,
+    SignalRule,
+    kinds_in_family,
+)
 from apps.ai_detection.structural import load_structural_context, run_kind
 from apps.catalog.services import get_bool, get_int
 
@@ -27,6 +36,9 @@ if TYPE_CHECKING:
     from apps.accounts.selectors import ScopeFilter
 
 logger = logging.getLogger(__name__)
+
+PER_PR_KINDS = kinds_in_family(SignalFamily.PER_PR)
+BASELINE_KINDS = kinds_in_family(SignalFamily.BASELINE)
 
 
 def _evidence_hash(evidence: str) -> str:
@@ -40,6 +52,17 @@ def structural_evidence_hash(code: str, params: dict[str, Any]) -> str:
     new one instead of silently leaving a stale sentence on the page."""
     canonical = json.dumps({"code": code, "params": params}, sort_keys=True, default=str)
     return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def _signal_kind(signal: AISignal) -> str | None:
+    """The `SignalKind` a stored signal came from, or None for a regex signal. `signal_rule` is
+    prefetched by `detectors._prefetch_for_detection`, so this costs no query."""
+    return signal.signal_rule.kind if signal.signal_rule is not None else None
+
+
+def _stored_baseline_kinds(pull_request: PullRequest) -> set[str]:
+    kinds = {_signal_kind(signal) for signal in pull_request.ai_signals.all()}
+    return {kind for kind in kinds if kind in BASELINE_KINDS}
 
 
 def resolve_ai_status(
@@ -117,7 +140,7 @@ def detect_pull_request(
     if rules is None:
         rules = _compile_active_rule_patterns(list(DetectionRule.objects.filter(is_active=True)))
     if signal_rules is None:
-        signal_rules = list(SignalRule.objects.filter(is_active=True))
+        signal_rules = list(SignalRule.objects.filter(is_active=True, kind__in=PER_PR_KINDS))
     if config is None:
         config = load_config()
 
@@ -164,9 +187,13 @@ def detect_pull_request(
                     },
                 )
 
+    # Only the families this function computes. A baseline signal is written by the nightly
+    # `run_baselines()` from an author's whole history, so treating one as "stale" here — it is
+    # not in this pull request's wanted set, and never could be — would delete it on every sync.
     existing = {
         (signal.rule_id, signal.signal_rule_id, signal.evidence_hash): signal
         for signal in ctx.pull_request.ai_signals.all()
+        if signal.rule_id is not None or _signal_kind(signal) in PER_PR_KINDS
     }
 
     to_create = [
@@ -197,6 +224,10 @@ def detect_pull_request(
     structural_kinds = {
         payload["signal_rule"].kind for payload in wanted.values() if payload["signal_rule"] is not None
     }
+    # Baseline signals were written by a different pass and are not in `wanted`, but they are
+    # evidence about this pull request all the same, so they count toward the distinct-kind
+    # threshold. Read from the stored rows rather than recomputed here.
+    structural_kinds |= _stored_baseline_kinds(ctx.pull_request)
     signal_tools = {payload["tool"] for payload in wanted.values()}
 
     pr = ctx.pull_request
@@ -275,3 +306,139 @@ def dry_run_rule(rule: DetectionRule, scope: ScopeFilter, limit: int) -> list[Dr
                 DryRunMatch(pull_request=ctx.pull_request, evidence=match.evidence, commit_id=match.commit_id)
             )
     return matches
+
+
+# --- the baseline family (phase 12, stage 5) ----------------------------------------------------
+
+
+@dataclass(frozen=True)
+class BaselineRunResult:
+    authors: int
+    created: int
+    deleted: int
+    pull_requests_restatused: int
+
+
+@transaction.atomic
+def run_baselines(reference: date | None = None) -> BaselineRunResult:
+    """Recomputes every active baseline rule over the rolling window and reconciles the stored
+    baseline signals against the result.
+
+    Runs whole-window rather than per pull request because a baseline verdict changes when *other*
+    pull requests arrive: an author who looked unusual in March may look ordinary once April's
+    work lands, and the old signal has to disappear on its own. That is why this is a nightly job
+    and not part of the sync pipeline.
+
+    It touches only the baseline family. The per-PR signals the sync just wrote, and the regex
+    signals, are left exactly as they are — each of the three writers reconciles its own family.
+    """
+    rules = list(SignalRule.objects.filter(is_active=True, kind__in=BASELINE_KINDS))
+    existing = {
+        (signal.pull_request_id, signal.signal_rule_id, signal.evidence_hash): signal
+        for signal in AISignal.objects.filter(signal_rule__kind__in=BASELINE_KINDS).select_related(
+            "signal_rule"
+        )
+    }
+    if not rules:
+        # Every baseline rule switched off means every baseline signal is stale. Deleting them is
+        # the same promise `detect_pull_request` makes for its own families: deactivating a rule
+        # removes its evidence on the next run rather than leaving it on the page forever.
+        return _finish_baseline_run(authors=0, wanted={}, existing=existing)
+
+    # The window is the widest any active rule asks for, so one load serves them all; each rule
+    # still reads only as far back as its own `window_weeks`.
+    window_weeks = max(float(rule.effective_params().get("window_weeks") or 8) for rule in rules)
+    sustained_weeks = max(float(rule.effective_params().get("sustained_weeks") or 2) for rule in rules)
+    authors = load_author_baselines(
+        window_weeks=window_weeks, sustained_weeks=sustained_weeks, reference=reference
+    )
+
+    wanted: dict[tuple[int, int, str], dict[str, Any]] = {}
+    for rule in rules:
+        params = rule.effective_params()
+        for author in authors:
+            for match in run_baseline_kind(rule.kind, params, author):
+                evidence_hash = structural_evidence_hash(match.code, match.params)
+                wanted.setdefault(
+                    (match.pull_request_id, rule.pk, evidence_hash),
+                    {
+                        "pull_request_id": match.pull_request_id,
+                        "signal_rule": rule,
+                        "tool": rule.tool,
+                        "confidence": rule.confidence,
+                        "evidence_code": match.code,
+                        "evidence_params": match.params,
+                    },
+                )
+
+    return _finish_baseline_run(authors=len(authors), wanted=wanted, existing=existing)
+
+
+def _finish_baseline_run(
+    *,
+    authors: int,
+    wanted: dict[tuple[int, int, str], dict[str, Any]],
+    existing: dict[tuple[int, int | None, str], AISignal],
+) -> BaselineRunResult:
+    to_create = [
+        AISignal(
+            pull_request_id=payload["pull_request_id"],
+            signal_rule=payload["signal_rule"],
+            tool=payload["tool"],
+            confidence=payload["confidence"],
+            evidence="",
+            evidence_code=payload["evidence_code"],
+            evidence_params=payload["evidence_params"],
+            evidence_hash=key[2],
+        )
+        for key, payload in wanted.items()
+        if key not in existing
+    ]
+    if to_create:
+        AISignal.objects.bulk_create(to_create)
+
+    stale = [signal for key, signal in existing.items() if key not in wanted]
+    if stale:
+        AISignal.objects.filter(pk__in=[signal.pk for signal in stale]).delete()
+
+    touched = (
+        {payload["pull_request_id"] for payload in wanted.values()}
+        | {signal.pull_request_id for signal in stale}
+        | {signal.pull_request_id for signal in to_create}
+    )
+    restatused = _restatus_pull_requests(touched)
+    return BaselineRunResult(
+        authors=authors,
+        created=len(to_create),
+        deleted=len(stale),
+        pull_requests_restatused=restatused,
+    )
+
+
+def _restatus_pull_requests(pull_request_ids: Collection[int]) -> int:
+    """Re-resolves `ai_status` from the stored signals of *both* families, for the pull requests a
+    baseline run added evidence to or took it away from.
+
+    Cheaper and safer than re-running `detect_pull_request` on each: the regex and per-PR results
+    are already on disk and have not changed, so recomputing them would burn the work and risk a
+    different answer if a rule was edited in between.
+    """
+    if not pull_request_ids:
+        return 0
+
+    config = load_config()
+    changed = 0
+    pull_requests = PullRequest.objects.filter(pk__in=list(pull_request_ids)).prefetch_related(
+        "ai_signals__signal_rule"
+    )
+    for pull_request in pull_requests:
+        signals = list(pull_request.ai_signals.all())
+        regex_confidences = {signal.confidence for signal in signals if signal.rule_id is not None}
+        structural_kinds = {kind for kind in (_signal_kind(signal) for signal in signals) if kind is not None}
+        disclosure = parse_disclosure(pull_request.body, config).disclosure
+        resolved = resolve_ai_status(regex_confidences, disclosure, structural_kinds)
+        if resolved != pull_request.ai_status:
+            pull_request.ai_status = resolved
+            pull_request.save(update_fields=["ai_status"])
+            changed += 1
+    return changed

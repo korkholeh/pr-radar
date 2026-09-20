@@ -116,6 +116,21 @@ reviewer and must be attributable to its own rule and confidence rather than mer
 detector. Every `AISignal.evidence` is truncated to `EVIDENCE_MAX_LENGTH` (200 chars), centred on the match, so
 it always fits the field and is still readable on the PR page.
 
+**The three signal families each reconcile only their own rows** (`SignalFamily`, phase 12). A per-PR kind is
+computed during sync, a baseline kind nightly over a rolling window, a diff kind (stage 6) from the churn
+clone. All three write `AISignal` rows, and all three do a wanted-vs-existing diff — so without a family split
+each writer would see the other families' rows as stale and delete them: a nightly baseline run would wipe
+everything the sync had just written, and the next sync would wipe it back. `detect_pull_request` therefore
+reconciles only regex and per-PR rows, and `run_baselines` only baseline rows.
+
+The split is not merely defensive. A baseline verdict changes when *other* pull requests arrive, so computing
+one while syncing a single pull request would freeze an answer that is already going stale; and a diff kind
+needs file contents that are not in the database at all. Where a kind runs is forced by what it reads.
+
+`run_baselines` re-resolves `ai_status` for the pull requests it touched rather than re-running
+`detect_pull_request` on each: the regex and per-PR results are already stored and have not changed, so
+recomputing them would burn the work and could return a different answer if a rule was edited in between.
+
 **Structural signals are a second rule family, not more detectors** (`apps/ai_detection/structural.py`,
 phase 12). A `DetectionRule` matches a regex against text somebody wrote; a `SignalRule` names a *kind* — a
 piece of code reading the pull request's own shape — tuned by a `params` dict. `AISignal` became dual-sourced

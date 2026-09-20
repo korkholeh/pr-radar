@@ -50,6 +50,13 @@ is one command each rather than restarting it: `manage.py process_exports` runs 
 `manage.py cleanup_exports` deletes export files past their retention window and clears a job stuck `running` for
 over an hour.
 
+Author-baseline signals (`docs/user/tune-ai-detection.md`) run as a scheduled huey task,
+`compute_baselines`, at 01:00 server time. They compare each author's recent work against their own trailing
+history over a rolling window, so they have to be recomputed on a schedule rather than during a sync: a
+verdict about an author changes when *other* pull requests arrive. It makes no GitHub call and can be run by
+hand with `manage.py compute_baselines`. If no baseline rule is active — the shipped ones all start
+deactivated — the run finishes immediately having written nothing.
+
 Churn analysis (`docs/user/churn.md`) runs as a scheduled huey task, `compute_churn`, at 02:00 server time — an
 hour before the 03:00 export cleanup — as long as `run_huey` is running. It clones each repository with open
 churn work into `DATA_DIR/repos/<owner>/<name>.git` (bare clones, fetched in place on later runs rather than
@@ -60,7 +67,8 @@ commits. Deleting `DATA_DIR/repos/` is always safe: the next run re-clones whate
 
 ## Scheduling
 
-`run_huey` (see "Run" above) already runs `sync`, `compute_churn` (02:00 server time) and the export-cleanup task
+`run_huey` (see "Run" above) already runs `sync`, `compute_baselines` (01:00 server time), `compute_churn`
+(02:00 server time) and the export-cleanup task
 on its own internal scheduler as long as the process stays up — for most single-operator setups that is enough,
 and nothing below is required. Use an OS scheduler instead when you want the web process and the worker to
 survive a reboot unattended, or when you'd rather have `cron`/`launchd` retry a crashed run than rely on the
@@ -96,7 +104,7 @@ even if the worker's own scheduler is briefly down.
 ```
 
 A second agent, e.g. `~/Library/LaunchAgents/com.pr-radar.schedule.plist`, with a `StartCalendarInterval` array
-(one dict per run time) instead of `KeepAlive`, invoking `manage.py sync`, `manage.py compute_churn` and
+(one dict per run time) instead of `KeepAlive`, invoking `manage.py sync`, `manage.py compute_baselines`, `manage.py compute_churn` and
 `manage.py cleanup_exports` — either as three separate agents or a small wrapper shell script the single agent
 calls in sequence. Load either agent with `launchctl load ~/Library/LaunchAgents/com.pr-radar.worker.plist` (add
 `bootstrap gui/$(id -u)` on newer macOS if `load` is deprecated on your version); `launchctl list | grep pr-radar`
@@ -112,6 +120,7 @@ work standalone since every huey task is also a plain management command (see
 ```cron
 # crontab -e
 0 * * * *   cd /path/to/pr-radar && /path/to/pr-radar/.venv/bin/python manage.py sync >> data/logs/cron-sync.log 2>&1
+0 1 * * *   cd /path/to/pr-radar && /path/to/pr-radar/.venv/bin/python manage.py compute_baselines >> data/logs/cron-baselines.log 2>&1
 0 2 * * *   cd /path/to/pr-radar && /path/to/pr-radar/.venv/bin/python manage.py compute_churn >> data/logs/cron-churn.log 2>&1
 0 3 * * *   cd /path/to/pr-radar && /path/to/pr-radar/.venv/bin/python manage.py cleanup_exports >> data/logs/cron-cleanup.log 2>&1
 ```

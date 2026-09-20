@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 06:53+0000\n"
+"POT-Creation-Date: 2026-09-20 07:17+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -64,7 +64,7 @@ msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:303
-#: apps/ai_detection/models.py:61 apps/ai_detection/models.py:136
+#: apps/ai_detection/models.py:61 apps/ai_detection/models.py:183
 #: apps/connections/models.py:43 apps/dashboards/models.py:60
 #: apps/policy/models.py:20 apps/policy/models.py:119
 msgid "created at"
@@ -388,7 +388,7 @@ msgstr "має подальше виправлення"
 #: apps/activity/models.py:127 apps/activity/models.py:202
 #: apps/activity/models.py:225 apps/activity/models.py:262
 #: apps/activity/models.py:293 apps/activity/models.py:326
-#: apps/ai_detection/models.py:199 apps/churn/models.py:16
+#: apps/ai_detection/models.py:246 apps/churn/models.py:16
 #: apps/policy/models.py:102
 msgid "pull request"
 msgstr "pull request"
@@ -434,7 +434,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:186 apps/activity/models.py:205
-#: apps/ai_detection/models.py:207
+#: apps/ai_detection/models.py:254
 msgid "commit"
 msgstr "коміт"
 
@@ -576,7 +576,7 @@ msgstr "статус перевірки"
 msgid "check statuses"
 msgstr "статуси перевірок"
 
-#: apps/ai_detection/evidence.py:48
+#: apps/ai_detection/evidence.py:52
 #, python-format
 msgid ""
 "%(lines)s lines across %(files)s files arrived %(hours)s hours after the "
@@ -587,7 +587,7 @@ msgstr ""
 "першого коміту (правило спрацьовує на %(min_lines)s рядках і %(min_files)s "
 "файлах протягом %(max_hours)s год)."
 
-#: apps/ai_detection/evidence.py:65
+#: apps/ai_detection/evidence.py:69
 #, python-format
 msgid ""
 "The whole change — %(lines)s lines across %(files)s files — arrived in a "
@@ -596,7 +596,7 @@ msgstr ""
 "Уся зміна — %(lines)s рядків у %(files)s файлах — надійшла одним комітом "
 "(правило спрацьовує на %(min_lines)s рядках і %(min_files)s файлах)."
 
-#: apps/ai_detection/evidence.py:71
+#: apps/ai_detection/evidence.py:75
 #, python-format
 msgid ""
 "%(added_files)s new files were added across %(directories)s directories (the "
@@ -605,7 +605,7 @@ msgstr ""
 "Додано %(added_files)s нових файлів у %(directories)s каталогах (правило "
 "спрацьовує на %(min_added_files)s файлах у %(min_directories)s каталогах)."
 
-#: apps/ai_detection/evidence.py:77
+#: apps/ai_detection/evidence.py:81
 #, python-format
 msgid ""
 "%(manifest)s adds the dependency %(package)s, and nothing else in this "
@@ -614,7 +614,52 @@ msgstr ""
 "%(manifest)s додає залежність %(package)s, і ніщо інше в цій зміні її не "
 "імпортує."
 
-#: apps/ai_detection/evidence.py:100
+#: apps/ai_detection/evidence.py:97
+#, python-format
+msgid ""
+"This author opened %(recent_per_week)s pull requests a week recently, "
+"against %(earlier_per_week)s a week before that — %(ratio)s times their own "
+"rate once the team's own change of %(team_ratio)s is divided out (the rule "
+"flags %(min_ratio)s)."
+msgstr ""
+"Останнім часом цей автор відкривав %(recent_per_week)s PR на тиждень проти "
+"%(earlier_per_week)s на тиждень до того — у %(ratio)s разів більше за власний "
+"темп після врахування зміни самої команди у %(team_ratio)s (правило "
+"спрацьовує на %(min_ratio)s)."
+
+#: apps/ai_detection/evidence.py:104
+#, python-format
+msgid ""
+"%(share)s%% of this author's recent volume landed outside the hours they "
+"usually commit in (%(usual_hours)s); the rule flags %(min_share)s%%."
+msgstr ""
+"%(share)s%% нещодавнього обсягу цього автора припали на години поза тими, у "
+"які він зазвичай комітить (%(usual_hours)s); правило спрацьовує на "
+"%(min_share)s%%."
+
+#: apps/ai_detection/evidence.py:110
+#, python-format
+msgid ""
+"Across %(pr_count)s pull requests the test-to-code ratio stayed at about "
+"%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under "
+"%(max_variance)s)."
+msgstr ""
+"У %(pr_count)s PR співвідношення тестів до коду трималося близько "
+"%(mean_ratio)s і змінювалося лише на %(spread)s (правило спрацьовує на "
+"відхиленні менше ніж %(max_variance)s)."
+
+#: apps/ai_detection/evidence.py:117
+#, python-format
+msgid ""
+"This author's pull-request descriptions run about %(recent_length)s "
+"characters recently, against %(earlier_length)s before — %(ratio)s times the "
+"difference the rule flags at %(min_ratio)s."
+msgstr ""
+"Описи PR цього автора останнім часом мають близько %(recent_length)s символів "
+"проти %(earlier_length)s раніше — різниця у %(ratio)s разів, тоді як правило "
+"спрацьовує на %(min_ratio)s."
+
+#: apps/ai_detection/evidence.py:131
 #, python-format
 msgid ""
 "%(commits)s substantial commits landed less than %(gap_seconds)s seconds "
@@ -641,7 +686,7 @@ msgstr[3] ""
 "с (правило спрацьовує на %(min_commits)s таких комітах протягом "
 "%(max_gap_seconds)s с)."
 
-#: apps/ai_detection/evidence.py:107
+#: apps/ai_detection/evidence.py:138
 #, python-format
 msgid ""
 "A new commit followed a review comment within %(max_minutes)s minutes, "
@@ -716,8 +761,7 @@ msgstr "Нотатки"
 #: apps/ai_detection/forms.py:58
 msgid ""
 "Enter the parameters as a JSON object, for example {\"min_lines\": 400}."
-msgstr ""
-"Введіть параметри як обʼєкт JSON, наприклад {\"min_lines\": 400}."
+msgstr "Введіть параметри як обʼєкт JSON, наприклад {\"min_lines\": 400}."
 
 #: apps/ai_detection/forms.py:73
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:18
@@ -846,7 +890,7 @@ msgstr "Середній"
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:129
+#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:176
 #: apps/catalog/models.py:41 apps/catalog/models.py:71
 #: apps/connections/models.py:19 apps/github_sync/models.py:62
 msgid "name"
@@ -860,29 +904,29 @@ msgstr "детектор"
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:57 apps/ai_detection/models.py:132
-#: apps/ai_detection/models.py:226
+#: apps/ai_detection/models.py:57 apps/ai_detection/models.py:179
+#: apps/ai_detection/models.py:273
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:58 apps/ai_detection/models.py:133
-#: apps/ai_detection/models.py:227
+#: apps/ai_detection/models.py:58 apps/ai_detection/models.py:180
+#: apps/ai_detection/models.py:274
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:59 apps/ai_detection/models.py:134
+#: apps/ai_detection/models.py:59 apps/ai_detection/models.py:181
 #: apps/catalog/models.py:17 apps/catalog/models.py:47
 #: apps/catalog/models.py:80 apps/catalog/models.py:104
 #: apps/connections/models.py:34 apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:60 apps/ai_detection/models.py:135
+#: apps/ai_detection/models.py:60 apps/ai_detection/models.py:182
 #: apps/catalog/models.py:109
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:62 apps/ai_detection/models.py:137
+#: apps/ai_detection/models.py:62 apps/ai_detection/models.py:184
 #: apps/connections/models.py:44 apps/metrics/models.py:58
 #: apps/policy/models.py:120
 msgid "updated at"
@@ -934,85 +978,113 @@ msgstr "Нова залежність, яку ніщо в дифі не вико
 msgid "Repeated commits moments after review comments"
 msgstr "Повторні коміти одразу після коментарів ревʼю"
 
-#: apps/ai_detection/models.py:130 apps/catalog/models.py:133
+#: apps/ai_detection/models.py:107
+msgid "Throughput jumped against the author's own history"
+msgstr "Продуктивність зросла проти власної історії автора"
+
+#: apps/ai_detection/models.py:108
+msgid "Volume moved outside the author's usual hours"
+msgstr "Обсяг перемістився поза звичні години автора"
+
+#: apps/ai_detection/models.py:109
+msgid "Test-to-code ratio barely varies across pull requests"
+msgstr "Співвідношення тестів до коду майже не змінюється між PR"
+
+#: apps/ai_detection/models.py:110
+msgid "Pull-request descriptions broke from the author's own style"
+msgstr "Описи PR відірвалися від власного стилю автора"
+
+#: apps/ai_detection/models.py:126
+msgid "Per pull request"
+msgstr "На пул-реквест"
+
+#: apps/ai_detection/models.py:127
+msgid "Author baseline"
+msgstr "Базова лінія автора"
+
+#: apps/ai_detection/models.py:128
+msgid "Diff contents"
+msgstr "Вміст дифу"
+
+#: apps/ai_detection/models.py:177 apps/catalog/models.py:133
 #: apps/connections/models.py:20 apps/dashboards/models.py:48
 msgid "kind"
 msgstr "вид"
 
-#: apps/ai_detection/models.py:131
+#: apps/ai_detection/models.py:178
 msgid "parameters"
 msgstr "параметри"
 
-#: apps/ai_detection/models.py:140 apps/ai_detection/models.py:224
+#: apps/ai_detection/models.py:187 apps/ai_detection/models.py:271
 msgid "structural signal rule"
 msgstr "структурне правило сигналу"
 
-#: apps/ai_detection/models.py:141
+#: apps/ai_detection/models.py:188
 msgid "structural signal rules"
 msgstr "структурні правила сигналів"
 
-#: apps/ai_detection/models.py:159
+#: apps/ai_detection/models.py:206
 msgid ""
 "A structural rule can never be high confidence. Only an artefact the tool "
 "itself wrote proves AI authorship; a heuristic about a pull request's shape "
 "is evidence for a human to read."
 msgstr ""
 "Структурне правило ніколи не може мати високу впевненість. Лише артефакт, "
-"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR "
-"— це доказ, який читає людина."
+"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR — "
+"це доказ, який читає людина."
 
-#: apps/ai_detection/models.py:167
+#: apps/ai_detection/models.py:214
 msgid "Unknown signal kind."
 msgstr "Невідомий вид сигналу."
 
-#: apps/ai_detection/models.py:170
+#: apps/ai_detection/models.py:217
 msgid "Parameters must be a JSON object."
 msgstr "Параметри мають бути обʼєктом JSON."
 
-#: apps/ai_detection/models.py:175
+#: apps/ai_detection/models.py:222
 #, python-format
 msgid "Unknown parameter(s) for this kind: %(names)s. Known: %(known)s."
 msgstr "Невідомі параметри для цього виду: %(names)s. Відомі: %(known)s."
 
-#: apps/ai_detection/models.py:184
+#: apps/ai_detection/models.py:231
 #, python-format
 msgid "Parameter %(name)s must be a number."
 msgstr "Параметр %(name)s має бути числом."
 
-#: apps/ai_detection/models.py:186
+#: apps/ai_detection/models.py:233
 #, python-format
 msgid "Parameter %(name)s cannot be negative."
 msgstr "Параметр %(name)s не може бути відʼємним."
 
-#: apps/ai_detection/models.py:216
+#: apps/ai_detection/models.py:263
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:233
+#: apps/ai_detection/models.py:280
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:234
+#: apps/ai_detection/models.py:281
 msgid "evidence code"
 msgstr "код доказу"
 
-#: apps/ai_detection/models.py:235
+#: apps/ai_detection/models.py:282
 msgid "evidence parameters"
 msgstr "параметри доказу"
 
-#: apps/ai_detection/models.py:236
+#: apps/ai_detection/models.py:283
 msgid "evidence hash"
 msgstr "хеш доказу"
 
-#: apps/ai_detection/models.py:237
+#: apps/ai_detection/models.py:284
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:240
+#: apps/ai_detection/models.py:287
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:241
+#: apps/ai_detection/models.py:288
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:157
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:175
 msgid "AI signals"
@@ -1197,9 +1269,9 @@ msgstr ""
 "Ці правила читають форму PR — як швидко він надійшов, як рознесені його "
 "коміти, скільки файлів він створив — а не текст, який написав інструмент. "
 "Жодне з них не може мати високу впевненість, і один структурний сигнал сам "
-"по собі ніколи не змінює статус ШІ у PR. Кожне правило з постачання "
-"починає деактивованим: поріг, правильний для однієї команди, створює шум у "
-"іншій, тож спершу прожене його на ваших власних PR."
+"по собі ніколи не змінює статус ШІ у PR. Кожне правило з постачання починає "
+"деактивованим: поріг, правильний для однієї команди, створює шум у іншій, "
+"тож спершу прожене його на ваших власних PR."
 
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:14
 msgid "Structural signal rules"
@@ -1528,8 +1600,7 @@ msgid ""
 msgstr ""
 "Скільки різних видів структурних сигналів потрібно PR, щоб його статус ШІ "
 "став «підозрюється». Рахуються види, а не рядки: пʼять серій комітів — це "
-"один вид доказу. Жодна кількість структурних сигналів ніколи не дає "
-"«явно»."
+"один вид доказу. Жодна кількість структурних сигналів ніколи не дає «явно»."
 
 #: apps/catalog/setting_defs.py:173
 msgid ""
@@ -1538,8 +1609,8 @@ msgid ""
 "names."
 msgstr ""
 "Шляхи, які позначають репозиторій як налаштований для агента ШІ. "
-"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині "
-"будь-якого каталогу, названого шаблоном."
+"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині будь-"
+"якого каталогу, названого шаблоном."
 
 #: apps/catalog/setting_defs.py:190
 msgid "File path globs excluded from size and churn calculations."
