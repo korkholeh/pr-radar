@@ -17,18 +17,23 @@ from apps.metrics.services import compute
 from apps.metrics.timeframe import day_end_exclusive, day_start
 from apps.metrics.types import Scope
 
+# Compliance first, then quality, then flow, and volume last — `docs/POLICY.md`'s product
+# constraint, from the standards themselves: the number of pull requests a person produced is not
+# a measure of that person. A lead who opens this page before a 1:1 reads how the work was done
+# before they read how much of it there was.
 PERSON_COMPARISON_METRIC_KEYS: tuple[str, ...] = (
     "ai_pr_share",
     "disclosure_rate",
-    "prs_merged",
-    "lead_time_p50",
-    "time_to_first_review_p50",
-    "pr_size_p50",
+    "structural_signal_rate",
     "rework_rate",
-    "reviews_given",
-    "reviewer_response_p50",
     "churn_21d",
     "followup_fix_rate",
+    "lead_time_p50",
+    "time_to_first_review_p50",
+    "reviewer_response_p50",
+    "pr_size_p50",
+    "prs_merged",
+    "reviews_given",
 )
 
 

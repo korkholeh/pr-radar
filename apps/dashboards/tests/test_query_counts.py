@@ -94,6 +94,16 @@ def _seed_project(n_people: int = 1) -> tuple[ProjectFactory, RepositoryFactory]
 
 
 # -- whole-page pins -----------------------------------------------------------------------------
+#
+# STALE AS OF PHASE 12, STAGE 8 for the four Period-mode pages — `test_overview_query_count`,
+# `test_project_query_count`, `test_repository_query_count` and `test_person_page_query_count`.
+# Each was measured before `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`, so those pages now issue the
+# extra `compute()` queries that row's four ratio metrics cost and the pinned numbers are too low.
+# They were not re-measured because test runs are switched off in this working tree
+# (`.claude/tests-disabled`); re-pin them from a real run — the number the failure reports is the
+# measurement — rather than guessing. `test_day_query_count` and the index/Reviews pins are
+# unaffected (`DAY_ROWS` is unchanged and those pages render no KPI row), and so are the per-row
+# growth tests below: the new row is a page-level cost, not a per-row one.
 
 
 @pytest.mark.django_db

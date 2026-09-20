@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 09:15+0000\n"
+"POT-Creation-Date: 2026-09-20 09:55+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -11,7 +11,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #: apps/accounts/models.py:8
 msgid "System"
@@ -258,7 +261,6 @@ msgid "ready for review at"
 msgstr "готовий до ревʼю о"
 
 #: apps/activity/models.py:69
-#| msgid "review rounds"
 msgid "review requested at"
 msgstr "запит ревʼю о"
 
@@ -532,7 +534,6 @@ msgid "is review thread"
 msgstr "це нитка ревʼю"
 
 #: apps/activity/models.py:312
-#| msgid "Resolved"
 msgid "is resolved"
 msgstr "вирішено"
 
@@ -608,9 +609,8 @@ msgstr ""
 #: apps/ai_detection/evidence.py:78
 #, python-format
 msgid ""
-"%(added_files)s new files were added across %(directories)s directories (the"
-" rule flags %(min_added_files)s files across %(min_directories)s "
-"directories)."
+"%(added_files)s new files were added across %(directories)s directories (the "
+"rule flags %(min_added_files)s files across %(min_directories)s directories)."
 msgstr ""
 "Додано %(added_files)s нових файлів у %(directories)s каталогах (правило "
 "спрацьовує на %(min_added_files)s файлах у %(min_directories)s каталогах)."
@@ -651,8 +651,8 @@ msgstr ""
 #, python-format
 msgid ""
 "Across %(pr_count)s pull requests the test-to-code ratio stayed at about "
-"%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under"
-" %(max_variance)s)."
+"%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under "
+"%(max_variance)s)."
 msgstr ""
 "У %(pr_count)s PR співвідношення тестів до коду трималося близько "
 "%(mean_ratio)s і змінювалося лише на %(spread)s (правило спрацьовує на "
@@ -662,8 +662,8 @@ msgstr ""
 #, python-format
 msgid ""
 "This author's pull-request descriptions run about %(recent_length)s "
-"characters recently, against %(earlier_length)s before — %(ratio)s times the"
-" difference the rule flags at %(min_ratio)s."
+"characters recently, against %(earlier_length)s before — %(ratio)s times the "
+"difference the rule flags at %(min_ratio)s."
 msgstr ""
 "Описи PR цього автора останнім часом мають близько %(recent_length)s "
 "символів проти %(earlier_length)s раніше — різниця у %(ratio)s разів, тоді "
@@ -689,8 +689,8 @@ msgid ""
 "baseline, at %(min_density)s%% or more."
 msgstr ""
 "Доданий код на %(density)s%% складається з коментарів і докстрингів "
-"(%(comment_lines)s рядків коментарів проти %(code_lines)s рядків коду), тоді"
-" як у тих самих файлах до зміни було %(baseline_density)s%%. Правило "
+"(%(comment_lines)s рядків коментарів проти %(code_lines)s рядків коду), тоді "
+"як у тих самих файлах до зміни було %(baseline_density)s%%. Правило "
 "спрацьовує на перевищенні базового рівня в %(ratio)s разів за щільності "
 "%(min_density)s%% або більше."
 
@@ -734,8 +734,7 @@ msgstr[0] ""
 "%(occurrences)s раз (правило спрацьовує на %(min_occurrences)s таких разах)."
 msgstr[1] ""
 "Новий коміт надходив протягом %(max_minutes)s хв після коментаря ревʼю "
-"%(occurrences)s рази (правило спрацьовує на %(min_occurrences)s таких "
-"разах)."
+"%(occurrences)s рази (правило спрацьовує на %(min_occurrences)s таких разах)."
 msgstr[2] ""
 "Новий коміт надходив протягом %(max_minutes)s хв після коментаря ревʼю "
 "%(occurrences)s разів (правило спрацьовує на %(min_occurrences)s таких "
@@ -753,8 +752,8 @@ msgid ""
 "across %(min_files)s files)."
 msgid_plural ""
 "The same %(block_lines)s-line block of added code appears %(occurrences)s "
-"times across %(files)s files (the rule flags %(min_occurrences)s occurrences"
-" across %(min_files)s files)."
+"times across %(files)s files (the rule flags %(min_occurrences)s occurrences "
+"across %(min_files)s files)."
 msgstr[0] ""
 "Той самий блок доданого коду з %(block_lines)s рядків зустрічається "
 "%(occurrences)s раз у %(files)s файлах (правило спрацьовує на "
@@ -822,7 +821,8 @@ msgid "Notes"
 msgstr "Нотатки"
 
 #: apps/ai_detection/forms.py:58
-msgid "Enter the parameters as a JSON object, for example {\"min_lines\": 400}."
+msgid ""
+"Enter the parameters as a JSON object, for example {\"min_lines\": 400}."
 msgstr "Введіть параметри як обʼєкт JSON, наприклад {\"min_lines\": 400}."
 
 #: apps/ai_detection/forms.py:73
@@ -1013,8 +1013,7 @@ msgstr "Не є коректним регулярним виразом: %(error)
 #: apps/ai_detection/models.py:84
 msgid ""
 "This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
-"which can hang on a normal PR body. Rewrite it without the nested "
-"quantifier."
+"which can hang on a normal PR body. Rewrite it without the nested quantifier."
 msgstr ""
 "Цей шаблон вкладає групу з повторенням в іншу групу з повторенням "
 "(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
@@ -1108,8 +1107,8 @@ msgid ""
 "is evidence for a human to read."
 msgstr ""
 "Структурне правило ніколи не може мати високу впевненість. Лише артефакт, "
-"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR —"
-" це доказ, який читає людина."
+"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR — "
+"це доказ, який читає людина."
 
 #: apps/ai_detection/models.py:238
 msgid "Unknown signal kind."
@@ -1335,8 +1334,7 @@ msgstr "Ще немає правил детекції."
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:30
 msgid "Add a detection rule to start flagging AI-authored code automatically."
-msgstr ""
-"Додайте правило детекції, щоб автоматично позначати код, написаний ШІ."
+msgstr "Додайте правило детекції, щоб автоматично позначати код, написаний ШІ."
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:40
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:43
@@ -1358,18 +1356,18 @@ msgstr "Запустити"
 
 #: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:11
 msgid ""
-"This rule reads an author's whole history, so it cannot be previewed against"
-" recent pull requests. Activate it and run the nightly baseline job to see "
+"This rule reads an author's whole history, so it cannot be previewed against "
+"recent pull requests. Activate it and run the nightly baseline job to see "
 "what it finds."
 msgstr ""
 "Це правило читає всю історію автора, тому його не можна перевірити на "
-"останніх пул-реквестах. Увімкніть його та запустіть нічне обчислення базових"
-" рівнів, щоб побачити результат."
+"останніх пул-реквестах. Увімкніть його та запустіть нічне обчислення базових "
+"рівнів, щоб побачити результат."
 
 #: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:15
 msgid ""
-"This rule reads the contents of each change from the local clone, which only"
-" the nightly churn run has. Activate it, add the repository to the diff-"
+"This rule reads the contents of each change from the local clone, which only "
+"the nightly churn run has. Activate it, add the repository to the diff-"
 "analysis list in Settings, and the next run will show what it finds."
 msgstr ""
 "Це правило читає вміст кожної зміни з локальної копії, яка є лише в нічному "
@@ -1389,8 +1387,8 @@ msgstr "Нове структурне правило"
 #: apps/ai_detection/templates/ai_detection/partials/signal_rule_form.html:7
 msgid ""
 "A structural rule can never be high confidence: only an artefact the tool "
-"itself wrote proves AI authorship. What a heuristic produces is evidence for"
-" you to read."
+"itself wrote proves AI authorship. What a heuristic produces is evidence for "
+"you to read."
 msgstr ""
 "Структурне правило ніколи не може мати високу впевненість: лише артефакт, "
 "який написав сам інструмент, доводить авторство ШІ. Те, що дає евристика, — "
@@ -1406,8 +1404,8 @@ msgstr "Структурні сигнали"
 msgid ""
 "These rules read the shape of a pull request — how fast it arrived, how its "
 "commits are spaced, how many files it created — rather than any text a tool "
-"wrote. None of them can be high confidence, and one structural signal on its"
-" own never changes a pull request's AI status. Every shipped rule starts "
+"wrote. None of them can be high confidence, and one structural signal on its "
+"own never changes a pull request's AI status. Every shipped rule starts "
 "deactivated: a threshold that is right for one team produces noise on "
 "another, so dry-run it against your own pull requests first."
 msgstr ""
@@ -1738,10 +1736,10 @@ msgstr "Верхня межа кількості рядків для кожно�
 
 #: apps/catalog/setting_defs.py:141
 msgid ""
-"How many distinct structural signal kinds a pull request needs before its AI"
-" status becomes 'suspected'. Counted over kinds, not rows: five commit "
-"bursts are one kind of evidence. No number of structural signals ever "
-"reaches 'explicit'."
+"How many distinct structural signal kinds a pull request needs before its AI "
+"status becomes 'suspected'. Counted over kinds, not rows: five commit bursts "
+"are one kind of evidence. No number of structural signals ever reaches "
+"'explicit'."
 msgstr ""
 "Скільки різних видів структурних сигналів потрібно PR, щоб його статус ШІ "
 "став «підозрюється». Рахуються види, а не рядки: пʼять серій комітів — це "
@@ -1754,8 +1752,8 @@ msgid ""
 "names."
 msgstr ""
 "Шляхи, які позначають репозиторій як налаштований для агента ШІ. "
-"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині "
-"будь-якого каталогу, названого шаблоном."
+"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині будь-"
+"якого каталогу, названого шаблоном."
 
 #: apps/catalog/setting_defs.py:190
 msgid "File path globs excluded from size and churn calculations."
@@ -1770,8 +1768,8 @@ msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
 msgstr ""
-"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю"
-" формальним."
+"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
+"формальним."
 
 #: apps/catalog/setting_defs.py:218
 msgid "How many top reviewers count toward review load."
@@ -1787,8 +1785,7 @@ msgstr "Мінімальна частка перетину файлів для �
 
 #: apps/catalog/setting_defs.py:238
 msgid ""
-"How long a computed metrics result stays cached before it expires on its "
-"own."
+"How long a computed metrics result stays cached before it expires on its own."
 msgstr ""
 "Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
 "сам по собі."
@@ -1806,8 +1803,7 @@ msgstr ""
 
 #: apps/catalog/setting_defs.py:259
 msgid ""
-"Rule codes switched off; an open violation for a disabled rule auto-"
-"resolves."
+"Rule codes switched off; an open violation for a disabled rule auto-resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
@@ -1823,16 +1819,15 @@ msgstr ""
 #: apps/catalog/setting_defs.py:274
 msgid ""
 "Headings under which a pull request states its risk level. Matched the same "
-"tolerant way as the disclosure section, because a client's template will not"
-" use PR Radar's wording."
+"tolerant way as the disclosure section, because a client's template will not "
+"use PR Radar's wording."
 msgstr ""
 "Заголовки, під якими пул-реквест зазначає рівень ризику. Розпізнаються так "
 "само гнучко, як секція розкриття, бо шаблон клієнта не використовує "
 "формулювань PR Radar."
 
 #: apps/catalog/setting_defs.py:284
-msgid ""
-"Headings under which a pull request states how the change was verified."
+msgid "Headings under which a pull request states how the change was verified."
 msgstr "Заголовки, під якими пул-реквест описує, як зміну перевірено."
 
 #: apps/catalog/setting_defs.py:291
@@ -1861,8 +1856,8 @@ msgid ""
 "reference, a tracker key such as ABC-123, or a tracker URL. A pull request "
 "body matching any of them satisfies the task-link requirement."
 msgstr ""
-"Регулярні вирази, що вважаються посиланням на задачу: згадка issue у GitHub,"
-" ключ трекера на кшталт ABC-123 або URL трекера. Опис пул-реквеста, що "
+"Регулярні вирази, що вважаються посиланням на задачу: згадка issue у GitHub, "
+"ключ трекера на кшталт ABC-123 або URL трекера. Опис пул-реквеста, що "
 "відповідає будь-якому з них, задовольняє вимогу про посилання на задачу."
 
 #: apps/catalog/setting_defs.py:328
@@ -1904,13 +1899,13 @@ msgid ""
 "the contents."
 msgstr ""
 "Шляхи, які ніколи не повинні потрапляти в репозиторій: файли з доступами, "
-"приватні ключі та історія чату агента. Порівнюється лише шлях, тому вміст не"
-" читається."
+"приватні ключі та історія чату агента. Порівнюється лише шлях, тому вміст не "
+"читається."
 
 #: apps/catalog/setting_defs.py:417
 msgid ""
-"Paths that look like a credential file but are documentation: a template, or"
-" a public key."
+"Paths that look like a credential file but are documentation: a template, or "
+"a public key."
 msgstr ""
 "Шляхи, що виглядають як файл із доступами, але є документацією: шаблон або "
 "публічний ключ."
@@ -1951,14 +1946,14 @@ msgstr ""
 
 #: apps/catalog/setting_defs.py:457
 msgid ""
-"Repositories (owner/name) whose diffs are analysed for structural AI signals"
-" during the nightly churn run. Opt-in per repository because it reads the "
+"Repositories (owner/name) whose diffs are analysed for structural AI signals "
+"during the nightly churn run. Opt-in per repository because it reads the "
 "contents of every change; \"*\" opts in every repository. Empty means no "
 "diff analysis runs."
 msgstr ""
 "Репозиторії (owner/name), дифи яких аналізуються на структурні AI-сигнали "
-"під час нічного обчислення churn. Увімкнення окреме для кожного репозиторію,"
-" бо аналіз читає вміст кожної зміни; «*» означає всі репозиторії. Порожній "
+"під час нічного обчислення churn. Увімкнення окреме для кожного репозиторію, "
+"бо аналіз читає вміст кожної зміни; «*» означає всі репозиторії. Порожній "
 "список — аналіз дифів не виконується."
 
 #: apps/catalog/setting_defs.py:467
@@ -1976,8 +1971,8 @@ msgstr ""
 
 #: apps/catalog/setting_defs.py:481
 msgid ""
-"Authors/reviewers shown per axis on the reviews heat map; the rest fold into"
-" 'Other'."
+"Authors/reviewers shown per axis on the reviews heat map; the rest fold into "
+"'Other'."
 msgstr ""
 "Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
 "згортаються в «Інше»."
@@ -2023,8 +2018,7 @@ msgstr "Кількість PR, що завантажуються за одну �
 #: apps/catalog/setting_defs.py:522
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
-"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків "
-"PR."
+"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
 #: apps/catalog/setting_defs.py:529
 msgid "Primary rate-limit remaining below which the client waits for reset."
@@ -2162,8 +2156,8 @@ msgid ""
 "People appear automatically once pull requests or reviews are synced from "
 "GitHub."
 msgstr ""
-"Люди з'являються автоматично після синхронізації pull request-ів або ревʼю з"
-" GitHub."
+"Люди з'являються автоматично після синхронізації pull request-ів або ревʼю з "
+"GitHub."
 
 #: apps/catalog/templates/catalog/partials/person_form.html:4
 #: apps/catalog/templates/catalog/person_form.html:3
@@ -2236,9 +2230,9 @@ msgid ""
 "token lists them explicitly, and an organization may also require single "
 "sign-on authorization."
 msgstr ""
-"Надайте токену доступ на читання до репозиторіїв, які ви відстежуєте. У "
-"fine-grained токені їх треба вибрати явно, а організація може додатково "
-"вимагати авторизації єдиного входу (SSO)."
+"Надайте токену доступ на читання до репозиторіїв, які ви відстежуєте. У fine-"
+"grained токені їх треба вибрати явно, а організація може додатково вимагати "
+"авторизації єдиного входу (SSO)."
 
 #: apps/connections/check_codes.py:38
 #, python-format
@@ -2257,8 +2251,8 @@ msgid ""
 "scope."
 msgstr ""
 "Надайте токену доступ на читання pull request-ів у цьому репозиторії та "
-"перевірте ще раз. Для приватного репозиторію скоупа 'public_repo' класичного"
-" токена недостатньо."
+"перевірте ще раз. Для приватного репозиторію скоупа 'public_repo' класичного "
+"токена недостатньо."
 
 #: apps/connections/check_codes.py:49
 msgid "Pull request access was not checked."
@@ -2323,8 +2317,8 @@ msgid ""
 "Replace it with a fine-grained token limited to the repositories PR Radar "
 "reads."
 msgstr ""
-"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR"
-" Radar."
+"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR "
+"Radar."
 
 #: apps/connections/check_codes.py:84
 #, python-format
@@ -2598,8 +2592,8 @@ msgstr ""
 #: apps/connections/templates/connections/partials/discovery_content.html:115
 msgid ""
 "This token cannot read any repository. Check that it has repository read "
-"access — for a fine-grained token, that the repositories are selected on it,"
-" and for an organization, that single sign-on is authorized."
+"access — for a fine-grained token, that the repositories are selected on it, "
+"and for an organization, that single sign-on is authorized."
 msgstr ""
 "Цей токен не може читати жодного репозиторію. Перевірте, що він має доступ "
 "на читання репозиторіїв: у fine-grained токені потрібні репозиторії мають "
@@ -2624,8 +2618,7 @@ msgid "No GitHub connections yet."
 msgstr "Ще немає підключень GitHub."
 
 #: apps/connections/templates/connections/partials/discovery_content.html:145
-msgid ""
-"Create a connection first, then come back to discover its repositories."
+msgid "Create a connection first, then come back to discover its repositories."
 msgstr ""
 "Спочатку створіть підключення, потім повертайтеся, щоб виявити його "
 "репозиторії."
@@ -2713,8 +2706,7 @@ msgstr "Для цього підключення немає репозиторі
 
 #: apps/connections/templates/connections/partials/repositories_content.html:62
 msgid "Pick another connection above, or discover repositories to add some."
-msgstr ""
-"Виберіть інше підключення вище або виявіть репозиторії, щоб додати їх."
+msgstr "Виберіть інше підключення вище або виявіть репозиторії, щоб додати їх."
 
 #: apps/connections/templates/connections/partials/repositories_content.html:65
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:16
@@ -2952,8 +2944,7 @@ msgstr ""
 "адміністратора, якщо помилка повторюється."
 
 #: apps/dashboards/export_messages.py:9
-msgid ""
-"This export did not finish in time and was marked as failed. Try again."
+msgid "This export did not finish in time and was marked as failed. Try again."
 msgstr ""
 "Цей експорт не завершився вчасно і був позначений як невдалий. Спробуйте ще "
 "раз."
@@ -3229,18 +3220,18 @@ msgstr ""
 
 #: apps/dashboards/templates/dashboards/partials/ai_tooling.html:21
 msgid ""
-"This repository is configured for an AI agent. These paths were found at the"
-" tip of the default branch:"
+"This repository is configured for an AI agent. These paths were found at the "
+"tip of the default branch:"
 msgstr ""
-"Цей репозиторій налаштовано для агента ШІ. На вершині гілки за замовчуванням"
-" знайдено такі шляхи:"
+"Цей репозиторій налаштовано для агента ШІ. На вершині гілки за замовчуванням "
+"знайдено такі шляхи:"
 
 #: apps/dashboards/templates/dashboards/partials/ai_tooling.html:29
 #, python-format
 msgid ""
 "Checked %(checked_at)s. Configuring a repository for an agent says nothing "
-"about who wrote any individual pull request, so this never changes a PR's AI"
-" status on its own."
+"about who wrote any individual pull request, so this never changes a PR's AI "
+"status on its own."
 msgstr ""
 "Перевірено %(checked_at)s. Налаштування репозиторію для агента нічого не "
 "говорить про те, хто написав конкретний pull request, тому це саме по собі "
@@ -3499,8 +3490,8 @@ msgstr "Завантажити звіт (XLSX)"
 
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
 msgid ""
-"PR Radar has no repositories to report on. Add some from a GitHub connection"
-" to get started."
+"PR Radar has no repositories to report on. Add some from a GitHub connection "
+"to get started."
 msgstr ""
 "PR Radar не має репозиторіїв для звітів. Додайте їх із підключення GitHub, "
 "щоб почати."
@@ -3537,8 +3528,8 @@ msgstr "Немає pull request-ів за цей період."
 
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:34
 msgid ""
-"No pull requests match this period and filter. Widen the period or clear the"
-" filters."
+"No pull requests match this period and filter. Widen the period or clear the "
+"filters."
 msgstr ""
 "Жоден pull request не відповідає цьому періоду та фільтру. Розширте період "
 "або очистіть фільтри."
@@ -3646,8 +3637,7 @@ msgstr "У цьому періоді немає ревʼю."
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:22
 msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period."
-msgstr ""
-"Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
+msgstr "Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
 
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:37
 msgid "Waiting for review"
@@ -3675,8 +3665,8 @@ msgid ""
 "These metrics are organization-wide; this table is not narrowed to the "
 "current project or repository."
 msgstr ""
-"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного проєкту"
-" чи репозиторію."
+"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного проєкту "
+"чи репозиторію."
 
 #: apps/dashboards/templates/dashboards/partials/table.html:30
 #: apps/dashboards/templates/dashboards/partials/table.html:34
@@ -3756,11 +3746,13 @@ msgstr "Churn ще не обчислено."
 #, python-format
 msgid ""
 "\n"
-"          %(ratio)s churn — %(surviving)s of %(at_merge)s lines still present after %(days)s days.\n"
+"          %(ratio)s churn — %(surviving)s of %(at_merge)s lines still "
+"present after %(days)s days.\n"
 "        "
 msgstr ""
 "\n"
-"          Churn %(ratio)s — %(surviving)s з %(at_merge)s рядків досі присутні через %(days)s днів.\n"
+"          Churn %(ratio)s — %(surviving)s з %(at_merge)s рядків досі "
+"присутні через %(days)s днів.\n"
 "        "
 
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:84
@@ -3776,7 +3768,8 @@ msgstr "Churn не вимірюється для злиттів методом r
 #, python-format
 msgid ""
 "\n"
-"          This PR changes more than %(limit)s files; churn was not measured.\n"
+"          This PR changes more than %(limit)s files; churn was not "
+"measured.\n"
 "        "
 msgstr ""
 "\n"
@@ -3826,8 +3819,8 @@ msgstr "Файлів не зафіксовано."
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:135
 msgid "File changes are recorded the next time this pull request is synced."
 msgstr ""
-"Зміни у файлах будуть зафіксовані під час наступної синхронізації цього pull"
-" request-а."
+"Зміни у файлах будуть зафіксовані під час наступної синхронізації цього pull "
+"request-а."
 
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:145
 #, python-format
@@ -3888,8 +3881,7 @@ msgstr "Ревʼю"
 #: apps/dashboards/views.py:56
 msgid ""
 "No commit was found on the default branch before the churn window ended."
-msgstr ""
-"Не знайдено жодного коміту в основній гілці до завершення вікна churn."
+msgstr "Не знайдено жодного коміту в основній гілці до завершення вікна churn."
 
 #: apps/dashboards/views.py:57
 msgid "The repository could not be fetched."
@@ -4036,12 +4028,12 @@ msgstr "Завантажити історичні дані"
 #: apps/github_sync/templates/github_sync/partials/backfill.html:15
 msgid ""
 "Fetches every pull request updated since the chosen date again, instead of "
-"only the ones changed since the last sync. Use it after adding a repository,"
-" or when a sync window was too narrow."
+"only the ones changed since the last sync. Use it after adding a repository, "
+"or when a sync window was too narrow."
 msgstr ""
-"Повторно завантажує всі pull request-и, оновлені від обраної дати, а не лише"
-" ті, що змінилися після останньої синхронізації. Знадобиться після додавання"
-" репозиторію або коли вікно синхронізації було завузьким."
+"Повторно завантажує всі pull request-и, оновлені від обраної дати, а не лише "
+"ті, що змінилися після останньої синхронізації. Знадобиться після додавання "
+"репозиторію або коли вікно синхронізації було завузьким."
 
 #: apps/github_sync/templates/github_sync/partials/backfill.html:54
 msgid "Start backfill"
@@ -4216,6 +4208,75 @@ msgstr "Порушення, створені за день, незалежно �
 msgid "Violations created in the period, grouped by rule code."
 msgstr "Порушення, створені за період, згруповані за кодом правила."
 
+#: apps/metrics/calculators/compliance.py:150
+msgid "Bot-only approval rate"
+msgstr "Частка затверджень лише від ботів"
+
+#: apps/metrics/calculators/compliance.py:152
+msgid ""
+"Share of pull requests merged on a day, among those that were approved at "
+"all, whose approvals came only from bot accounts — no human other than the "
+"author approved."
+msgstr ""
+"Частка pull request-ів, змерджених за день, серед тих, що мали хоч одне "
+"затвердження, у яких усі затвердження надійшли лише від ботів — жодна "
+"людина, крім автора, їх не затвердила."
+
+#: apps/metrics/calculators/compliance.py:196
+msgid "Quality-gate bypass rate"
+msgstr "Частка обходів воріт якості"
+
+#: apps/metrics/calculators/compliance.py:198
+msgid ""
+"Share of pull requests merged on a day whose last observed status-check "
+"rollup was a failure or an error. A repository that runs no checks cannot "
+"bypass them, so PRs with no check at all are excluded from both sides."
+msgstr ""
+"Частка pull request-ів, змерджених за день, у яких останній зафіксований "
+"підсумок перевірок був невдачею або помилкою. Репозиторій, який не запускає "
+"перевірок, не може їх обійти, тому PR-и без жодної перевірки не враховано в "
+"жодній частині формули."
+
+#: apps/metrics/calculators/compliance.py:239
+msgid "AI review coverage"
+msgstr "Покриття AI-ревʼю"
+
+#: apps/metrics/calculators/compliance.py:241
+msgid ""
+"Share of pull requests merged on a day that one of the AI reviewers named in "
+"the AI policy reviewed. Empty until at least one AI reviewer login is "
+"configured."
+msgstr ""
+"Частка pull request-ів, змерджених за день, які переглянув один з "
+"AI-рецензентів, названих у політиці AI. Порожня, доки не налаштовано "
+"щонайменше один логін AI-рецензента."
+
+#: apps/metrics/calculators/compliance.py:267
+msgid "High-risk AI PR rate"
+msgstr "Частка AI PR високого ризику"
+
+#: apps/metrics/calculators/compliance.py:269
+msgid ""
+"Share of AI-cohort pull requests merged on a day that touched a path a "
+"sensitive-path rule classifies as high risk. Always measured over the AI "
+"cohort, whatever cohort the page is filtered to."
+msgstr ""
+"Частка pull request-ів когорти AI, змерджених за день, які зачепили шлях, "
+"що правило чутливих шляхів класифікує як високий ризик. Завжди вимірюється "
+"на когорті AI, хоч би за якою когортою відфільтровано сторінку."
+
+#: apps/metrics/calculators/compliance.py:294
+msgid "Structural signal rate"
+msgstr "Частка структурних сигналів"
+
+#: apps/metrics/calculators/compliance.py:296
+msgid ""
+"Share of pull requests merged on a day carrying at least one structural "
+"signal — a heuristic about the shape of the change, never a quoted AI marker."
+msgstr ""
+"Частка pull request-ів, змерджених за день, які мають щонайменше один "
+"структурний сигнал — евристику про форму зміни, а не процитовану позначку AI."
+
 #: apps/metrics/calculators/flow.py:73
 msgid "PRs opened"
 msgstr "Відкрито PR"
@@ -4298,8 +4359,8 @@ msgid ""
 "From ready for review to the first review, for PRs merged in the period "
 "(90th percentile)."
 msgstr ""
-"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й"
-" перцентиль)."
+"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й "
+"перцентиль)."
 
 #: apps/metrics/calculators/flow.py:365
 msgid "PR size (median)"
@@ -4307,11 +4368,11 @@ msgstr "Розмір PR (медіана)"
 
 #: apps/metrics/calculators/flow.py:366
 msgid ""
-"Median effective lines changed (additions + deletions) for PRs merged in the"
-" period."
+"Median effective lines changed (additions + deletions) for PRs merged in the "
+"period."
 msgstr ""
-"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за"
-" період."
+"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за "
+"період."
 
 #: apps/metrics/calculators/flow.py:396
 msgid "PR size buckets"
@@ -4343,15 +4404,15 @@ msgstr "Час відповіді рецензента (медіана)"
 
 #: apps/metrics/calculators/flow.py:491
 msgid ""
-"From the PR becoming ready for review (falling back to its creation) to this"
-" reviewer's review, for reviews given in the period — an approximation: no "
+"From the PR becoming ready for review (falling back to its creation) to this "
+"reviewer's review, for reviews given in the period — an approximation: no "
 "review-request timestamp is stored, so this is not measured from the actual "
 "request."
 msgstr ""
 "Від моменту, коли PR став готовим до ревʼю (або його створення, якщо іншого "
 "немає), до ревʼю цього рецензента, для ревʼю, наданих за період — "
-"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не"
-" від фактичного запиту."
+"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не "
+"від фактичного запиту."
 
 #: apps/metrics/calculators/quality.py:110
 msgid "Review rounds (average)"
@@ -4379,8 +4440,8 @@ msgstr "Рівень проходження CI з першого разу"
 
 #: apps/metrics/calculators/quality.py:179
 msgid ""
-"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS)."
-" PRs with no first-CI-commit record are excluded from both sides."
+"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS). "
+"PRs with no first-CI-commit record are excluded from both sides."
 msgstr ""
 "Частка PR, змерджених за день, чий перший коміт, охоплений CI, пройшов "
 "перевірку (SUCCESS). PR без запису про перший коміт CI виключені з обох "
@@ -4465,8 +4526,8 @@ msgid ""
 "a hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their "
 "files."
 msgstr ""
-"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS"
-" слідував hotfix/fix PR, що перетинається щонайменше на "
+"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS "
+"слідував hotfix/fix PR, що перетинається щонайменше на "
 "FOLLOWUP_FIX_FILE_OVERLAP їхніх файлів."
 
 #: apps/metrics/calculators/state.py:48
@@ -4474,8 +4535,7 @@ msgid "Open PRs"
 msgstr "Відкриті PR"
 
 #: apps/metrics/calculators/state.py:49
-msgid ""
-"Pull requests open at the end of a day, reconstructed from their dates."
+msgid "Pull requests open at the end of a day, reconstructed from their dates."
 msgstr "Pull request-и, відкриті на кінець дня, відновлені за їхніми датами."
 
 #: apps/metrics/calculators/state.py:77
@@ -4604,7 +4664,6 @@ msgid "Allowed tools"
 msgstr "Дозволені інструменти"
 
 #: apps/policy/forms.py:133 apps/policy/models.py:55
-#| msgid "Reviewer load"
 msgid "AI reviewer logins"
 msgstr "Логіни AI-рецензентів"
 
@@ -4621,32 +4680,26 @@ msgid "Their approval satisfies the extra review a migration needs."
 msgstr "Їхнє затвердження задовольняє додаткове ревʼю, потрібне для міграції."
 
 #: apps/policy/forms.py:144
-#| msgid "Maximum effective lines for an AI PR"
 msgid "Maximum effective lines, low risk"
 msgstr "Максимум ефективних рядків, низький ризик"
 
 #: apps/policy/forms.py:147
-#| msgid "Maximum effective lines for an AI PR"
 msgid "Maximum effective lines, medium risk"
 msgstr "Максимум ефективних рядків, середній ризик"
 
 #: apps/policy/forms.py:150
-#| msgid "Max effective lines"
 msgid "Maximum effective lines, high risk"
 msgstr "Максимум ефективних рядків, високий ризик"
 
 #: apps/policy/forms.py:161
-#| msgid "Disclosure rate"
 msgid "Disclosure and tools"
 msgstr "Розкриття та інструменти"
 
 #: apps/policy/forms.py:165
-#| msgid "review"
 msgid "Human review"
 msgstr "Ревʼю людиною"
 
 #: apps/policy/forms.py:176
-#| msgid "review"
 msgid "AI review"
 msgstr "Ревʼю від AI"
 
@@ -4685,7 +4738,6 @@ msgid "Maximum effective lines for an AI PR"
 msgstr "Максимум ефективних рядків для AI PR"
 
 #: apps/policy/forms.py:229
-#| msgid "Reviews by author and reviewer"
 msgid "Require a review from an AI reviewer"
 msgstr "Вимагати ревʼю від AI-рецензента"
 
@@ -4702,7 +4754,6 @@ msgid "Require a stated risk level"
 msgstr "Вимагати зазначений рівень ризику"
 
 #: apps/policy/forms.py:233
-#| msgid "Require tests"
 msgid "Require a linked task"
 msgstr "Вимагати посилання на задачу"
 
@@ -4735,7 +4786,6 @@ msgid "Forbid rubber-stamp approval of AI PRs"
 msgstr "Забороняти формальне затвердження AI-пул-реквестів"
 
 #: apps/policy/forms.py:241
-#| msgid "No agent configuration"
 msgid "Flag agent configuration changes"
 msgstr "Позначати зміни конфігурації агента"
 
@@ -4769,8 +4819,7 @@ msgstr "Опис"
 #: apps/policy/forms.py:304
 msgid ""
 "Advisory classifies the path's risk without raising a violation of its own."
-msgstr ""
-"«Дорадче» лише класифікує ризик шляху і не створює власного порушення."
+msgstr "«Дорадче» лише класифікує ризик шляху і не створює власного порушення."
 
 #: apps/policy/forms.py:306
 msgid ""
@@ -4789,7 +4838,6 @@ msgid "a commit told CI to skip the run"
 msgstr "коміт наказав CI пропустити запуск"
 
 #: apps/policy/messages.py:34
-#| msgid "No agent configuration"
 msgid "the change relaxed the CI configuration"
 msgstr "зміна послабила конфігурацію CI"
 
@@ -4840,8 +4888,8 @@ msgid ""
 "This pull request discloses no AI assistance, but a high-confidence AI "
 "signal was detected."
 msgstr ""
-"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ"
-" з високою впевненістю."
+"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ "
+"з високою впевненістю."
 
 #: apps/policy/messages.py:60
 #, python-format
@@ -4859,7 +4907,6 @@ msgstr ""
 
 #: apps/policy/messages.py:115
 #, python-format
-#| msgid "No pull requests merged this day."
 msgid "This pull request was merged although %(reason)s."
 msgstr "Цей пул-реквест змерджено, хоча %(reason)s."
 
@@ -4871,8 +4918,8 @@ msgstr "Тести послаблено: %(reason)s."
 #: apps/policy/messages.py:133
 #, python-format
 msgid ""
-"None of the expected AI reviewers (%(reviewers)s) reviewed this pull request"
-" before it merged."
+"None of the expected AI reviewers (%(reviewers)s) reviewed this pull request "
+"before it merged."
 msgstr ""
 "Жоден з очікуваних AI-рецензентів (%(reviewers)s) не переглянув цей пул-"
 "реквест до мерджу."
@@ -4882,8 +4929,7 @@ msgid "This pull request's description states no risk level."
 msgstr "В описі цього пул-реквеста не зазначено рівень ризику."
 
 #: apps/policy/messages.py:160
-msgid ""
-"This pull request's description says nothing about how it was verified."
+msgid "This pull request's description says nothing about how it was verified."
 msgstr "В описі цього пул-реквеста не сказано, як зміну перевірено."
 
 #: apps/policy/messages.py:163
@@ -4900,8 +4946,8 @@ msgid ""
 "This AI pull request was approved with an empty review, no comments and "
 "almost no time spent reading it."
 msgstr ""
-"Цей AI-пул-реквест затверджено з порожнім ревʼю, без коментарів і майже без"
-" часу на читання."
+"Цей AI-пул-реквест затверджено з порожнім ревʼю, без коментарів і майже без "
+"часу на читання."
 
 #: apps/policy/messages.py:223
 #, python-format
@@ -4952,11 +4998,11 @@ msgstr[3] ""
 #: apps/policy/messages.py:235
 #, python-format
 msgid ""
-"This merged AI pull request has %(approvals)s of %(required)s required human"
-" approval."
+"This merged AI pull request has %(approvals)s of %(required)s required human "
+"approval."
 msgid_plural ""
-"This merged AI pull request has %(approvals)s of %(required)s required human"
-" approvals."
+"This merged AI pull request has %(approvals)s of %(required)s required human "
+"approvals."
 msgstr[0] ""
 "Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
 "підтвердження людини."
@@ -5003,8 +5049,8 @@ msgstr[0] ""
 "Цей AI pull request змінює %(effective_lines)s ефективний рядок, що "
 "перевищує ліміт %(limit)s."
 msgstr[1] ""
-"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує"
-" ліміт %(limit)s."
+"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує "
+"ліміт %(limit)s."
 msgstr[2] ""
 "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
 "перевищує ліміт %(limit)s."
@@ -5014,9 +5060,6 @@ msgstr[3] ""
 
 #: apps/policy/messages.py:250
 #, python-format
-#| msgid ""
-#| "This merged AI pull request was self-merged with no approval from another "
-#| "human."
 msgid ""
 "This pull request was merged with %(bot_approvals)s approval, all of them "
 "from a bot account and none from a person."
@@ -5027,20 +5070,20 @@ msgstr[0] ""
 "Цей пул-реквест змерджено з %(bot_approvals)s затвердженням, і воно від "
 "бота, а не від людини."
 msgstr[1] ""
-"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від"
-" ботів, а не від людей."
+"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від "
+"ботів, а не від людей."
 msgstr[2] ""
-"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від"
-" ботів, а не від людей."
+"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від "
+"ботів, а не від людей."
 msgstr[3] ""
-"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від"
-" ботів, а не від людей."
+"Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від "
+"ботів, а не від людей."
 
 #: apps/policy/messages.py:257
 #, python-format
 msgid ""
-"This pull request merged with %(threads)s comment thread from an AI reviewer"
-" still unresolved."
+"This pull request merged with %(threads)s comment thread from an AI reviewer "
+"still unresolved."
 msgid_plural ""
 "This pull request merged with %(threads)s comment threads from an AI "
 "reviewer still unresolved."
@@ -5059,18 +5102,12 @@ msgstr[3] ""
 
 #: apps/policy/messages.py:262
 #, python-format
-#| msgid ""
-#| "This AI pull request touches %(path_count)s file needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
-#| msgid_plural ""
-#| "This AI pull request touches %(path_count)s files needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
 msgid ""
 "This pull request touches %(path_count)s high-risk path (%(paths)s) and its "
 "description states no plan, risks or rollback."
 msgid_plural ""
-"This pull request touches %(path_count)s high-risk paths (%(paths)s) and its"
-" description states no plan, risks or rollback."
+"This pull request touches %(path_count)s high-risk paths (%(paths)s) and its "
+"description states no plan, risks or rollback."
 msgstr[0] ""
 "Цей пул-реквест торкається %(path_count)s високоризикового шляху "
 "(%(paths)s), а в описі немає плану, ризиків чи відкату."
@@ -5086,15 +5123,9 @@ msgstr[3] ""
 
 #: apps/policy/messages.py:269
 #, python-format
-#| msgid ""
-#| "This AI pull request touches %(path_count)s file needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
-#| msgid_plural ""
-#| "This AI pull request touches %(path_count)s files needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
 msgid ""
-"This AI pull request changes %(path_count)s dependency manifest (%(paths)s);"
-" check that a person chose the dependency."
+"This AI pull request changes %(path_count)s dependency manifest (%(paths)s); "
+"check that a person chose the dependency."
 msgid_plural ""
 "This AI pull request changes %(path_count)s dependency manifests "
 "(%(paths)s); check that a person chose the dependencies."
@@ -5105,20 +5136,14 @@ msgstr[1] ""
 "Цей AI-пул-реквест змінює %(path_count)s маніфести залежностей (%(paths)s); "
 "перевірте, що залежності обрала людина."
 msgstr[2] ""
-"Цей AI-пул-реквест змінює %(path_count)s маніфестів залежностей (%(paths)s);"
-" перевірте, що залежності обрала людина."
+"Цей AI-пул-реквест змінює %(path_count)s маніфестів залежностей (%(paths)s); "
+"перевірте, що залежності обрала людина."
 msgstr[3] ""
-"Цей AI-пул-реквест змінює %(path_count)s маніфестів залежностей (%(paths)s);"
-" перевірте, що залежності обрала людина."
+"Цей AI-пул-реквест змінює %(path_count)s маніфестів залежностей (%(paths)s); "
+"перевірте, що залежності обрала людина."
 
 #: apps/policy/messages.py:276
 #, python-format
-#| msgid ""
-#| "This AI pull request touches %(path_count)s file needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
-#| msgid_plural ""
-#| "This AI pull request touches %(path_count)s files needing extra review "
-#| "(%(paths)s) and has %(approvals)s of %(required)s required human approvals."
 msgid ""
 "This AI pull request carries %(path_count)s migration file (%(paths)s) and "
 "no designated reviewer approved it."
@@ -5126,8 +5151,8 @@ msgid_plural ""
 "This AI pull request carries %(path_count)s migration files (%(paths)s) and "
 "no designated reviewer approved it."
 msgstr[0] ""
-"Цей AI-пул-реквест містить %(path_count)s файл міграції (%(paths)s), і жоден"
-" призначений рецензент його не затвердив."
+"Цей AI-пул-реквест містить %(path_count)s файл міграції (%(paths)s), і жоден "
+"призначений рецензент його не затвердив."
 msgstr[1] ""
 "Цей AI-пул-реквест містить %(path_count)s файли міграцій (%(paths)s), і "
 "жоден призначений рецензент його не затвердив."
@@ -5140,12 +5165,6 @@ msgstr[3] ""
 
 #: apps/policy/messages.py:283
 #, python-format
-#| msgid ""
-#| "This AI pull request touches %(path_count)s file forbidden by a sensitive-"
-#| "path rule: %(paths)s."
-#| msgid_plural ""
-#| "This AI pull request touches %(path_count)s files forbidden by a sensitive-"
-#| "path rule: %(paths)s."
 msgid ""
 "This pull request adds %(path_count)s file that should never be committed: "
 "%(paths)s."
@@ -5159,11 +5178,11 @@ msgstr[1] ""
 "Цей пул-реквест додає %(path_count)s файли, яких не має бути в репозиторії: "
 "%(paths)s."
 msgstr[2] ""
-"Цей пул-реквест додає %(path_count)s файлів, яких не має бути в репозиторії:"
-" %(paths)s."
+"Цей пул-реквест додає %(path_count)s файлів, яких не має бути в репозиторії: "
+"%(paths)s."
 msgstr[3] ""
-"Цей пул-реквест додає %(path_count)s файлів, яких не має бути в репозиторії:"
-" %(paths)s."
+"Цей пул-реквест додає %(path_count)s файлів, яких не має бути в репозиторії: "
+"%(paths)s."
 
 #: apps/policy/messages.py:288
 #, python-format
@@ -5177,8 +5196,8 @@ msgstr[0] ""
 "Цей пул-реквест змінює %(path_count)s файл конфігурації агента (%(paths)s), "
 "що змінює поведінку наступних запусків."
 msgstr[1] ""
-"Цей пул-реквест змінює %(path_count)s файли конфігурації агента (%(paths)s),"
-" що змінює поведінку наступних запусків."
+"Цей пул-реквест змінює %(path_count)s файли конфігурації агента (%(paths)s), "
+"що змінює поведінку наступних запусків."
 msgstr[2] ""
 "Цей пул-реквест змінює %(path_count)s файлів конфігурації агента "
 "(%(paths)s), що змінює поведінку наступних запусків."
@@ -5216,12 +5235,10 @@ msgid "maximum effective lines for an AI PR"
 msgstr "максимум ефективних рядків для AI PR"
 
 #: apps/policy/models.py:22
-#| msgid "require human approval"
 msgid "require an AI review"
 msgstr "вимагати ревʼю від AI"
 
 #: apps/policy/models.py:23
-#| msgid "No human approval"
 msgid "forbid AI-only approval"
 msgstr "забороняти затвердження лише від AI"
 
@@ -5266,7 +5283,6 @@ msgid "forbid rubber-stamp approval of AI PRs"
 msgstr "забороняти формальне затвердження AI-пул-реквестів"
 
 #: apps/policy/models.py:38
-#| msgid "No agent configuration"
 msgid "flag agent configuration changes"
 msgstr "позначати зміни конфігурації агента"
 
@@ -5275,12 +5291,10 @@ msgid "flag new dependencies in AI PRs"
 msgstr "позначати нові залежності в AI-пул-реквестах"
 
 #: apps/policy/models.py:40
-#| msgid "Minimum approvals"
 msgid "minimum approvals for high risk"
 msgstr "мінімум затверджень для високого ризику"
 
 #: apps/policy/models.py:45
-#| msgid "maximum effective lines for an AI PR"
 msgid "maximum effective lines by risk level"
 msgstr "максимум ефективних рядків за рівнем ризику"
 
@@ -5289,8 +5303,7 @@ msgid "designated reviewers"
 msgstr "призначені рецензенти"
 
 #: apps/policy/models.py:52
-msgid ""
-"People whose approval satisfies a migration's extra-review requirement."
+msgid "People whose approval satisfies a migration's extra-review requirement."
 msgstr ""
 "Люди, чиє затвердження задовольняє вимогу додаткового ревʼю для міграції."
 
@@ -5407,7 +5420,6 @@ msgid "AI review missing"
 msgstr "Немає ревʼю від AI"
 
 #: apps/policy/models.py:148
-#| msgid "review comments"
 msgid "AI review comments unresolved"
 msgstr "Комментарі AI-ревʼю не вирішено"
 
@@ -5428,7 +5440,6 @@ msgid "Task not linked"
 msgstr "Немає посилання на задачу"
 
 #: apps/policy/models.py:153
-#| msgid "New dependency nothing in the diff uses"
 msgid "New dependency in an AI PR"
 msgstr "Нова залежність в AI-пул-реквесті"
 
@@ -5441,7 +5452,6 @@ msgid "Credential file committed"
 msgstr "Закомічено файл із доступами"
 
 #: apps/policy/models.py:159
-#| msgid "No agent configuration"
 msgid "Agent configuration changed"
 msgstr "Змінено конфігурацію агента"
 
@@ -5450,7 +5460,6 @@ msgid "Scope creep"
 msgstr "Розповзання обсягу"
 
 #: apps/policy/models.py:161
-#| msgid "Rubber-stamp rate"
 msgid "Rubber-stamp approval of an AI PR"
 msgstr "Формальне затвердження AI-пул-реквеста"
 
@@ -5535,11 +5544,13 @@ msgstr "Н/Д"
 #, python-format
 msgid ""
 "\n"
-"            Sample too small (%(sample)s below %(min_sample)s) to be reliable.\n"
+"            Sample too small (%(sample)s below %(min_sample)s) to be "
+"reliable.\n"
 "          "
 msgstr ""
 "\n"
-"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути надійною.\n"
+"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути "
+"надійною.\n"
 "          "
 
 #: apps/policy/templates/policy/partials/mismatch_list.html:16
@@ -5661,8 +5672,7 @@ msgstr "Помилка сервера"
 msgid "Something went wrong."
 msgstr "Щось пішло не так."
 
-#: templates/base.html:15 templates/base.html:40
-#: templates/partials/nav.html:21
+#: templates/base.html:15 templates/base.html:40 templates/partials/nav.html:21
 msgid "PR Radar"
 msgstr "PR Radar"
 
@@ -5856,8 +5866,8 @@ msgstr "Надіслати посилання"
 #~ msgstr "Тема"
 
 #~ msgid ""
-#~ "Check the connection's token scopes, or that the account has access to any "
-#~ "repositories."
+#~ "Check the connection's token scopes, or that the account has access to "
+#~ "any repositories."
 #~ msgstr ""
 #~ "Перевірте права токена підключення або доступ облікового запису до "
 #~ "репозиторіїв."

@@ -53,8 +53,8 @@ queries in `selectors.py`.
 | `github_sync` | The httpx GraphQL/REST client, pagination, per-connection rate budgeting, retries, `SyncRun`, `SyncLock`, the orchestration, the repository AI-tooling probe and the post-processing hook | `client.py`, `queries.py`, `rate_limit.py`, `mappers.py`, `upserts.py`, `tooling.py`, `pipeline.py`, `services.py` |
 | `activity` | `PullRequest`, `Commit`, `PullRequestCommit`, `PRFile`, `Review`, `ReviewComment`, `CheckStatus`, the derived-field service and the follow-up-fix heuristic | `derive.py`, `followup.py` |
 | `ai_detection` | `DetectionRule`, `SignalRule`, `AISignal`, `DiffAnalysis`, twelve detectors, and three structural families — five per-PR kinds, four author baselines, four diff kinds — plus the PR-template disclosure parser and `ai_status` resolution | `detectors.py`, `structural.py`, `baselines.py`, `diffsignals.py`, `evidence.py`, `disclosure.py`, `rules.py`, `services.py`, `tasks.py` |
-| `policy` | `AIPolicy`, `SensitivePathRule`, `PolicyViolation`, nine rule evaluators, idempotent evaluation and auto-resolve, message rendering | `rules.py`, `services.py`, `messages.py` |
-| `metrics` | The `MetricDef` registry (39 metrics), four calculator families, `DailyRollup`, `compute()`/`compute_many()`, the versioned cache, `metrics_doc` | `registry.py`, `calculators/`, `rollups.py`, `services.py`, `timeframe.py`, `docs.py` |
+| `policy` | `AIPolicy`, `SensitivePathRule`, `PolicyViolation`, twenty-four rule evaluators (nine from the spec, fifteen from the PLANEKS standards), idempotent evaluation and auto-resolve, message rendering | `rules.py`, `services.py`, `messages.py` |
+| `metrics` | The `MetricDef` registry (44 metrics), four calculator strategies, `DailyRollup`, `compute()`/`compute_many()`, the versioned cache, `metrics_doc` | `registry.py`, `calculators/`, `rollups.py`, `services.py`, `timeframe.py`, `docs.py` |
 | `churn` | Bare git clones, `GIT_ASKPASS` credential handoff, blame-based survival analysis, `ChurnResult`, and the diff reads that feed `ai_detection`'s diff kinds from the same clone | `clones.py`, `gitcmd.py`, `askpass.py`, `blame.py`, `diffs.py`, `services.py` |
 | `dashboards` | Views, templates, htmx fragments, chart JSON, django-tables2 tables, the export layer, `ExportJob` | `views.py`, `charts.py`, `kpis.py`, `tables.py`, `forms.py`, `exports/` |
 | `config` | Settings (`base`/`local`/`prod`/`e2e`), urls, huey, the secret-masking filter, SQLite pragmas | `settings/`, `security.py`, `logging_filters.py`, `db.py`, `htmx.py` |
@@ -176,6 +176,38 @@ its `last_synced_at` watermark minus `SYNC_OVERLAP`. Each PR's upserts run in on
 - `mark_dirty()` records the affected `REPORT_TIMEZONE` dates (including the day of a reverted PR, and of any PR
   whose follow-up-fix flag changed); `rollups.rebuild_dirty()` deletes and rewrites exactly those
   `(date, scope, scope_id, cohort, metric_key)` rows, then `data_version()` is bumped so every cache key changes.
+
+## AI detection: two families, three execution sites
+
+Detection is two rule families that meet only at `resolve_ai_status()`, and never write into each other.
+
+| | **Text rules** (`DetectionRule`) | **Structural signals** (`SignalRule`) |
+|---|---|---|
+| What it matches | a string a tool wrote — a commit trailer, a session link, a chat-history file in the diff | a shape — commit burst, new-file ratio, an author's own baseline, a wholesale reformat |
+| Evidence | `AISignal.evidence`, the matched substring, needing no translation | `evidence_code` + `evidence_params`, rendered as a sentence in the reader's language by `evidence.py` |
+| Confidence | up to `high` | never `high` — a `CheckConstraint` on `SignalRule` refuses it |
+| Effect on `ai_status` | one `high` signal ⇒ `ai_explicit` | `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` (2) distinct *kinds* ⇒ `ai_suspected`, never further |
+| Seeded by | `seed_detection_rules` (`fixtures/detection_rules.yaml`) | `seed_signal_rules` (`fixtures/signal_rules.yaml`), at the repository root |
+
+Why the asymmetry is a decision rather than a tuning choice:
+[ADR 0009](adr/0009-structural-signals-never-reach-high-confidence.md).
+
+The two families run at **three different times**, which is why a pull request's status can change without a
+re-sync:
+
+1. **On sync**, inside `process_pull_request`: every text detector, plus the per-PR structural kinds
+   (`structural.py`), which need only the PR's own commits, files and timestamps.
+2. **Nightly**, in `compute_baselines_task` (also `manage.py compute_baselines`, and `recompute --baselines`):
+   the author-history kinds in `baselines.py`. They compare an author against their own twelve-week median, so
+   they cannot be computed from one pull request in isolation.
+3. **In the churn job**, `apps/churn/diffs.py`: the diff-level kinds in `diffsignals.py`, reusing the bare clone
+   `blame.py` already made. This is also where `DiffFacts` is produced for the three policy checks that read the
+   diff. A repository not in `DIFF_ANALYSIS_REPOSITORIES` simply has no `DiffAnalysis`, and every consumer is
+   silent rather than accusing.
+
+Outcome data — churn, reverts, follow-up fixes — is never an input to any of it. It is measured *for* the AI
+cohort; feeding it back into deciding who is in the cohort would make the AI-quality dashboards self-proving.
+`apps/ai_detection/tests/test_structural.py` asserts it.
 
 ## Reads
 

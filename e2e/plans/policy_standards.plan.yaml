@@ -1,0 +1,77 @@
+feature: policy_standards
+surfaces: [app]
+entry: "Settings > AI policy (/settings/ai-policy/), the Policy console (/policy/) and the dashboard's compliance KPI row"
+
+under_test:
+  - apps/policy/forms.py::AIPolicyForm.fieldsets (the six switch groups)
+  - apps/policy/rules.py::_ai_only_approval (one of the fifteen PLANEKS checks, end to end)
+  - apps/policy/messages.py (the violation rendered from its code and parameters)
+  - apps/policy/views.py + templates/policy/partials/violations.html (console row, bulk waive)
+  - apps/dashboards/kpis.py::COMPLIANCE_ROW and apps/metrics/calculators/compliance.py
+
+oracle: >
+  .autodev/phases/12-detection-and-policy-depth/PLAN.md's design §D8 and docs/POLICY.md: fifteen
+  checks encode the PLANEKS standards, every one off until a lead turns it on, each rendered from a
+  stored code plus parameters in the reader's language and waivable with a reason. The five compliance
+  metrics read the same facts the checks read and are computed whether or not the check is on, with
+  `ai_review_coverage` empty -- never 0% -- until an AI reviewer login is configured.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e). `manage.py seed_e2e` switches exactly one of the
+  fifteen checks on in the seeded policy version (`forbid_ai_only_approval`, forced on every reseed so a
+  surface whose database already exists picks it up) and seeds "E2E Policy Bot-Only Approval Target"
+  (#946): merged, approved once by the `e2e-ci[bot]` identity, disclosure `none` so it stays outside the
+  AI cohort and the console's compliance sample is unchanged. It is run through the real
+  `evaluate_pull_request()`, and its violations are deleted and re-evaluated on every reseed, so a
+  previous run's Waive click cannot leak into the next session. No AI reviewer login is configured, which
+  is what makes the `ai_review_coverage` card's missing value the seeded state rather than an accident.
+
+cases:
+  - id: policy-form-groups-the-standards-switches
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/ai-policy/"]
+    expected: >
+      the form shows all six legends (disclosure and tools, human review, AI review, what a description
+      must state, quality gates and tests, size and scope), and the one seeded-on switch is checked --
+      the form is prefilled from the version in effect, not reset to defaults
+
+  - id: an-enabled-standards-check-renders-its-violation-in-the-readers-language
+    priority: high
+    steps: ["log in as e2e-lead", "open /policy/", "follow the violation's PR link"]
+    expected: >
+      the row reads "Approved only by AI", High, Open, and never the raw `AI_ONLY_APPROVAL` code; the
+      PR page renders the full sentence from the violation's stored parameters
+
+  - id: a-standards-violation-can-be-waived-with-a-reason
+    priority: high
+    steps: ["log in as e2e-lead", "select the row, choose Waive, type a reason, Apply", "filter to Waived"]
+    expected: >
+      one notice reading "Updated 1 violation.", the row leaves the open-only default view, and it
+      reads "Waived" under the Waived filter
+
+  - id: compliance-kpis-are-on-the-dashboard-for-a-lead
+    priority: high
+    steps: ["log in as e2e-lead", "open /"]
+    expected: >
+      all four compliance KPI cards are present, and AI review coverage shows a missing value rather
+      than 0% while no AI reviewer login is configured
+
+findings: []
+
+deferred_not_authored:
+  - id: switching-a-check-on-makes-a-violation-appear-in-the-same-session
+    reason: >
+      By design there is no such browser path. Saving the AI policy writes a *new version*, and a pull
+      request is judged by the version in effect at its own `created_at` -- so a version saved now
+      governs nothing already in the database (the sole exception being the very first version ever
+      saved). Evaluation itself runs after a sync or `manage.py recompute`, not on save, and the e2e
+      stack runs neither. The causal chain is asserted without a browser in
+      apps/policy/tests/: a default policy raises nothing on the worst pull request the codebase can
+      describe, and each check raises exactly its own violation once its toggle is on.
+  - id: the-other-fourteen-checks-end-to-end
+    reason: >
+      They differ only in which fact they read; the console, the rendering, the waive flow and the
+      audit entry are the same code for all fifteen, proven once here and once per rule in
+      apps/policy/tests/test_rules_standards.py. Seeding fourteen more offending pull requests would
+      widen the reachable rule set that e2e/plans/policy_console.plan.yaml's filter and severity cases
+      were written against, for no additional browser-level risk.

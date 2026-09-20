@@ -110,6 +110,23 @@ Three things read it:
 `*.lock` at medium. Read them as a starting point: `infra/**` is a dozen YAML files in one company and the whole
 product in another. A re-seed never touches a rule you have edited.
 
+## The compliance metrics
+
+Five metrics read the same facts these checks read, and they are computed **whether or not the matching check is
+switched on** — a rate that only moved when somebody ticked a checkbox would measure the configuration rather
+than the engineering. They are `ai_only_approval_rate`, `quality_gate_bypass_rate`, `ai_review_coverage`,
+`high_risk_ai_pr_rate` and `structural_signal_rate`; four of them are a KPI row on every dashboard, at every
+scope, and all five are in `docs/METRICS.md` with their exact formulas.
+
+Two of them read a policy field rather than raw pull-request data. `ai_review_coverage` is empty until at least
+one login is entered in `ai_reviewer_identities` — with nobody named, "no AI reviewer looked" is not a fact, it
+is a missing setting, and the metric says `None` rather than 0%. `high_risk_ai_pr_rate` depends on a
+`SensitivePathRule` carrying `risk_level=high` matching something; with no risk rules seeded it reads 0%.
+
+They are deliberately not violation counts: `violations_by_rule` already reports what the policy raised, and the
+two answer different questions — "how often does this happen here" versus "how much of it have we decided to
+act on".
+
 ## What PR Radar does not measure
 
 `AI-ENGINEERING-STANDARDS.md` names four metrics. Review time and post-merge defects PR Radar measures directly.

@@ -7,8 +7,22 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.activity.models import AIDisclosure, PullRequest
-from apps.ai_detection.models import Confidence, DetectionRule, Detector, Tool
+from apps.activity.models import (
+    AIDisclosure,
+    Commit,
+    PRFile,
+    PullRequest,
+    PullRequestCommit,
+    Review,
+)
+from apps.ai_detection.models import (
+    Confidence,
+    DetectionRule,
+    Detector,
+    SignalKind,
+    SignalRule,
+    Tool,
+)
 from apps.ai_detection.services import detect_pull_request
 from apps.catalog.models import Identity, Organization, Person, Project, Repository
 from apps.catalog.services import get_int
@@ -56,6 +70,7 @@ class Command(BaseCommand):
         self._seed_github_connections_and_sync()
         self._seed_people_and_identities()
         seed_ids = self._seed_ai_detection()
+        seed_ids.update(self._seed_structural_signals())
         self._seed_policy()
         seed_ids.update(self._seed_churn())
 
@@ -298,6 +313,111 @@ class Command(BaseCommand):
             "ai_detection_no_signal_pr_pk": no_signal_pr.pk,
         }
 
+    def _seed_structural_signals(self) -> dict[str, int]:
+        """Rows for Settings -> Structural signals and the structural half of a PR's AI section
+        (phase 12). Like `_seed_ai_detection` above, the pull request is run through the real
+        `detect_pull_request()`, so its two structural signals -- and the `AI suspected` status
+        two distinct kinds produce -- are genuinely computed rather than written by hand.
+
+        No browser action re-runs detection (activating a rule deliberately does not re-detect
+        anything: that is a batch job, not a request), so the spec reads an already-detected pull
+        request for the status and drives the rules page for the rest. See
+        e2e/plans/structural_signals.plan.yaml's deferred_not_authored."""
+        repository = Repository.objects.get(full_name="e2e-org/widget")
+
+        SignalRule.objects.filter(name="E2E UI created signal rule").delete()
+
+        single_commit_rule, _ = SignalRule.objects.get_or_create(
+            name="E2E structural single-commit rule",
+            defaults={
+                "kind": SignalKind.SINGLE_LARGE_COMMIT,
+                "params": {"min_lines": 300, "min_files": 5},
+                "tool": Tool.OTHER,
+                "confidence": Confidence.LOW,
+                "notes": "e2e seed rule -- matches the seeded structurally suspicious PR",
+            },
+        )
+        scaffolding_rule, _ = SignalRule.objects.get_or_create(
+            name="E2E structural scaffolding rule",
+            defaults={
+                "kind": SignalKind.MASS_FILE_CREATION,
+                "params": {"min_added_files": 10, "min_directories": 3},
+                "tool": Tool.OTHER,
+                "confidence": Confidence.MEDIUM,
+                "notes": "e2e seed rule -- the second kind that makes the seeded PR 'AI suspected'",
+            },
+        )
+        for rule in (single_commit_rule, scaffolding_rule):
+            # Undoes a previous run's own "Deactivate" click, the same reset the detection
+            # toggle rule needs above: the seeded PR's status depends on both being active.
+            if not rule.is_active:
+                rule.is_active = True
+                rule.save(update_fields=["is_active"])
+
+        toggle_rule, _ = SignalRule.objects.get_or_create(
+            name="E2E structural toggle rule",
+            defaults={
+                "kind": SignalKind.COMMIT_BURST,
+                "params": {"min_commits": 5, "max_gap_seconds": 90, "min_lines_per_commit": 20},
+                "tool": Tool.OTHER,
+                "confidence": Confidence.LOW,
+                "is_active": False,
+                "notes": "e2e seed rule for the activate/deactivate case -- ships deactivated",
+            },
+        )
+        if toggle_rule.is_active:
+            # This one resets the other way round: it must start deactivated, because the spec's
+            # first act is to switch it on.
+            toggle_rule.is_active = False
+            toggle_rule.save(update_fields=["is_active"])
+
+        now = timezone.now()
+        structural_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=920,
+            defaults={
+                "github_id": "e2e-pr-structural",
+                "title": "E2E structurally suspicious PR",
+                "state": PullRequest.State.OPEN,
+                "created_at": now - datetime.timedelta(hours=3),
+                "body": "Scaffolding for the reporting module.",
+                "additions": 900,
+                "deletions": 0,
+                "effective_additions": 900,
+                "effective_deletions": 0,
+                "changed_files": 12,
+            },
+        )
+        commit, _ = Commit.objects.get_or_create(
+            repository=repository,
+            sha="e2e57ruc7u2a10000000000000000000000000000",
+            defaults={
+                "github_id": "e2e-commit-structural",
+                "message": "Add the reporting module",
+                "committed_at": now - datetime.timedelta(hours=3),
+                "authored_at": now - datetime.timedelta(hours=3),
+                "additions": 900,
+                "deletions": 0,
+            },
+        )
+        PullRequestCommit.objects.get_or_create(
+            pull_request=structural_pr, commit=commit, defaults={"position": 0}
+        )
+        # Twelve added files over four directories: over both thresholds, and over them by
+        # enough that a later tweak to the shipped defaults does not silently stop the seed
+        # tripping the kinds the spec is about.
+        for index in range(12):
+            directory = f"reporting/module_{index % 4}"
+            PRFile.objects.get_or_create(
+                pull_request=structural_pr,
+                path=f"{directory}/part_{index}.py",
+                defaults={"status": "added", "additions": 75, "deletions": 0},
+            )
+
+        detect_pull_request(structural_pr.pk)
+
+        return {"structural_pr_pk": structural_pr.pk}
+
     def _seed_policy(self) -> None:
         """Rows for the Policy console (/policy/) and its two settings pages. One `AIPolicy`
         version, pinned to a fixed point in the past (`SEED_POLICY_EFFECTIVE_FROM`) rather than
@@ -320,10 +440,23 @@ class Command(BaseCommand):
         project.repositories.add(repository)
 
         seed_effective_from = datetime.datetime(2020, 1, 1, tzinfo=datetime.UTC)
-        AIPolicy.objects.get_or_create(
+        policy, _ = AIPolicy.objects.get_or_create(
             effective_from=seed_effective_from,
-            defaults={"allowed_tools": [Tool.CLAUDE_CODE], "require_disclosure": True},
+            defaults={
+                "allowed_tools": [Tool.CLAUDE_CODE],
+                "require_disclosure": True,
+                "forbid_ai_only_approval": True,
+            },
         )
+        if not policy.forbid_ai_only_approval:
+            # One of the fifteen PLANEKS checks is switched on in the seed so a spec can see a
+            # standards violation rendered and waived. Forced on every reseed rather than left to
+            # `defaults`, which does nothing for a surface whose database already has this row.
+            # It is the only one enabled: `AI_ONLY_APPROVAL` needs a bot approval on a merged PR,
+            # a shape no other seeded pull request has, so the existing console cases keep the
+            # deterministic rule set they were written against.
+            policy.forbid_ai_only_approval = True
+            policy.save(update_fields=["forbid_ai_only_approval"])
 
         SensitivePathRule.objects.filter(description__startswith="e2e seed rule -- UI created").delete()
         SensitivePathRule.objects.get_or_create(
@@ -389,7 +522,36 @@ class Command(BaseCommand):
         )
         detect_pull_request(mismatch_pr.pk)
 
-        action_target_prs = [ack_pr, comment_pr, waive_pr, bulk_pr_1, bulk_pr_2]
+        bot_approval_pr, _ = PullRequest.objects.get_or_create(
+            repository=repository,
+            number=946,
+            defaults={
+                "github_id": "e2e-pr-policy-946",
+                "title": "E2E Policy Bot-Only Approval Target",
+                "state": PullRequest.State.MERGED,
+                "created_at": now - datetime.timedelta(days=2),
+                "merged_at": now - datetime.timedelta(days=1),
+                # Disclosed as "none" with no tool section and no detectable marker, so this PR
+                # stays outside the AI cohort and the console's AI-PR compliance sample (and its
+                # small-sample note) is exactly what it was before this row existed.
+                "body": "A routine dependency bump.",
+                "ai_disclosure": AIDisclosure.NONE,
+            },
+        )
+        bot_identity = Identity.objects.get(kind=Identity.Kind.GITHUB_LOGIN, value="e2e-ci[bot]")
+        Review.objects.get_or_create(
+            github_id="e2e-review-bot-approval",
+            defaults={
+                "pull_request": bot_approval_pr,
+                "reviewer": bot_identity,
+                "state": Review.State.APPROVED,
+                "submitted_at": now - datetime.timedelta(days=1, hours=1),
+                "body_length": 0,
+                "comments_count": 0,
+            },
+        )
+
+        action_target_prs = [ack_pr, comment_pr, waive_pr, bulk_pr_1, bulk_pr_2, bot_approval_pr]
         PolicyViolation.objects.filter(pull_request__in=action_target_prs).delete()
 
         for pr in [*action_target_prs, mismatch_pr]:

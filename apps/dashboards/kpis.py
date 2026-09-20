@@ -47,6 +47,13 @@ QUALITY_ROW: tuple[KpiSpec, ...] = (
     KpiSpec("churn_21d", compare_cohorts=True),
 )
 
+COMPLIANCE_ROW: tuple[KpiSpec, ...] = (
+    KpiSpec("ai_only_approval_rate"),
+    KpiSpec("quality_gate_bypass_rate"),
+    KpiSpec("ai_review_coverage"),
+    KpiSpec("high_risk_ai_pr_rate", secondary_key="structural_signal_rate"),
+)
+
 DAY_ACTIVITY_ROW: tuple[KpiSpec, ...] = (
     KpiSpec("prs_opened"),
     KpiSpec("prs_merged"),
@@ -62,7 +69,7 @@ DAY_STATE_ROW: tuple[KpiSpec, ...] = (
     KpiSpec("stale_prs"),
 )
 
-PERIOD_ROWS: tuple[tuple[KpiSpec, ...], ...] = (ADOPTION_ROW, FLOW_ROW, QUALITY_ROW)
+PERIOD_ROWS: tuple[tuple[KpiSpec, ...], ...] = (ADOPTION_ROW, FLOW_ROW, QUALITY_ROW, COMPLIANCE_ROW)
 DAY_ROWS: tuple[tuple[KpiSpec, ...], ...] = (DAY_ACTIVITY_ROW, DAY_STATE_ROW)
 
 

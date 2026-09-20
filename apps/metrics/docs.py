@@ -16,8 +16,9 @@ _MODULE_GROUP = {
     "flow": "Flow",
     "state": "Flow",
     "quality": "Quality",
+    "compliance": "Compliance",
 }
-_GROUP_ORDER = ["Adoption", "Flow", "Quality"]
+_GROUP_ORDER = ["Adoption", "Flow", "Quality", "Compliance"]
 
 _LEVEL_LABEL: dict[str, str] = {
     ScopeType.GLOBAL: "global",

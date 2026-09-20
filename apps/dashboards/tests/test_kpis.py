@@ -52,7 +52,7 @@ def test_compare_row_matches_direct_compute_calls(django_user_model):
 
 
 @pytest.mark.django_db
-def test_build_dashboard_period_mode_returns_the_three_rows():
+def test_build_dashboard_period_mode_returns_the_four_rows():
     access = ScopeFilter(unrestricted=True)
     scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=access)
     params = DashboardParams(
@@ -73,7 +73,8 @@ def test_build_dashboard_period_mode_returns_the_three_rows():
     )
     context = build_dashboard(scope, params)
     assert context["mode"] == "period"
-    assert len(context["kpi_rows"]) == 3
+    # Adoption, flow, quality, compliance (phase 12, stage 8).
+    assert len(context["kpi_rows"]) == 4
 
 
 @pytest.mark.django_db

@@ -25,6 +25,12 @@ median computed from that few PRs is not reliable enough to act on.
 The quality row (rework rate, CI first-pass rate, revert rate, churn) can show AI-authored and non-AI PRs
 side by side — switch the filter panel's **Cohort** to "AI vs non-AI" to turn this on for every card on the page.
 
+The last row is about compliance: the share of merges approved only by a bot, the share that went in over a red
+check rollup, how much of the work an AI reviewer looked at, and how much AI work lands on high-risk paths (with
+the structural-signal rate under it). These read the pull requests themselves, not your policy settings, so they
+are worth watching *before* you switch a check on — [Set your AI policy](ai-policy.md) explains what each one
+enforces. AI review coverage stays an em dash until you tell PR Radar which login your AI reviewer posts as.
+
 ## Change what you see
 
 The filters live behind the **Filters** button above the page; the button opens a panel on the right, and the

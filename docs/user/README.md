@@ -52,8 +52,11 @@ Read these in sequence the first time. After that, [Find the right page](index.m
    looking at.
 5. **[Tune AI detection](tune-ai-detection.md)** — check a few pull requests whose AI status you can verify by
    hand, and adjust the detection rules before anyone acts on an adoption number.
-6. **[Handle policy violations](handle-policy-violations.md)** — set your AI policy, then work the violations
-   console: acknowledge, waive with a reason, or fix the underlying PR.
+6. **[Set your AI policy](ai-policy.md)** — decide which of the twenty-four checks your team is actually held
+   to. Everything beyond the original nine is off until you turn it on, so this is a deliberate pass, not a
+   default you inherit.
+7. **[Handle policy violations](handle-policy-violations.md)** — work the violations console: acknowledge,
+   waive with a reason, or fix the underlying PR.
 
 Once that's in place, the day-to-day pages:
 

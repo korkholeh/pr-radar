@@ -710,3 +710,34 @@ against every developer who ever pushed a fix.
 but that only exists for repositories opted in to diff analysis, and a committed credential is worth flagging
 everywhere. Path-only matching also means nothing in this product ever reads, logs or stores the contents of the
 file it is complaining about.
+
+**The compliance metrics read facts, not violations.** `ai_only_approval_rate`,
+`quality_gate_bypass_rate`, `ai_review_coverage`, `high_risk_ai_pr_rate` and `structural_signal_rate` compute from
+approvals, check rollups, reviews, matched paths and signals — never from `PolicyViolation` rows. Every PLANEKS
+check is off until a lead turns it on, so a violation-derived rate would have read as zero on an installation that
+had simply not configured anything, and would have moved when somebody ticked a checkbox rather than when the
+engineering changed. `violations_by_rule` still answers the other question: how much of it a team has decided to
+act on.
+
+**A ratio whose denominator would be a guess is empty, not zero.** `ai_review_coverage` returns `None` until a
+login is entered in `AIPolicy.ai_reviewer_identities`: with nobody named, "no AI reviewer looked at this pull
+request" is a missing setting, not a fact about the team. `quality_gate_bypass_rate` excludes pull requests with
+no check rollup at all from both sides for the same reason — a repository that runs no CI cannot bypass it, and
+counting it in the denominator would quietly reward having no tests.
+
+**`high_risk_ai_pr_rate` ignores the cohort filter.** It is registered with `supports_cohorts=False` and computes
+over the AI cohort on both sides whatever the page is filtered to, because "the share of *non-AI* PRs that are
+high-risk AI PRs" is not a question. Every other compliance metric supports the three cohorts normally.
+
+**Every "has a review/file/signal like this" test is an `Exists` subquery, never a join filter.**
+`calculators/base.py::_grouped_value` takes the GLOBAL value from `queryset.count()`, so a join that multiplies
+rows would inflate it while the per-repository and per-person groups (which count distinct pks) stayed right —
+the worst kind of wrong number, correct at one level and not at another. The same reason keeps
+`quality_gate_bypass_rate`'s "last observed rollup" annotation inside a `pk__in` subquery: a non-aggregate
+annotation carried into `_grouped_value`'s `.values(...).annotate(Count(...))` would land in the `GROUP BY` and
+split the groups.
+
+**The person page leads with compliance and quality and keeps volume last.** `PERSON_COMPARISON_METRIC_KEYS` is
+ordered deliberately, not alphabetically or by when each metric was written: the standards say the number of
+generated lines, prompts or AI pull requests is not a measure of a person, and the page a lead opens before a
+one-to-one is where that either holds or does not.

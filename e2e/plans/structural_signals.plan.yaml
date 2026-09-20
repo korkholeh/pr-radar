@@ -1,0 +1,96 @@
+feature: structural_signals
+surfaces: [app]
+entry: "Settings > Structural signals (/settings/structural-signals/) and a PR's AI section at /prs/<pk>/"
+
+under_test:
+  - apps/ai_detection/views.py::signal_rules_list, signal_rule_create, signal_rule_toggle, signal_rule_dry_run
+  - apps/ai_detection/forms.py::SignalRuleForm, SignalDryRunForm (the confidence choices exclude High)
+  - apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html, signal_dry_run_result.html
+  - apps/ai_detection/evidence.py (a structural signal's sentence, rendered from code + params)
+  - apps/dashboards/templates/dashboards/pull_request_detail.html (the two-family signals table)
+
+oracle: >
+  .autodev/phases/12-detection-and-policy-depth/PLAN.md's design §D5/§D6 and
+  docs/dev/adr/0009-structural-signals-never-reach-high-confidence.md: a structural rule can never be
+  high confidence, ships deactivated, and one structural signal alone never changes a pull request's
+  AI status -- two distinct kinds make it `ai_suspected`, and nothing structural ever makes it
+  `ai_explicit`. Every structural signal shows its own arithmetic as a full sentence in the reader's
+  language, rendered from `evidence_code` + `evidence_params`, never a stored English string and never
+  a bare code.
+
+scope_notes: >
+  Runs against `make e2e-up` (config.settings.e2e) with rows `manage.py seed_e2e` adds in
+  `_seed_structural_signals`: two active rules ("E2E structural single-commit rule",
+  "E2E structural scaffolding rule"), one that ships deactivated for the toggle case ("E2E structural
+  toggle rule"), and "E2E structurally suspicious PR" (#920) -- one commit, 900 effective lines, twelve
+  added files across four directories -- run through the real `detect_pull_request()`, so its two
+  structural signals and its `ai_suspected` status are computed rather than written by hand. Its pk is
+  read from `E2E_SEED_IDS` (e2e/conftest.py's `seed_ids` fixture), the same pattern
+  e2e/plans/ai_detection.plan.yaml uses. The reseed resets both directions: the two active rules back on,
+  the toggle rule back off.
+
+cases:
+  - id: admin-sees-structural-rules-lead-403
+    priority: high
+    steps: ["log in as e2e-lead", "open /settings/structural-signals/", "log in as e2e-admin", "open it again"]
+    expected: >
+      the lead gets the no-access page; the admin sees the seeded rules listed
+
+  - id: a-shipped-rule-starts-deactivated-and-can-be-switched-on
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/structural-signals/", "click Activate on the toggle rule", "reload"]
+    expected: >
+      the rule reads "No" before the click and "Yes" after it, and the change survives a reload
+
+  - id: high-confidence-is-not-offered-on-the-rule-form
+    priority: high
+    steps: ["log in as e2e-admin", "open /settings/structural-signals/new/"]
+    expected: >
+      the Confidence select offers exactly Medium and Low -- ADR 0009's ceiling, visible in the UI
+      (the database refuses a high-confidence structural rule regardless)
+
+  - id: dry-run-reports-matches-without-writing-signals
+    priority: high
+    steps:
+      - "log in as e2e-admin"
+      - "note the seeded PR's signal count and AI status"
+      - "open /settings/structural-signals/ and dry-run single_large_commit with min_lines 300, min_files 5"
+      - "reopen the PR"
+    expected: >
+      the result names e2e-org/widget#920 and quotes its measurement ("900 lines across 12 files"),
+      and the PR's signal count and status are unchanged -- a dry run writes nothing
+
+  - id: dry-run-of-a-baseline-kind-explains-it-cannot-be-previewed
+    priority: medium
+    steps: ["log in as e2e-admin", "dry-run throughput_shift"]
+    expected: >
+      the result explains the rule reads an author's whole history and cannot be previewed against
+      recent pull requests, instead of reporting a misleading zero matches
+
+  - id: two-structural-kinds-make-a-pr-ai-suspected-with-its-arithmetic-shown
+    priority: high
+    steps: ["log in as e2e-admin", "open the seeded structural PR"]
+    expected: >
+      the AI status reads "AI suspected" (never "AI explicit"); the signals table names both kinds and
+      renders both evidence sentences with their measurements and thresholds; no raw `evidence_code`
+      and no "High" confidence appears
+
+findings: []
+
+deferred_not_authored:
+  - id: activating-a-rule-changes-a-pr-status-in-the-same-session
+    reason: >
+      Activating a rule deliberately does not re-run detection: detection is a batch over every pull
+      request (the sync pipeline, `manage.py recompute`, the nightly baseline job), not work a settings
+      request performs while an admin waits. There is therefore no browser action that turns a rule on
+      and a status over in one session, and the e2e stack runs no management command mid-suite. The
+      causal chain is covered where it happens -- apps/ai_detection/tests/test_services.py asserts that
+      activating a rule and re-running detection writes the signal and moves `ai_status`, and that
+      deactivating it retires the signal -- while this plan proves what a browser can prove: the rule
+      page, the dry run, and the rendered result on an already-detected pull request.
+  - id: baseline-and-diff-kinds-end-to-end
+    reason: >
+      Both run outside a request (the nightly `compute_baselines` task and the churn job's clone), and
+      the e2e stack forbids subprocess and network work. Their dry-run branches -- the two sentences
+      explaining why they cannot be previewed -- are covered above; the kinds themselves are asserted
+      against fixtures in apps/ai_detection/tests/test_baselines.py and apps/ai_detection/tests/test_diffsignals.py.

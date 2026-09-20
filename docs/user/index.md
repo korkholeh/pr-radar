@@ -10,6 +10,7 @@ order a new user needs them.
 | See the global picture — KPIs, charts, trends | [Read the dashboards](dashboards.md) (Overview) |
 | Drill into one project or repository | [Read the dashboards](dashboards.md) |
 | See who's using AI tools, and how much | [Read the dashboards](dashboards.md)'s AI-adoption KPIs, or [Tune AI detection](tune-ai-detection.md) if a person's AI status looks wrong |
+| Decide which AI-policy checks apply to my team | [Set your AI policy](ai-policy.md) |
 | Find and close a policy violation | [Handle policy violations](handle-policy-violations.md) |
 | Understand exactly why a violation fired | `docs/POLICY.md` (the full rule reference) |
 | Look up one person, or compare them to their team | [Look up a person](people.md) |

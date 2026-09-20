@@ -14,6 +14,27 @@
 
 ### Added
 
+- **Five compliance numbers on every dashboard.** A fourth KPI row: **bot-only approval rate** (of the pull
+  requests merged with any approval, the share whose approvals came only from bots), **quality-gate bypass
+  rate** (merged with the last check rollup red, counted only where a repository runs checks at all), **AI
+  review coverage** (the share an AI reviewer you named actually reviewed) and **high-risk AI PR rate**, with
+  the **structural signal rate** underneath the last one. They are on Overview, a project, a repository and a
+  person alike, and they export with everything else.
+
+  **They do not wait for you to switch a check on.** Each one reads the same facts the matching PLANEKS check
+  reads, so you can watch a number for a fortnight and then decide what to enforce — a rate that only moved
+  when somebody ticked a checkbox would measure the configuration rather than the engineering. Two depend on
+  your settings for a different reason: AI review coverage is blank until you name an AI reviewer login (with
+  nobody named, "no AI reviewer looked" is a missing setting, not a fact), and the high-risk rate needs a
+  sensitive-path rule carrying `risk_level=high`.
+
+  **The person page now leads with compliance and quality, and keeps volume last** — the standards' own
+  constraint that generated lines and PR counts are not a measure of a person, applied to the page a lead is
+  most likely to open before a one-to-one.
+
+  New reading: [`docs/user/ai-policy.md`](docs/user/ai-policy.md) walks the policy form group by group and says
+  what to switch on first; `docs/METRICS.md` has the five formulas.
+
 - **Author baselines: is this person's recent work unusual *for them*?** Four more structural kinds, computed
   nightly (`compute_baselines`, 01:00) rather than during a sync, because the answer changes when other pull
   requests arrive: **throughput jumped** against the author's own trailing rate, **volume moved outside their

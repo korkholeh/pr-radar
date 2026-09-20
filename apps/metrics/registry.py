@@ -145,7 +145,13 @@ def _load_calculators() -> None:
     """Imported for side effect: every `calculators/*.py` module registers its metrics at import
     time. Deferred to the bottom of this module (rather than a top-level import) because each
     calculator module imports `MetricDef`/`_register`/the strategy dataclasses from here."""
-    from apps.metrics.calculators import adoption, flow, quality, state  # noqa: F401
+    from apps.metrics.calculators import (  # noqa: F401
+        adoption,
+        compliance,
+        flow,
+        quality,
+        state,
+    )
 
 
 _load_calculators()
