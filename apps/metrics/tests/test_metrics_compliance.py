@@ -219,18 +219,23 @@ def test_ai_review_coverage_counts_a_review_by_a_configured_login_case_insensiti
 # --- high_risk_ai_pr_rate -----------------------------------------------------------------------
 
 
-def _high_risk_rule() -> SensitivePathRule:
+def _high_risk_rule(**kwargs) -> SensitivePathRule:
+    """Advisory on purpose: that is how `seed_sensitive_paths` ships the PLANEKS risk table, and an
+    advisory rule is deliberately kept out of `PRFile.matched_sensitive_rule`. The metric therefore
+    has to classify risk from the globs, the way `policy.rules._risk_of` does — reading the column
+    would report 0% on every installation that seeded the table."""
+    kwargs.setdefault("glob", "**/migrations/**")
     return SensitivePathRuleFactory(
-        glob="**/migrations/**",
         ai_mode=SensitivePathRule.AiMode.ADVISORY,
         risk_level=SensitivePathRule.RiskLevel.HIGH,
+        **kwargs,
     )
 
 
 def test_high_risk_ai_pr_rate_counts_an_ai_pr_touching_a_high_risk_path():
-    rule = _high_risk_rule()
+    _high_risk_rule()
     risky = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
-    PRFileFactory(pull_request=risky, path="app/migrations/0001_initial.py", matched_sensitive_rule=rule)
+    PRFileFactory(pull_request=risky, path="app/migrations/0001_initial.py")
     ordinary = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
     PRFileFactory(pull_request=ordinary, path="app/views.py")
 
@@ -239,24 +244,44 @@ def test_high_risk_ai_pr_rate_counts_an_ai_pr_touching_a_high_risk_path():
 
 
 def test_high_risk_ai_pr_rate_measures_the_ai_cohort_whatever_cohort_is_asked_for():
-    rule = _high_risk_rule()
+    _high_risk_rule()
     ai_pr = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
-    PRFileFactory(pull_request=ai_pr, path="app/migrations/0001_initial.py", matched_sensitive_rule=rule)
+    PRFileFactory(pull_request=ai_pr, path="app/migrations/0001_initial.py")
     hand_written = _merged_pr(ai_status=AIStatus.NO_AI)
-    PRFileFactory(pull_request=hand_written, path="app/migrations/0002_more.py", matched_sensitive_rule=rule)
+    PRFileFactory(pull_request=hand_written, path="app/migrations/0002_more.py")
 
     assert _ratio("high_risk_ai_pr_rate", _day_ctx(Cohort.NON_AI)) == MetricValue(1.0, 1)
 
 
 def test_high_risk_ai_pr_rate_ignores_an_excluded_file():
-    rule = _high_risk_rule()
+    _high_risk_rule()
     pull_request = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
     PRFileFactory(
         pull_request=pull_request,
         path="app/migrations/0001_initial.py",
-        matched_sensitive_rule=rule,
         is_excluded=True,
     )
+
+    assert _ratio("high_risk_ai_pr_rate") == MetricValue(0.0, 1)
+
+
+def test_high_risk_ai_pr_rate_applies_a_project_scoped_rule_only_inside_that_project():
+    project = ProjectFactory(name="Scoped project")
+    repository = RepositoryFactory(full_name="scoped/repo")
+    project.repositories.add(repository)
+    _high_risk_rule(glob="scoped_only/**", project=project)
+
+    inside = _merged_pr(repository=repository, ai_status=AIStatus.AI_EXPLICIT)
+    PRFileFactory(pull_request=inside, path="scoped_only/thing.py")
+    outside = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
+    PRFileFactory(pull_request=outside, path="scoped_only/thing.py")
+
+    assert _ratio("high_risk_ai_pr_rate") == MetricValue(0.5, 2)
+
+
+def test_high_risk_ai_pr_rate_is_empty_when_no_risk_rule_exists():
+    pull_request = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
+    PRFileFactory(pull_request=pull_request, path="app/migrations/0001_initial.py")
 
     assert _ratio("high_risk_ai_pr_rate") == MetricValue(0.0, 1)
 
@@ -312,7 +337,7 @@ def test_every_compliance_metric_is_narrowed_by_a_restricted_scope():
     other_project.repositories.add(other_repo)
 
     AIPolicyFactory(ai_reviewer_identities=["copilot"])
-    rule = _high_risk_rule()
+    _high_risk_rule()
     for repository in (own_repo, other_repo):
         pull_request = _merged_pr(repository=repository, ai_status=AIStatus.AI_EXPLICIT)
         _approval(pull_request, is_bot=True)
@@ -321,11 +346,7 @@ def test_every_compliance_metric_is_narrowed_by_a_restricted_scope():
             rollup_state=CheckStatus.RollupState.FAILURE,
             observed_at=MERGED_AT,
         )
-        PRFileFactory(
-            pull_request=pull_request,
-            path="app/migrations/0001_initial.py",
-            matched_sensitive_rule=rule,
-        )
+        PRFileFactory(pull_request=pull_request, path="app/migrations/0001_initial.py")
         ReviewFactory(
             pull_request=pull_request,
             reviewer=_reviewer(login=f"copilot-{repository.pk}"),

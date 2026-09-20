@@ -17,6 +17,7 @@ from `queryset.count()`, which a joined row would inflate.
 from __future__ import annotations
 
 import datetime
+from collections import defaultdict
 from functools import reduce
 from operator import or_
 
@@ -26,6 +27,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.activity.models import CheckStatus, PRFile, PullRequest, Review
 from apps.ai_detection.models import AISignal
+from apps.catalog.globs import compile_globs, matches_any
 from apps.metrics.calculators.base import (
     GLOBAL_SCOPE,
     DayContext,
@@ -252,28 +254,81 @@ _register_compliance_ratio(
 # --- high_risk_ai_pr_rate -----------------------------------------------------------------------
 
 
-def _touches_a_high_risk_path() -> Exists:
-    return Exists(
-        PRFile.objects.filter(
-            pull_request=OuterRef("pk"),
-            is_excluded=False,
-            matched_sensitive_rule__risk_level=SensitivePathRule.RiskLevel.HIGH,
+def _high_risk_pull_request_ids(queryset: QuerySet[PullRequest]) -> frozenset[int]:
+    """Which of these pull requests touch a high-risk path, read from the *globs*.
+
+    Not from `PRFile.matched_sensitive_rule`, which would be one join and no Python at all: an
+    `advisory` rule is deliberately kept out of that column (`policy.services.match_sensitive_paths`
+    — a broad risk glob there would shadow a narrow rule somebody wrote to forbid a path), and the
+    whole shipped PLANEKS risk table is advisory. Reading the column would therefore have returned
+    0% on every installation that seeded the table, which is exactly the installation this metric
+    is for. `apps.policy.rules._risk_of` classifies risk the same way, from the globs.
+
+    Two queries regardless of how many pull requests are in the window: their project ids (only
+    when a project-scoped risk rule exists) and their non-excluded file paths.
+    """
+    rules = [
+        rule
+        for rule in SensitivePathRule.objects.filter(
+            is_active=True, risk_level=SensitivePathRule.RiskLevel.HIGH
         )
+    ]
+    if not rules:
+        return frozenset()
+
+    global_matchers = [compile_globs([rule.glob]) for rule in rules if rule.project_id is None]
+    project_matchers: dict[int, list] = defaultdict(list)
+    for rule in rules:
+        if rule.project_id is not None:
+            project_matchers[rule.project_id].append(compile_globs([rule.glob]))
+
+    projects_by_pr: dict[int, set[int]] = defaultdict(set)
+    if project_matchers:
+        rows = queryset.filter(repository__projects__isnull=False).values_list(
+            "pk", "repository__projects__id"
+        )
+        for pull_request_id, project_id in rows:
+            projects_by_pr[pull_request_id].add(project_id)
+
+    matched: set[int] = set()
+    paths = PRFile.objects.filter(pull_request__in=queryset, is_excluded=False).values_list(
+        "pull_request_id", "path"
     )
+    for pull_request_id, path in paths.iterator():
+        if pull_request_id in matched:
+            continue
+        applicable = global_matchers
+        if project_matchers:
+            applicable = [
+                *global_matchers,
+                *(
+                    patterns
+                    for project_id in projects_by_pr.get(pull_request_id, ())
+                    for patterns in project_matchers.get(project_id, ())
+                ),
+            ]
+        if any(matches_any(path, patterns) for patterns in applicable):
+            matched.add(pull_request_id)
+    return frozenset(matched)
+
+
+def _touches_a_high_risk_path(queryset: QuerySet[PullRequest]) -> QuerySet[PullRequest]:
+    return queryset.filter(pk__in=_high_risk_pull_request_ids(queryset))
 
 
 _register_compliance_ratio(
     "high_risk_ai_pr_rate",
     _("High-risk AI PR rate"),
     _(
-        "Share of AI-cohort pull requests merged on a day that touched a path a sensitive-path "
-        "rule classifies as high risk. Always measured over the AI cohort, whatever cohort the "
-        "page is filtered to."
+        "Share of AI-cohort pull requests merged on a day that touched a path an active "
+        "sensitive-path rule classifies as high risk, advisory rules included. Always measured "
+        "over the AI cohort, whatever cohort the page is filtered to."
     ),
     "neutral",
-    lambda queryset: queryset.filter(_touches_a_high_risk_path()),
+    _touches_a_high_risk_path,
     lambda queryset: queryset,
-    "AI-cohort merged PRs touching a high-risk path / AI-cohort merged PRs, on the day",
+    "AI-cohort merged PRs touching a glob of an active risk_level=high sensitive-path rule / "
+    "AI-cohort merged PRs, on the day",
     supports_cohorts=False,
     fixed_cohort=Cohort.AI,
 )

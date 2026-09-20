@@ -120,8 +120,10 @@ scope, and all five are in `docs/METRICS.md` with their exact formulas.
 
 Two of them read a policy field rather than raw pull-request data. `ai_review_coverage` is empty until at least
 one login is entered in `ai_reviewer_identities` — with nobody named, "no AI reviewer looked" is not a fact, it
-is a missing setting, and the metric says `None` rather than 0%. `high_risk_ai_pr_rate` depends on a
-`SensitivePathRule` carrying `risk_level=high` matching something; with no risk rules seeded it reads 0%.
+is a missing setting, and the metric says `None` rather than 0%. `high_risk_ai_pr_rate` depends on an active
+`SensitivePathRule` carrying `risk_level=high` whose glob matches something; with no risk rules seeded it reads
+0%. It classifies a path the same way the policy engine does — from the globs, advisory rules included — rather
+than from `PRFile.matched_sensitive_rule`, which advisory rules never reach.
 
 They are deliberately not violation counts: `violations_by_rule` already reports what the policy raised, and the
 two answer different questions — "how often does this happen here" versus "how much of it have we decided to

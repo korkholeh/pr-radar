@@ -725,6 +725,14 @@ request" is a missing setting, not a fact about the team. `quality_gate_bypass_r
 no check rollup at all from both sides for the same reason — a repository that runs no CI cannot bypass it, and
 counting it in the denominator would quietly reward having no tests.
 
+**`high_risk_ai_pr_rate` classifies risk from the globs, not from `PRFile.matched_sensitive_rule`.**
+That column is one join away and would have been free, but `match_sensitive_paths()` deliberately keeps
+`advisory` rules out of it (a broad risk glob there would shadow a narrow rule somebody wrote to forbid a path),
+and the whole shipped PLANEKS risk table is advisory. Reading the column would have reported 0% on exactly the
+installations that seeded the table. The metric therefore re-matches the globs in Python, the way
+`policy.rules._risk_of` does, at the cost of two queries per window (the pull requests' project ids, and their
+non-excluded paths) — the same classification the policy engine uses, not a second definition of "high risk".
+
 **`high_risk_ai_pr_rate` ignores the cohort filter.** It is registered with `supports_cohorts=False` and computes
 over the AI cohort on both sides whatever the page is filtered to, because "the share of *non-AI* PRs that are
 high-risk AI PRs" is not a question. Every other compliance metric supports the three cohorts normally.
