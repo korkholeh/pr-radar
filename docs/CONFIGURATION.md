@@ -71,6 +71,18 @@ missing.
 | policy | `NO_TESTS_MIN_LINES` | int | `20` | Minimum changed lines before a missing-tests violation applies. |
 | policy | `POLICY_DISABLED_RULES` | list | `[]` | Rule codes switched off entirely; an open violation for a disabled code auto-resolves on the next run. An unrecognised code is ignored with a logged warning. See `docs/POLICY.md`. |
 | policy | `POLICY_VIOLATION_PATHS_IN_PARAMS` | int | `20` | Maximum file paths stored in a sensitive-path violation's `details_params`; the real total is kept separately as `path_count` so a large PR can't write an oversized row. |
+| policy | `POLICY_RISK_SECTION_HEADINGS` | list | `["Risk level", "Risk", "Risk assessment"]` | Headings under which a pull request states its risk level, read by `RISK_LEVEL_MISSING`. Matched as tolerantly as the disclosure section. |
+| policy | `POLICY_VERIFICATION_SECTION_HEADINGS` | list | `["Verification", "How verified", …]` | Headings read by `VERIFICATION_MISSING`. |
+| policy | `POLICY_TASK_SECTION_HEADINGS` | list | `["Task", "Ticket", "Issue", …]` | Headings under which a task is linked. |
+| policy | `POLICY_PLAN_SECTION_HEADINGS` | list | `["Plan", "Risks", "Rollback", …]` | Headings read by `HIGH_RISK_NO_PLAN`. |
+| policy | `POLICY_SCOPE_SECTION_HEADINGS` | list | `["Scope", "In scope", "Out of scope"]` | Headings read by `SCOPE_CREEP`'s stated-scope comparison. |
+| policy | `POLICY_TASK_LINK_PATTERNS` | list | `["#\\d+", "\\b[A-Z][A-Z0-9]+-\\d+\\b", …]` | Regular expressions that count as a link to a task — a GitHub issue reference, a tracker key, a tracker URL. Matched anywhere in the body, not only under a heading. A pattern that does not compile is skipped. |
+| policy | `POLICY_SKIP_CI_MARKERS` | list | `["[skip ci]", "[ci skip]", …]` | Commit-message markers that tell CI not to run; `QUALITY_GATE_BYPASSED` treats one as a bypass. |
+| policy | `POLICY_MANIFEST_PATH_GLOBS` | list | `["pyproject.toml", "package.json", …]` | Dependency manifests and lockfiles, read by `NEW_DEPENDENCY_AI`. Matched against every file, including excluded ones — a lockfile is exactly what the check is about. |
+| policy | `POLICY_MIGRATION_PATH_GLOBS` | list | `["**/migrations/**", …]` | Paths carrying a database migration, read by `MIGRATION_AI_INSUFFICIENT_REVIEW`. |
+| policy | `POLICY_AGENT_CONFIG_PATH_GLOBS` | list | `["CLAUDE.md", "AGENTS.md", ".claude/**", …]` | Agent-configuration paths, read by `AGENT_CONFIG_CHANGED`. |
+| policy | `POLICY_SECRET_ARTIFACT_PATH_GLOBS` | list | `[".env", "*.pem", "**/id_rsa", …]` | Paths that should never be committed, read by `SECRET_ARTIFACT_COMMITTED`. Matched on the path only: nothing reads the file's contents. |
+| policy | `POLICY_SECRET_ARTIFACT_EXCEPTION_GLOBS` | list | `["*.example", "*.pub", ".env.example", …]` | Paths that look like a credential file but are documentation or a public key. |
 | policy | `VIOLATIONS_PAGE_SIZE` | int | `50` | Rows per page on the Policy console's violation table. |
 | churn | `CHURN_WINDOW_DAYS` | int | `21` | Days after merge over which churn is measured. |
 | churn | `CHURN_MAX_FILES` | int | `50` | Maximum files in a PR before churn analysis is skipped. |

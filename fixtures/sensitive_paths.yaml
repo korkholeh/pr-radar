@@ -1,0 +1,63 @@
+# Seed set for `manage.py seed_sensitive_paths` (phase 12, stage 7): the PLANEKS AI Engineering
+# Standards' risk table, expressed as path globs.
+#
+# Every rule here is `advisory`. That is not timidity — it is what makes the table safe to ship
+# active. An advisory rule classifies a path's risk and raises no violation of its own, so seeding
+# it changes no pull request's compliance until a lead turns on a check that *reads* risk:
+# `require_high_risk_plan`, `high_risk_min_approvals`, or a `max_effective_lines_by_risk` entry.
+# Advisory rules are also kept out of `PRFile.matched_sensitive_rule`, so a broad glob here can
+# never shadow a narrow rule somebody wrote to forbid a path.
+#
+# A pull request's risk level is the highest of the paths it touches: a hundred lines of
+# documentation plus one line under `payments/` is a payments change.
+#
+# Read this as a starting point, not a verdict on your repository. `infra/**` may be a dozen YAML
+# files in one company and the whole product in another. Edit the rules in
+# Settings -> Sensitive paths; a re-seed never touches a rule you have already changed.
+
+rules:
+  # --- High: a mistake here costs money, data or downtime ---------------------------------------
+  - glob: "**/migrations/**"
+    risk_level: high
+    description: Database migrations — irreversible against production data.
+  - glob: "**/auth*/**"
+    risk_level: high
+    description: Authentication and authorisation.
+  - glob: "**/payments/**"
+    risk_level: high
+    description: Payment handling.
+  - glob: "**/billing/**"
+    risk_level: high
+    description: Billing and invoicing.
+  - glob: ".github/workflows/**"
+    risk_level: high
+    description: CI configuration — the quality gate itself.
+  - glob: "**/settings/**"
+    risk_level: high
+    description: Application settings, including secrets handling.
+  - glob: "infra/**"
+    risk_level: high
+    description: Infrastructure definitions.
+  - glob: "ansible/**"
+    risk_level: high
+    description: Provisioning and configuration management.
+  - glob: "docker/**"
+    risk_level: high
+    description: Container build and runtime configuration.
+
+  # --- Medium: a mistake here reaches other people's code ---------------------------------------
+  - glob: "**/api/**"
+    risk_level: medium
+    description: Public API surface — a change here reaches every client.
+  - glob: "**/serializers.py"
+    risk_level: medium
+    description: Serialisers shape what the API accepts and returns.
+  - glob: "pyproject.toml"
+    risk_level: medium
+    description: Python dependencies and tooling configuration.
+  - glob: "package.json"
+    risk_level: medium
+    description: JavaScript dependencies and scripts.
+  - glob: "*.lock"
+    risk_level: medium
+    description: Resolved dependency versions.

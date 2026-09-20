@@ -40,6 +40,39 @@
   `AI suspected`. Nothing moves until you activate a rule; after you do, run `manage.py recompute --baselines`
   and expect some historical pull requests — and therefore some AI metrics — to shift.
 
+- **The PLANEKS AI Engineering Standards as automatic checks.** Fifteen new policy rules: a bypassed quality
+  gate, weakened tests, an AI-only approval, a missing or unanswered AI review, a high-risk change with no plan, a
+  description with no risk level, no verification note or no task link, a new dependency in an AI PR, a migration
+  no designated reviewer approved, a committed credential file, a changed agent configuration, scope creep, and a
+  rubber-stamped AI PR. `docs/POLICY.md` maps each one to the standard it comes from.
+
+  **Every one of them is off until you turn it on.** Upgrading raises nothing — there is a test that builds the
+  worst pull request this codebase can describe and asserts that a default policy produces zero violations for
+  it. Settings → AI policy now groups its switches into sections (disclosure, human review, AI review, what a
+  description must state, quality gates, size and scope) and starts prefilled from the version in effect, so
+  publishing a new version means changing what you meant to change.
+
+  Not every check is about AI. A bypassed quality gate, a weakened test, a committed credential and a missing task
+  link are no better for having been written by hand, so those apply to every pull request — restricting them to
+  the AI cohort would measure the tool rather than the engineering.
+
+  **Risk levels.** A sensitive-path rule can now carry a risk level, and a pull request's risk is the highest of
+  the paths it touches. Three things read it: the high-risk plan requirement, `high_risk_min_approvals` (which
+  only ever raises the ordinary minimum, never lowers it), and an optional size limit per risk level.
+  `manage.py seed_sensitive_paths` seeds the standards' own risk table — migrations, auth, payments, billing, CI
+  configuration, settings, infrastructure — as **advisory** rules that classify risk and raise no violation of
+  their own, so seeding changes nobody's compliance until you switch on a check that reads risk.
+
+  **What PR Radar still will not tell you.** AI cost per task and your team's own rating of the tool are not
+  derivable from GitHub data, and nothing here invents them. The standards' own rule that generated lines, prompt
+  counts and AI PR counts are not a measure of an employee's performance is recorded in `docs/POLICY.md` as a
+  product constraint: the person page leads with compliance and quality, and no metric ranks people by volume.
+
+  The sync now also records whether each review thread was resolved and when a review was first requested, both
+  from GraphQL fields it already had access to. A thread whose resolution an older GitHub Enterprise Server does
+  not report stays *unknown* rather than becoming "unresolved" — nobody is accused of ignoring a reviewer on the
+  strength of a missing field.
+
 - **Diff-level signals: four kinds that read the change itself.** `wholesale_reformat` (a large diff that
   changes almost nothing once whitespace is ignored), `comment_density_outlier` (added code carrying far more
   comments and docstrings than the same files did before), `duplicated_blocks` (one block pasted across

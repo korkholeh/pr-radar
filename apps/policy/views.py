@@ -32,7 +32,12 @@ from apps.policy.selectors import (
     violations_by_rule,
     violations_in_scope,
 )
-from apps.policy.services import BulkStatusChangeResult, apply_bulk_status_change, save_policy_version
+from apps.policy.services import (
+    BulkStatusChangeResult,
+    apply_bulk_status_change,
+    current_policy,
+    save_policy_version,
+)
 from config.htmx import is_htmx
 
 SETTINGS_PERMISSION = "catalog.manage_settings"
@@ -202,7 +207,10 @@ def policy_settings(request: HttpRequest) -> HttpResponse:
             save_policy_version(request.user, form.cleaned_data)
             return redirect("policy:policy_settings")
     else:
-        form = AIPolicyForm()
+        # Prefilled from the version in effect, so publishing a new version means changing what you
+        # meant to change. With twenty-odd switches an empty form would quietly turn every one of
+        # them off — and `save_policy_version` still writes a new row, never editing this one.
+        form = AIPolicyForm(instance=current_policy())
 
     context = {"form": form, "history": list(AIPolicy.objects.all())}
     template = "policy/partials/policy_form.html" if is_htmx(request) else "policy/policy_settings.html"

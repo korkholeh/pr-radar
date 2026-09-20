@@ -267,6 +267,157 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "policy",
     ),
     SettingDef(
+        "POLICY_RISK_SECTION_HEADINGS",
+        "list",
+        ["Risk level", "Risk", "Risk assessment"],
+        _(
+            "Headings under which a pull request states its risk level. Matched the same tolerant "
+            "way as the disclosure section, because a client's template will not use PR Radar's "
+            "wording."
+        ),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_VERIFICATION_SECTION_HEADINGS",
+        "list",
+        ["Verification", "How verified", "Checks run", "Testing", "How to test"],
+        _("Headings under which a pull request states how the change was verified."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_TASK_SECTION_HEADINGS",
+        "list",
+        ["Task", "Ticket", "Issue", "Related issue", "Related"],
+        _("Headings under which a pull request links the task it implements."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_PLAN_SECTION_HEADINGS",
+        "list",
+        ["Plan", "Risks", "Risks and mitigation", "Rollback", "Rollback plan"],
+        _("Headings under which a high-risk pull request states its plan, risks and rollback."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_SCOPE_SECTION_HEADINGS",
+        "list",
+        ["Scope", "In scope", "Out of scope"],
+        _("Headings under which a pull request states which parts of the codebase it touches."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_TASK_LINK_PATTERNS",
+        "list",
+        [
+            r"#\d+",
+            r"\b[A-Z][A-Z0-9]+-\d+\b",
+            r"https?://\S*(?:jira|atlassian|linear\.app|asana|youtrack|redmine|trello|clickup)\S*",
+            r"https?://github\.com/\S+/(?:issues|pull)/\d+",
+        ],
+        _(
+            "Regular expressions that count as a link to a task: a GitHub issue reference, a "
+            "tracker key such as ABC-123, or a tracker URL. A pull request body matching any of "
+            "them satisfies the task-link requirement."
+        ),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_SKIP_CI_MARKERS",
+        "list",
+        ["[skip ci]", "[ci skip]", "***NO_CI***", "[no ci]", "[skip actions]"],
+        _("Commit-message markers that tell CI not to run, which a quality-gate check treats as a bypass."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_MANIFEST_PATH_GLOBS",
+        "list",
+        [
+            "pyproject.toml",
+            "requirements*.txt",
+            "package.json",
+            "Pipfile",
+            "poetry.lock",
+            "uv.lock",
+            "*-lock.json",
+            "yarn.lock",
+            "pnpm-lock.yaml",
+            "Gemfile*",
+            "go.mod",
+            "go.sum",
+            "Cargo.toml",
+            "Cargo.lock",
+            "composer.json",
+        ],
+        _("Paths that declare dependencies; a change to one is what the new-dependency check reads."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_MIGRATION_PATH_GLOBS",
+        "list",
+        ["**/migrations/**", "**/migrate/**", "**/alembic/versions/**", "**/db/migrate/**"],
+        _("Paths that carry a database migration, which the designated-reviewer check reads."),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_AGENT_CONFIG_PATH_GLOBS",
+        "list",
+        [
+            "CLAUDE.md",
+            "AGENTS.md",
+            "GEMINI.md",
+            ".claude/**",
+            ".agents/**",
+            ".cursor/**",
+            ".cursorrules",
+            ".windsurfrules",
+            ".mcp.json",
+            ".github/copilot-instructions.md",
+            ".github/agents/**",
+        ],
+        _(
+            "Paths that configure an AI agent. A change to one is worth a reader's attention, since "
+            "it changes how every later agent run behaves."
+        ),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_SECRET_ARTIFACT_PATH_GLOBS",
+        "list",
+        [
+            ".env",
+            ".env.*",
+            "**/.env",
+            "*.pem",
+            "*.p12",
+            "*.pfx",
+            "*.jks",
+            "*.keystore",
+            "**/id_rsa",
+            "**/id_ed25519",
+            "*.key",
+            "**/credentials.json",
+            "**/service-account*.json",
+            ".npmrc",
+            ".pypirc",
+            ".netrc",
+            "**/.claude/settings.local.json",
+            "**/.specstory/**",
+            "**/.aider.chat.history.md",
+        ],
+        _(
+            "Paths that should never be committed: credential files, private keys and an agent's "
+            "own chat history. Matched on the path only, so nothing has to read the contents."
+        ),
+        "policy",
+    ),
+    SettingDef(
+        "POLICY_SECRET_ARTIFACT_EXCEPTION_GLOBS",
+        "list",
+        ["*.example", "*.sample", "*.template", "*.dist", "*.pub", ".env.example", ".env.test"],
+        _("Paths that look like a credential file but are documentation: a template, or a public key."),
+        "policy",
+    ),
+    SettingDef(
         "VIOLATIONS_PAGE_SIZE",
         "int",
         50,

@@ -61,6 +61,7 @@ files = [
     "apps/churn/diffs.py",
     "apps/ai_detection/disclosure.py",
     "apps/ai_detection/rules.py",
+    "apps/policy/config.py",
     "apps/policy/rules.py",
     "apps/policy/messages.py",
     "apps/metrics/types.py",

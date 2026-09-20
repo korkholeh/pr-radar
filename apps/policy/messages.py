@@ -24,6 +24,29 @@ class _MessageDef(TypedDict, total=False):
     count_key: str
 
 
+# A param whose value is a *code* rather than a number or a path: the reason a quality gate counts
+# as bypassed, the risk level a size limit came from. Stored as the code (CLAUDE.md: never store
+# rendered text) and turned into words here, in the reader's language.
+ENUM_PARAM_LABELS: dict[str, dict[str, str]] = {
+    "reason": {
+        "checks_failing": gettext_noop("the checks were not green"),
+        "skip_ci_marker": gettext_noop("a commit told CI to skip the run"),
+        "gate_relaxed": gettext_noop("the change relaxed the CI configuration"),
+        "check_removed": gettext_noop("the change removed a check from CI"),
+        "test_file_removed": gettext_noop("a test file was deleted alongside code changes"),
+        "skip_marker_added": gettext_noop("a skip or xfail marker was added"),
+        "assertions_removed": gettext_noop("assertions were removed and none added back"),
+        "reformat_mixed_in": gettext_noop("a formatting sweep was mixed into the change"),
+        "outside_stated_scope": gettext_noop("it reaches outside the scope the description states"),
+    },
+    "risk_level": {
+        "low": gettext_noop("low-risk"),
+        "medium": gettext_noop("medium-risk"),
+        "high": gettext_noop("high-risk"),
+    },
+}
+
+
 RULE_MESSAGES: dict[str, _MessageDef] = {
     RuleCode.DISCLOSURE_MISSING: {
         "singular": gettext_noop("This pull request is missing the required AI-assistance disclosure."),
@@ -87,6 +110,105 @@ RULE_MESSAGES: dict[str, _MessageDef] = {
         ),
         "count_key": "effective_lines",
     },
+    # --- the PLANEKS standards (phase 12, stage 7) -----------------------------------------------
+    RuleCode.QUALITY_GATE_BYPASSED: {
+        "singular": gettext_noop("This pull request was merged although %(reason)s."),
+    },
+    RuleCode.TEST_WEAKENED: {
+        "singular": gettext_noop("The tests were weakened: %(reason)s."),
+    },
+    RuleCode.AI_ONLY_APPROVAL: {
+        "singular": (
+            "This pull request was merged with %(bot_approvals)s approval, all of them from a bot "
+            "account and none from a person."
+        ),
+        "plural": (
+            "This pull request was merged with %(bot_approvals)s approvals, all of them from bot "
+            "accounts and none from a person."
+        ),
+        "count_key": "bot_approvals",
+    },
+    RuleCode.AI_REVIEW_MISSING: {
+        "singular": gettext_noop(
+            "None of the expected AI reviewers (%(reviewers)s) reviewed this pull request before it merged."
+        ),
+    },
+    RuleCode.AI_REVIEW_UNRESOLVED: {
+        "singular": (
+            "This pull request merged with %(threads)s comment thread from an AI reviewer still unresolved."
+        ),
+        "plural": (
+            "This pull request merged with %(threads)s comment threads from an AI reviewer still unresolved."
+        ),
+        "count_key": "threads",
+    },
+    RuleCode.HIGH_RISK_NO_PLAN: {
+        "singular": (
+            "This pull request touches %(path_count)s high-risk path (%(paths)s) and its description "
+            "states no plan, risks or rollback."
+        ),
+        "plural": (
+            "This pull request touches %(path_count)s high-risk paths (%(paths)s) and its description "
+            "states no plan, risks or rollback."
+        ),
+        "count_key": "path_count",
+    },
+    RuleCode.RISK_LEVEL_MISSING: {
+        "singular": gettext_noop("This pull request's description states no risk level."),
+    },
+    RuleCode.VERIFICATION_MISSING: {
+        "singular": gettext_noop("This pull request's description says nothing about how it was verified."),
+    },
+    RuleCode.TASK_LINK_MISSING: {
+        "singular": gettext_noop("This pull request's description links no task."),
+    },
+    RuleCode.NEW_DEPENDENCY_AI: {
+        "singular": (
+            "This AI pull request changes %(path_count)s dependency manifest (%(paths)s); check that a "
+            "person chose the dependency."
+        ),
+        "plural": (
+            "This AI pull request changes %(path_count)s dependency manifests (%(paths)s); check that a "
+            "person chose the dependencies."
+        ),
+        "count_key": "path_count",
+    },
+    RuleCode.MIGRATION_AI_INSUFFICIENT_REVIEW: {
+        "singular": (
+            "This AI pull request carries %(path_count)s migration file (%(paths)s) and no designated "
+            "reviewer approved it."
+        ),
+        "plural": (
+            "This AI pull request carries %(path_count)s migration files (%(paths)s) and no designated "
+            "reviewer approved it."
+        ),
+        "count_key": "path_count",
+    },
+    RuleCode.SECRET_ARTIFACT_COMMITTED: {
+        "singular": ("This pull request adds %(path_count)s file that should never be committed: %(paths)s."),
+        "plural": ("This pull request adds %(path_count)s files that should never be committed: %(paths)s."),
+        "count_key": "path_count",
+    },
+    RuleCode.AGENT_CONFIG_CHANGED: {
+        "singular": (
+            "This pull request changes %(path_count)s agent-configuration file (%(paths)s), which "
+            "changes how later agent runs behave."
+        ),
+        "plural": (
+            "This pull request changes %(path_count)s agent-configuration files (%(paths)s), which "
+            "changes how later agent runs behave."
+        ),
+        "count_key": "path_count",
+    },
+    RuleCode.SCOPE_CREEP: {
+        "singular": gettext_noop("This AI pull request did more than it stated: %(reason)s."),
+    },
+    RuleCode.RUBBER_STAMP_ON_AI_PR: {
+        "singular": gettext_noop(
+            "This AI pull request was approved with an empty review, no comments and almost no time "
+            "spent reading it."
+        ),
+    },
 }
 
 
@@ -124,6 +246,51 @@ def _register_plural_forms_for_makemessages() -> None:  # pragma: no cover
         "This AI pull request changes %(effective_lines)s effective lines, over the limit of %(limit)s.",
         1,
     )
+    ngettext(
+        "This pull request was merged with %(bot_approvals)s approval, all of them from a bot "
+        "account and none from a person.",
+        "This pull request was merged with %(bot_approvals)s approvals, all of them from bot "
+        "accounts and none from a person.",
+        1,
+    )
+    ngettext(
+        "This pull request merged with %(threads)s comment thread from an AI reviewer still unresolved.",
+        "This pull request merged with %(threads)s comment threads from an AI reviewer still unresolved.",
+        1,
+    )
+    ngettext(
+        "This pull request touches %(path_count)s high-risk path (%(paths)s) and its description "
+        "states no plan, risks or rollback.",
+        "This pull request touches %(path_count)s high-risk paths (%(paths)s) and its description "
+        "states no plan, risks or rollback.",
+        1,
+    )
+    ngettext(
+        "This AI pull request changes %(path_count)s dependency manifest (%(paths)s); check that a "
+        "person chose the dependency.",
+        "This AI pull request changes %(path_count)s dependency manifests (%(paths)s); check that a "
+        "person chose the dependencies.",
+        1,
+    )
+    ngettext(
+        "This AI pull request carries %(path_count)s migration file (%(paths)s) and no designated "
+        "reviewer approved it.",
+        "This AI pull request carries %(path_count)s migration files (%(paths)s) and no designated "
+        "reviewer approved it.",
+        1,
+    )
+    ngettext(
+        "This pull request adds %(path_count)s file that should never be committed: %(paths)s.",
+        "This pull request adds %(path_count)s files that should never be committed: %(paths)s.",
+        1,
+    )
+    ngettext(
+        "This pull request changes %(path_count)s agent-configuration file (%(paths)s), which "
+        "changes how later agent runs behave.",
+        "This pull request changes %(path_count)s agent-configuration files (%(paths)s), which "
+        "changes how later agent runs behave.",
+        1,
+    )
 
 
 class _SafeDict(dict):
@@ -141,6 +308,12 @@ def _paths_text(params: Mapping[str, Any]) -> str:
     return shown
 
 
+def _list_text(value: Any) -> str:
+    if isinstance(value, (list, tuple)):
+        return ", ".join(str(item) for item in value)
+    return str(value)
+
+
 def render_violation(rule_code: str, params: Mapping[str, Any] | None = None) -> str:
     entry = RULE_MESSAGES.get(rule_code)
     if entry is None:
@@ -149,6 +322,16 @@ def render_violation(rule_code: str, params: Mapping[str, Any] | None = None) ->
     merged: dict[str, Any] = dict(params or {})
     if "paths" in merged:
         merged["paths"] = _paths_text(merged)
+    if "modules" in merged:
+        merged["modules"] = _list_text(merged["modules"])
+    if "reviewers" in merged and isinstance(merged["reviewers"], (list, tuple)):
+        merged["reviewers"] = _list_text(merged["reviewers"])
+    if "codes" in merged:
+        merged["codes"] = _list_text(merged["codes"])
+    for name, labels in ENUM_PARAM_LABELS.items():
+        value = merged.get(name)
+        if isinstance(value, str) and value in labels:
+            merged[name] = _(labels[value])
 
     plural = entry.get("plural")
     count_key = entry.get("count_key")

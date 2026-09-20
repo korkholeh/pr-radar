@@ -60,6 +60,7 @@ def upsert_pull_request(
             "author": author,
             "merged_by": merged_by,
             "ready_for_review_at": mappers.map_ready_for_review_at(timeline_nodes),
+            "review_requested_at": mappers.map_review_requested_at(timeline_nodes),
         },
     )
 
@@ -121,7 +122,14 @@ def upsert_pull_request(
         )
 
     for comment_node in review_thread_comment_nodes:
-        comment_fields = mappers.map_review_comment(comment_node, is_review_thread=True)
+        # The thread's `isResolved` travels with its first comment, attached by `sync_repository`
+        # when it flattens the threads: a comment row is what this project stores, and whether the
+        # conversation it opened was ever answered is a property of the thread around it.
+        comment_fields = mappers.map_review_comment(
+            comment_node,
+            is_review_thread=True,
+            is_resolved=comment_node.get("_thread_is_resolved"),
+        )
         author_login = comment_fields.pop("author_login")
         comment_github_id = comment_fields.pop("github_id")
         ReviewComment.objects.update_or_create(

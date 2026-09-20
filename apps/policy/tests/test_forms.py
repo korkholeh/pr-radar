@@ -103,3 +103,90 @@ def test_sensitive_path_rule_form_rejects_an_empty_glob():
     form = SensitivePathRuleForm(data={"glob": "", "ai_mode": "forbidden", "is_active": True})
     assert not form.is_valid()
     assert "glob" in form.errors
+
+
+# -- phase 12, stage 7: the standards fields ------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_ai_policy_form_parses_reviewer_logins_one_per_line():
+    form = AIPolicyForm(
+        data={
+            "min_human_approvals": 1,
+            "high_risk_min_approvals": 2,
+            "ai_reviewer_logins": "@Copilot\ncopilot-pull-request-reviewer, gemini-code-assist",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+    # The leading `@` a lead pastes from a GitHub mention is dropped; commas work as well as
+    # newlines, because both are what people actually type.
+    assert form.cleaned_data["ai_reviewer_identities"] == [
+        "Copilot",
+        "copilot-pull-request-reviewer",
+        "gemini-code-assist",
+    ]
+
+
+@pytest.mark.django_db
+def test_ai_policy_form_assembles_the_risk_limits_from_three_inputs():
+    """A lead configuring a size limit per risk level should not have to type JSON."""
+    form = AIPolicyForm(
+        data={"min_human_approvals": 1, "high_risk_min_approvals": 2, "max_lines_high_risk": 400}
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["max_effective_lines_by_risk"] == {"high": 400}
+
+
+@pytest.mark.django_db
+def test_ai_policy_form_leaves_the_risk_limits_empty_when_nothing_is_entered():
+    """The empty dict is what keeps an upgrade quiet: no limit means nothing to exceed."""
+    form = AIPolicyForm(data={"min_human_approvals": 1, "high_risk_min_approvals": 2})
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["max_effective_lines_by_risk"] == {}
+
+
+@pytest.mark.django_db
+def test_every_ai_policy_field_appears_in_a_fieldset():
+    """A field missing from `FIELDSETS` lands in "Other" rather than vanishing, so this test is
+    what keeps a new toggle from being merely misplaced."""
+    form = AIPolicyForm()
+    grouped = {field.name for _legend, fields in form.fieldsets() for field in fields}
+
+    assert grouped == set(form.fields)
+    assert "Other" not in {str(legend) for legend, _fields in form.fieldsets()}
+
+
+@pytest.mark.django_db
+def test_a_bot_cannot_be_a_designated_reviewer():
+    from apps.catalog.factories import PersonFactory
+
+    person = PersonFactory(is_bot=False)
+    bot = PersonFactory(is_bot=True)
+
+    queryset = AIPolicyForm().fields["designated_reviewers"].queryset
+
+    assert person in queryset
+    assert bot not in queryset
+
+
+@pytest.mark.django_db
+def test_sensitive_path_rule_form_accepts_an_advisory_rule_with_a_risk_level():
+    form = SensitivePathRuleForm(
+        data={"glob": "**/migrations/**", "ai_mode": "advisory", "risk_level": "high", "is_active": True}
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["risk_level"] == "high"
+
+
+@pytest.mark.django_db
+def test_sensitive_path_rule_form_allows_a_rule_with_no_risk_level():
+    """A rule written to forbid a path says nothing about how risky the path is, and guessing
+    `low` for it would quietly exempt it from every risk-based limit."""
+    form = SensitivePathRuleForm(data={"glob": "secrets/**", "ai_mode": "forbidden", "is_active": True})
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["risk_level"] == ""

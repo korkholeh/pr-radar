@@ -117,15 +117,23 @@ def map_review(node: dict) -> dict:
     }
 
 
-def map_review_comment(node: dict, *, is_review_thread: bool) -> dict:
+def map_review_comment(node: dict, *, is_review_thread: bool, is_resolved: bool | None = None) -> dict:
+    """`is_resolved` belongs to the *thread*, not the comment, so the caller reads it from the
+    thread node and passes it down. `None` means the field was absent — an older GitHub Enterprise
+    Server — and stays `None` rather than becoming `False`, because "we do not know" must never be
+    stored as "the author ignored this"."""
     body = optional(node, "bodyText", "") or ""
+    # `sync_repository` carries the thread's own fields onto this node under `_`-prefixed keys;
+    # they are this project's bookkeeping, not GitHub's payload, so they are kept out of `raw`.
+    payload = {key: value for key, value in node.items() if not key.startswith("_")}
     return {
         "github_id": require(node, "id"),
         "author_login": optional(node, "author.login"),
         "created_at": _parse_dt(optional(node, "createdAt")),
         "is_review_thread": is_review_thread,
+        "is_resolved": is_resolved,
         "body_length": len(body),
-        "raw": _raw(node),
+        "raw": _raw(payload),
     }
 
 
@@ -151,10 +159,19 @@ def map_check_status(node: dict) -> dict | None:
     }
 
 
-def map_ready_for_review_at(nodes: list[dict]) -> datetime.datetime | None:
+def _earliest_event_at(nodes: list[dict], typename: str) -> datetime.datetime | None:
     timestamps = [
-        _parse_dt(require(node, "createdAt"))
-        for node in nodes
-        if node.get("__typename") == "ReadyForReviewEvent"
+        _parse_dt(require(node, "createdAt")) for node in nodes if node.get("__typename") == typename
     ]
     return min(timestamps) if timestamps else None
+
+
+def map_ready_for_review_at(nodes: list[dict]) -> datetime.datetime | None:
+    return _earliest_event_at(nodes, "ReadyForReviewEvent")
+
+
+def map_review_requested_at(nodes: list[dict]) -> datetime.datetime | None:
+    """The first time anybody was asked to review, from `REVIEW_REQUESTED_EVENT`. The earliest,
+    not the latest: a second reviewer added a week later does not change when the pull request
+    started waiting."""
+    return _earliest_event_at(nodes, "ReviewRequestedEvent")

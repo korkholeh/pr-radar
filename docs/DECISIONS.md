@@ -660,3 +660,53 @@ change is a choice an operator makes, so an upgrade analyses nothing until someb
 kind needs an author's whole history and a diff kind needs the clone. The panel used to report "no matches" for
 those, which is a claim the reader has no way to check. It now explains which job produces the rule's evidence
 instead.
+
+
+**Every stage-7 policy check defaults to off, including the ones the plan gave numbers for.** The plan specified
+`max_effective_lines_by_risk` as `{"low": null, "medium": 800, "high": 400}` and `high_risk_min_approvals` as 2.
+The first of those cannot be a default: a non-empty size limit would raise `AI_PR_TOO_LARGE` across an existing
+installation's whole history on the first `recompute` after the upgrade, which contradicts the same plan's
+acceptance criterion that an upgrade produces zero violations. It ships as `{}`, with the standards' numbers
+recorded in `docs/POLICY.md` for a lead to enter deliberately. `high_risk_min_approvals` keeps its default of 2
+because it is only read when `require_human_approval` is already on, and it can only ever raise the ordinary
+minimum.
+
+**`MIGRATION_AI_INSUFFICIENT_REVIEW` is gated by its own data, not by a toggle.** It fires only when at least one
+person is named in `designated_reviewers`, which is empty by default. A toggle would have been a second switch
+for the same decision, and a check that fired with nobody designated would be unanswerable — there would be no
+approval that could satisfy it.
+
+**A third `SensitivePathRule.ai_mode`, `advisory`, exists so the seeded risk table can ship active.** Risk
+classification only works if the rule is active, but the seeded PLANEKS table is broad (`**/migrations/**`,
+`infra/**`), and seeding it as `needs_extra_review` would have raised sensitive-path violations nobody asked for.
+Advisory rules raise nothing of their own and are deliberately excluded from `match_sensitive_paths`: that loop is
+first-match-wins, so a broad advisory glob would otherwise shadow a narrow rule somebody wrote to forbid a path
+and silently stop that violation from firing.
+
+**Four checks read the pull-request body through the parser the disclosure check already used.** `_find_section`,
+`_heading_candidate` and the boundary helpers moved from `disclosure.py` into `apps/ai_detection/body_sections.py`
+unchanged, and `disclosure.py` imports them. A second implementation of "what counts as a heading in a PR
+template" would have drifted from the first within a release. The two new helpers on top decide whether a section
+carries *real* content: a bare checkbox, a lone bullet or the template's own HTML-comment instructions are not an
+answer, because a check satisfied by an untouched template is worse than no check. `N/A` **is** an answer —
+somebody read the section and responded, and treating that as silence would accuse them wrongly.
+
+**`QUALITY_GATE_BYPASSED`, `TEST_WEAKENED` and `SCOPE_CREEP` emit one finding per reason.** Each reason is part of
+the violation's identity, so "merged with red checks" and "the diff turned a check off" are separate rows: a
+reader acts on them differently, and one can be waived while the other stands. The reason travels as a code in
+`details_params` and is rendered into words by `messages.ENUM_PARAM_LABELS` at read time, which keeps CLAUDE.md's
+rule that no rendered English is ever stored.
+
+**A missing input makes a check silent, never accusing.** A review thread whose resolution GitHub did not report
+is `None` and is counted nowhere; a repository with no diff analysis produces none of the diff-derived reasons; a
+repository that runs no CI at all has no rollup state and cannot bypass a gate. Each of those could have been read
+as the accusing answer, and each would have been wrong about somebody.
+
+**The final check rollup is the last one observed, not the worst.** A pull request that failed CI at noon and was
+green by five o'clock did not bypass anything. Reading the worst state ever seen would have raised a violation
+against every developer who ever pushed a fix.
+
+**`SECRET_ARTIFACT_COMMITTED` decides from the path alone.** It could have read `DiffFacts.secret_like_lines`,
+but that only exists for repositories opted in to diff analysis, and a committed credential is worth flagging
+everywhere. Path-only matching also means nothing in this product ever reads, logs or stores the contents of the
+file it is complaining about.

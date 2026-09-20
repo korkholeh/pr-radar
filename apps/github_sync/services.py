@@ -191,11 +191,17 @@ def sync_repository(
                     page_size=nested_page_size,
                 )
             )
-            review_thread_comment_nodes = [
-                thread["comments"]["nodes"][0]
-                for thread in thread_nodes
-                if thread.get("comments", {}).get("nodes")
-            ]
+            # One stored comment per thread: its first. `isResolved` is the thread's, so it is
+            # carried onto that comment under a private key rather than read again downstream —
+            # `upsert_pull_request` never sees the thread node itself. `.get` keeps a server that
+            # does not return the field at `None` ("unknown"), never `False`.
+            review_thread_comment_nodes = []
+            for thread in thread_nodes:
+                comments = thread.get("comments", {}).get("nodes") or []
+                if not comments:
+                    continue
+                comment = {**comments[0], "_thread_is_resolved": thread.get("isResolved")}
+                review_thread_comment_nodes.append(comment)
             file_nodes = list(
                 client.paginate(
                     PR_FILES_QUERY, {"id": pr_id}, page_path="node.files", page_size=nested_page_size

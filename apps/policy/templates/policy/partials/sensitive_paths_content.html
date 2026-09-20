@@ -17,6 +17,7 @@
           <th scope="col">{% translate "Project" %}</th>
           <th scope="col">{% translate "Glob" %}</th>
           <th scope="col">{% translate "AI mode" %}</th>
+          <th scope="col">{% translate "Risk level" %}</th>
           <th scope="col">{% translate "Description" %}</th>
           <th scope="col">{% translate "Is active" %}</th>
           <th scope="col">{% translate "Actions" %}</th>
@@ -27,7 +28,7 @@
           {% include "policy/partials/sensitive_path_row.html" %}
         {% empty %}
           <tr>
-            <td colspan="6">
+            <td colspan="7">
               {% translate "No sensitive-path rules yet." as empty_title %}
               {% translate "Add a rule to flag pull requests that touch sensitive paths." as empty_explanation %}
               {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}

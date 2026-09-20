@@ -443,3 +443,34 @@ def test_watermark_since_overrides_everything():
     repository = RepositoryFactory(sync_since=datetime.date(2026, 1, 1))
     explicit = datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC)
     assert _watermark(repository, since=explicit, full=False) == explicit
+
+
+# -- phase 12, stage 7: thread resolution and the review-requested event --------------------------
+
+
+@pytest.mark.django_db
+def test_sync_stores_thread_resolution_and_the_review_request_time(github_fixture):
+    """Both fields reach the database through the real sync path, and a thread whose resolution the
+    server did not report stays `None` — "unknown", never "unresolved"."""
+    _make_repository(full_name="acme/widget")
+    sequence = [
+        _tooling_page(),
+        _pr_list_page(1, "2026-03-05T09:00:00Z"),
+        _commits_page(["sha0001"]),
+        _empty_nested_page("reviews"),
+        github_fixture("pr_review_threads_resolution"),
+        _files_page(),
+        github_fixture("pr_timeline_review_requested"),
+    ]
+    mock_graphql_sequence(*sequence)
+
+    run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
+
+    pull_request = PullRequest.objects.get(number=1)
+    assert pull_request.review_requested_at == datetime.datetime(2026, 3, 1, 8, 30, tzinfo=datetime.UTC)
+    resolutions = {comment.github_id: comment.is_resolved for comment in pull_request.review_comments.all()}
+    assert resolutions == {
+        "PRRC_resolved": True,
+        "PRRC_unresolved": False,
+        "PRRC_unknown": None,
+    }

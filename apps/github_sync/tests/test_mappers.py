@@ -12,6 +12,7 @@ from apps.github_sync.mappers import (
     map_ready_for_review_at,
     map_review,
     map_review_comment,
+    map_review_requested_at,
     parse_co_authors,
     parse_trailers,
 )
@@ -141,3 +142,65 @@ def test_map_ready_for_review_at_picks_earliest_event():
 
 def test_map_ready_for_review_at_none_without_events():
     assert map_ready_for_review_at([{"__typename": "SomethingElse"}]) is None
+
+
+# -- phase 12, stage 7: thread resolution and the review-requested event --------------------------
+
+
+def test_map_review_comment_carries_the_threads_resolution(github_fixture):
+    threads = github_fixture("pr_review_threads_resolution")["data"]["node"]["reviewThreads"]["nodes"]
+    resolved, unresolved, unknown = (thread["comments"]["nodes"][0] for thread in threads)
+
+    assert (
+        map_review_comment(resolved, is_review_thread=True, is_resolved=threads[0].get("isResolved"))[
+            "is_resolved"
+        ]
+        is True
+    )
+    assert (
+        map_review_comment(unresolved, is_review_thread=True, is_resolved=threads[1].get("isResolved"))[
+            "is_resolved"
+        ]
+        is False
+    )
+    # A server that does not return the field leaves it unknown. `None`, never `False`: "we could
+    # not tell" must not be stored as "the author ignored the reviewer".
+    assert (
+        map_review_comment(unknown, is_review_thread=True, is_resolved=threads[2].get("isResolved"))[
+            "is_resolved"
+        ]
+        is None
+    )
+
+
+def test_map_review_comment_keeps_private_bookkeeping_out_of_raw(settings):
+    settings.STORE_RAW_PAYLOADS = True
+    node = {
+        "id": "RC_1",
+        "author": {"login": "octocat"},
+        "createdAt": "2026-01-01T00:00:00Z",
+        "bodyText": "hi",
+        "_thread_is_resolved": False,
+    }
+
+    fields = map_review_comment(node, is_review_thread=True, is_resolved=False)
+
+    assert "_thread_is_resolved" not in fields["raw"]
+    assert fields["raw"]["id"] == "RC_1"
+
+
+def test_map_review_requested_at_picks_the_earliest_request(github_fixture):
+    """The earliest, not the latest: a second reviewer added two days later does not change when
+    the pull request started waiting."""
+    nodes = github_fixture("pr_timeline_review_requested")["data"]["node"]["timelineItems"]["nodes"]
+
+    requested_at = map_review_requested_at(nodes)
+
+    assert requested_at == datetime.datetime(2026, 3, 1, 8, 30, tzinfo=datetime.UTC)
+    # And the two event types do not bleed into each other.
+    assert map_ready_for_review_at(nodes) == datetime.datetime(2026, 3, 1, 8, 0, tzinfo=datetime.UTC)
+
+
+def test_map_review_requested_at_is_none_when_nobody_was_asked():
+    nodes = [{"__typename": "ReadyForReviewEvent", "createdAt": "2026-01-01T00:00:00Z"}]
+    assert map_review_requested_at(nodes) is None

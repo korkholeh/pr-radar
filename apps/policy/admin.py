@@ -7,12 +7,13 @@ from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
 class AIPolicyAdmin(admin.ModelAdmin):
     list_display = ("effective_from", "require_disclosure", "require_human_approval", "min_human_approvals")
     list_filter = ("require_disclosure", "require_human_approval")
+    filter_horizontal = ("designated_reviewers",)
 
 
 @admin.register(SensitivePathRule)
 class SensitivePathRuleAdmin(admin.ModelAdmin):
-    list_display = ("glob", "project", "ai_mode", "is_active")
-    list_filter = ("ai_mode", "is_active")
+    list_display = ("glob", "project", "ai_mode", "risk_level", "is_active")
+    list_filter = ("ai_mode", "risk_level", "is_active")
     list_select_related = ("project",)
     raw_id_fields = ("project",)
     search_fields = ("glob",)

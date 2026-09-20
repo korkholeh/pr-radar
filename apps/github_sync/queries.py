@@ -73,6 +73,7 @@ query PullRequestReviewThreads($id: ID!, $first: Int!, $after: String) {{
       reviewThreads(first: $first, after: $after) {{
         pageInfo {{ hasNextPage endCursor }}
         nodes {{
+          isResolved
           comments(first: 1) {{
             nodes {{
               id
@@ -138,11 +139,16 @@ PR_TIMELINE_QUERY = f"""
 query PullRequestTimeline($id: ID!, $first: Int!, $after: String) {{
   node(id: $id) {{
     ... on PullRequest {{
-      timelineItems(first: $first, after: $after, itemTypes: [READY_FOR_REVIEW_EVENT]) {{
+      timelineItems(
+        first: $first
+        after: $after
+        itemTypes: [READY_FOR_REVIEW_EVENT, REVIEW_REQUESTED_EVENT]
+      ) {{
         pageInfo {{ hasNextPage endCursor }}
         nodes {{
           __typename
           ... on ReadyForReviewEvent {{ createdAt }}
+          ... on ReviewRequestedEvent {{ createdAt }}
         }}
       }}
     }}

@@ -16,6 +16,47 @@ class AIPolicy(models.Model):
     ai_pr_max_effective_lines = models.PositiveIntegerField(
         _("maximum effective lines for an AI PR"), null=True, blank=True
     )
+    # Phase 12, stage 7: the PLANEKS AI Engineering Standards as checks. Every one of these is off
+    # — False, empty or null — so upgrading an existing installation produces no violation at all
+    # until a lead turns something on. A test asserts exactly that.
+    require_ai_review_first = models.BooleanField(_("require an AI review"), default=False)
+    forbid_ai_only_approval = models.BooleanField(_("forbid AI-only approval"), default=False)
+    require_ai_comments_resolved = models.BooleanField(
+        _("require AI review comments to be resolved"), default=False
+    )
+    require_risk_level = models.BooleanField(_("require a stated risk level"), default=False)
+    require_task_link = models.BooleanField(_("require a linked task"), default=False)
+    require_verification_note = models.BooleanField(_("require a verification note"), default=False)
+    require_high_risk_plan = models.BooleanField(_("require a plan for high-risk changes"), default=False)
+    forbid_ci_bypass = models.BooleanField(_("forbid bypassing the quality gate"), default=False)
+    forbid_test_weakening = models.BooleanField(_("forbid weakening tests"), default=False)
+    forbid_secret_artifacts = models.BooleanField(_("forbid committing credential files"), default=False)
+    forbid_scope_creep = models.BooleanField(_("forbid scope creep in AI PRs"), default=False)
+    forbid_rubber_stamp_approval = models.BooleanField(
+        _("forbid rubber-stamp approval of AI PRs"), default=False
+    )
+    flag_agent_config_changes = models.BooleanField(_("flag agent configuration changes"), default=False)
+    flag_new_dependencies_in_ai_prs = models.BooleanField(_("flag new dependencies in AI PRs"), default=False)
+    high_risk_min_approvals = models.PositiveIntegerField(_("minimum approvals for high risk"), default=2)
+    # `{}` rather than the standards' own {"medium": 800, "high": 400}: a non-empty default would
+    # raise AI_PR_TOO_LARGE across an installation's whole history the moment it upgraded. The
+    # suggested numbers are in docs/POLICY.md, for a lead to paste in deliberately.
+    max_effective_lines_by_risk = models.JSONField(
+        _("maximum effective lines by risk level"), default=dict, blank=True
+    )
+    designated_reviewers = models.ManyToManyField(
+        "catalog.Person",
+        blank=True,
+        related_name="designated_for_policies",
+        verbose_name=_("designated reviewers"),
+        help_text=_("People whose approval satisfies a migration's extra-review requirement."),
+    )
+    ai_reviewer_identities = models.JSONField(
+        _("AI reviewer logins"),
+        default=list,
+        blank=True,
+        help_text=_("GitHub logins of the AI reviewers a pull request is expected to have run."),
+    )
     effective_from = models.DateTimeField(_("effective from"), unique=True)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
@@ -32,6 +73,16 @@ class SensitivePathRule(models.Model):
     class AiMode(models.TextChoices):
         FORBIDDEN = "forbidden", _("Forbidden")
         NEEDS_EXTRA_REVIEW = "needs_extra_review", _("Needs extra review")
+        # Classification only: the rule contributes its `risk_level` and raises no violation of
+        # its own. That is what lets the seeded PLANEKS risk table ship active — it has to be
+        # active to classify anything — without flooding an installation with sensitive-path
+        # violations the lead never asked for.
+        ADVISORY = "advisory", _("Advisory (risk level only)")
+
+    class RiskLevel(models.TextChoices):
+        LOW = "low", _("Low")
+        MEDIUM = "medium", _("Medium")
+        HIGH = "high", _("High")
 
     project = models.ForeignKey(
         "catalog.Project",
@@ -44,6 +95,11 @@ class SensitivePathRule(models.Model):
     )
     glob = models.CharField(_("path glob"), max_length=400)
     ai_mode = models.CharField(_("AI mode"), max_length=30, choices=AiMode.choices)
+    # Blank means "not classified": a rule written to forbid a path says nothing about how risky
+    # the path is, and guessing `low` for it would quietly exempt it from every risk-based limit.
+    risk_level = models.CharField(  # noqa: DJ001
+        _("risk level"), max_length=10, choices=RiskLevel.choices, blank=True
+    )
     description = models.CharField(_("description"), max_length=400, blank=True)
     is_active = models.BooleanField(_("is active"), default=True)
 
@@ -83,6 +139,26 @@ class PolicyViolation(models.Model):
         SELF_MERGE = "SELF_MERGE", _("Self-merge")
         NO_TESTS = "NO_TESTS", _("No tests")
         AI_PR_TOO_LARGE = "AI_PR_TOO_LARGE", _("AI PR too large")
+        # Phase 12, stage 7: the PLANEKS AI Engineering Standards. docs/POLICY.md maps each code
+        # to the numbered rule or named section it comes from.
+        QUALITY_GATE_BYPASSED = "QUALITY_GATE_BYPASSED", _("Quality gate bypassed")
+        TEST_WEAKENED = "TEST_WEAKENED", _("Tests weakened")
+        AI_ONLY_APPROVAL = "AI_ONLY_APPROVAL", _("Approved only by AI")
+        AI_REVIEW_MISSING = "AI_REVIEW_MISSING", _("AI review missing")
+        AI_REVIEW_UNRESOLVED = "AI_REVIEW_UNRESOLVED", _("AI review comments unresolved")
+        HIGH_RISK_NO_PLAN = "HIGH_RISK_NO_PLAN", _("High-risk change with no plan")
+        RISK_LEVEL_MISSING = "RISK_LEVEL_MISSING", _("Risk level not stated")
+        VERIFICATION_MISSING = "VERIFICATION_MISSING", _("Verification not stated")
+        TASK_LINK_MISSING = "TASK_LINK_MISSING", _("Task not linked")
+        NEW_DEPENDENCY_AI = "NEW_DEPENDENCY_AI", _("New dependency in an AI PR")
+        MIGRATION_AI_INSUFFICIENT_REVIEW = (
+            "MIGRATION_AI_INSUFFICIENT_REVIEW",
+            _("Migration in an AI PR without designated review"),
+        )
+        SECRET_ARTIFACT_COMMITTED = "SECRET_ARTIFACT_COMMITTED", _("Credential file committed")
+        AGENT_CONFIG_CHANGED = "AGENT_CONFIG_CHANGED", _("Agent configuration changed")
+        SCOPE_CREEP = "SCOPE_CREEP", _("Scope creep")
+        RUBBER_STAMP_ON_AI_PR = "RUBBER_STAMP_ON_AI_PR", _("Rubber-stamp approval of an AI PR")
 
     class Severity(models.TextChoices):
         HIGH = "high", _("High")
@@ -101,7 +177,7 @@ class PolicyViolation(models.Model):
         related_name="violations",
         verbose_name=_("pull request"),
     )
-    rule_code = models.CharField(_("rule code"), max_length=30, choices=RuleCode.choices)
+    rule_code = models.CharField(_("rule code"), max_length=40, choices=RuleCode.choices)
     severity = models.CharField(_("severity"), max_length=10, choices=Severity.choices)
     details_params = models.JSONField(_("details params"), default=dict, blank=True)
     details_hash = models.CharField(_("details hash"), max_length=64)

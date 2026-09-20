@@ -18,8 +18,9 @@ from apps.activity.models import PRFile, PullRequest
 from apps.ai_detection.services import ai_cohort_statuses as compute_ai_cohort_statuses
 from apps.catalog.globs import compile_globs, matches_any
 from apps.catalog.services import get_int, get_list
+from apps.policy.config import PolicyConfig, load_policy_config
 from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
-from apps.policy.rules import RULES, Finding, load_context
+from apps.policy.rules import RULES, Finding, compile_risk_matchers, load_context
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +66,18 @@ def match_sensitive_paths(pr: PullRequest, sensitive_rules: Sequence[SensitivePa
     applicable rule (global, or scoped to one of the PR's repository's projects) whose glob
     matches, in `sensitive_rules`' own order. Idempotent (same inputs, no write) and self-healing
     (a rule no longer in `sensitive_rules` — deactivated or deleted — clears the mark, because the
-    file list is re-read and re-matched from scratch every call, not patched incrementally)."""
+    file list is re-read and re-matched from scratch every call, not patched incrementally).
+
+    An `advisory` rule is skipped here on purpose (phase 12, stage 7). Those rules exist only to
+    classify risk, and the seeded PLANEKS risk table is broad — `**/migrations/**`, `infra/**`. If
+    they took part in this first-match-wins loop they would shadow the rule a lead actually wrote
+    to forbid a path, and the forbidden-path violation would silently stop firing."""
     project_ids = {project.pk for project in pr.repository.projects.all()}
     applicable = [
-        rule for rule in sensitive_rules if rule.project_id is None or rule.project_id in project_ids
+        rule
+        for rule in sensitive_rules
+        if (rule.project_id is None or rule.project_id in project_ids)
+        and rule.ai_mode != SensitivePathRule.AiMode.ADVISORY
     ]
     compiled = [(rule, compile_globs([rule.glob])) for rule in applicable]
 
@@ -109,6 +118,9 @@ def evaluate_pull_request(
     no_tests_min_lines: int | None = None,
     paths_in_params: int | None = None,
     ai_cohort_statuses: frozenset[str] | None = None,
+    config: PolicyConfig | None = None,
+    designated_reviewers_by_policy: Mapping[int, frozenset[int]] | None = None,
+    risk_matchers: Sequence[tuple[SensitivePathRule, Any]] | None = None,
 ) -> None:
     """The pipeline's fourth stage: a wanted-vs-existing diff over `PolicyViolation` rows, the
     same shape as `ai_detection.services.detect_pull_request`. May only create an open violation
@@ -133,6 +145,10 @@ def evaluate_pull_request(
         paths_in_params = get_int("POLICY_VIOLATION_PATHS_IN_PARAMS")
     if ai_cohort_statuses is None:
         ai_cohort_statuses = compute_ai_cohort_statuses()
+    if config is None:
+        config = load_policy_config()
+    if risk_matchers is None:
+        risk_matchers = compile_risk_matchers(sensitive_rules)
 
     # Sensitive-path matching is bookkeeping independent of any one policy version: it always
     # runs so a deactivated/deleted rule clears PRFile.matched_sensitive_rule on the next pass.
@@ -154,6 +170,13 @@ def evaluate_pull_request(
             no_tests_min_lines=no_tests_min_lines,
             paths_in_params=paths_in_params,
             ai_cohort_statuses=ai_cohort_statuses,
+            config=config,
+            designated_reviewer_person_ids=(
+                designated_reviewers_by_policy.get(policy.pk)
+                if designated_reviewers_by_policy is not None
+                else None
+            ),
+            risk_matchers=risk_matchers,
         )
         for rule_code, evaluator in RULES.items():
             if rule_code in disabled_rules:
@@ -216,12 +239,23 @@ def evaluate_pull_requests(queryset: QuerySet[PullRequest]) -> int:
     sensitive rules, the three settings and the AI cohort statuses once, not once per PR (RISKS
     row 10). Each PR is still judged under the version in effect at its own `created_at` (see
     `evaluate_pull_request`)."""
-    policy_versions = list(AIPolicy.objects.order_by("-effective_from"))
+    policy_versions = list(
+        AIPolicy.objects.order_by("-effective_from").prefetch_related("designated_reviewers")
+    )
     sensitive_rules = list(SensitivePathRule.objects.filter(is_active=True))
     disabled_rules = _disabled_rule_codes(get_list("POLICY_DISABLED_RULES"))
     no_tests_min_lines = get_int("NO_TESTS_MIN_LINES")
     paths_in_params = get_int("POLICY_VIOLATION_PATHS_IN_PARAMS")
     ai_cohort_statuses = compute_ai_cohort_statuses()
+    config = load_policy_config()
+    risk_matchers = compile_risk_matchers(sensitive_rules)
+    # Per policy *version*, not per pull request: each PR is judged under the version in effect at
+    # its own `created_at`, and a version's designated reviewers are the same for every PR it
+    # governs.
+    designated_reviewers_by_policy = {
+        version.pk: frozenset(person.pk for person in version.designated_reviewers.all())
+        for version in policy_versions
+    }
 
     count = 0
     for pk in queryset.values_list("pk", flat=True):
@@ -233,6 +267,9 @@ def evaluate_pull_requests(queryset: QuerySet[PullRequest]) -> int:
             no_tests_min_lines=no_tests_min_lines,
             paths_in_params=paths_in_params,
             ai_cohort_statuses=ai_cohort_statuses,
+            config=config,
+            designated_reviewers_by_policy=designated_reviewers_by_policy,
+            risk_matchers=risk_matchers,
         )
         count += 1
     return count
@@ -261,8 +298,35 @@ def apply_status_change(user: User, violation: PolicyViolation, action: str, com
     )
 
 
+# The fields a policy version carries beyond the spec's original six (phase 12, stage 7). Listed
+# once, so the form, the snapshot written to the audit trail and the new version all stay in step:
+# a field added to the model and forgotten here would silently never be saved.
+STANDARDS_BOOLEAN_FIELDS: tuple[str, ...] = (
+    "require_ai_review_first",
+    "forbid_ai_only_approval",
+    "require_ai_comments_resolved",
+    "require_risk_level",
+    "require_task_link",
+    "require_verification_note",
+    "require_high_risk_plan",
+    "forbid_ci_bypass",
+    "forbid_test_weakening",
+    "forbid_secret_artifacts",
+    "forbid_scope_creep",
+    "forbid_rubber_stamp_approval",
+    "flag_agent_config_changes",
+    "flag_new_dependencies_in_ai_prs",
+)
+
+STANDARDS_VALUE_FIELDS: tuple[str, ...] = (
+    "high_risk_min_approvals",
+    "max_effective_lines_by_risk",
+    "ai_reviewer_identities",
+)
+
+
 def _policy_snapshot(policy: AIPolicy) -> dict[str, Any]:
-    return {
+    snapshot: dict[str, Any] = {
         "allowed_tools": list(policy.allowed_tools or []),
         "require_disclosure": policy.require_disclosure,
         "require_human_approval": policy.require_human_approval,
@@ -271,6 +335,13 @@ def _policy_snapshot(policy: AIPolicy) -> dict[str, Any]:
         "ai_pr_max_effective_lines": policy.ai_pr_max_effective_lines,
         "effective_from": policy.effective_from.isoformat(),
     }
+    for name in STANDARDS_BOOLEAN_FIELDS:
+        snapshot[name] = getattr(policy, name)
+    snapshot["high_risk_min_approvals"] = policy.high_risk_min_approvals
+    snapshot["max_effective_lines_by_risk"] = dict(policy.max_effective_lines_by_risk or {})
+    snapshot["ai_reviewer_identities"] = list(policy.ai_reviewer_identities or [])
+    snapshot["designated_reviewers"] = sorted(person.pk for person in policy.designated_reviewers.all())
+    return snapshot
 
 
 def save_policy_version(user: User, cleaned_data: Mapping[str, Any]) -> AIPolicy:
@@ -289,6 +360,7 @@ def save_policy_version(user: User, cleaned_data: Mapping[str, Any]) -> AIPolicy
         effective_from = earliest_created_at or timezone.now()
     else:
         effective_from = timezone.now()
+    before = _policy_snapshot(previous) if previous is not None else {}
     policy = AIPolicy.objects.create(
         allowed_tools=list(cleaned_data["allowed_tools"]),
         require_disclosure=cleaned_data["require_disclosure"],
@@ -297,12 +369,19 @@ def save_policy_version(user: User, cleaned_data: Mapping[str, Any]) -> AIPolicy
         require_tests_for_ai_prs=cleaned_data["require_tests_for_ai_prs"],
         ai_pr_max_effective_lines=cleaned_data.get("ai_pr_max_effective_lines"),
         effective_from=effective_from,
+        **{name: bool(cleaned_data.get(name, False)) for name in STANDARDS_BOOLEAN_FIELDS},
+        high_risk_min_approvals=cleaned_data.get("high_risk_min_approvals") or 2,
+        max_effective_lines_by_risk=cleaned_data.get("max_effective_lines_by_risk") or {},
+        ai_reviewer_identities=list(cleaned_data.get("ai_reviewer_identities") or []),
     )
+    # A version's designated reviewers are set after the row exists (a many-to-many needs a pk) and
+    # copied forward from the form, so a new version never silently loses them.
+    policy.designated_reviewers.set(cleaned_data.get("designated_reviewers") or [])
     record_audit(
         user,
         "ai_policy.update",
         policy,
-        before=_policy_snapshot(previous) if previous is not None else {},
+        before=before,
         after=_policy_snapshot(policy),
     )
     return policy

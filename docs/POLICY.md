@@ -1,6 +1,7 @@
 # AI policy and violations
 
-This is the reference for the nine policy rules, how a violation moves through its lifecycle, and what the two
+This is the reference for the policy rules — the nine from the spec and the fifteen that turn the PLANEKS AI
+Engineering Standards into automatic checks — how a violation moves through its lifecycle, and what the two
 Settings pages that shape both control. It doubles as the contract `tests/test_docs.py` checks against the code:
 every `PolicyViolation.RuleCode`, `PolicyViolation.Status` and `SensitivePathRule.AiMode` value must appear here,
 and the severity table below must match `apps.policy.rules.SEVERITY` exactly.
@@ -21,7 +22,7 @@ means saving a *second or later* policy version never changes how an already-exi
 starts governing PRs created from that moment on. A pull request created before any policy existed at all is
 never evaluated: no violation is created for it, and any violation still `open` on it auto-resolves.
 
-## The nine rules
+## The nine spec rules
 
 "AI PR" below means `pull_request.ai_status` is in the AI cohort (`ai_explicit`, `ai_disclosed`, and
 `ai_suspected` when `AI_COHORT_INCLUDE_SUSPECTED` is on) — the same cohort the AI-adoption dashboards use, not a
@@ -42,14 +43,91 @@ they approved.
 | `AI_PR_TOO_LARGE` | low | Effective additions + deletions exceed `AIPolicy.ai_pr_max_effective_lines` | AI only | Leaving `ai_pr_max_effective_lines` empty |
 
 `POLICY_DISABLED_RULES` (Settings, see `docs/CONFIGURATION.md`) is a second, blunt off-switch that covers every
-rule code, including the five that have no dedicated `AIPolicy` field — an unrecognised code in the list is
-ignored with a logged warning rather than raising. `NO_HUMAN_APPROVAL` and `SELF_MERGE` are the two
-**merge-dependent** rules: on an open (not-yet-merged) PR they never fire, whatever the policy says.
+rule code, including the ones that have no dedicated `AIPolicy` field — an unrecognised code in the list is
+ignored with a logged warning rather than raising.
+
+## The PLANEKS standards as checks
+
+Fifteen further rules map the PLANEKS **AI Engineering Standards** and **AI Developer Manifesto** onto data PR
+Radar already holds. **Every one of them is off until you turn it on.** An upgrade raises nothing: a test builds
+the worst pull request the codebase can describe — merged with red checks, a skip-CI commit, a deleted test, a
+committed `.env`, a changed `CLAUDE.md`, a migration, an empty description, a bot-only approval — and asserts
+that a default policy produces zero violations for it.
+
+| Rule code | Severity | Standard | Fires when | Scope | Switched on by |
+|---|---|---|---|---|---|
+| `QUALITY_GATE_BYPASSED` | high | Security rules, "do not bypass controls" | Merged with a red check rollup, a `[skip ci]` commit, a CI configuration the diff relaxed, or a CI step the diff removed (one violation per reason) | Any PR, merged only | `forbid_ci_bypass` |
+| `TEST_WEAKENED` | high | R6 | A test file deleted while non-test code changed, a skip/xfail marker added, or assertions removed with none added back | Any PR | `forbid_test_weakening` |
+| `AI_ONLY_APPROVAL` | high | R10 | Every approval came from a bot account and none from a person | Any PR, merged only | `forbid_ai_only_approval` |
+| `AI_REVIEW_MISSING` | medium | PR requirements, "the AI reviewer goes first" | None of the logins in `ai_reviewer_identities` reviewed it | Any PR, merged only | `require_ai_review_first` **and** at least one login in `ai_reviewer_identities` |
+| `AI_REVIEW_UNRESOLVED` | medium | PR requirements, "the author answers every comment" | Merged with a thread opened by an AI reviewer that GitHub reports as unresolved | Any PR, merged only | `require_ai_comments_resolved` |
+| `HIGH_RISK_NO_PLAN` | high | R3 | A high-risk change whose description states no plan, risks or rollback | Any PR | `require_high_risk_plan` **and** a `risk_level=high` sensitive-path rule that matches |
+| `RISK_LEVEL_MISSING` | low | PR requirements | The description states no risk level | Any PR | `require_risk_level` |
+| `VERIFICATION_MISSING` | low | PR requirements | The description says nothing about how the change was verified | Any PR | `require_verification_note` |
+| `TASK_LINK_MISSING` | low | PR requirements | The description links no task, anywhere | Any PR | `require_task_link` |
+| `NEW_DEPENDENCY_AI` | medium | R7 | An AI PR changes a dependency manifest or lockfile | AI only | `flag_new_dependencies_in_ai_prs` |
+| `MIGRATION_AI_INSUFFICIENT_REVIEW` | high | "Requires extra human attention" | An AI PR carries a migration and no designated reviewer approved it | AI only, merged only | Naming at least one person in `designated_reviewers` |
+| `SECRET_ARTIFACT_COMMITTED` | high | Security rules | The PR adds a credential file, a private key or an agent's chat history (`POLICY_SECRET_ARTIFACT_PATH_GLOBS`, minus the exceptions) | Any PR | `forbid_secret_artifacts` |
+| `AGENT_CONFIG_CHANGED` | low | "Changes to these files go through normal review" | `CLAUDE.md`, `AGENTS.md`, `.claude/**` and friends changed | Any PR | `flag_agent_config_changes` |
+| `SCOPE_CREEP` | medium | R4 | An AI PR trips `wholesale_reformat`, or reaches into top-level modules its stated scope never mentions | AI only | `forbid_scope_creep` |
+| `RUBBER_STAMP_ON_AI_PR` | high | Manifesto, "we do not accept code we do not understand" | A merged AI PR approved with an empty review, no comments, inside `RUBBER_STAMP_MAX_MINUTES` | AI only, merged only | `forbid_rubber_stamp_approval` |
+
+Eight rules are **merge-dependent** — `NO_HUMAN_APPROVAL`, `SELF_MERGE`, `QUALITY_GATE_BYPASSED`,
+`AI_ONLY_APPROVAL`, `AI_REVIEW_MISSING`, `AI_REVIEW_UNRESOLVED`, `MIGRATION_AI_INSUFFICIENT_REVIEW` and
+`RUBBER_STAMP_ON_AI_PR` — and never fire on an open pull request, whatever the policy says: an open PR can still
+get its review, resolve its threads or fix its checks.
+
+Note which rules are **not** AI-only. A bypassed quality gate, a weakened test, a committed credential and a
+missing task link are no better for having been written by hand, so those checks apply to everybody. Restricting
+them to the AI cohort would be measuring the tool rather than the engineering.
+
+**Two of these read the diff**, and only where diff analysis runs (`DIFF_ANALYSIS_REPOSITORIES`, see
+`docs/user/tune-ai-detection.md`): the "relaxed CI configuration" and "removed CI step" reasons behind
+`QUALITY_GATE_BYPASSED`, and the skip-marker and assertion counts behind `TEST_WEAKENED`. In a repository that is
+not opted in, those reasons simply never fire — a repository whose diff was never read is not one that weakened
+its tests. Every other check works from data the sync already stores.
+
+## Risk levels and the limits that read them
+
+A `SensitivePathRule` can carry a `risk_level` of `low`, `medium` or `high`. A pull request's risk is the
+**highest** of the non-excluded paths it touches: a hundred lines of documentation plus one line under
+`payments/` is a payments change. A rule with no risk level says nothing about risk, and a change matching no
+risk rule has no risk level at all.
+
+Three things read it:
+
+- `require_high_risk_plan` → `HIGH_RISK_NO_PLAN`, for high-risk changes only.
+- `high_risk_min_approvals` (default 2) raises `min_human_approvals` for a high-risk change. Only ever raises it:
+  a lead who asks for three approvals everywhere does not mean two on the riskiest paths.
+- `max_effective_lines_by_risk`, a per-level size limit that overrides the flat `ai_pr_max_effective_lines` for
+  `AI_PR_TOO_LARGE`. It is **empty by default**. The standards' own numbers are 800 lines at medium risk and 400
+  at high; enter them in Settings → AI policy if you want them, because applying them automatically would raise a
+  violation across an installation's whole history the moment it upgraded.
+
+`manage.py seed_sensitive_paths` seeds the standards' risk table as `advisory` rules — `**/migrations/**`,
+`**/auth*/**`, `**/payments/**`, `**/billing/**`, `.github/workflows/**`, `**/settings/**`, `infra/**`,
+`ansible/**` and `docker/**` at high risk; `**/api/**`, `**/serializers.py`, `pyproject.toml`, `package.json` and
+`*.lock` at medium. Read them as a starting point: `infra/**` is a dozen YAML files in one company and the whole
+product in another. A re-seed never touches a rule you have edited.
+
+## What PR Radar does not measure
+
+`AI-ENGINEERING-STANDARDS.md` names four metrics. Review time and post-merge defects PR Radar measures directly.
+**AI cost per task and the team's own rating of the tool are not derivable from GitHub data**, and they are not
+invented here — no metric in this product estimates either.
+
+The same document is explicit that *the number of generated lines, prompts or AI pull requests is not used to
+evaluate an employee's performance*. That is a product constraint, not a preference: the person page leads with
+compliance and quality and keeps volume below them, the AI-adoption dashboards report cohort shares rather than
+per-person counts, and no metric ranks people by how much they produced.
 
 ## Sensitive paths
 
-Settings → Sensitive paths lets an admin flag a path glob as `forbidden` (an AI PR must never touch it) or
-`needs_extra_review` (an AI PR touching it needs one more human approval than usual). A rule is either global
+Settings → Sensitive paths lets an admin flag a path glob as `forbidden` (an AI PR must never touch it),
+`needs_extra_review` (an AI PR touching it needs one more human approval than usual) or `advisory` (it only
+classifies the path's risk and raises no violation of its own). An advisory rule is deliberately left out of
+`PRFile.matched_sensitive_rule`: the seeded risk table is broad, and if it took part in the first-match-wins loop
+it would shadow a narrow rule somebody wrote to forbid a path. A rule is either global
 (empty project) or scoped to one project; on every sync, each of a pull request's non-excluded files is matched
 against the active rules that apply to it (global, plus any of the PR's repository's projects) and the match is
 recorded on `PRFile.matched_sensitive_rule`. Deactivating a rule clears the mark and auto-resolves any violation

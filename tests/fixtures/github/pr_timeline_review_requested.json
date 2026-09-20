@@ -1,0 +1,15 @@
+{
+  "data": {
+    "node": {
+      "timelineItems": {
+        "pageInfo": { "hasNextPage": false, "endCursor": null },
+        "nodes": [
+          { "__typename": "ReadyForReviewEvent", "createdAt": "2026-03-01T08:00:00Z" },
+          { "__typename": "ReviewRequestedEvent", "createdAt": "2026-03-01T08:30:00Z" },
+          { "__typename": "ReviewRequestedEvent", "createdAt": "2026-03-03T11:00:00Z" }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4997, "resetAt": "2026-03-01T10:00:00Z", "cost": 1 }
+  }
+}

@@ -63,6 +63,10 @@ class PullRequest(models.Model):
 
     created_at = models.DateTimeField(_("created at"))
     ready_for_review_at = models.DateTimeField(_("ready for review at"), null=True, blank=True)
+    # When a review was first asked for, from the timeline's REVIEW_REQUESTED_EVENT (phase 12,
+    # stage 7). Distinct from `ready_for_review_at`: a draft can be marked ready without anyone
+    # being asked to look at it, and a reviewer can be asked while it is still a draft.
+    review_requested_at = models.DateTimeField(_("review requested at"), null=True, blank=True)
     first_commit_at = models.DateTimeField(_("first commit at"), null=True, blank=True)
     first_review_at = models.DateTimeField(_("first review at"), null=True, blank=True)
     first_approval_at = models.DateTimeField(_("first approval at"), null=True, blank=True)
@@ -302,6 +306,10 @@ class ReviewComment(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), null=True, blank=True)
     is_review_thread = models.BooleanField(_("is review thread"), default=False)
+    # Whether the thread this comment opened has been resolved (phase 12, stage 7). Null means
+    # unknown — an older GitHub Enterprise Server does not return the field, and "unknown" must
+    # never be read as "unresolved", which would accuse an author of ignoring a reviewer.
+    is_resolved = models.BooleanField(_("is resolved"), null=True, blank=True)
     body_length = models.PositiveIntegerField(_("body length"), null=True, blank=True)
     github_id = models.CharField(_("GitHub node id"), max_length=100, unique=True)
     raw = models.JSONField(_("raw payload"), null=True, blank=True)

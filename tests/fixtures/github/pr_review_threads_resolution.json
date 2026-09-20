@@ -1,0 +1,50 @@
+{
+  "data": {
+    "node": {
+      "reviewThreads": {
+        "pageInfo": { "hasNextPage": false, "endCursor": null },
+        "nodes": [
+          {
+            "isResolved": true,
+            "comments": {
+              "nodes": [
+                {
+                  "id": "PRRC_resolved",
+                  "author": { "login": "copilot-pull-request-reviewer" },
+                  "createdAt": "2026-03-01T09:00:00Z",
+                  "bodyText": "Consider extracting this branch."
+                }
+              ]
+            }
+          },
+          {
+            "isResolved": false,
+            "comments": {
+              "nodes": [
+                {
+                  "id": "PRRC_unresolved",
+                  "author": { "login": "copilot-pull-request-reviewer" },
+                  "createdAt": "2026-03-01T09:05:00Z",
+                  "bodyText": "This path is not covered by a test."
+                }
+              ]
+            }
+          },
+          {
+            "comments": {
+              "nodes": [
+                {
+                  "id": "PRRC_unknown",
+                  "author": { "login": "octocat" },
+                  "createdAt": "2026-03-01T09:10:00Z",
+                  "bodyText": "An older server returns no isResolved field at all."
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4998, "resetAt": "2026-03-01T10:00:00Z", "cost": 1 }
+  }
+}
