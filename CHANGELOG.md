@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Fixed
+
+- **AI reviewers and agents whose login has no `[bot]` suffix are now recognised as bots.** GitHub's
+  `copilot-pull-request-reviewer` and the Charlie agent accounts (`charliecreates`, `charliehelps`) were
+  being counted as people, so their reviews inflated the review metrics of the teams they work on. They are
+  now in the `BOT_LOGINS` default. The flag is only decided when a person is first created, so existing
+  databases need one run of the new `manage.py reclassify_bots` command — it lists the people it would
+  change, writes nothing without `--apply`, and never turns a person a lead marked as a bot back into a
+  person. Run `manage.py recompute` afterwards to refresh the metrics.
+
+### Added
+
+- **Eleven more detection rules, and a reason to trust each one.** The shipped rule set now covers the
+  session and task permalinks agents leave in a PR body or commit trailer (Claude Code, Codex, Devin, Jules),
+  the co-author trailers Cursor, Copilot and the Gemini CLI write, Copilot's hidden body marker, CodeRabbit's
+  review marker, and a robot-emoji hint. Every rule now records **where its pattern came from** — documented
+  by the vendor, observed in your own synced data, or unverified. `manage.py seed_detection_rules` creates
+  the unverified ones **deactivated** and tells you how many, so nothing starts marking pull requests as
+  machine-generated on the strength of a guess. `docs/user/tune-ai-detection.md` explains how to confirm one
+  with the dry run and switch it on; activating a rule survives every later re-seed.
+
+- **Charlie is detected as an AI tool.** Pull requests and commits authored by the Charlie agent
+  (charlielabs.ai) now resolve to `AI explicit` with Charlie named as the tool, instead of sitting at
+  `Unknown`. Run `manage.py seed_detection_rules` to pick the two new rules up.
+
 ### Changed
 
 - **Paging now shows the page numbers.** Every paginated list — the dashboard tables, the identity queue and

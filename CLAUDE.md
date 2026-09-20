@@ -33,7 +33,8 @@ All run from the repository root, all non-interactive.
 | translations | `make messages` — `makemessages -l uk -a` + `compilemessages` |
 
 Management commands: `sync`, `recompute`, `compute_churn`, `seed_demo`, `seed_e2e`, `metrics_doc`,
-`bootstrap_connection`, `rotate_encryption_key`, `seed_detection_rules`, `process_exports`, `cleanup_exports`.
+`bootstrap_connection`, `rotate_encryption_key`, `seed_detection_rules`, `reclassify_bots`, `process_exports`,
+`cleanup_exports`.
 
 ## Conventions
 

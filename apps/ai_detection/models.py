@@ -36,6 +36,7 @@ class Tool(models.TextChoices):
     AIDER = "aider", _("Aider")
     WINDSURF = "windsurf", _("Windsurf")
     CHATGPT = "chatgpt", _("ChatGPT")
+    CHARLIE = "charlie", _("Charlie")
     OTHER = "other", _("Other")
 
 

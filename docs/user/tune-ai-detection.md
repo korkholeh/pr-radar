@@ -14,6 +14,45 @@ message), which tool it points to, its confidence and an evidence fragment — t
 200 characters, so you can judge a match without leaving the page. The resolved status is `ai_explicit` only when
 at least one `high`-confidence signal fired; a `medium`/`low` signal alone yields `ai_suspected`.
 
+## Why some shipped rules arrive switched off
+
+The rule set PR Radar ships with is not one uniform list. Each rule records **where its pattern came from**:
+
+- **documented** — the vendor's own documentation says the tool writes this string.
+- **observed** — it has actually been seen in a pull request synced into this installation.
+- **unverified** — it is a reasonable expectation that nobody has confirmed. Perhaps the vendor changed the
+  wording, perhaps it was never written that way at all.
+
+`manage.py seed_detection_rules` creates the documented and observed rules **active**, and the unverified ones
+**deactivated**. The command tells you how many it switched off.
+
+This is deliberate. An unverified rule is not a weaker signal — if a tool really does stamp a commit with its
+own name, matching that stamp is proof. The uncertainty is about whether the string is ever written, not about
+what it means when it is. So the rule keeps its confidence and simply waits for you to confirm it, rather than
+being downgraded to `medium` and quietly turning every real match into a missed one.
+
+## Confirm an unverified rule
+
+You need one pull request that the rule should have caught.
+
+1. Find a PR you already know was produced by that tool — ask the author, or pick one from a repository where
+   the tool is in use.
+2. Open Settings → **Detection rules**, find the rule, and run it through **Dry run**. It tests the pattern
+   against the most recently stored pull requests without writing anything.
+3. Read the result:
+   - **It matched, and the evidence is the tool's own marker** → activate the rule. Note the PR (`repo#number`)
+     somewhere; if you keep a fork of `fixtures/detection_rules.yaml`, move the rule's `provenance` to
+     `observed` and put that reference in its `notes`.
+   - **It matched something innocent** → edit the pattern to narrow it, or leave the rule off.
+   - **It matched nothing** → that tells you nothing on its own, unless you are sure the PRs it scanned include
+     one the tool wrote. Widen the dry run (`DETECTION_DRY_RUN_PR_COUNT`) or leave the rule off and revisit it
+     when you have a known example.
+4. After activating, run `manage.py recompute` so stored pull requests are re-evaluated. New signals appear on
+   PRs going back through your history, and `ai_status` may change for some of them.
+
+Leaving a rule deactivated costs nothing. Activating one you have not confirmed risks marking a colleague's
+hand-written PR as machine-generated, which is much harder to undo than a missing signal.
+
 ## Fix a false positive
 
 A rule that fires on text it shouldn't is a settings change, not a release. Open Settings → **Detection rules**,

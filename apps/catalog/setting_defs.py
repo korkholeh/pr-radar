@@ -42,7 +42,18 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
     SettingDef(
         "BOT_LOGINS",
         "list",
-        ["dependabot", "renovate", "github-actions"],
+        [
+            "dependabot",
+            "renovate",
+            "github-actions",
+            # AI agents and reviewers whose login carries no `[bot]` suffix, so `BOT_LOGIN_SUFFIXES`
+            # never catches them. Each one below was observed in real synced data; do not add a
+            # login here on the strength of a vendor's documentation alone, because a wrong entry
+            # silently removes a real person from every metric.
+            "copilot-pull-request-reviewer",
+            "charliecreates",
+            "charliehelps",
+        ],
         _("Exact logins that mark an account as a bot."),
         "ai",
     ),

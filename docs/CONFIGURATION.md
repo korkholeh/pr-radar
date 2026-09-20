@@ -45,7 +45,7 @@ missing.
 | sync | `CONNECTION_RECHECK_MIN_MINUTES` | int | `60` | Minimum minutes between two non-forced verifications of the same connection. |
 | ai | `AI_COHORT_INCLUDE_SUSPECTED` | bool | `False` | Whether PRs with a merely suspected AI status count in the AI cohort. |
 | ai | `BOT_LOGIN_SUFFIXES` | list | `["[bot]"]` | Login suffixes that mark an account as a bot. |
-| ai | `BOT_LOGINS` | list | `["dependabot", "renovate", "github-actions"]` | Exact logins that mark an account as a bot. |
+| ai | `BOT_LOGINS` | list | `["dependabot", "renovate", "github-actions", "copilot-pull-request-reviewer", "charliecreates", "charliehelps"]` | Exact logins that mark an account as a bot. |
 | ai | `DISCLOSURE_SECTION_HEADINGS` | list | `["AI assistance"]` | PR template section headings that hold the AI disclosure. |
 | ai | `DISCLOSURE_LABELS_NONE` | list | `["None"]` | Disclosure values meaning no AI assistance. |
 | ai | `DISCLOSURE_LABELS_PARTIAL` | list | `["Partial"]` | Disclosure values meaning partial AI assistance. |

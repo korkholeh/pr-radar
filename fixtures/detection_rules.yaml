@@ -1,30 +1,76 @@
-# Seed set for `manage.py seed_detection_rules` (spec §6.1). Each rule names its source in `notes`;
-# a rule whose signal is genuinely disputed (a convention rather than something the tool itself
-# writes) ships at `confidence: low` so it never alone yields `ai_explicit`.
+# Seed set for `manage.py seed_detection_rules` (spec §6.1).
+#
+# Every rule carries two independent qualifiers, and they answer different questions:
+#
+#   disputed:   is the signal itself a reliable indicator of AI authorship? A team convention — a
+#               manually applied label, a branch someone names by hand — is not, so a disputed rule
+#               is capped at `confidence: low` and can never alone resolve a PR to `ai_explicit`.
+#
+#   provenance: do we have evidence the string is ever actually emitted?
+#                 documented — the vendor documents it; `notes` carries the URL.
+#                 observed   — seen in this installation's synced data; `notes` carries the PR.
+#                 unverified — recalled or inferred. Seeded DEACTIVATED, not downgraded: if the
+#                              string really is written by the tool then matching it is proof, and
+#                              downgrading would only produce false negatives. A lead dry-runs it
+#                              against their own pull requests and switches it on.
+#
+# Moving a rule to `observed` is a human act: run the rule, find a real PR, put its reference in
+# `notes`. Never promote one because it "looks right".
+#
+# Every rule also needs an entry in fixtures/detection_samples.yaml — the strings it must match and
+# the ones it must reject. That corpus is a regression lock on edits, not evidence of provenance.
+
 rules:
+  # --- Claude Code ---------------------------------------------------------------------------
   - name: "Claude Code co-authored-by trailer"
     detector: commit_trailer
     pattern: "Co-Authored-By: Claude"
     tool: claude_code
     confidence: high
+    provenance: observed
     notes: >
-      Claude Code appends this trailer to every commit it makes by default.
-      https://docs.claude.com/en/docs/claude-code/overview
+      Claude Code appends this trailer to every commit it makes by default. Observed in synced
+      data on 21 pull requests, where the co-author reads "Claude Sonnet 5
+      <noreply@anthropic.com>". https://docs.claude.com/en/docs/claude-code/overview
+
+  - name: "Claude Code session trailer"
+    detector: commit_trailer
+    pattern: "Claude-Session: https://claude\\.ai/code/session_"
+    tool: claude_code
+    confidence: high
+    provenance: observed
+    notes: >
+      A session permalink trailer Claude Code writes into commits when the session is configured
+      to attribute them. Observed in synced data: AtlasRMS#4878, 7 commits across 5 PRs.
 
   - name: "Claude Code PR description footer"
     detector: pr_body_footer
     pattern: "Generated with \\[Claude Code\\]"
     tool: claude_code
     confidence: high
+    provenance: documented
     notes: >
       Claude Code's default PR description footer.
       https://docs.claude.com/en/docs/claude-code/overview
 
+  - name: "Claude Code commit message footer"
+    detector: commit_message
+    pattern: "Generated with \\[Claude Code\\]"
+    tool: claude_code
+    confidence: high
+    provenance: unverified
+    notes: >
+      The same footer as the PR-description rule, but written into the commit message body rather
+      than the pull request. Not seen in this installation's data yet; confirm against a real
+      commit before activating.
+
+  # --- GitHub Copilot ------------------------------------------------------------------------
   - name: "GitHub Copilot coding agent bot author"
     detector: commit_author
     pattern: "copilot-swe-agent\\[bot\\]"
     tool: copilot
     confidence: high
+    provenance: documented
     notes: >
       GitHub's Copilot coding agent commits and opens PRs as this bot login.
       https://docs.github.com/en/copilot/using-github-copilot/coding-agent
@@ -34,63 +80,194 @@ rules:
     pattern: "^copilot/"
     tool: copilot
     confidence: medium
+    provenance: documented
     notes: >
       GitHub's Copilot coding agent uses this branch naming convention by default; a human can
       also name a branch this way, so it is not treated as high confidence on its own.
       https://docs.github.com/en/copilot/using-github-copilot/coding-agent
 
-  - name: "Devin bot PR author"
-    detector: pr_author
-    pattern: "devin-ai-integration"
-    tool: devin
+  - name: "GitHub Copilot co-author trailer"
+    detector: commit_trailer
+    pattern: "Co-authored-by: Copilot <"
+    tool: copilot
     confidence: high
+    provenance: unverified
     notes: >
-      Devin opens PRs under the devin-ai-integration[bot] GitHub App login.
-      https://docs.devin.ai/
+      Copilot Workspace and the coding agent co-author the commits they write. The trailing "<"
+      keeps the pattern off a human whose display name merely starts with "Copilot". Not seen in
+      this installation's data yet.
 
-  - name: "Gemini Code Assist hidden review marker"
+  - name: "GitHub Copilot coding agent body marker"
     detector: html_comment
-    pattern: "gemini-code-assist"
-    tool: gemini
-    confidence: medium
+    pattern: "COPILOT[_ ]CODING[_ ]AGENT|copilot-coding-agent"
+    tool: copilot
+    confidence: high
+    provenance: unverified
     notes: >
-      Gemini Code Assist embeds this marker in an HTML comment inside its review summaries.
-      https://developers.google.com/gemini-code-assist
+      A hidden marker the Copilot coding agent embeds in the body of the pull request it opens.
+      Recalled, not confirmed: check a real Copilot-authored PR's raw body before activating.
 
-  - name: "Cursor convention label"
-    detector: label
-    pattern: "^cursor$"
-    tool: cursor
-    confidence: low
-    disputed: true
-    notes: >
-      Some teams tag Cursor-authored PRs with a manual "cursor" label. Disputed: this is a team
-      convention, not something Cursor itself writes, so it stays low confidence.
-
+  # --- OpenAI Codex --------------------------------------------------------------------------
   - name: "OpenAI Codex branch prefix"
     detector: branch_pattern
     pattern: "^codex/"
     tool: codex
     confidence: medium
+    provenance: documented
     notes: >
       Codex's default branch naming convention when it opens a PR from the CLI or cloud agent.
       https://developers.openai.com/codex/
 
+  - name: "OpenAI Codex cloud task link"
+    detector: pr_body_footer
+    pattern: "chatgpt\\.com/codex/tasks/"
+    tool: codex
+    confidence: high
+    provenance: unverified
+    notes: >
+      Codex's cloud agent links the originating task from the pull request it opens. A task
+      permalink is written by the tool, so a match would be conclusive — but the exact host and
+      path are recalled, not confirmed.
+
+  # --- Devin ---------------------------------------------------------------------------------
+  - name: "Devin bot PR author"
+    detector: pr_author
+    pattern: "devin-ai-integration"
+    tool: devin
+    confidence: high
+    provenance: documented
+    notes: >
+      Devin opens PRs under the devin-ai-integration[bot] GitHub App login.
+      https://docs.devin.ai/
+
+  - name: "Devin session link"
+    detector: pr_body_footer
+    pattern: "app\\.devin\\.ai/sessions/"
+    tool: devin
+    confidence: high
+    provenance: unverified
+    notes: >
+      Devin links the session that produced the change from the pull request body. Recalled host
+      and path; confirm against a real Devin PR before activating.
+
+  # --- Google Gemini / Jules -----------------------------------------------------------------
+  - name: "Gemini Code Assist hidden review marker"
+    detector: html_comment
+    pattern: "gemini-code-assist"
+    tool: gemini
+    confidence: medium
+    provenance: documented
+    notes: >
+      Gemini Code Assist embeds this marker in an HTML comment inside its review summaries.
+      https://developers.google.com/gemini-code-assist
+
+  - name: "Gemini CLI co-author trailer"
+    detector: commit_trailer
+    pattern: "Co-authored-by: gemini"
+    tool: gemini
+    confidence: high
+    provenance: unverified
+    notes: >
+      The Gemini CLI GitHub action co-authors the commits it pushes. Recalled trailer value; not
+      seen in this installation's data.
+
+  - name: "Google Jules task link"
+    detector: pr_body_footer
+    pattern: "jules\\.google\\.com/task"
+    tool: gemini
+    confidence: high
+    provenance: unverified
+    notes: >
+      Google Jules links its task from the pull request it opens. Filed under the gemini tool
+      because Jules has no Tool value of its own. Recalled, not confirmed.
+
+  # --- Cursor --------------------------------------------------------------------------------
+  - name: "Cursor convention label"
+    detector: label
+    pattern: "^cursor$"
+    tool: cursor
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Some teams tag Cursor-authored PRs with a manual "cursor" label. Disputed: this is a team
+      convention, not something Cursor itself writes, so it stays low confidence. This
+      installation's synced data carries no labels at all, on any pull request.
+
+  - name: "Cursor agent co-author trailer"
+    detector: commit_trailer
+    pattern: "Co-Authored-By: Cursor(\\s|Agent|<)"
+    tool: cursor
+    confidence: high
+    provenance: unverified
+    notes: >
+      Cursor's background agent co-authors the commits it writes. The trailing group keeps the
+      pattern off a human whose name merely begins with "Cursor". Recalled, not confirmed.
+
+  # --- Aider ---------------------------------------------------------------------------------
   - name: "Aider commit message marker"
     detector: commit_message
     pattern: "^aider:"
     tool: aider
     confidence: high
+    provenance: documented
     notes: >
       Aider prefixes commit messages it writes with "aider:" by default.
       https://aider.chat/docs/git.html
 
+  # --- Windsurf ------------------------------------------------------------------------------
   - name: "Windsurf branch prefix"
     detector: branch_pattern
     pattern: "^windsurf/"
     tool: windsurf
     confidence: low
+    provenance: unverified
     disputed: true
     notes: >
       Windsurf's Cascade agent branch naming is not officially documented; disputed heuristic
-      based on observed team conventions.
+      based on reported team conventions rather than anything the tool writes.
+
+  # --- Charlie -------------------------------------------------------------------------------
+  - name: "Charlie agent PR author"
+    detector: pr_author
+    pattern: "^charlie(creates|helps)(\\[bot\\])?$"
+    tool: charlie
+    confidence: high
+    provenance: observed
+    notes: >
+      Charlie (charlielabs.ai) opens pull requests under the charliecreates / charliehelps
+      accounts. Observed in synced data: ADT#1983. Two of its three logins carry no [bot]
+      suffix, which is why it also needs the BOT_LOGINS entries.
+
+  - name: "Charlie agent commit author"
+    detector: commit_author
+    pattern: "charliecreates\\[bot\\]|charlie@charlielabs\\.ai"
+    tool: charlie
+    confidence: high
+    provenance: observed
+    notes: >
+      Charlie's commit author identity: the [bot] noreply address it commits under, and the
+      charlielabs.ai address on its charliehelps account. Observed in synced data: ADT#1983.
+
+  # --- AI reviewers and generic markers ------------------------------------------------------
+  - name: "CodeRabbit review marker"
+    detector: html_comment
+    pattern: "walkthrough_start|coderabbit"
+    tool: other
+    confidence: high
+    provenance: unverified
+    notes: >
+      CodeRabbit embeds markers in the HTML comments of its review summaries. Note that this
+      detects an AI *reviewer*, not an AI author — it tells you the change was reviewed by a
+      machine. Recalled marker names; confirm before activating.
+
+  - name: "Robot emoji in a commit message"
+    detector: commit_message
+    pattern: "🤖"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Several agents open a generated commit footer with the robot emoji. Disputed: a human can
+      type it just as easily, so it never counts for more than a hint.

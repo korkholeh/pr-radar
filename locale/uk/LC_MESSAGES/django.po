@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 19:48+0000\n"
+"POT-Creation-Date: 2026-09-19 20:57+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -64,7 +64,7 @@ msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:303
-#: apps/ai_detection/models.py:56 apps/connections/models.py:43
+#: apps/ai_detection/models.py:57 apps/connections/models.py:43
 #: apps/dashboards/models.py:60 apps/policy/models.py:20
 #: apps/policy/models.py:119
 msgid "created at"
@@ -388,7 +388,7 @@ msgstr "має подальше виправлення"
 #: apps/activity/models.py:127 apps/activity/models.py:202
 #: apps/activity/models.py:225 apps/activity/models.py:262
 #: apps/activity/models.py:293 apps/activity/models.py:326
-#: apps/ai_detection/models.py:92 apps/churn/models.py:16
+#: apps/ai_detection/models.py:93 apps/churn/models.py:16
 #: apps/policy/models.py:102
 msgid "pull request"
 msgstr "pull request"
@@ -434,7 +434,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:186 apps/activity/models.py:205
-#: apps/ai_detection/models.py:100
+#: apps/ai_detection/models.py:101
 msgid "commit"
 msgstr "коміт"
 
@@ -688,75 +688,79 @@ msgstr "Windsurf"
 msgid "ChatGPT"
 msgstr "ChatGPT"
 
-#: apps/ai_detection/models.py:39 apps/catalog/models.py:94
+#: apps/ai_detection/models.py:39
+msgid "Charlie"
+msgstr "Charlie"
+
+#: apps/ai_detection/models.py:40 apps/catalog/models.py:94
 #: apps/dashboards/reviews.py:84
 msgid "Other"
 msgstr "Інше"
 
-#: apps/ai_detection/models.py:43 apps/policy/models.py:88
+#: apps/ai_detection/models.py:44 apps/policy/models.py:88
 msgid "High"
 msgstr "Високий"
 
-#: apps/ai_detection/models.py:44 apps/policy/models.py:89
+#: apps/ai_detection/models.py:45 apps/policy/models.py:89
 msgid "Medium"
 msgstr "Середній"
 
-#: apps/ai_detection/models.py:45 apps/policy/models.py:90
+#: apps/ai_detection/models.py:46 apps/policy/models.py:90
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:49 apps/catalog/models.py:41
+#: apps/ai_detection/models.py:50 apps/catalog/models.py:41
 #: apps/catalog/models.py:64 apps/connections/models.py:19
 #: apps/github_sync/models.py:62
 msgid "name"
 msgstr "назва"
 
-#: apps/ai_detection/models.py:50
+#: apps/ai_detection/models.py:51
 msgid "detector"
 msgstr "детектор"
 
-#: apps/ai_detection/models.py:51
+#: apps/ai_detection/models.py:52
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:52 apps/ai_detection/models.py:105
+#: apps/ai_detection/models.py:53 apps/ai_detection/models.py:106
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:53 apps/ai_detection/models.py:106
+#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:107
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:54 apps/catalog/models.py:17
+#: apps/ai_detection/models.py:55 apps/catalog/models.py:17
 #: apps/catalog/models.py:47 apps/catalog/models.py:73
 #: apps/catalog/models.py:97 apps/connections/models.py:34
 #: apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:55 apps/catalog/models.py:102
+#: apps/ai_detection/models.py:56 apps/catalog/models.py:102
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:57 apps/connections/models.py:44
+#: apps/ai_detection/models.py:58 apps/connections/models.py:44
 #: apps/metrics/models.py:58 apps/policy/models.py:120
 msgid "updated at"
 msgstr "оновлено о"
 
-#: apps/ai_detection/models.py:60
+#: apps/ai_detection/models.py:61
 msgid "detection rule"
 msgstr "правило детекції"
 
-#: apps/ai_detection/models.py:61
+#: apps/ai_detection/models.py:62
 msgid "detection rules"
 msgstr "правила детекції"
 
-#: apps/ai_detection/models.py:73
+#: apps/ai_detection/models.py:74
 #, python-format
 msgid "Not a valid regular expression: %(error)s"
 msgstr "Не є коректним регулярним виразом: %(error)s"
 
-#: apps/ai_detection/models.py:79
+#: apps/ai_detection/models.py:80
 msgid ""
 "This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
 "which can hang on a normal PR body. Rewrite it without the nested quantifier."
@@ -765,27 +769,27 @@ msgstr ""
 "(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
 "Перепишіть його без вкладеного квантифікатора."
 
-#: apps/ai_detection/models.py:103
+#: apps/ai_detection/models.py:104
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:107
+#: apps/ai_detection/models.py:108
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:108
+#: apps/ai_detection/models.py:109
 msgid "evidence hash"
 msgstr "хеш доказу"
 
-#: apps/ai_detection/models.py:109
+#: apps/ai_detection/models.py:110
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:112
+#: apps/ai_detection/models.py:113
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:113
+#: apps/ai_detection/models.py:114
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:157
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:175
 msgid "AI signals"
@@ -1155,71 +1159,71 @@ msgstr "Чи враховуються PR зі статусом «ШІ підоз
 msgid "Login suffixes that mark an account as a bot."
 msgstr "Суфікси логіну, що позначають акаунт як бота."
 
-#: apps/catalog/setting_defs.py:46
+#: apps/catalog/setting_defs.py:57
 msgid "Exact logins that mark an account as a bot."
 msgstr "Точні логіни, що позначають акаунт як бота."
 
-#: apps/catalog/setting_defs.py:53
+#: apps/catalog/setting_defs.py:64
 msgid "PR template section headings that hold the AI disclosure."
 msgstr "Заголовки секцій шаблону PR, що містять розкриття ШІ."
 
-#: apps/catalog/setting_defs.py:57
+#: apps/catalog/setting_defs.py:68
 msgid "Disclosure values meaning no AI assistance."
 msgstr "Значення розкриття, що означають відсутність допомоги ШІ."
 
-#: apps/catalog/setting_defs.py:63
+#: apps/catalog/setting_defs.py:74
 msgid "Disclosure values meaning partial AI assistance."
 msgstr "Значення розкриття, що означають часткову допомогу ШІ."
 
-#: apps/catalog/setting_defs.py:70
+#: apps/catalog/setting_defs.py:81
 msgid "Disclosure values meaning substantial AI assistance."
 msgstr "Значення розкриття, що означають суттєву допомогу ШІ."
 
-#: apps/catalog/setting_defs.py:77
+#: apps/catalog/setting_defs.py:88
 msgid "PR template section headings that list the AI tools used."
 msgstr ""
 "Заголовки секцій шаблону PR, що перелічують використані інструменти ШІ."
 
-#: apps/catalog/setting_defs.py:84
+#: apps/catalog/setting_defs.py:95
 msgid "How many of the most recent PRs a detection rule dry run scans."
 msgstr "Скільки останніх PR переглядає пробний запуск правила детекції."
 
-#: apps/catalog/setting_defs.py:101
+#: apps/catalog/setting_defs.py:112
 msgid ""
 "Free text in the disclosed-tools line mapped onto a canonical Tool value."
 msgstr ""
 "Довільний текст у рядку розкритих інструментів, який відображається на "
 "канонічне значення Tool."
 
-#: apps/catalog/setting_defs.py:105
+#: apps/catalog/setting_defs.py:116
 msgid "Minimum sample size below which a metric is greyed out."
 msgstr "Мінімальний розмір вибірки, нижче якого метрика сіріє."
 
-#: apps/catalog/setting_defs.py:108
+#: apps/catalog/setting_defs.py:119
 msgid "Days of inactivity after which an open PR is considered stale."
 msgstr "Дні бездіяльності, після яких відкритий PR вважається застарілим."
 
-#: apps/catalog/setting_defs.py:114
+#: apps/catalog/setting_defs.py:125
 msgid "Hours after which a PR waiting for review is flagged."
 msgstr "Години, після яких PR, що чекає на ревʼю, позначається."
 
-#: apps/catalog/setting_defs.py:117
+#: apps/catalog/setting_defs.py:128
 msgid "How PR durations are computed."
 msgstr "Як обчислюється тривалість PR."
 
-#: apps/catalog/setting_defs.py:122
+#: apps/catalog/setting_defs.py:133
 msgid "Upper line-count boundary for each PR size bucket."
 msgstr "Верхня межа кількості рядків для кожної розмірної категорії PR."
 
-#: apps/catalog/setting_defs.py:137
+#: apps/catalog/setting_defs.py:148
 msgid "File path globs excluded from size and churn calculations."
 msgstr "Glob-шаблони шляхів, виключені з обчислення розміру та churn."
 
-#: apps/catalog/setting_defs.py:154
+#: apps/catalog/setting_defs.py:165
 msgid "File path globs recognised as test files."
 msgstr "Glob-шаблони шляхів, що розпізнаються як тестові файли."
 
-#: apps/catalog/setting_defs.py:161
+#: apps/catalog/setting_defs.py:172
 msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
@@ -1227,44 +1231,44 @@ msgstr ""
 "Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
 "формальним."
 
-#: apps/catalog/setting_defs.py:165
+#: apps/catalog/setting_defs.py:176
 msgid "How many top reviewers count toward review load."
 msgstr "Скільки провідних ревʼюерів враховується в навантаженні на ревʼю."
 
-#: apps/catalog/setting_defs.py:171
+#: apps/catalog/setting_defs.py:182
 msgid "Days after merge in which a follow-up fix is attributed."
 msgstr "Дні після мерджу, протягом яких виправлення відносять до PR."
 
-#: apps/catalog/setting_defs.py:178
+#: apps/catalog/setting_defs.py:189
 msgid "Minimum file overlap ratio to attribute a follow-up fix to a PR."
 msgstr "Мінімальна частка перетину файлів для віднесення виправлення до PR."
 
-#: apps/catalog/setting_defs.py:185
+#: apps/catalog/setting_defs.py:196
 msgid ""
 "How long a computed metrics result stays cached before it expires on its own."
 msgstr ""
 "Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
 "сам по собі."
 
-#: apps/catalog/setting_defs.py:192
+#: apps/catalog/setting_defs.py:203
 msgid "Default number of days a dashboard period covers when none is chosen."
 msgstr ""
 "Кількість днів у періоді дашборду за замовчуванням, якщо період не обрано."
 
-#: apps/catalog/setting_defs.py:199
+#: apps/catalog/setting_defs.py:210
 msgid "Minimum changed lines before a missing-tests violation applies."
 msgstr ""
 "Мінімальна кількість змінених рядків для застосування порушення «немає "
 "тестів»."
 
-#: apps/catalog/setting_defs.py:206
+#: apps/catalog/setting_defs.py:217
 msgid ""
 "Rule codes switched off; an open violation for a disabled rule auto-resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
 
-#: apps/catalog/setting_defs.py:213
+#: apps/catalog/setting_defs.py:224
 msgid ""
 "Maximum sensitive paths stored in a violation's details; the total is kept "
 "separately."
@@ -1272,33 +1276,33 @@ msgstr ""
 "Максимальна кількість чутливих шляхів, що зберігаються в деталях порушення; "
 "загальна кількість зберігається окремо."
 
-#: apps/catalog/setting_defs.py:220
+#: apps/catalog/setting_defs.py:231
 msgid "Rows per page on the policy violations console."
 msgstr "Кількість рядків на сторінці консолі порушень політики."
 
-#: apps/catalog/setting_defs.py:223
+#: apps/catalog/setting_defs.py:234
 msgid "Days after merge over which churn is measured."
 msgstr "Дні після мерджу, за які вимірюється churn."
 
-#: apps/catalog/setting_defs.py:225
+#: apps/catalog/setting_defs.py:236
 msgid "Maximum files in a PR before churn analysis is skipped."
 msgstr ""
 "Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
 
-#: apps/catalog/setting_defs.py:231
+#: apps/catalog/setting_defs.py:242
 msgid "Maximum concurrent git workers a churn run uses."
 msgstr ""
 "Максимальна кількість паралельних git-обробників, які використовує "
 "обчислення churn."
 
-#: apps/catalog/setting_defs.py:238
+#: apps/catalog/setting_defs.py:249
 msgid ""
 "Timeout in seconds for a single git subprocess call during churn analysis."
 msgstr ""
 "Час очікування в секундах для одного виклику підпроцесу git під час аналізу "
 "churn."
 
-#: apps/catalog/setting_defs.py:245
+#: apps/catalog/setting_defs.py:256
 msgid ""
 "Maximum seconds a churn run spends on a single repository before deferring "
 "the rest."
@@ -1306,7 +1310,7 @@ msgstr ""
 "Максимальний час у секундах, який обчислення churn витрачає на один "
 "репозиторій, перш ніж відкласти решту."
 
-#: apps/catalog/setting_defs.py:252
+#: apps/catalog/setting_defs.py:263
 msgid ""
 "Rows per page on a dashboard table (projects, repositories, people, recent "
 "PRs)."
@@ -1314,12 +1318,12 @@ msgstr ""
 "Кількість рядків на сторінці таблиці дашборду (проєкти, репозиторії, люди, "
 "останні PR)."
 
-#: apps/catalog/setting_defs.py:259
+#: apps/catalog/setting_defs.py:270
 msgid "Maximum files shown on the PR detail page before a '+N more' line."
 msgstr ""
 "Максимальна кількість файлів на сторінці деталей PR перед рядком «+N ще»."
 
-#: apps/catalog/setting_defs.py:266
+#: apps/catalog/setting_defs.py:277
 msgid ""
 "Authors/reviewers shown per axis on the reviews heat map; the rest fold into "
 "'Other'."
@@ -1327,33 +1331,33 @@ msgstr ""
 "Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
 "згортаються в «Інше»."
 
-#: apps/catalog/setting_defs.py:269
+#: apps/catalog/setting_defs.py:280
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:274
+#: apps/catalog/setting_defs.py:285
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:277
+#: apps/catalog/setting_defs.py:288
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:282
+#: apps/catalog/setting_defs.py:293
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:286
+#: apps/catalog/setting_defs.py:297
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:292
+#: apps/catalog/setting_defs.py:303
 msgid "Days a background export file is kept before cleanup deletes it."
 msgstr ""
 "Кількість днів, протягом яких файл фонового експорту зберігається до "
 "видалення."
 
-#: apps/catalog/setting_defs.py:299
+#: apps/catalog/setting_defs.py:310
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1361,41 +1365,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:302
+#: apps/catalog/setting_defs.py:313
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:307
+#: apps/catalog/setting_defs.py:318
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:314
+#: apps/catalog/setting_defs.py:325
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:318
+#: apps/catalog/setting_defs.py:329
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:321
+#: apps/catalog/setting_defs.py:332
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:327
+#: apps/catalog/setting_defs.py:338
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:334
+#: apps/catalog/setting_defs.py:345
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:341
+#: apps/catalog/setting_defs.py:352
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
