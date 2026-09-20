@@ -65,6 +65,13 @@ active repository — the same order of magnitude as that repository's own `.git
 nightly run after connecting a large repository to take longer than subsequent ones, which only fetch new
 commits. Deleting `DATA_DIR/repos/` is always safe: the next run re-clones whatever it needs.
 
+The same run also analyses pull-request diffs for structural AI signals, from the clone it has just made, for
+the repositories named in `DIFF_ANALYSIS_REPOSITORIES` (empty by default — nothing is analysed until you opt a
+repository in; `"*"` opts in all of them). It adds no GitHub API call, takes what is left of a repository's
+`CHURN_REPO_TIME_BUDGET_SECONDS` after churn itself, and `manage.py compute_churn --no-diffs` runs churn
+without it. Opting in a repository with a long history drains its backlog over successive nights rather than
+in one run.
+
 ## Scheduling
 
 `run_huey` (see "Run" above) already runs `sync`, `compute_baselines` (01:00 server time), `compute_churn`

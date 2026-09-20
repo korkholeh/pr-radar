@@ -40,6 +40,29 @@
   `AI suspected`. Nothing moves until you activate a rule; after you do, run `manage.py recompute --baselines`
   and expect some historical pull requests — and therefore some AI metrics — to shift.
 
+- **Diff-level signals: four kinds that read the change itself.** `wholesale_reformat` (a large diff that
+  changes almost nothing once whitespace is ignored), `comment_density_outlier` (added code carrying far more
+  comments and docstrings than the same files did before), `duplicated_blocks` (one block pasted across
+  several files), and `unused_new_dependency`, which was registered but silent until now because deciding
+  whether anything imports a package needs the lines of the change.
+
+  **They cost no GitHub API call.** They read the bare clone the churn job already makes, so they run inside
+  the nightly churn run (`manage.py compute_churn`, 02:00; `--no-diffs` skips this half) and take what is left
+  of a repository's time budget after churn itself.
+
+  **They are opt-in per repository.** Add repositories to the new `DIFF_ANALYSIS_REPOSITORIES` setting as
+  `owner/name`, or a single `*` for all of them; the default is empty, so an upgrade analyses nothing until
+  you ask it to. Reading the contents of every change is a choice an operator makes, not a default.
+
+  The usual guarantees hold: these are structural rules, so they can never be `high` confidence, one signal
+  alone never moves a pull request's AI status, and every one of them ships deactivated. A repository with no
+  usable clone that night produces no signals **and deletes none** — a repository PR Radar could not reach is
+  not evidence that a signal has gone away. Rebase merges are skipped, as they are for churn.
+
+  Each analysis also records what the diff contains — weakened tests, relaxed CI configuration, files that
+  look like committed credentials — as data for the policy checks arriving next. Counts, paths and codes only:
+  a credential that leaked into a pull request is never copied into PR Radar's own database.
+
 - **A second kind of evidence: what a pull request's shape says.** Detection rules match text a tool wrote.
   The new **structural signals** read the pull request itself — a large change merged within two hours of its
   first commit, five substantial commits ninety seconds apart, a whole change in one commit, ten new files

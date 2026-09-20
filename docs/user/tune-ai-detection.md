@@ -101,7 +101,7 @@ Everything above matches *text* — a trailer, a file path, a login. A second fa
 request itself: how fast it arrived, how its commits are spaced, how many files it created, how quickly it
 answered a review. Settings → **Structural signals**.
 
-Six kinds ship:
+Five kinds read one pull request's own rows and run during a sync:
 
 | Kind | Fires when |
 |---|---|
@@ -109,8 +109,11 @@ Six kinds ship:
 | Burst of near-simultaneous substantial commits | several sizeable commits seconds apart |
 | Whole change in one large commit | a large multi-file change with no intermediate state |
 | Many files created across many directories | scaffolding, in one sitting |
-| New dependency nothing in the diff uses | a manifest gains a package nothing imports |
 | Repeated commits moments after review comments | not once, but three times over |
+
+Four more read an author's own history, and four read the contents of the change itself — see **Author
+baselines** and **Diff-level signals** below. Where a kind runs decides when it runs, and the dry-run panel
+tells you so rather than reporting "no matches" for a rule it cannot preview.
 
 **Two things these rules can never do.** They can never be high confidence — the database refuses it, not
 just the form — so no combination of them ever marks a pull request as `AI explicit`. And one signal on its
@@ -176,6 +179,46 @@ uv run python manage.py recompute --baselines
 ```
 
 and expect some historical pull requests, and therefore some AI metrics, to move.
+
+## Diff-level signals: reading the change itself
+
+The rules above work from what GitHub tells PR Radar about a pull request. Four kinds need something more:
+the actual lines of the change.
+
+| Kind | Fires when |
+|---|---|
+| Large diff with almost no semantic change | the same diff counted again ignoring whitespace is a fraction of the size — a formatter's work |
+| Comment density far above the code it joins | the added code carries far more comments and docstrings than the same files did before |
+| The same block of code repeated across files | one eight-line block appears three times across at least two files |
+| New dependency nothing in the diff uses | a manifest gains a package and no added line anywhere else mentions it |
+
+**They cost no GitHub API calls.** They read the local bare clone the churn job already makes, so they run
+inside the nightly churn run (`manage.py compute_churn`, 02:00) and add nothing to your rate limit.
+
+**They are opt-in per repository**, because they read the contents of every change. In Settings →
+**App settings**, add repositories to `DIFF_ANALYSIS_REPOSITORIES` as `owner/name`, one entry per repository,
+or a single `*` for all of them. An empty list — the default — means no diff analysis runs anywhere.
+
+Then:
+
+1. Add the repository to `DIFF_ANALYSIS_REPOSITORIES`.
+2. Activate the kinds you want in Settings → **Structural signals** (they ship off, like every structural rule).
+3. Run `uv run python manage.py compute_churn` — or wait for the nightly run — and read the matches on the
+   pull requests they name. `--no-diffs` runs churn without this half if you want to separate the two.
+4. Adjust thresholds and re-run. As with every structural rule, a changed threshold retires the old signal
+   and writes a new one, so no pull request keeps a sentence quoting a number you no longer use.
+
+**What they will not do.** A repository with no usable clone that night produces no signals *and deletes
+none* — a repository PR Radar could not reach is not evidence that a signal has gone away. A rebase-merged
+pull request is skipped, exactly as it is for churn: there is no single commit representing the change. A
+change with more files than `CHURN_MAX_FILES`, or a diff over two million characters, is left unanalysed
+rather than read into memory. Lockfiles, vendored trees and generated code (`EXCLUDED_PATH_GLOBS`) are left
+out of every measurement, and the comment-density kind also skips test files and prose.
+
+**What will trip them innocently.** A deliberate "run the formatter over the repository" pull request. A
+tricky module somebody documented properly. Boilerplate handlers, fixtures or migrations that legitimately
+look alike. A dependency added in one pull request for use in the next. Read the pull request; the evidence
+quotes both the measurement and the threshold so you can see which it is.
 
 ## What the repository page tells you instead
 

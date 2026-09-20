@@ -20,6 +20,7 @@ from django.db.models import QuerySet
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest
 from apps.ai_detection.baselines import load_author_baselines, run_baseline_kind
 from apps.ai_detection.detectors import DETECTORS, load_context, load_contexts
+from apps.ai_detection.diffsignals import DiffRuleSpec
 from apps.ai_detection.disclosure import DisclosureConfig, load_config, parse_disclosure
 from apps.ai_detection.models import (
     AISignal,
@@ -29,7 +30,7 @@ from apps.ai_detection.models import (
     SignalRule,
     kinds_in_family,
 )
-from apps.ai_detection.structural import load_structural_context, run_kind
+from apps.ai_detection.structural import StructuralMatch, load_structural_context, run_kind
 from apps.catalog.services import get_bool, get_int
 
 if TYPE_CHECKING:
@@ -39,6 +40,12 @@ logger = logging.getLogger(__name__)
 
 PER_PR_KINDS = kinds_in_family(SignalFamily.PER_PR)
 BASELINE_KINDS = kinds_in_family(SignalFamily.BASELINE)
+DIFF_KINDS = kinds_in_family(SignalFamily.DIFF)
+# The two families written by a different pass than `detect_pull_request`: a nightly baseline run
+# and the churn job's diff analysis. Their signals are evidence about a pull request all the same,
+# so they count toward the distinct-kind threshold — but `detect_pull_request` must never treat one
+# as stale, because it is not in (and never could be in) that function's wanted set.
+OTHER_FAMILY_KINDS = BASELINE_KINDS | DIFF_KINDS
 
 
 def _evidence_hash(evidence: str) -> str:
@@ -60,9 +67,9 @@ def _signal_kind(signal: AISignal) -> str | None:
     return signal.signal_rule.kind if signal.signal_rule is not None else None
 
 
-def _stored_baseline_kinds(pull_request: PullRequest) -> set[str]:
+def _stored_other_family_kinds(pull_request: PullRequest) -> set[str]:
     kinds = {_signal_kind(signal) for signal in pull_request.ai_signals.all()}
-    return {kind for kind in kinds if kind in BASELINE_KINDS}
+    return {kind for kind in kinds if kind in OTHER_FAMILY_KINDS}
 
 
 def resolve_ai_status(
@@ -224,10 +231,10 @@ def detect_pull_request(
     structural_kinds = {
         payload["signal_rule"].kind for payload in wanted.values() if payload["signal_rule"] is not None
     }
-    # Baseline signals were written by a different pass and are not in `wanted`, but they are
-    # evidence about this pull request all the same, so they count toward the distinct-kind
+    # Baseline and diff signals were written by a different pass and are not in `wanted`, but they
+    # are evidence about this pull request all the same, so they count toward the distinct-kind
     # threshold. Read from the stored rows rather than recomputed here.
-    structural_kinds |= _stored_baseline_kinds(ctx.pull_request)
+    structural_kinds |= _stored_other_family_kinds(ctx.pull_request)
     signal_tools = {payload["tool"] for payload in wanted.values()}
 
     pr = ctx.pull_request
@@ -242,7 +249,10 @@ def detect_pull_requests(queryset: QuerySet[PullRequest]) -> int:
     it drift after a rule is added, edited or deactivated. Loads the compiled rules and the
     disclosure config once, not once per PR (RISKS row 10)."""
     rules = _compile_active_rule_patterns(list(DetectionRule.objects.filter(is_active=True)))
-    signal_rules = list(SignalRule.objects.filter(is_active=True))
+    # Only the family this pass computes: a baseline rule belongs to `run_baselines()` and a diff
+    # rule to the churn job, and handing either to `detect_pull_request` would load rows it can
+    # only ignore.
+    signal_rules = list(SignalRule.objects.filter(is_active=True, kind__in=PER_PR_KINDS))
     config = load_config()
     count = 0
     for pk in queryset.values_list("pk", flat=True):
@@ -442,3 +452,95 @@ def _restatus_pull_requests(pull_request_ids: Collection[int]) -> int:
             pull_request.save(update_fields=["ai_status"])
             changed += 1
     return changed
+
+
+# --- the diff family (phase 12, stage 6) --------------------------------------------------------
+
+
+def diff_rule_specs() -> list[DiffRuleSpec]:
+    """The active diff rules, flattened into plain data.
+
+    Read on the main thread and handed to churn's worker threads, which must never open an ORM
+    connection of their own (`apps/churn/services.py`'s module docstring): the workers get
+    thresholds, not rows.
+    """
+    return [
+        DiffRuleSpec(
+            pk=rule.pk,
+            kind=rule.kind,
+            params=rule.effective_params(),
+            tool=rule.tool,
+            confidence=rule.confidence,
+        )
+        for rule in SignalRule.objects.filter(is_active=True, kind__in=DIFF_KINDS)
+    ]
+
+
+@dataclass(frozen=True)
+class DiffSignalWriteResult:
+    created: int = 0
+    deleted: int = 0
+    restatused: int = 0
+
+
+@transaction.atomic
+def reconcile_diff_signals(
+    pull_request_id: int,
+    matches: Collection[tuple[int, StructuralMatch]],
+    rules: Collection[DiffRuleSpec],
+) -> DiffSignalWriteResult:
+    """Reconciles one pull request's *diff-family* signals against what the analysis just found,
+    then re-resolves its `ai_status`.
+
+    The same wanted-vs-existing diff the other two families use, over the same key, so re-running
+    the churn job on an unchanged pull request writes nothing and raising a threshold retires the
+    old signal. It touches only diff kinds: the regex and per-PR signals the sync wrote, and the
+    nightly baseline signals, are none of this writer's business.
+
+    Call it only for an analysis that actually read a diff. A missing clone is not evidence that a
+    signal has gone away, so a `no_clone` or `error` outcome must leave the stored rows alone
+    rather than delete them (PLAN stage 6: "a repository with no clone available produces no diff
+    signals and no error").
+    """
+    rules_by_pk = {rule.pk: rule for rule in rules}
+
+    wanted: dict[tuple[int, str], tuple[DiffRuleSpec, StructuralMatch]] = {}
+    for rule_pk, match in matches:
+        rule = rules_by_pk.get(rule_pk)
+        if rule is None:
+            continue
+        evidence_hash = structural_evidence_hash(match.code, match.params)
+        wanted.setdefault((rule_pk, evidence_hash), (rule, match))
+
+    existing = {
+        (signal.signal_rule_id, signal.evidence_hash): signal
+        for signal in AISignal.objects.filter(
+            pull_request_id=pull_request_id, signal_rule__kind__in=DIFF_KINDS
+        )
+    }
+
+    to_create = [
+        AISignal(
+            pull_request_id=pull_request_id,
+            signal_rule_id=rule.pk,
+            tool=rule.tool,
+            confidence=rule.confidence,
+            evidence="",
+            evidence_code=match.code,
+            evidence_params=match.params,
+            evidence_hash=key[1],
+        )
+        for key, (rule, match) in wanted.items()
+        if key not in existing
+    ]
+    if to_create:
+        AISignal.objects.bulk_create(to_create)
+
+    stale_ids = [signal.pk for key, signal in existing.items() if key not in wanted]
+    if stale_ids:
+        AISignal.objects.filter(pk__in=stale_ids).delete()
+
+    restatused = 0
+    if to_create or stale_ids:
+        restatused = _restatus_pull_requests([pull_request_id])
+    return DiffSignalWriteResult(created=len(to_create), deleted=len(stale_ids), restatused=restatused)

@@ -69,20 +69,6 @@ rules:
       paths, so a vendored tree or a lockfile never contributes. A new service or a code generator
       will trip it legitimately.
 
-  - name: "New dependency nothing in the diff uses"
-    kind: unused_new_dependency
-    params:
-      manifests:
-        - pyproject.toml
-        - package.json
-        - requirements.txt
-    tool: other
-    confidence: medium
-    notes: >
-      Registered but silent until the diff pipeline lands (phase 12, stage 6): deciding whether
-      anything imports a package needs the file contents of the change, which are not in the
-      database. Create and tune it now and it will start producing evidence then.
-
   - name: "Three commits within five minutes of a review comment"
     kind: instant_review_response
     params:
@@ -163,3 +149,72 @@ rules:
       a good description: somebody who wrote two lines and now writes forty is as interesting as
       the reverse. A new PR template will trip it for the whole team at once, which is the first
       thing to check before reading anything into it.
+
+  # --- Diff contents --------------------------------------------------------------------------
+  #
+  # These four read the bytes of the change, which live in no table. They run from the nightly
+  # churn job, off the bare clone it already makes, and cost no GitHub API call — but only for the
+  # repositories named in DIFF_ANALYSIS_REPOSITORIES, because reading the contents of every change
+  # is an operator's choice. A repository that is not opted in produces nothing here, silently and
+  # by design.
+  #
+  # `wholesale_reformat` is the most reliable of the four and the cheapest: one extra
+  # `git diff -w --numstat` against a tree already on disk.
+  - name: "Large diff with almost no semantic change"
+    kind: wholesale_reformat
+    params:
+      min_lines: 200
+      max_semantic_share: 0.15
+    tool: other
+    confidence: medium
+    notes: >
+      Counts the same diff twice, once normally and once ignoring whitespace: a change that moves
+      hundreds of lines and alters almost nothing is a formatter's work. A deliberate "run the
+      formatter over the repository" pull request trips it legitimately — which is why the evidence
+      quotes both counts, so you can see that is what happened.
+
+  - name: "Comment density far above the surrounding code"
+    kind: comment_density_outlier
+    params:
+      min_added_lines: 60
+      min_baseline_lines: 40
+      min_density: 0.2
+      ratio: 2.5
+    tool: other
+    confidence: low
+    notes: >
+      The baseline is the same files before the change, not a repository-wide average, so a
+      well-commented codebase is not flagged for staying well commented. Test files and prose
+      (Markdown, reStructuredText) are skipped, and a change made entirely of new files produces
+      nothing — without a baseline there is nothing to be an outlier against. A developer who
+      documents a tricky module properly will trip it, hence low confidence.
+
+  - name: "The same block repeated across files"
+    kind: duplicated_blocks
+    params:
+      block_lines: 8
+      min_occurrences: 3
+      min_files: 2
+    tool: other
+    confidence: low
+    notes: >
+      Compares added lines with whitespace and comments removed, so re-indented copies still
+      match, and counts non-overlapping occurrences across at least min_files files. Legitimate
+      duplication is everywhere — fixtures, migrations, boilerplate handlers, tests of the same
+      shape — so read the pull request before drawing any conclusion.
+
+  - name: "New dependency nothing in the diff uses"
+    kind: unused_new_dependency
+    params:
+      manifests:
+        - pyproject.toml
+        - package.json
+        - requirements*.txt
+      max_matches: 5
+    tool: other
+    confidence: medium
+    notes: >
+      A manifest gains a package and no added line anywhere else in the change mentions it. The
+      search for a use is deliberately loose — any mention of the name counts — because the failure
+      to avoid is accusing a change that does use its new dependency. A dependency added for a
+      later pull request, or one used only from a config file this cannot read, will trip it.

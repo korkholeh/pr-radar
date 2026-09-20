@@ -9,6 +9,7 @@ from apps.ai_detection.models import (
     Confidence,
     DetectionRule,
     Detector,
+    DiffAnalysis,
     SignalKind,
     SignalRule,
     Tool,
@@ -49,3 +50,17 @@ class AISignalFactory(DjangoModelFactory):
     confidence = Confidence.HIGH
     evidence = "Co-Authored-By: Claude <noreply@anthropic.com>"
     evidence_hash = factory.LazyAttribute(lambda o: hashlib.sha256(o.evidence.encode()).hexdigest())
+
+
+class DiffAnalysisFactory(DjangoModelFactory):
+    """A settled, empty analysis by default: `status=ok` with no facts is what a pull request whose
+    diff carried nothing interesting looks like."""
+
+    class Meta:
+        model = DiffAnalysis
+
+    pull_request = factory.SubFactory(PullRequestFactory)
+    status = DiffAnalysis.Status.OK
+    facts = factory.LazyFunction(dict)
+    base_sha = "0" * 40
+    head_sha = "1" * 40

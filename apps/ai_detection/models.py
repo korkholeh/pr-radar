@@ -108,6 +108,11 @@ class SignalKind(models.TextChoices):
     OFF_HOURS_VOLUME = "off_hours_volume", _("Volume moved outside the author's usual hours")
     TEST_RATIO_LOCKSTEP = "test_ratio_lockstep", _("Test-to-code ratio barely varies across pull requests")
     BODY_STYLE_SHIFT = "body_style_shift", _("Pull-request descriptions broke from the author's own style")
+    # Diff kinds (phase 12, stage 6). These read the bytes of the change, which live in no table —
+    # the only local copy is the bare clone the churn job already makes, so they run there.
+    WHOLESALE_REFORMAT = "wholesale_reformat", _("Large diff with almost no semantic change")
+    COMMENT_DENSITY_OUTLIER = "comment_density_outlier", _("Comment density far above the code it joins")
+    DUPLICATED_BLOCKS = "duplicated_blocks", _("The same block of code repeated across files")
 
 
 class SignalFamily(models.TextChoices):
@@ -133,12 +138,20 @@ SIGNAL_KIND_FAMILY: dict[str, str] = {
     SignalKind.COMMIT_BURST: SignalFamily.PER_PR,
     SignalKind.SINGLE_LARGE_COMMIT: SignalFamily.PER_PR,
     SignalKind.MASS_FILE_CREATION: SignalFamily.PER_PR,
-    SignalKind.UNUSED_NEW_DEPENDENCY: SignalFamily.PER_PR,
     SignalKind.INSTANT_REVIEW_RESPONSE: SignalFamily.PER_PR,
     SignalKind.THROUGHPUT_SHIFT: SignalFamily.BASELINE,
     SignalKind.OFF_HOURS_VOLUME: SignalFamily.BASELINE,
     SignalKind.TEST_RATIO_LOCKSTEP: SignalFamily.BASELINE,
     SignalKind.BODY_STYLE_SHIFT: SignalFamily.BASELINE,
+    # `unused_new_dependency` was registered in stage 4 as a per-PR kind that always returned
+    # nothing, because deciding whether anything imports a package needs the file contents of the
+    # change. Stage 6 gave it those contents, and they only exist in the churn clone — so it is a
+    # DIFF kind now. Moving it rather than leaving it in two places keeps the promise each family
+    # makes: exactly one writer reconciles a kind's rows, so nothing deletes another pass's work.
+    SignalKind.UNUSED_NEW_DEPENDENCY: SignalFamily.DIFF,
+    SignalKind.WHOLESALE_REFORMAT: SignalFamily.DIFF,
+    SignalKind.COMMENT_DENSITY_OUTLIER: SignalFamily.DIFF,
+    SignalKind.DUPLICATED_BLOCKS: SignalFamily.DIFF,
 }
 
 
@@ -154,12 +167,23 @@ SIGNAL_PARAM_DEFAULTS: dict[str, dict[str, object]] = {
     SignalKind.COMMIT_BURST: {"min_commits": 5, "max_gap_seconds": 90, "min_lines_per_commit": 20},
     SignalKind.SINGLE_LARGE_COMMIT: {"min_lines": 300, "min_files": 5},
     SignalKind.MASS_FILE_CREATION: {"min_added_files": 10, "min_directories": 3},
-    SignalKind.UNUSED_NEW_DEPENDENCY: {"manifests": ["pyproject.toml", "package.json", "requirements*.txt"]},
+    SignalKind.UNUSED_NEW_DEPENDENCY: {
+        "manifests": ["pyproject.toml", "package.json", "requirements*.txt"],
+        "max_matches": 5,
+    },
     SignalKind.INSTANT_REVIEW_RESPONSE: {"max_minutes": 5, "min_occurrences": 3},
     SignalKind.THROUGHPUT_SHIFT: {"window_weeks": 8, "ratio": 2.5, "sustained_weeks": 2},
     SignalKind.OFF_HOURS_VOLUME: {"window_weeks": 8, "percentile": 0.9, "min_share": 0.4},
     SignalKind.TEST_RATIO_LOCKSTEP: {"window_weeks": 8, "min_prs": 10, "max_variance": 0.15},
     SignalKind.BODY_STYLE_SHIFT: {"window_weeks": 8, "min_prs": 10, "length_ratio": 4},
+    SignalKind.WHOLESALE_REFORMAT: {"min_lines": 200, "max_semantic_share": 0.15},
+    SignalKind.COMMENT_DENSITY_OUTLIER: {
+        "min_added_lines": 60,
+        "min_baseline_lines": 40,
+        "min_density": 0.2,
+        "ratio": 2.5,
+    },
+    SignalKind.DUPLICATED_BLOCKS: {"block_lines": 8, "min_occurrences": 3, "min_files": 2},
 }
 
 
@@ -311,3 +335,47 @@ class AISignal(models.Model):
 
     def __str__(self) -> str:
         return f"{self.rule or self.signal_rule} on {self.pull_request}"
+
+
+class DiffAnalysis(models.Model):
+    """The result of reading one pull request's diff out of the churn clone (phase 12, stage 6).
+
+    Two reasons this is stored rather than recomputed on demand. It costs a clone and several
+    `git` calls, so it belongs to the nightly job that already has both; and the policy engine
+    (stage 7) evaluates during a sync, where no clone is available — it reads `facts` from here
+    instead. One row per pull request, rewritten by each analysis, holding the same
+    `status`/`error` vocabulary as `ChurnResult` for the same reason: a failure is a statement
+    about git, not a verdict about the pull request, so an `error` row is retried while a settled
+    one is not.
+
+    `facts` is `diffsignals.DiffFacts` as data — counts, paths and codes, never a rendered
+    sentence and never a matched secret.
+    """
+
+    class Status(models.TextChoices):
+        OK = "ok", _("OK")
+        NO_CLONE = "no_clone", _("No clone available")
+        TOO_LARGE = "too_large", _("Too large")
+        UNSUPPORTED_MERGE_METHOD = "unsupported_merge_method", _("Unsupported merge method")
+        ERROR = "error", _("Error")
+
+    pull_request = models.OneToOneField(
+        "activity.PullRequest",
+        on_delete=models.CASCADE,
+        related_name="diff_analysis",
+        verbose_name=_("pull request"),
+    )
+    status = models.CharField(_("status"), max_length=30, choices=Status.choices)
+    facts = models.JSONField(_("diff facts"), default=dict, blank=True)
+    base_sha = models.CharField(_("base sha"), max_length=64, blank=True)
+    head_sha = models.CharField(_("head sha"), max_length=64, blank=True)
+    computed_at = models.DateTimeField(_("computed at"), auto_now=True)
+    error = models.TextField(_("error"), blank=True)
+
+    class Meta:
+        verbose_name = _("diff analysis")
+        verbose_name_plural = _("diff analyses")
+        indexes = [models.Index(fields=["status", "computed_at"])]
+
+    def __str__(self) -> str:
+        return f"{self.pull_request} diff analysis ({self.status})"

@@ -22,7 +22,7 @@ from django.utils.translation import gettext_noop, ngettext
 
 
 class EvidenceCode:
-    """The codes `structural.py` (and, from stage 5, `baselines.py`) may write.
+    """The codes `structural.py`, `baselines.py` (stage 5) and `diffsignals.py` (stage 6) may write.
 
     Plain string constants rather than `TextChoices`: these never reach a model field's `choices`,
     only `AISignal.evidence_code`, and the registry below is what a test checks them against.
@@ -38,6 +38,9 @@ class EvidenceCode:
     OFF_HOURS_VOLUME = "off_hours_volume"
     TEST_RATIO_LOCKSTEP = "test_ratio_lockstep"
     BODY_STYLE_SHIFT = "body_style_shift"
+    WHOLESALE_REFORMAT = "wholesale_reformat"
+    COMMENT_DENSITY_OUTLIER = "comment_density_outlier"
+    DUPLICATED_BLOCKS = "duplicated_blocks"
 
 
 class _MessageDef(TypedDict, total=False):
@@ -119,6 +122,33 @@ EVIDENCE_MESSAGES: dict[str, _MessageDef] = {
             "rule flags at %(min_ratio)s."
         ),
     },
+    EvidenceCode.WHOLESALE_REFORMAT: {
+        "singular": gettext_noop(
+            "Of %(lines)s changed lines only %(semantic_lines)s change anything but whitespace — "
+            "%(share)s%% of the diff (the rule flags %(min_lines)s lines at or below %(max_share)s%%)."
+        ),
+    },
+    EvidenceCode.COMMENT_DENSITY_OUTLIER: {
+        "singular": gettext_noop(
+            "The added code is %(density)s%% comments and docstrings (%(comment_lines)s comment "
+            "lines to %(code_lines)s code lines), against %(baseline_density)s%% in the same files "
+            "before the change — the rule flags %(ratio)s times the baseline, at %(min_density)s%% "
+            "or more."
+        ),
+    },
+    EvidenceCode.DUPLICATED_BLOCKS: {
+        "singular": (
+            "The same %(block_lines)s-line block of added code appears %(occurrences)s time across "
+            "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
+            "files)."
+        ),
+        "plural": (
+            "The same %(block_lines)s-line block of added code appears %(occurrences)s times across "
+            "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
+            "files)."
+        ),
+        "count_key": "occurrences",
+    },
 }
 
 
@@ -139,6 +169,15 @@ def _register_plural_forms_for_makemessages() -> None:  # pragma: no cover
         "(the rule flags %(min_occurrences)s such times).",
         "A new commit followed a review comment within %(max_minutes)s minutes, %(occurrences)s times "
         "(the rule flags %(min_occurrences)s such times).",
+        1,
+    )
+    ngettext(
+        "The same %(block_lines)s-line block of added code appears %(occurrences)s time across "
+        "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
+        "files).",
+        "The same %(block_lines)s-line block of added code appears %(occurrences)s times across "
+        "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
+        "files).",
         1,
     )
 

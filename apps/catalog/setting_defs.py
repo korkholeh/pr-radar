@@ -299,6 +299,17 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "churn",
     ),
     SettingDef(
+        "DIFF_ANALYSIS_REPOSITORIES",
+        "list",
+        [],
+        _(
+            "Repositories (owner/name) whose diffs are analysed for structural AI signals during "
+            "the nightly churn run. Opt-in per repository because it reads the contents of every "
+            'change; "*" opts in every repository. Empty means no diff analysis runs.'
+        ),
+        "churn",
+    ),
+    SettingDef(
         "DASHBOARD_TABLE_PAGE_SIZE",
         "int",
         25,

@@ -8,10 +8,12 @@ never moves `ai_status` on its own (see `services.resolve_ai_status`).
 
 Each kind is a pure function of `(params, StructuralContext) -> Iterator[StructuralMatch]`,
 mirroring `detectors.DETECTORS` so `services.detect_pull_request` can run both families through
-one wanted-vs-existing diff. A kind never touches the database and never reads outcome data:
-churn, reverts and follow-up fixes are what this project *measures for* the AI cohort, so using
-them to decide who is in that cohort would make the quality dashboards self-proving (PLAN D7,
-asserted by a test).
+one wanted-vs-existing diff. The two other families live in `baselines.py` (an author's history)
+and `diffsignals.py` (the bytes of the change, read from the churn clone).
+
+A kind never touches the database and never reads outcome data: churn, reverts and follow-up fixes
+are what this project *measures for* the AI cohort, so using them to decide who is in that cohort
+would make the quality dashboards self-proving (PLAN D7, asserted by a test).
 
 Every match carries the thresholds that produced it in its params, not just the measurement. A
 lead reading "40 minutes" cannot judge it without knowing the rule said two hours, and a signal
@@ -24,7 +26,7 @@ from __future__ import annotations
 import datetime
 import posixpath
 from collections.abc import Callable, Iterator, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from apps.activity.models import PullRequest
@@ -66,10 +68,6 @@ class StructuralContext:
     commits: tuple[StructuralCommit, ...]  # ordered by committed_at, then position
     files: tuple[StructuralFile, ...]  # non-excluded, ordered by path
     review_comment_times: tuple[datetime.datetime, ...]  # ordered, comments by anyone but the author
-    # Filled in stage 6 from the churn clone; empty here, so `unused_new_dependency` is registered
-    # and silent rather than absent (the convention phase 6 used for `ci_first_pass_rate`).
-    diff_text: str = ""
-    added_dependencies: tuple[tuple[str, str], ...] = field(default=())  # (manifest, package)
 
     @property
     def effective_lines(self) -> int:
@@ -227,28 +225,6 @@ def _mass_file_creation(params: Mapping[str, Any], ctx: StructuralContext) -> It
     )
 
 
-def _unused_new_dependency(params: Mapping[str, Any], ctx: StructuralContext) -> Iterator[StructuralMatch]:
-    """Registered here, silent until stage 6.
-
-    Deciding whether anything imports a package needs the file contents of the change, which are
-    not in the database — the only place those bytes already exist locally is the churn clone. The
-    kind ships registered-but-empty rather than absent so a lead can create and tune the rule now
-    and have it start producing evidence when the diff pipeline lands, instead of the kind
-    appearing out of nowhere later.
-    """
-    manifests = params.get("manifests") or []
-    if not ctx.added_dependencies:
-        return
-    known = {str(manifest) for manifest in manifests}
-    for manifest, package in ctx.added_dependencies:
-        if known and manifest not in known:
-            continue
-        yield StructuralMatch(
-            code=EvidenceCode.UNUSED_NEW_DEPENDENCY,
-            params={"manifest": manifest, "package": package},
-        )
-
-
 def _instant_review_response(params: Mapping[str, Any], ctx: StructuralContext) -> Iterator[StructuralMatch]:
     """Repeatedly, a new commit lands moments after a reviewer comments.
 
@@ -290,7 +266,6 @@ SIGNAL_FUNCTIONS: dict[str, SignalFunction] = {
     SignalKind.COMMIT_BURST: _commit_burst,
     SignalKind.SINGLE_LARGE_COMMIT: _single_large_commit,
     SignalKind.MASS_FILE_CREATION: _mass_file_creation,
-    SignalKind.UNUSED_NEW_DEPENDENCY: _unused_new_dependency,
     SignalKind.INSTANT_REVIEW_RESPONSE: _instant_review_response,
 }
 

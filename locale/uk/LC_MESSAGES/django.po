@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 07:17+0000\n"
+"POT-Creation-Date: 2026-09-20 08:29+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -11,10 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
-"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
-"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
-"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #: apps/accounts/models.py:8
 msgid "System"
@@ -64,7 +61,7 @@ msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:303
-#: apps/ai_detection/models.py:61 apps/ai_detection/models.py:183
+#: apps/ai_detection/models.py:61 apps/ai_detection/models.py:207
 #: apps/connections/models.py:43 apps/dashboards/models.py:60
 #: apps/policy/models.py:20 apps/policy/models.py:119
 msgid "created at"
@@ -388,8 +385,8 @@ msgstr "має подальше виправлення"
 #: apps/activity/models.py:127 apps/activity/models.py:202
 #: apps/activity/models.py:225 apps/activity/models.py:262
 #: apps/activity/models.py:293 apps/activity/models.py:326
-#: apps/ai_detection/models.py:246 apps/churn/models.py:16
-#: apps/policy/models.py:102
+#: apps/ai_detection/models.py:270 apps/ai_detection/models.py:366
+#: apps/churn/models.py:16 apps/policy/models.py:102
 msgid "pull request"
 msgstr "pull request"
 
@@ -434,7 +431,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:186 apps/activity/models.py:205
-#: apps/ai_detection/models.py:254
+#: apps/ai_detection/models.py:278
 msgid "commit"
 msgstr "коміт"
 
@@ -458,9 +455,10 @@ msgstr "коміти pull request-у"
 msgid "path"
 msgstr "шлях"
 
-#: apps/activity/models.py:228 apps/churn/models.py:24
-#: apps/connections/models.py:28 apps/dashboards/models.py:53
-#: apps/github_sync/models.py:32 apps/policy/models.py:108
+#: apps/activity/models.py:228 apps/ai_detection/models.py:368
+#: apps/churn/models.py:24 apps/connections/models.py:28
+#: apps/dashboards/models.py:53 apps/github_sync/models.py:32
+#: apps/policy/models.py:108
 msgid "status"
 msgstr "статус"
 
@@ -544,7 +542,8 @@ msgstr "Успіх"
 msgid "Failure"
 msgstr "Помилка"
 
-#: apps/activity/models.py:321 apps/churn/models.py:10
+#: apps/activity/models.py:321 apps/ai_detection/models.py:360
+#: apps/churn/models.py:10
 msgid "Error"
 msgstr "Помилка виконання"
 
@@ -576,7 +575,7 @@ msgstr "статус перевірки"
 msgid "check statuses"
 msgstr "статуси перевірок"
 
-#: apps/ai_detection/evidence.py:52
+#: apps/ai_detection/evidence.py:55
 #, python-format
 msgid ""
 "%(lines)s lines across %(files)s files arrived %(hours)s hours after the "
@@ -587,7 +586,7 @@ msgstr ""
 "першого коміту (правило спрацьовує на %(min_lines)s рядках і %(min_files)s "
 "файлах протягом %(max_hours)s год)."
 
-#: apps/ai_detection/evidence.py:69
+#: apps/ai_detection/evidence.py:72
 #, python-format
 msgid ""
 "The whole change — %(lines)s lines across %(files)s files — arrived in a "
@@ -596,16 +595,17 @@ msgstr ""
 "Уся зміна — %(lines)s рядків у %(files)s файлах — надійшла одним комітом "
 "(правило спрацьовує на %(min_lines)s рядках і %(min_files)s файлах)."
 
-#: apps/ai_detection/evidence.py:75
+#: apps/ai_detection/evidence.py:78
 #, python-format
 msgid ""
-"%(added_files)s new files were added across %(directories)s directories (the "
-"rule flags %(min_added_files)s files across %(min_directories)s directories)."
+"%(added_files)s new files were added across %(directories)s directories (the"
+" rule flags %(min_added_files)s files across %(min_directories)s "
+"directories)."
 msgstr ""
 "Додано %(added_files)s нових файлів у %(directories)s каталогах (правило "
 "спрацьовує на %(min_added_files)s файлах у %(min_directories)s каталогах)."
 
-#: apps/ai_detection/evidence.py:81
+#: apps/ai_detection/evidence.py:84
 #, python-format
 msgid ""
 "%(manifest)s adds the dependency %(package)s, and nothing else in this "
@@ -614,7 +614,7 @@ msgstr ""
 "%(manifest)s додає залежність %(package)s, і ніщо інше в цій зміні її не "
 "імпортує."
 
-#: apps/ai_detection/evidence.py:97
+#: apps/ai_detection/evidence.py:100
 #, python-format
 msgid ""
 "This author opened %(recent_per_week)s pull requests a week recently, "
@@ -623,11 +623,11 @@ msgid ""
 "flags %(min_ratio)s)."
 msgstr ""
 "Останнім часом цей автор відкривав %(recent_per_week)s PR на тиждень проти "
-"%(earlier_per_week)s на тиждень до того — у %(ratio)s разів більше за власний "
-"темп після врахування зміни самої команди у %(team_ratio)s (правило "
+"%(earlier_per_week)s на тиждень до того — у %(ratio)s разів більше за "
+"власний темп після врахування зміни самої команди у %(team_ratio)s (правило "
 "спрацьовує на %(min_ratio)s)."
 
-#: apps/ai_detection/evidence.py:104
+#: apps/ai_detection/evidence.py:107
 #, python-format
 msgid ""
 "%(share)s%% of this author's recent volume landed outside the hours they "
@@ -637,29 +637,54 @@ msgstr ""
 "які він зазвичай комітить (%(usual_hours)s); правило спрацьовує на "
 "%(min_share)s%%."
 
-#: apps/ai_detection/evidence.py:110
+#: apps/ai_detection/evidence.py:113
 #, python-format
 msgid ""
 "Across %(pr_count)s pull requests the test-to-code ratio stayed at about "
-"%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under "
-"%(max_variance)s)."
+"%(mean_ratio)s, varying by only %(spread)s (the rule flags a variation under"
+" %(max_variance)s)."
 msgstr ""
 "У %(pr_count)s PR співвідношення тестів до коду трималося близько "
 "%(mean_ratio)s і змінювалося лише на %(spread)s (правило спрацьовує на "
 "відхиленні менше ніж %(max_variance)s)."
 
-#: apps/ai_detection/evidence.py:117
+#: apps/ai_detection/evidence.py:120
 #, python-format
 msgid ""
 "This author's pull-request descriptions run about %(recent_length)s "
-"characters recently, against %(earlier_length)s before — %(ratio)s times the "
-"difference the rule flags at %(min_ratio)s."
+"characters recently, against %(earlier_length)s before — %(ratio)s times the"
+" difference the rule flags at %(min_ratio)s."
 msgstr ""
-"Описи PR цього автора останнім часом мають близько %(recent_length)s символів "
-"проти %(earlier_length)s раніше — різниця у %(ratio)s разів, тоді як правило "
-"спрацьовує на %(min_ratio)s."
+"Описи PR цього автора останнім часом мають близько %(recent_length)s "
+"символів проти %(earlier_length)s раніше — різниця у %(ratio)s разів, тоді "
+"як правило спрацьовує на %(min_ratio)s."
 
-#: apps/ai_detection/evidence.py:131
+#: apps/ai_detection/evidence.py:127
+#, python-format
+msgid ""
+"Of %(lines)s changed lines only %(semantic_lines)s change anything but "
+"whitespace — %(share)s%% of the diff (the rule flags %(min_lines)s lines at "
+"or below %(max_share)s%%)."
+msgstr ""
+"Зі %(lines)s змінених рядків лише %(semantic_lines)s змінюють щось, окрім "
+"пробілів, — %(share)s%% дифу (правило спрацьовує на %(min_lines)s рядках за "
+"умови %(max_share)s%% або менше)."
+
+#: apps/ai_detection/evidence.py:133
+#, python-format
+msgid ""
+"The added code is %(density)s%% comments and docstrings (%(comment_lines)s "
+"comment lines to %(code_lines)s code lines), against %(baseline_density)s%% "
+"in the same files before the change — the rule flags %(ratio)s times the "
+"baseline, at %(min_density)s%% or more."
+msgstr ""
+"Доданий код на %(density)s%% складається з коментарів і докстрингів "
+"(%(comment_lines)s рядків коментарів проти %(code_lines)s рядків коду), "
+"тоді як у тих самих файлах до зміни було %(baseline_density)s%%. Правило "
+"спрацьовує на перевищенні базового рівня в %(ratio)s разів за щільності "
+"%(min_density)s%% або більше."
+
+#: apps/ai_detection/evidence.py:161
 #, python-format
 msgid ""
 "%(commits)s substantial commits landed less than %(gap_seconds)s seconds "
@@ -686,7 +711,7 @@ msgstr[3] ""
 "с (правило спрацьовує на %(min_commits)s таких комітах протягом "
 "%(max_gap_seconds)s с)."
 
-#: apps/ai_detection/evidence.py:138
+#: apps/ai_detection/evidence.py:168
 #, python-format
 msgid ""
 "A new commit followed a review comment within %(max_minutes)s minutes, "
@@ -699,7 +724,8 @@ msgstr[0] ""
 "%(occurrences)s раз (правило спрацьовує на %(min_occurrences)s таких разах)."
 msgstr[1] ""
 "Новий коміт надходив протягом %(max_minutes)s хв після коментаря ревʼю "
-"%(occurrences)s рази (правило спрацьовує на %(min_occurrences)s таких разах)."
+"%(occurrences)s рази (правило спрацьовує на %(min_occurrences)s таких "
+"разах)."
 msgstr[2] ""
 "Новий коміт надходив протягом %(max_minutes)s хв після коментаря ревʼю "
 "%(occurrences)s разів (правило спрацьовує на %(min_occurrences)s таких "
@@ -708,6 +734,36 @@ msgstr[3] ""
 "Новий коміт надходив протягом %(max_minutes)s хв після коментаря ревʼю "
 "%(occurrences)s разів (правило спрацьовує на %(min_occurrences)s таких "
 "разах)."
+
+#: apps/ai_detection/evidence.py:175
+#, python-format
+#| msgid ""
+#| "The whole change — %(lines)s lines across %(files)s files — arrived in a "
+#| "single commit (the rule flags %(min_lines)s lines and %(min_files)s files)."
+msgid ""
+"The same %(block_lines)s-line block of added code appears %(occurrences)s "
+"time across %(files)s files (the rule flags %(min_occurrences)s occurrences "
+"across %(min_files)s files)."
+msgid_plural ""
+"The same %(block_lines)s-line block of added code appears %(occurrences)s "
+"times across %(files)s files (the rule flags %(min_occurrences)s occurrences"
+" across %(min_files)s files)."
+msgstr[0] ""
+"Той самий блок доданого коду з %(block_lines)s рядків зустрічається "
+"%(occurrences)s раз у %(files)s файлах (правило спрацьовує на "
+"%(min_occurrences)s випадках у %(min_files)s файлах)."
+msgstr[1] ""
+"Той самий блок доданого коду з %(block_lines)s рядків зустрічається "
+"%(occurrences)s рази у %(files)s файлах (правило спрацьовує на "
+"%(min_occurrences)s випадках у %(min_files)s файлах)."
+msgstr[2] ""
+"Той самий блок доданого коду з %(block_lines)s рядків зустрічається "
+"%(occurrences)s разів у %(files)s файлах (правило спрацьовує на "
+"%(min_occurrences)s випадках у %(min_files)s файлах)."
+msgstr[3] ""
+"Той самий блок доданого коду з %(block_lines)s рядків зустрічається "
+"%(occurrences)s разів у %(files)s файлах (правило спрацьовує на "
+"%(min_occurrences)s випадках у %(min_files)s файлах)."
 
 #: apps/ai_detection/forms.py:12 apps/ai_detection/forms.py:72
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:14
@@ -759,8 +815,7 @@ msgid "Notes"
 msgstr "Нотатки"
 
 #: apps/ai_detection/forms.py:58
-msgid ""
-"Enter the parameters as a JSON object, for example {\"min_lines\": 400}."
+msgid "Enter the parameters as a JSON object, for example {\"min_lines\": 400}."
 msgstr "Введіть параметри як обʼєкт JSON, наприклад {\"min_lines\": 400}."
 
 #: apps/ai_detection/forms.py:73
@@ -890,7 +945,7 @@ msgstr "Середній"
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:176
+#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:200
 #: apps/catalog/models.py:41 apps/catalog/models.py:71
 #: apps/connections/models.py:19 apps/github_sync/models.py:62
 msgid "name"
@@ -904,29 +959,29 @@ msgstr "детектор"
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:57 apps/ai_detection/models.py:179
-#: apps/ai_detection/models.py:273
+#: apps/ai_detection/models.py:57 apps/ai_detection/models.py:203
+#: apps/ai_detection/models.py:297
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:58 apps/ai_detection/models.py:180
-#: apps/ai_detection/models.py:274
+#: apps/ai_detection/models.py:58 apps/ai_detection/models.py:204
+#: apps/ai_detection/models.py:298
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:59 apps/ai_detection/models.py:181
+#: apps/ai_detection/models.py:59 apps/ai_detection/models.py:205
 #: apps/catalog/models.py:17 apps/catalog/models.py:47
 #: apps/catalog/models.py:80 apps/catalog/models.py:104
 #: apps/connections/models.py:34 apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:60 apps/ai_detection/models.py:182
+#: apps/ai_detection/models.py:60 apps/ai_detection/models.py:206
 #: apps/catalog/models.py:109
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:62 apps/ai_detection/models.py:184
+#: apps/ai_detection/models.py:62 apps/ai_detection/models.py:208
 #: apps/connections/models.py:44 apps/metrics/models.py:58
 #: apps/policy/models.py:120
 msgid "updated at"
@@ -948,7 +1003,8 @@ msgstr "Не є коректним регулярним виразом: %(error)
 #: apps/ai_detection/models.py:84
 msgid ""
 "This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
-"which can hang on a normal PR body. Rewrite it without the nested quantifier."
+"which can hang on a normal PR body. Rewrite it without the nested "
+"quantifier."
 msgstr ""
 "Цей шаблон вкладає групу з повторенням в іншу групу з повторенням "
 "(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
@@ -994,104 +1050,166 @@ msgstr "Співвідношення тестів до коду майже не 
 msgid "Pull-request descriptions broke from the author's own style"
 msgstr "Описи PR відірвалися від власного стилю автора"
 
-#: apps/ai_detection/models.py:126
+#: apps/ai_detection/models.py:113
+msgid "Large diff with almost no semantic change"
+msgstr "Великий диф майже без змістових змін"
+
+#: apps/ai_detection/models.py:114
+msgid "Comment density far above the code it joins"
+msgstr "Щільність коментарів значно вища, ніж у коді, до якого їх додано"
+
+#: apps/ai_detection/models.py:115
+msgid "The same block of code repeated across files"
+msgstr "Той самий блок коду повторюється в кількох файлах"
+
+#: apps/ai_detection/models.py:131
 msgid "Per pull request"
 msgstr "На пул-реквест"
 
-#: apps/ai_detection/models.py:127
+#: apps/ai_detection/models.py:132
 msgid "Author baseline"
 msgstr "Базова лінія автора"
 
-#: apps/ai_detection/models.py:128
+#: apps/ai_detection/models.py:133
 msgid "Diff contents"
 msgstr "Вміст дифу"
 
-#: apps/ai_detection/models.py:177 apps/catalog/models.py:133
+#: apps/ai_detection/models.py:201 apps/catalog/models.py:133
 #: apps/connections/models.py:20 apps/dashboards/models.py:48
 msgid "kind"
 msgstr "вид"
 
-#: apps/ai_detection/models.py:178
+#: apps/ai_detection/models.py:202
 msgid "parameters"
 msgstr "параметри"
 
-#: apps/ai_detection/models.py:187 apps/ai_detection/models.py:271
+#: apps/ai_detection/models.py:211 apps/ai_detection/models.py:295
 msgid "structural signal rule"
 msgstr "структурне правило сигналу"
 
-#: apps/ai_detection/models.py:188
+#: apps/ai_detection/models.py:212
 msgid "structural signal rules"
 msgstr "структурні правила сигналів"
 
-#: apps/ai_detection/models.py:206
+#: apps/ai_detection/models.py:230
 msgid ""
 "A structural rule can never be high confidence. Only an artefact the tool "
 "itself wrote proves AI authorship; a heuristic about a pull request's shape "
 "is evidence for a human to read."
 msgstr ""
 "Структурне правило ніколи не може мати високу впевненість. Лише артефакт, "
-"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR — "
-"це доказ, який читає людина."
+"який написав сам інструмент, доводить авторство ШІ; евристика про форму PR —"
+" це доказ, який читає людина."
 
-#: apps/ai_detection/models.py:214
+#: apps/ai_detection/models.py:238
 msgid "Unknown signal kind."
 msgstr "Невідомий вид сигналу."
 
-#: apps/ai_detection/models.py:217
+#: apps/ai_detection/models.py:241
 msgid "Parameters must be a JSON object."
 msgstr "Параметри мають бути обʼєктом JSON."
 
-#: apps/ai_detection/models.py:222
+#: apps/ai_detection/models.py:246
 #, python-format
 msgid "Unknown parameter(s) for this kind: %(names)s. Known: %(known)s."
 msgstr "Невідомі параметри для цього виду: %(names)s. Відомі: %(known)s."
 
-#: apps/ai_detection/models.py:231
+#: apps/ai_detection/models.py:255
 #, python-format
 msgid "Parameter %(name)s must be a number."
 msgstr "Параметр %(name)s має бути числом."
 
-#: apps/ai_detection/models.py:233
+#: apps/ai_detection/models.py:257
 #, python-format
 msgid "Parameter %(name)s cannot be negative."
 msgstr "Параметр %(name)s не може бути відʼємним."
 
-#: apps/ai_detection/models.py:263
+#: apps/ai_detection/models.py:287
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:280
+#: apps/ai_detection/models.py:304
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:281
+#: apps/ai_detection/models.py:305
 msgid "evidence code"
 msgstr "код доказу"
 
-#: apps/ai_detection/models.py:282
+#: apps/ai_detection/models.py:306
 msgid "evidence parameters"
 msgstr "параметри доказу"
 
-#: apps/ai_detection/models.py:283
+#: apps/ai_detection/models.py:307
 msgid "evidence hash"
 msgstr "хеш доказу"
 
-#: apps/ai_detection/models.py:284
+#: apps/ai_detection/models.py:308
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:287
+#: apps/ai_detection/models.py:311
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:288
+#: apps/ai_detection/models.py:312
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:157
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:175
 msgid "AI signals"
 msgstr "сигнали ШІ"
 
+#: apps/ai_detection/models.py:356 apps/churn/models.py:7
+#: apps/connections/models.py:14
+msgid "OK"
+msgstr "OK"
+
+#: apps/ai_detection/models.py:357
+#| msgid "Export unavailable"
+msgid "No clone available"
+msgstr "Локальна копія недоступна"
+
+#: apps/ai_detection/models.py:358 apps/churn/models.py:9
+msgid "Too large"
+msgstr "Занадто великий"
+
+#: apps/ai_detection/models.py:359 apps/churn/models.py:8
+msgid "Unsupported merge method"
+msgstr "Непідтримуваний спосіб мерджу"
+
+#: apps/ai_detection/models.py:369
+#| msgid "Diff contents"
+msgid "diff facts"
+msgstr "факти дифу"
+
+#: apps/ai_detection/models.py:370
+#| msgid "base ref"
+msgid "base sha"
+msgstr "базовий sha"
+
+#: apps/ai_detection/models.py:371
+#| msgid "head ref"
+msgid "head sha"
+msgstr "кінцевий sha"
+
+#: apps/ai_detection/models.py:372 apps/churn/models.py:23
+#: apps/metrics/models.py:26
+msgid "computed at"
+msgstr "обчислено о"
+
+#: apps/ai_detection/models.py:373 apps/churn/models.py:25
+msgid "error"
+msgstr "помилка"
+
+#: apps/ai_detection/models.py:376
+msgid "diff analysis"
+msgstr "аналіз дифу"
+
+#: apps/ai_detection/models.py:377
+msgid "diff analyses"
+msgstr "аналізи дифу"
+
 #: apps/ai_detection/templates/ai_detection/partials/dry_run_result.html:11
-#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:11
+#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:19
 #, python-format
 msgid "%(counter)s match in the last %(limit)s PRs"
 msgid_plural "%(counter)s matches in the last %(limit)s PRs"
@@ -1101,7 +1219,7 @@ msgstr[2] "%(counter)s збігів серед останніх %(limit)s PR"
 msgstr[3] "%(counter)s збігу серед останніх %(limit)s PR"
 
 #: apps/ai_detection/templates/ai_detection/partials/dry_run_result.html:27
-#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:27
+#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:35
 msgid "No matches."
 msgstr "Немає збігів."
 
@@ -1211,7 +1329,8 @@ msgstr "Ще немає правил детекції."
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:30
 msgid "Add a detection rule to start flagging AI-authored code automatically."
-msgstr "Додайте правило детекції, щоб автоматично позначати код, написаний ШІ."
+msgstr ""
+"Додайте правило детекції, щоб автоматично позначати код, написаний ШІ."
 
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:40
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:43
@@ -1231,6 +1350,26 @@ msgstr ""
 msgid "Run"
 msgstr "Запустити"
 
+#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:11
+msgid ""
+"This rule reads an author's whole history, so it cannot be previewed against"
+" recent pull requests. Activate it and run the nightly baseline job to see "
+"what it finds."
+msgstr ""
+"Це правило читає всю історію автора, тому його не можна перевірити на "
+"останніх пул-реквестах. Увімкніть його та запустіть нічне обчислення базових"
+" рівнів, щоб побачити результат."
+
+#: apps/ai_detection/templates/ai_detection/partials/signal_dry_run_result.html:15
+msgid ""
+"This rule reads the contents of each change from the local clone, which only"
+" the nightly churn run has. Activate it, add the repository to the diff-"
+"analysis list in Settings, and the next run will show what it finds."
+msgstr ""
+"Це правило читає вміст кожної зміни з локальної копії, яка є лише в нічному "
+"обчисленні churn. Увімкніть його, додайте репозиторій до списку аналізу "
+"дифів у налаштуваннях — і наступний запуск покаже результат."
+
 #: apps/ai_detection/templates/ai_detection/partials/signal_rule_form.html:4
 #: apps/ai_detection/templates/ai_detection/signal_rule_form.html:3
 msgid "Edit structural signal rule"
@@ -1244,8 +1383,8 @@ msgstr "Нове структурне правило"
 #: apps/ai_detection/templates/ai_detection/partials/signal_rule_form.html:7
 msgid ""
 "A structural rule can never be high confidence: only an artefact the tool "
-"itself wrote proves AI authorship. What a heuristic produces is evidence for "
-"you to read."
+"itself wrote proves AI authorship. What a heuristic produces is evidence for"
+" you to read."
 msgstr ""
 "Структурне правило ніколи не може мати високу впевненість: лише артефакт, "
 "який написав сам інструмент, доводить авторство ШІ. Те, що дає евристика, — "
@@ -1261,8 +1400,8 @@ msgstr "Структурні сигнали"
 msgid ""
 "These rules read the shape of a pull request — how fast it arrived, how its "
 "commits are spaced, how many files it created — rather than any text a tool "
-"wrote. None of them can be high confidence, and one structural signal on its "
-"own never changes a pull request's AI status. Every shipped rule starts "
+"wrote. None of them can be high confidence, and one structural signal on its"
+" own never changes a pull request's AI status. Every shipped rule starts "
 "deactivated: a threshold that is right for one team produces noise on "
 "another, so dry-run it against your own pull requests first."
 msgstr ""
@@ -1593,10 +1732,10 @@ msgstr "Верхня межа кількості рядків для кожно�
 
 #: apps/catalog/setting_defs.py:141
 msgid ""
-"How many distinct structural signal kinds a pull request needs before its AI "
-"status becomes 'suspected'. Counted over kinds, not rows: five commit bursts "
-"are one kind of evidence. No number of structural signals ever reaches "
-"'explicit'."
+"How many distinct structural signal kinds a pull request needs before its AI"
+" status becomes 'suspected'. Counted over kinds, not rows: five commit "
+"bursts are one kind of evidence. No number of structural signals ever "
+"reaches 'explicit'."
 msgstr ""
 "Скільки різних видів структурних сигналів потрібно PR, щоб його статус ШІ "
 "став «підозрюється». Рахуються види, а не рядки: пʼять серій комітів — це "
@@ -1609,8 +1748,8 @@ msgid ""
 "names."
 msgstr ""
 "Шляхи, які позначають репозиторій як налаштований для агента ШІ. "
-"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині будь-"
-"якого каталогу, названого шаблоном."
+"Зіставляються з кореневим деревом репозиторію та одним рівнем усередині "
+"будь-якого каталогу, названого шаблоном."
 
 #: apps/catalog/setting_defs.py:190
 msgid "File path globs excluded from size and churn calculations."
@@ -1625,8 +1764,8 @@ msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
 msgstr ""
-"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
-"формальним."
+"Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю"
+" формальним."
 
 #: apps/catalog/setting_defs.py:218
 msgid "How many top reviewers count toward review load."
@@ -1642,7 +1781,8 @@ msgstr "Мінімальна частка перетину файлів для �
 
 #: apps/catalog/setting_defs.py:238
 msgid ""
-"How long a computed metrics result stays cached before it expires on its own."
+"How long a computed metrics result stays cached before it expires on its "
+"own."
 msgstr ""
 "Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
 "сам по собі."
@@ -1660,7 +1800,8 @@ msgstr ""
 
 #: apps/catalog/setting_defs.py:259
 msgid ""
-"Rule codes switched off; an open violation for a disabled rule auto-resolves."
+"Rule codes switched off; an open violation for a disabled rule auto-"
+"resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
@@ -1707,7 +1848,19 @@ msgstr ""
 "Максимальний час у секундах, який обчислення churn витрачає на один "
 "репозиторій, перш ніж відкласти решту."
 
-#: apps/catalog/setting_defs.py:305
+#: apps/catalog/setting_defs.py:306
+msgid ""
+"Repositories (owner/name) whose diffs are analysed for structural AI signals"
+" during the nightly churn run. Opt-in per repository because it reads the "
+"contents of every change; \"*\" opts in every repository. Empty means no "
+"diff analysis runs."
+msgstr ""
+"Репозиторії (owner/name), дифи яких аналізуються на структурні AI-сигнали "
+"під час нічного обчислення churn. Увімкнення окреме для кожного репозиторію,"
+" бо аналіз читає вміст кожної зміни; «*» означає всі репозиторії. Порожній "
+"список — аналіз дифів не виконується."
+
+#: apps/catalog/setting_defs.py:316
 msgid ""
 "Rows per page on a dashboard table (projects, repositories, people, recent "
 "PRs)."
@@ -1715,46 +1868,46 @@ msgstr ""
 "Кількість рядків на сторінці таблиці дашборду (проєкти, репозиторії, люди, "
 "останні PR)."
 
-#: apps/catalog/setting_defs.py:312
+#: apps/catalog/setting_defs.py:323
 msgid "Maximum files shown on the PR detail page before a '+N more' line."
 msgstr ""
 "Максимальна кількість файлів на сторінці деталей PR перед рядком «+N ще»."
 
-#: apps/catalog/setting_defs.py:319
+#: apps/catalog/setting_defs.py:330
 msgid ""
-"Authors/reviewers shown per axis on the reviews heat map; the rest fold into "
-"'Other'."
+"Authors/reviewers shown per axis on the reviews heat map; the rest fold into"
+" 'Other'."
 msgstr ""
 "Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
 "згортаються в «Інше»."
 
-#: apps/catalog/setting_defs.py:322
+#: apps/catalog/setting_defs.py:333
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:327
+#: apps/catalog/setting_defs.py:338
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:330
+#: apps/catalog/setting_defs.py:341
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:335
+#: apps/catalog/setting_defs.py:346
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:339
+#: apps/catalog/setting_defs.py:350
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:345
+#: apps/catalog/setting_defs.py:356
 msgid "Days a background export file is kept before cleanup deletes it."
 msgstr ""
 "Кількість днів, протягом яких файл фонового експорту зберігається до "
 "видалення."
 
-#: apps/catalog/setting_defs.py:352
+#: apps/catalog/setting_defs.py:363
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1762,41 +1915,42 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:355
+#: apps/catalog/setting_defs.py:366
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:360
+#: apps/catalog/setting_defs.py:371
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
-"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
+"Кількість елементів, що завантажуються за сторінку для вкладених зв'язків "
+"PR."
 
-#: apps/catalog/setting_defs.py:367
+#: apps/catalog/setting_defs.py:378
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:371
+#: apps/catalog/setting_defs.py:382
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:374
+#: apps/catalog/setting_defs.py:385
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:380
+#: apps/catalog/setting_defs.py:391
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:387
+#: apps/catalog/setting_defs.py:398
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:394
+#: apps/catalog/setting_defs.py:405
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -1907,8 +2061,8 @@ msgid ""
 "People appear automatically once pull requests or reviews are synced from "
 "GitHub."
 msgstr ""
-"Люди з'являються автоматично після синхронізації pull request-ів або ревʼю з "
-"GitHub."
+"Люди з'являються автоматично після синхронізації pull request-ів або ревʼю з"
+" GitHub."
 
 #: apps/catalog/templates/catalog/partials/person_form.html:4
 #: apps/catalog/templates/catalog/person_form.html:3
@@ -1918,18 +2072,6 @@ msgstr "Редагувати людину"
 #: apps/catalog/views.py:123
 msgid "Choose a person to assign this identity to."
 msgstr "Виберіть людину, якій призначити цю ідентичність."
-
-#: apps/churn/models.py:7 apps/connections/models.py:14
-msgid "OK"
-msgstr "OK"
-
-#: apps/churn/models.py:8
-msgid "Unsupported merge method"
-msgstr "Непідтримуваний спосіб мерджу"
-
-#: apps/churn/models.py:9
-msgid "Too large"
-msgstr "Занадто великий"
 
 #: apps/churn/models.py:18
 msgid "window days"
@@ -1950,14 +2092,6 @@ msgstr "коефіцієнт churn"
 #: apps/churn/models.py:22
 msgid "snapshot sha"
 msgstr "sha знімка"
-
-#: apps/churn/models.py:23 apps/metrics/models.py:26
-msgid "computed at"
-msgstr "обчислено о"
-
-#: apps/churn/models.py:25
-msgid "error"
-msgstr "помилка"
 
 #: apps/churn/models.py:28
 msgid "churn result"
@@ -2001,9 +2135,9 @@ msgid ""
 "token lists them explicitly, and an organization may also require single "
 "sign-on authorization."
 msgstr ""
-"Надайте токену доступ на читання до репозиторіїв, які ви відстежуєте. У fine-"
-"grained токені їх треба вибрати явно, а організація може додатково вимагати "
-"авторизації єдиного входу (SSO)."
+"Надайте токену доступ на читання до репозиторіїв, які ви відстежуєте. У "
+"fine-grained токені їх треба вибрати явно, а організація може додатково "
+"вимагати авторизації єдиного входу (SSO)."
 
 #: apps/connections/check_codes.py:38
 #, python-format
@@ -2022,8 +2156,8 @@ msgid ""
 "scope."
 msgstr ""
 "Надайте токену доступ на читання pull request-ів у цьому репозиторії та "
-"перевірте ще раз. Для приватного репозиторію скоупа 'public_repo' класичного "
-"токена недостатньо."
+"перевірте ще раз. Для приватного репозиторію скоупа 'public_repo' класичного"
+" токена недостатньо."
 
 #: apps/connections/check_codes.py:49
 msgid "Pull request access was not checked."
@@ -2088,8 +2222,8 @@ msgid ""
 "Replace it with a fine-grained token limited to the repositories PR Radar "
 "reads."
 msgstr ""
-"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR "
-"Radar."
+"Замініть його дрібнозернистим токеном, обмеженим репозиторіями, які читає PR"
+" Radar."
 
 #: apps/connections/check_codes.py:84
 #, python-format
@@ -2363,8 +2497,8 @@ msgstr ""
 #: apps/connections/templates/connections/partials/discovery_content.html:115
 msgid ""
 "This token cannot read any repository. Check that it has repository read "
-"access — for a fine-grained token, that the repositories are selected on it, "
-"and for an organization, that single sign-on is authorized."
+"access — for a fine-grained token, that the repositories are selected on it,"
+" and for an organization, that single sign-on is authorized."
 msgstr ""
 "Цей токен не може читати жодного репозиторію. Перевірте, що він має доступ "
 "на читання репозиторіїв: у fine-grained токені потрібні репозиторії мають "
@@ -2389,7 +2523,8 @@ msgid "No GitHub connections yet."
 msgstr "Ще немає підключень GitHub."
 
 #: apps/connections/templates/connections/partials/discovery_content.html:145
-msgid "Create a connection first, then come back to discover its repositories."
+msgid ""
+"Create a connection first, then come back to discover its repositories."
 msgstr ""
 "Спочатку створіть підключення, потім повертайтеся, щоб виявити його "
 "репозиторії."
@@ -2477,7 +2612,8 @@ msgstr "Для цього підключення немає репозиторі
 
 #: apps/connections/templates/connections/partials/repositories_content.html:62
 msgid "Pick another connection above, or discover repositories to add some."
-msgstr "Виберіть інше підключення вище або виявіть репозиторії, щоб додати їх."
+msgstr ""
+"Виберіть інше підключення вище або виявіть репозиторії, щоб додати їх."
 
 #: apps/connections/templates/connections/partials/repositories_content.html:65
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:16
@@ -2715,7 +2851,8 @@ msgstr ""
 "адміністратора, якщо помилка повторюється."
 
 #: apps/dashboards/export_messages.py:9
-msgid "This export did not finish in time and was marked as failed. Try again."
+msgid ""
+"This export did not finish in time and was marked as failed. Try again."
 msgstr ""
 "Цей експорт не завершився вчасно і був позначений як невдалий. Спробуйте ще "
 "раз."
@@ -2991,18 +3128,18 @@ msgstr ""
 
 #: apps/dashboards/templates/dashboards/partials/ai_tooling.html:21
 msgid ""
-"This repository is configured for an AI agent. These paths were found at the "
-"tip of the default branch:"
+"This repository is configured for an AI agent. These paths were found at the"
+" tip of the default branch:"
 msgstr ""
-"Цей репозиторій налаштовано для агента ШІ. На вершині гілки за замовчуванням "
-"знайдено такі шляхи:"
+"Цей репозиторій налаштовано для агента ШІ. На вершині гілки за замовчуванням"
+" знайдено такі шляхи:"
 
 #: apps/dashboards/templates/dashboards/partials/ai_tooling.html:29
 #, python-format
 msgid ""
 "Checked %(checked_at)s. Configuring a repository for an agent says nothing "
-"about who wrote any individual pull request, so this never changes a PR's AI "
-"status on its own."
+"about who wrote any individual pull request, so this never changes a PR's AI"
+" status on its own."
 msgstr ""
 "Перевірено %(checked_at)s. Налаштування репозиторію для агента нічого не "
 "говорить про те, хто написав конкретний pull request, тому це саме по собі "
@@ -3261,8 +3398,8 @@ msgstr "Завантажити звіт (XLSX)"
 
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:18
 msgid ""
-"PR Radar has no repositories to report on. Add some from a GitHub connection "
-"to get started."
+"PR Radar has no repositories to report on. Add some from a GitHub connection"
+" to get started."
 msgstr ""
 "PR Radar не має репозиторіїв для звітів. Додайте їх із підключення GitHub, "
 "щоб почати."
@@ -3299,8 +3436,8 @@ msgstr "Немає pull request-ів за цей період."
 
 #: apps/dashboards/templates/dashboards/partials/period_empty_state.html:34
 msgid ""
-"No pull requests match this period and filter. Widen the period or clear the "
-"filters."
+"No pull requests match this period and filter. Widen the period or clear the"
+" filters."
 msgstr ""
 "Жоден pull request не відповідає цьому періоду та фільтру. Розширте період "
 "або очистіть фільтри."
@@ -3408,7 +3545,8 @@ msgstr "У цьому періоді немає ревʼю."
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:22
 msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period."
-msgstr "Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
+msgstr ""
+"Навантаження, а не рейтинг — скільки ревʼю дала кожна особа за період."
 
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:37
 msgid "Waiting for review"
@@ -3436,8 +3574,8 @@ msgid ""
 "These metrics are organization-wide; this table is not narrowed to the "
 "current project or repository."
 msgstr ""
-"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного проєкту "
-"чи репозиторію."
+"Ці метрики загальноорганізаційні; ця таблиця не звужена до поточного проєкту"
+" чи репозиторію."
 
 #: apps/dashboards/templates/dashboards/partials/table.html:30
 #: apps/dashboards/templates/dashboards/partials/table.html:34
@@ -3517,13 +3655,11 @@ msgstr "Churn ще не обчислено."
 #, python-format
 msgid ""
 "\n"
-"          %(ratio)s churn — %(surviving)s of %(at_merge)s lines still "
-"present after %(days)s days.\n"
+"          %(ratio)s churn — %(surviving)s of %(at_merge)s lines still present after %(days)s days.\n"
 "        "
 msgstr ""
 "\n"
-"          Churn %(ratio)s — %(surviving)s з %(at_merge)s рядків досі "
-"присутні через %(days)s днів.\n"
+"          Churn %(ratio)s — %(surviving)s з %(at_merge)s рядків досі присутні через %(days)s днів.\n"
 "        "
 
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:84
@@ -3539,8 +3675,7 @@ msgstr "Churn не вимірюється для злиттів методом r
 #, python-format
 msgid ""
 "\n"
-"          This PR changes more than %(limit)s files; churn was not "
-"measured.\n"
+"          This PR changes more than %(limit)s files; churn was not measured.\n"
 "        "
 msgstr ""
 "\n"
@@ -3590,8 +3725,8 @@ msgstr "Файлів не зафіксовано."
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:135
 msgid "File changes are recorded the next time this pull request is synced."
 msgstr ""
-"Зміни у файлах будуть зафіксовані під час наступної синхронізації цього pull "
-"request-а."
+"Зміни у файлах будуть зафіксовані під час наступної синхронізації цього pull"
+" request-а."
 
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:145
 #, python-format
@@ -3652,7 +3787,8 @@ msgstr "Ревʼю"
 #: apps/dashboards/views.py:56
 msgid ""
 "No commit was found on the default branch before the churn window ended."
-msgstr "Не знайдено жодного коміту в основній гілці до завершення вікна churn."
+msgstr ""
+"Не знайдено жодного коміту в основній гілці до завершення вікна churn."
 
 #: apps/dashboards/views.py:57
 msgid "The repository could not be fetched."
@@ -3799,12 +3935,12 @@ msgstr "Завантажити історичні дані"
 #: apps/github_sync/templates/github_sync/partials/backfill.html:15
 msgid ""
 "Fetches every pull request updated since the chosen date again, instead of "
-"only the ones changed since the last sync. Use it after adding a repository, "
-"or when a sync window was too narrow."
+"only the ones changed since the last sync. Use it after adding a repository,"
+" or when a sync window was too narrow."
 msgstr ""
-"Повторно завантажує всі pull request-и, оновлені від обраної дати, а не лише "
-"ті, що змінилися після останньої синхронізації. Знадобиться після додавання "
-"репозиторію або коли вікно синхронізації було завузьким."
+"Повторно завантажує всі pull request-и, оновлені від обраної дати, а не лише"
+" ті, що змінилися після останньої синхронізації. Знадобиться після додавання"
+" репозиторію або коли вікно синхронізації було завузьким."
 
 #: apps/github_sync/templates/github_sync/partials/backfill.html:54
 msgid "Start backfill"
@@ -4061,8 +4197,8 @@ msgid ""
 "From ready for review to the first review, for PRs merged in the period "
 "(90th percentile)."
 msgstr ""
-"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й "
-"перцентиль)."
+"Від готовності до ревʼю до першого ревʼю, для PR, змерджених за період (90-й"
+" перцентиль)."
 
 #: apps/metrics/calculators/flow.py:365
 msgid "PR size (median)"
@@ -4070,11 +4206,11 @@ msgstr "Розмір PR (медіана)"
 
 #: apps/metrics/calculators/flow.py:366
 msgid ""
-"Median effective lines changed (additions + deletions) for PRs merged in the "
-"period."
+"Median effective lines changed (additions + deletions) for PRs merged in the"
+" period."
 msgstr ""
-"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за "
-"період."
+"Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за"
+" період."
 
 #: apps/metrics/calculators/flow.py:396
 msgid "PR size buckets"
@@ -4106,15 +4242,15 @@ msgstr "Час відповіді рецензента (медіана)"
 
 #: apps/metrics/calculators/flow.py:491
 msgid ""
-"From the PR becoming ready for review (falling back to its creation) to this "
-"reviewer's review, for reviews given in the period — an approximation: no "
+"From the PR becoming ready for review (falling back to its creation) to this"
+" reviewer's review, for reviews given in the period — an approximation: no "
 "review-request timestamp is stored, so this is not measured from the actual "
 "request."
 msgstr ""
 "Від моменту, коли PR став готовим до ревʼю (або його створення, якщо іншого "
 "немає), до ревʼю цього рецензента, для ревʼю, наданих за період — "
-"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не "
-"від фактичного запиту."
+"наближення: часова мітка запиту на ревʼю не зберігається, тож вимірюється не"
+" від фактичного запиту."
 
 #: apps/metrics/calculators/quality.py:110
 msgid "Review rounds (average)"
@@ -4142,8 +4278,8 @@ msgstr "Рівень проходження CI з першого разу"
 
 #: apps/metrics/calculators/quality.py:179
 msgid ""
-"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS). "
-"PRs with no first-CI-commit record are excluded from both sides."
+"Share of PRs merged on a day whose first CI-covered commit passed (SUCCESS)."
+" PRs with no first-CI-commit record are excluded from both sides."
 msgstr ""
 "Частка PR, змерджених за день, чий перший коміт, охоплений CI, пройшов "
 "перевірку (SUCCESS). PR без запису про перший коміт CI виключені з обох "
@@ -4228,8 +4364,8 @@ msgid ""
 "a hotfix/fix PR overlapping at least FOLLOWUP_FIX_FILE_OVERLAP of their "
 "files."
 msgstr ""
-"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS "
-"слідував hotfix/fix PR, що перетинається щонайменше на "
+"(евристика) Частка змерджених PR, за якими протягом FOLLOWUP_FIX_WINDOW_DAYS"
+" слідував hotfix/fix PR, що перетинається щонайменше на "
 "FOLLOWUP_FIX_FILE_OVERLAP їхніх файлів."
 
 #: apps/metrics/calculators/state.py:48
@@ -4237,7 +4373,8 @@ msgid "Open PRs"
 msgstr "Відкриті PR"
 
 #: apps/metrics/calculators/state.py:49
-msgid "Pull requests open at the end of a day, reconstructed from their dates."
+msgid ""
+"Pull requests open at the end of a day, reconstructed from their dates."
 msgstr "Pull request-и, відкриті на кінець дня, відновлені за їхніми датами."
 
 #: apps/metrics/calculators/state.py:77
@@ -4412,8 +4549,8 @@ msgid ""
 "This pull request discloses no AI assistance, but a high-confidence AI "
 "signal was detected."
 msgstr ""
-"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ "
-"з високою впевненістю."
+"Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ"
+" з високою впевненістю."
 
 #: apps/policy/messages.py:37
 #, python-format
@@ -4478,11 +4615,11 @@ msgstr[3] ""
 #: apps/policy/messages.py:113
 #, python-format
 msgid ""
-"This merged AI pull request has %(approvals)s of %(required)s required human "
-"approval."
+"This merged AI pull request has %(approvals)s of %(required)s required human"
+" approval."
 msgid_plural ""
-"This merged AI pull request has %(approvals)s of %(required)s required human "
-"approvals."
+"This merged AI pull request has %(approvals)s of %(required)s required human"
+" approvals."
 msgstr[0] ""
 "Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
 "підтвердження людини."
@@ -4529,8 +4666,8 @@ msgstr[0] ""
 "Цей AI pull request змінює %(effective_lines)s ефективний рядок, що "
 "перевищує ліміт %(limit)s."
 msgstr[1] ""
-"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує "
-"ліміт %(limit)s."
+"Цей AI pull request змінює %(effective_lines)s ефективні рядки, що перевищує"
+" ліміт %(limit)s."
 msgstr[2] ""
 "Цей AI pull request змінює %(effective_lines)s ефективних рядків, що "
 "перевищує ліміт %(limit)s."
@@ -4731,13 +4868,11 @@ msgstr "Н/Д"
 #, python-format
 msgid ""
 "\n"
-"            Sample too small (%(sample)s below %(min_sample)s) to be "
-"reliable.\n"
+"            Sample too small (%(sample)s below %(min_sample)s) to be reliable.\n"
 "          "
 msgstr ""
 "\n"
-"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути "
-"надійною.\n"
+"            Вибірка замала (%(sample)s менше %(min_sample)s), щоб бути надійною.\n"
 "          "
 
 #: apps/policy/templates/policy/partials/mismatch_list.html:16
@@ -4859,7 +4994,8 @@ msgstr "Помилка сервера"
 msgid "Something went wrong."
 msgstr "Щось пішло не так."
 
-#: templates/base.html:15 templates/base.html:40 templates/partials/nav.html:21
+#: templates/base.html:15 templates/base.html:40
+#: templates/partials/nav.html:21
 msgid "PR Radar"
 msgstr "PR Radar"
 
@@ -5053,8 +5189,8 @@ msgstr "Надіслати посилання"
 #~ msgstr "Тема"
 
 #~ msgid ""
-#~ "Check the connection's token scopes, or that the account has access to "
-#~ "any repositories."
+#~ "Check the connection's token scopes, or that the account has access to any "
+#~ "repositories."
 #~ msgstr ""
 #~ "Перевірте права токена підключення або доступ облікового запису до "
 #~ "репозиторіїв."

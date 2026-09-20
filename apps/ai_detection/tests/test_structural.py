@@ -1,4 +1,4 @@
-"""The six per-PR structural kinds (phase 12, stage 4).
+"""The per-PR structural kinds (phase 12, stage 4).
 
 Each kind gets a firing case and a near-miss, because a heuristic that fires on everything is
 worse than no heuristic at all: these rules read the shape of an honest developer's work as
@@ -21,9 +21,11 @@ from apps.activity.factories import (
     ReviewCommentFactory,
 )
 from apps.activity.models import PullRequest
-from apps.ai_detection import structural
+from apps.ai_detection import baselines, diffsignals, structural
+from apps.ai_detection.baselines import BASELINE_FUNCTIONS
+from apps.ai_detection.diffsignals import DIFF_FUNCTIONS
 from apps.ai_detection.evidence import EVIDENCE_MESSAGES
-from apps.ai_detection.models import SignalKind
+from apps.ai_detection.models import SignalFamily, SignalKind, kinds_in_family
 from apps.ai_detection.structural import (
     SIGNAL_FUNCTIONS,
     StructuralCommit,
@@ -55,10 +57,19 @@ def _commit(minutes_after=0, lines=100) -> StructuralCommit:
     )
 
 
-def test_every_kind_has_a_function_and_an_evidence_message():
-    assert set(SIGNAL_FUNCTIONS) == set(SignalKind.values)
-    for kind in SignalKind.values:
+def test_every_per_pr_kind_has_a_function_and_an_evidence_message():
+    """This module owns the per-PR family only. The other two are covered by their own modules'
+    tests (`test_baselines.py`, `test_diffsignals.py`), and `test_all_kinds_are_implemented_
+    somewhere` below is what stops a kind from being declared and implemented nowhere at all."""
+    per_pr_kinds = kinds_in_family(SignalFamily.PER_PR)
+    assert set(SIGNAL_FUNCTIONS) == per_pr_kinds
+    for kind in per_pr_kinds:
         assert kind in EVIDENCE_MESSAGES, kind
+
+
+def test_all_kinds_are_implemented_somewhere():
+    implemented = set(SIGNAL_FUNCTIONS) | set(BASELINE_FUNCTIONS) | set(DIFF_FUNCTIONS)
+    assert implemented == set(SignalKind.values)
 
 
 def test_an_unknown_kind_yields_nothing_rather_than_raising():
@@ -211,23 +222,6 @@ def test_mass_file_creation_does_not_fire_when_everything_lands_in_one_directory
     assert list(run_kind(SignalKind.MASS_FILE_CREATION, {}, _ctx(files=files))) == []
 
 
-# -- unused_new_dependency -----------------------------------------------------------------------
-
-
-def test_unused_new_dependency_is_registered_and_silent_until_the_diff_pipeline_lands():
-    """Registered-but-empty rather than absent, so a lead can create and tune the rule now and
-    have it start producing evidence in stage 6 instead of the kind appearing from nowhere."""
-    assert SignalKind.UNUSED_NEW_DEPENDENCY in SIGNAL_FUNCTIONS
-    ctx = _ctx(files=(StructuralFile("pyproject.toml", "modified", 3, 0),))
-    assert list(run_kind(SignalKind.UNUSED_NEW_DEPENDENCY, {"manifests": ["pyproject.toml"]}, ctx)) == []
-
-
-def test_unused_new_dependency_reports_what_stage_6_will_hand_it():
-    ctx = _ctx(added_dependencies=(("pyproject.toml", "requests"),))
-    matches = list(run_kind(SignalKind.UNUSED_NEW_DEPENDENCY, {"manifests": ["pyproject.toml"]}, ctx))
-    assert [match.params["package"] for match in matches] == ["requests"]
-
-
 # -- instant_review_response ---------------------------------------------------------------------
 
 
@@ -327,13 +321,18 @@ def test_no_structural_kind_reads_churn_revert_or_follow_up_fix_data():
     actual read of `ctx.churn_ratio` fails the build.
     """
     forbidden = {"churn", "churn_ratio", "is_revert", "has_followup_fix", "followup_fix"}
-    tree = ast.parse(inspect.getsource(structural))
-    kind_functions = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.FunctionDef) and node.name.lstrip("_") in set(SignalKind.values)
-    ]
-    assert len(kind_functions) == len(SignalKind.values)
+    kind_functions = []
+    for module in (structural, baselines, diffsignals):
+        tree = ast.parse(inspect.getsource(module))
+        kind_functions += [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name.lstrip("_") in set(SignalKind.values)
+        ]
+    # Every declared kind is checked, wherever it lives — including the diff family, which runs
+    # inside the churn job and therefore sits closest of the three to the outcome data it must
+    # never read.
+    assert {node.name.lstrip("_") for node in kind_functions} == set(SignalKind.values)
 
     for function in kind_functions:
         identifiers = {node.attr for node in ast.walk(function) if isinstance(node, ast.Attribute)} | {

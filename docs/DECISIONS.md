@@ -617,3 +617,46 @@ a `.filter-form` (or one marked `data-tagselect`), never to every multi-select i
 positioned `fixed` for the same reason the date picker's is: the drawer body scrolls. Because the native
 control is hidden, Playwright can no longer drive it, so the box carries `data-testid="tagselect-<name>"` and
 `e2e/web/test_policy_console.py::_choose_tag` goes through the widget the way a reader would.
+
+**`unused_new_dependency` is a diff kind, not a per-PR one.** It was registered in the per-PR family in phase
+12 stage 4 and always returned nothing, because deciding whether a change imports a package needs the lines of
+the change. Stage 6 could have kept it there and fed a per-PR context from the clone, but each family's writer
+reconciles only its own kinds — so a kind that produces rows from the churn job while `detect_pull_request`
+treats it as its own would have its signals deleted on the next sync, and rewritten on the next churn run,
+forever. Moving it costs no migration (the family map is Python, not a column) and no data migration (the kind
+had never written a row).
+
+**Diff analysis rides inside the churn run rather than the sync.** The bytes of a change exist locally in
+exactly one place: the bare clone `apps/churn/clones.py` already makes. Running the diff kinds there costs no
+GitHub API call, reuses `CHURN_GIT_TIMEOUT_SECONDS` and `CHURN_MAX_FILES`, and keeps `gitcmd.run_git()` as the
+only subprocess call site. The split inside the app follows the same line: `apps/churn/diffs.py` runs `git` and
+builds a `DiffContext`, `apps/ai_detection/diffsignals.py` holds the kinds and knows nothing about git, which
+is what lets every heuristic be tested on a hand-written diff. Churn work is served first out of a
+repository's time budget and diff work second: a churn window that has elapsed must be settled, whereas an
+unanalysed diff simply waits for the next night.
+
+**Comment density is measured against the same files before the change, not a repository median.** The plan
+called for a per-language repository median. The local baseline is cheaper (one `git show` per file against a
+tree already on disk, versus a walk over the whole repository), it is per-language for free, and it is the
+comparison a reviewer actually makes. It also fails honestly: a change made entirely of new files has no
+baseline and therefore produces no signal, which is the project's own rule that a thin sample yields `None`
+rather than a guessed number.
+
+**`DiffAnalysis` stores the facts because the policy engine cannot reach the clone.** Policy evaluates during a
+sync, where there is no clone and no diff; the checks arriving in stage 7 (`QUALITY_GATE_BYPASSED`,
+`TEST_WEAKENED`, `SECRET_ARTIFACT_COMMITTED`) therefore read `DiffAnalysis.facts`, written by the nightly run.
+The row also carries the `status`/`error` vocabulary `ChurnResult` uses, and for the same reason: an `error` is
+a statement about git, so it is retried, while a settled row is not re-read every night. `DiffFacts` keeps
+counts, paths and codes only — never a matched credential, because noticing a leaked secret is not a reason to
+store a second copy of it.
+
+**Diff analysis is opt-in through a setting, not a field on `Repository`.** `DIFF_ANALYSIS_REPOSITORIES` lists
+`owner/name` entries (or a single `*`), and the default is empty. A boolean on `Repository` would have been the
+obvious home, but that model's Django admin is deliberately read-only for synced GitHub data, and the list
+setting is editable today through the existing `AppSetting` admin with no new UI. Reading the contents of every
+change is a choice an operator makes, so an upgrade analyses nothing until somebody asks it to.
+
+**A dry run says so when it cannot preview a rule.** Only per-PR kinds can run inside a request; a baseline
+kind needs an author's whole history and a diff kind needs the clone. The panel used to report "no matches" for
+those, which is a claim the reader has no way to check. It now explains which job produces the rule's evidence
+instead.

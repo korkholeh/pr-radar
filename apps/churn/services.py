@@ -7,7 +7,12 @@ AppSettings (`CHURN_MAX_FILES`, `CHURN_GIT_TIMEOUT_SECONDS`, `CHURN_REPO_TIME_BU
 `CHURN_MAX_WORKERS`) are read exactly once, on the main thread, before any worker starts -- a
 worker thread must never open its own ORM connection (RISKS row 14: a cold settings cache falls
 through to a query, and concurrent workers racing that query is the exact contention this
-component exists to avoid)."""
+component exists to avoid).
+
+Phase 12, stage 6 added a second passenger to the same run: diff analysis
+(`apps/churn/diffs.py`), which needs the clone this component already makes and therefore costs no
+GitHub API call. It is opt-in per repository (`DIFF_ANALYSIS_REPOSITORIES`), it takes what is left
+of a repository's time budget after churn, and it writes through the same main-thread boundary."""
 
 from __future__ import annotations
 
@@ -17,19 +22,23 @@ import time
 from collections import defaultdict
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from django.db.models import Prefetch
 
 from apps.activity.models import PRFile, PullRequest
+from apps.ai_detection.diffsignals import DiffRuleSpec
+from apps.ai_detection.models import DiffAnalysis
+from apps.ai_detection.services import diff_rule_specs, reconcile_diff_signals
 from apps.catalog.models import Repository
-from apps.catalog.services import get_int
+from apps.catalog.services import get_int, get_list
 from apps.churn.blame import blame_counts, path_exists_at, resolve_path_at
 from apps.churn.clones import ensure_clone
+from apps.churn.diffs import DiffOutcome, analyse_pull_request_diff
 from apps.churn.gitcmd import GitOperationError, run_git
 from apps.churn.models import ChurnResult
-from apps.churn.selectors import eligible_pull_requests
+from apps.churn.selectors import eligible_pull_requests, pull_requests_needing_diff_analysis
 from apps.connections.auth import ConnectionNotUsableError, auth_for_connection
 from apps.metrics.services import bump_data_version
 
@@ -56,6 +65,21 @@ class ChurnRunResult:
     too_large: int = 0
     unsupported: int = 0
     errors: int = 0
+    # Diff analysis (phase 12, stage 6) rides along in this run because it needs the same clone.
+    diffs_analysed: int = 0
+    diffs_unreadable: int = 0
+    diff_signals_created: int = 0
+    diff_signals_deleted: int = 0
+
+
+@dataclass(frozen=True)
+class RepositoryWork:
+    """What one worker thread produced for one repository: churn outcomes, and — when the
+    repository is opted in to diff analysis — diff outcomes. Both are written back on the main
+    thread, which is what keeps this component out of SQLite write contention."""
+
+    churn: list[ChurnOutcome] = field(default_factory=list)
+    diffs: list[DiffOutcome] = field(default_factory=list)
 
 
 def _error_outcome(pull_request_id: int, window_days: int, code: str, detail: str) -> ChurnOutcome:
@@ -255,27 +279,47 @@ def _compute_repository(
     repo_budget: float,
     max_files: int,
     git_timeout: float | None,
-) -> list[ChurnOutcome]:
+    diff_pull_requests: list[PullRequest] | None = None,
+    diff_rules: list[DiffRuleSpec] | None = None,
+) -> RepositoryWork:
     """Runs in a worker thread. `repo_budget` is a duration, not an absolute deadline -- the
     deadline is computed here, as the first statement, so it measures this repository's own work
-    time rather than the time it spent queued behind other repositories in the pool."""
+    time rather than the time it spent queued behind other repositories in the pool.
+
+    Churn comes first and diff analysis second, out of the same budget and the same clone. Churn
+    has a deadline of its own (a PR whose window has elapsed and is never computed silently loses
+    a metric), whereas an unanalysed diff simply waits for tomorrow night -- so when the budget
+    runs out, it is diff work that is left undone."""
     deadline = time.monotonic() + repo_budget
+    diff_pull_requests = diff_pull_requests or []
 
     try:
         auth = auth_for_connection(repository.connection)
         credentials = auth.get_git_credentials()
     except ConnectionNotUsableError:
         logger.warning("Churn: connection unusable for repository %s.", repository.full_name)
-        return [
-            _error_outcome(pr.id, window_days, "connection_unusable", "connection is not usable")
-            for pr in pull_requests
-        ]
+        return RepositoryWork(
+            churn=[
+                _error_outcome(pr.id, window_days, "connection_unusable", "connection is not usable")
+                for pr in pull_requests
+            ],
+            diffs=[
+                DiffOutcome(pull_request_id=pr.id, status=DiffAnalysis.Status.NO_CLONE)
+                for pr in diff_pull_requests
+            ],
+        )
 
     try:
         clone_dir = ensure_clone(repository, credentials, timeout=git_timeout)
     except GitOperationError as exc:
         logger.warning("Churn: clone/fetch failed for repository %s.", repository.full_name)
-        return [_error_outcome(pr.id, window_days, "fetch_failed", str(exc)) for pr in pull_requests]
+        return RepositoryWork(
+            churn=[_error_outcome(pr.id, window_days, "fetch_failed", str(exc)) for pr in pull_requests],
+            diffs=[
+                DiffOutcome(pull_request_id=pr.id, status=DiffAnalysis.Status.NO_CLONE)
+                for pr in diff_pull_requests
+            ],
+        )
 
     outcomes = []
     for pull_request in pull_requests:
@@ -296,7 +340,58 @@ def _compute_repository(
             )
             outcome = _error_outcome(pull_request.id, window_days, "worker_failed", "unexpected pr failure")
         outcomes.append(outcome)
-    return outcomes
+
+    diff_outcomes = []
+    for pull_request in diff_pull_requests:
+        if time.monotonic() >= deadline:
+            break
+        # `analyse_pull_request_diff` promises never to raise, and this loop is the boundary that
+        # has to hold even if a future change breaks that promise -- one diff must never cost a
+        # repository its churn results.
+        try:
+            diff_outcomes.append(
+                analyse_pull_request_diff(
+                    pull_request, clone_dir, diff_rules or [], max_files=max_files, git_timeout=git_timeout
+                )
+            )
+        except Exception:
+            logger.exception(
+                "Diff analysis: unexpected failure on pull request %s; skipping it this run.",
+                pull_request.id,
+            )
+
+    return RepositoryWork(churn=outcomes, diffs=diff_outcomes)
+
+
+def _write_diff_outcome(outcome: DiffOutcome, rules: list[DiffRuleSpec], counts: dict[str, int]) -> None:
+    """Stores one diff analysis and reconciles the pull request's diff-family signals.
+
+    A non-`ok` outcome records the status and nothing else: no facts, and crucially no signal
+    reconciliation. A missing clone or a failed `git` call says nothing about whether a signal
+    still holds, so deleting the stored ones would let an unreachable repository quietly erase its
+    own evidence (PLAN stage 6).
+    """
+    if outcome.status == DiffAnalysis.Status.OK:
+        counts["diffs_analysed"] += 1
+    else:
+        counts["diffs_unreadable"] += 1
+
+    DiffAnalysis.objects.update_or_create(
+        pull_request_id=outcome.pull_request_id,
+        defaults={
+            "status": outcome.status,
+            "facts": outcome.facts,
+            "base_sha": outcome.base_sha,
+            "head_sha": outcome.head_sha,
+            "error": outcome.error,
+        },
+    )
+    if outcome.status != DiffAnalysis.Status.OK:
+        return
+
+    written = reconcile_diff_signals(outcome.pull_request_id, outcome.matches, rules)
+    counts["diff_signals_created"] += written.created
+    counts["diff_signals_deleted"] += written.deleted
 
 
 def run_churn(
@@ -305,17 +400,16 @@ def run_churn(
     repo_full_names: Iterable[str] | None = None,
     project_slug: str | None = None,
     limit: int | None = None,
+    analyse_diffs: bool = True,
 ) -> ChurnRunResult:
     if window_days is None:
         window_days = get_int("CHURN_WINDOW_DAYS")
 
+    files_prefetch = Prefetch("files", queryset=PRFile.objects.filter(is_excluded=False))
     pull_requests = list(
         eligible_pull_requests(
             window_days, repo_full_names=repo_full_names, project_slug=project_slug, limit=limit
-        ).prefetch_related(
-            Prefetch("files", queryset=PRFile.objects.filter(is_excluded=False)),
-            "pull_request_commits__commit",
-        )
+        ).prefetch_related(files_prefetch, "pull_request_commits__commit")
     )
     # Read every AppSetting a worker thread would otherwise need, once, here on the main thread.
     repo_budget = get_int("CHURN_REPO_TIME_BUDGET_SECONDS")
@@ -323,38 +417,84 @@ def run_churn(
     max_files = get_int("CHURN_MAX_FILES")
     git_timeout = get_int("CHURN_GIT_TIMEOUT_SECONDS")
 
+    # Diff analysis (phase 12, stage 6) is opt-in per repository and rides along here because it
+    # needs the clone this run already makes. The rules, like the settings above, are flattened to
+    # plain data on this thread: a worker never opens an ORM connection.
+    opted_in = [str(name) for name in get_list("DIFF_ANALYSIS_REPOSITORIES")] if analyse_diffs else []
+    diff_rules = diff_rule_specs() if opted_in else []
+    diff_pull_requests = (
+        list(
+            pull_requests_needing_diff_analysis(
+                opted_in, repo_full_names=repo_full_names, project_slug=project_slug, limit=limit
+            ).prefetch_related(files_prefetch)
+        )
+        if opted_in
+        else []
+    )
+
     by_repository: dict[Repository, list[PullRequest]] = defaultdict(list)
     for pull_request in pull_requests:
         by_repository[pull_request.repository].append(pull_request)
+    diffs_by_repository: dict[Repository, list[PullRequest]] = defaultdict(list)
+    for pull_request in diff_pull_requests:
+        diffs_by_repository[pull_request.repository].append(pull_request)
 
-    counts: dict[str, int] = {"computed": 0, "skipped": 0, "too_large": 0, "unsupported": 0, "errors": 0}
+    counts: dict[str, int] = {
+        "computed": 0,
+        "skipped": 0,
+        "too_large": 0,
+        "unsupported": 0,
+        "errors": 0,
+        "diffs_analysed": 0,
+        "diffs_unreadable": 0,
+        "diff_signals_created": 0,
+        "diff_signals_deleted": 0,
+    }
 
-    if by_repository:
+    # One task per repository over the union of both work sets, so a repository that needs only
+    # diff analysis is cloned once and a repository that needs both is cloned once too.
+    repositories = list(dict.fromkeys([*by_repository, *diffs_by_repository]))
+
+    if repositories:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
                 executor.submit(
-                    _compute_repository, repository, prs, window_days, repo_budget, max_files, git_timeout
+                    _compute_repository,
+                    repository,
+                    by_repository.get(repository, []),
+                    window_days,
+                    repo_budget,
+                    max_files,
+                    git_timeout,
+                    diffs_by_repository.get(repository, []),
+                    diff_rules,
                 ): repository
-                for repository, prs in by_repository.items()
+                for repository in repositories
             }
             for future, repository in futures.items():
                 try:
-                    outcomes = future.result()
+                    work = future.result()
                 except Exception:
                     # A repository's unexpected failure (e.g. a disk-full OSError from
                     # ensure_clone) must never abort the other repositories' results, nor lose
-                    # bump_data_version() -- spec §5.3's rule, reused (RISKS row 11).
+                    # bump_data_version() -- spec §5.3's rule, reused (RISKS row 11). The diff
+                    # half records nothing in that case: an unanalysed diff is simply retried
+                    # tomorrow, whereas a churn window that has elapsed must be settled.
                     logger.exception(
                         "Churn: repository %s failed unexpectedly; recording error outcomes.",
                         repository.full_name,
                     )
-                    outcomes = [
-                        _error_outcome(pr.id, window_days, "worker_failed", "unexpected worker failure")
-                        for pr in by_repository[repository]
-                    ]
-                for outcome in outcomes:
+                    work = RepositoryWork(
+                        churn=[
+                            _error_outcome(pr.id, window_days, "worker_failed", "unexpected worker failure")
+                            for pr in by_repository.get(repository, [])
+                        ]
+                    )
+                for outcome in work.churn:
                     _write_outcome(outcome)
                     _tally(counts, outcome)
+                for diff_outcome in work.diffs:
+                    _write_diff_outcome(diff_outcome, diff_rules, counts)
 
     bump_data_version()
     return ChurnRunResult(**counts)

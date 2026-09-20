@@ -84,11 +84,16 @@ def test_every_baseline_kind_has_a_function_and_an_evidence_message():
         assert kind in EVIDENCE_MESSAGES, kind
 
 
-def test_the_two_families_do_not_overlap():
+def test_the_three_families_do_not_overlap_and_cover_every_kind():
     per_pr = kinds_in_family(SignalFamily.PER_PR)
     baseline = kinds_in_family(SignalFamily.BASELINE)
+    diff = kinds_in_family(SignalFamily.DIFF)
     assert not (per_pr & baseline)
-    assert per_pr | baseline == set(SignalKind.values)
+    assert not (per_pr & diff)
+    assert not (baseline & diff)
+    # A kind in no family would be written by no pass and deleted by none either — it has to
+    # belong to exactly one writer.
+    assert per_pr | baseline | diff == set(SignalKind.values)
 
 
 # -- the MIN_SAMPLE floor ------------------------------------------------------------------------

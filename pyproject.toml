@@ -57,6 +57,8 @@ files = [
     "apps/catalog/identity.py",
     "apps/activity/derive.py",
     "apps/ai_detection/detectors.py",
+    "apps/ai_detection/diffsignals.py",
+    "apps/churn/diffs.py",
     "apps/ai_detection/disclosure.py",
     "apps/ai_detection/rules.py",
     "apps/policy/rules.py",

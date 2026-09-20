@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.ai_detection.models import AISignal, DetectionRule, SignalRule
+from apps.ai_detection.models import AISignal, DetectionRule, DiffAnalysis, SignalRule
 from config.admin import ReadOnlyAdminMixin
 
 
@@ -27,3 +27,15 @@ class AISignalAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
     list_filter = ("tool", "confidence")
     list_select_related = ("pull_request__repository", "rule", "signal_rule")
     search_fields = ("evidence", "evidence_code")
+
+
+@admin.register(DiffAnalysis)
+class DiffAnalysisAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
+    """Computed by the churn run, so read-only here: re-running `manage.py compute_churn` is how a
+    row changes, not an edit. Visible because `status`/`error` is the only place an operator can
+    see why a repository's diffs are not producing signals."""
+
+    list_display = ("pull_request", "status", "base_sha", "head_sha", "computed_at")
+    list_filter = ("status",)
+    list_select_related = ("pull_request__repository",)
+    search_fields = ("pull_request__number", "error")

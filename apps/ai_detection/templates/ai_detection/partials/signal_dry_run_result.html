@@ -6,6 +6,14 @@
     {% endfor %}
     {% for error in dry_run_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
   </div>
+{% elif unsupported_family == "baseline" %}
+  <p class="muted">
+    {% translate "This rule reads an author's whole history, so it cannot be previewed against recent pull requests. Activate it and run the nightly baseline job to see what it finds." %}
+  </p>
+{% elif unsupported_family == "diff" %}
+  <p class="muted">
+    {% translate "This rule reads the contents of each change from the local clone, which only the nightly churn run has. Activate it, add the repository to the diff-analysis list in Settings, and the next run will show what it finds." %}
+  </p>
 {% elif matches is not None %}
   <p class="mb-2 text-text">
     {% blocktranslate trimmed count counter=matches|length with limit=limit %}

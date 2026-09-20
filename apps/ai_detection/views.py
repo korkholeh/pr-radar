@@ -11,7 +11,7 @@ from apps.ai_detection.forms import (
     SignalDryRunForm,
     SignalRuleForm,
 )
-from apps.ai_detection.models import DetectionRule, SignalRule
+from apps.ai_detection.models import SIGNAL_KIND_FAMILY, DetectionRule, SignalFamily, SignalRule
 from apps.ai_detection.services import dry_run_rule, dry_run_signal_rule
 from apps.catalog.services import get_int
 from config.htmx import is_htmx
@@ -200,8 +200,16 @@ def signal_rule_dry_run(request: HttpRequest) -> HttpResponse:
     context: dict = {"dry_run_form": form}
     if form.is_valid():
         unsaved_rule = form.save(commit=False)
-        scope = scope_for_user(request.user)
-        limit = get_int("DETECTION_DRY_RUN_PR_COUNT")
-        context["matches"] = dry_run_signal_rule(unsaved_rule, scope, limit)
-        context["limit"] = limit
+        family = SIGNAL_KIND_FAMILY.get(unsaved_rule.kind)
+        if family == SignalFamily.PER_PR:
+            scope = scope_for_user(request.user)
+            limit = get_int("DETECTION_DRY_RUN_PR_COUNT")
+            context["matches"] = dry_run_signal_rule(unsaved_rule, scope, limit)
+            context["limit"] = limit
+        else:
+            # A baseline kind reads an author's whole history and a diff kind reads the bytes of a
+            # change from the local clone. Neither input is available in a request, and reporting
+            # "no matches" for a rule that was never actually run would be a lie the reader has no
+            # way to catch.
+            context["unsupported_family"] = family
     return render(request, "ai_detection/partials/signal_dry_run_result.html", context)
