@@ -199,3 +199,93 @@ def test_match_on_the_second_of_three_commits_records_that_commit():
     matches = list(DETECTORS[Detector.COMMIT_MESSAGE](_pattern("Generated with Claude Code"), ctx))
     assert len(matches) == 1
     assert matches[0].commit_id == commit_2.pk
+
+
+# -- file_path --------------------------------------------------------------------------------
+
+
+def test_file_path_matches():
+    ctx = _ctx(file_paths=("README.md", ".aider.chat.history.md"))
+    matches = list(DETECTORS[Detector.FILE_PATH](_pattern(r"\.aider\.chat\.history\.md$"), ctx))
+    assert len(matches) == 1
+    assert matches[0].evidence == ".aider.chat.history.md"
+    assert matches[0].commit_id is None
+
+
+def test_file_path_does_not_match():
+    ctx = _ctx(file_paths=("README.md", "apps/sync/client.py"))
+    matches = list(DETECTORS[Detector.FILE_PATH](_pattern(r"\.aider\.chat\.history\.md$"), ctx))
+    assert matches == []
+
+
+def test_file_path_yields_one_match_for_a_pull_request_that_touches_many_files():
+    """A 400-file PR must not produce 400 identical signals — one per rule is the whole point."""
+    ctx = _ctx(file_paths=tuple(f".claude/agents/agent-{index:03d}.md" for index in range(400)))
+    matches = list(DETECTORS[Detector.FILE_PATH](_pattern(r"^\.claude/"), ctx))
+    assert len(matches) == 1
+
+
+def test_file_path_reports_the_first_matching_path_in_the_given_order():
+    ctx = _ctx(file_paths=(".claude/a.md", ".claude/b.md"))
+    matches = list(DETECTORS[Detector.FILE_PATH](_pattern(r"^\.claude/"), ctx))
+    assert matches[0].evidence == ".claude/a.md"
+
+
+# -- pr_title --------------------------------------------------------------------------------
+
+
+def test_pr_title_matches():
+    ctx = _ctx(title="Codex: fix the flaky sync test")
+    matches = list(DETECTORS[Detector.PR_TITLE](_pattern(r"^codex\s*:\s"), ctx))
+    assert len(matches) == 1
+    assert matches[0].evidence == "Codex: fix the flaky sync test"
+
+
+def test_pr_title_does_not_match():
+    ctx = _ctx(title="fix(sync): retry on a 502")
+    matches = list(DETECTORS[Detector.PR_TITLE](_pattern(r"^codex\s*:\s"), ctx))
+    assert matches == []
+
+
+# -- reviewer_identity ------------------------------------------------------------------------
+
+
+def test_reviewer_identity_matches():
+    ctx = _ctx(reviewer_values=("octocat", "coderabbitai[bot]"))
+    matches = list(DETECTORS[Detector.REVIEWER_IDENTITY](_pattern(r"^coderabbitai(\[bot\])?$"), ctx))
+    assert len(matches) == 1
+    assert matches[0].evidence == "coderabbitai[bot]"
+
+
+def test_reviewer_identity_does_not_match():
+    ctx = _ctx(reviewer_values=("octocat", "hubot"))
+    matches = list(DETECTORS[Detector.REVIEWER_IDENTITY](_pattern(r"^coderabbitai(\[bot\])?$"), ctx))
+    assert matches == []
+
+
+def test_reviewer_identity_yields_one_match_however_many_times_the_bot_reviewed():
+    ctx = _ctx(reviewer_values=("coderabbitai[bot]",) * 12)
+    matches = list(DETECTORS[Detector.REVIEWER_IDENTITY](_pattern(r"^coderabbitai(\[bot\])?$"), ctx))
+    assert len(matches) == 1
+
+
+# -- merged_by_identity -----------------------------------------------------------------------
+
+
+def test_merged_by_identity_matches():
+    ctx = _ctx(merged_by_values=("devin-ai-integration[bot]",))
+    matches = list(DETECTORS[Detector.MERGED_BY_IDENTITY](_pattern(r"^devin-ai-integration"), ctx))
+    assert len(matches) == 1
+    assert matches[0].commit_id is None
+
+
+def test_merged_by_identity_does_not_match():
+    ctx = _ctx(merged_by_values=("octocat",))
+    matches = list(DETECTORS[Detector.MERGED_BY_IDENTITY](_pattern(r"^devin-ai-integration"), ctx))
+    assert matches == []
+
+
+def test_merged_by_identity_on_an_unmerged_pull_request_matches_nothing():
+    ctx = _ctx(merged_by_values=())
+    matches = list(DETECTORS[Detector.MERGED_BY_IDENTITY](_pattern(r"^devin-ai-integration"), ctx))
+    assert matches == []

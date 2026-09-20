@@ -271,3 +271,200 @@ rules:
     notes: >
       Several agents open a generated commit footer with the robot emoji. Disputed: a human can
       type it just as easily, so it never counts for more than a hint.
+
+  # --- Tool-written artefacts in the diff (file_path) -----------------------------------------
+  #
+  # A file the tool itself writes into the repository is the strongest evidence short of a
+  # trailer: nobody types a chat transcript by hand. Each of these rules yields at most one
+  # signal per pull request — the first matching path — so a 400-file PR cannot bury the rest.
+  - name: "Aider chat history file in the diff"
+    detector: file_path
+    pattern: "(^|/)\\.aider\\.(chat|input)\\.history\\.md$"
+    tool: aider
+    confidence: high
+    provenance: documented
+    notes: >
+      Aider writes its conversation and input history into .aider.chat.history.md and
+      .aider.input.history.md at the repository root. A PR that adds or changes one was produced
+      in an Aider session. https://aider.chat/docs/
+
+  - name: "SpecStory transcript in the diff"
+    detector: file_path
+    pattern: "(^|/)\\.specstory/"
+    tool: other
+    confidence: high
+    provenance: unverified
+    notes: >
+      The SpecStory extension saves AI chat transcripts under .specstory/ and teams sometimes
+      commit them. Recalled directory name; confirm against a real PR before activating.
+
+  - name: "Claude Code local settings in the diff"
+    detector: file_path
+    pattern: "(^|/)\\.claude/settings\\.local\\.json$"
+    tool: claude_code
+    confidence: high
+    provenance: documented
+    notes: >
+      .claude/settings.local.json is written by Claude Code itself when a user approves a
+      permission; it is per-developer and normally gitignored, so a PR carrying one was authored
+      in a Claude Code session. https://docs.claude.com/en/docs/claude-code/settings
+
+  - name: "Agent configuration file touched"
+    detector: file_path
+    pattern: "^\\.(agents|claude|cursor|windsurf|codex|gemini|roo|cline|continue|junie|aider|specstory|kiro)/|^(CLAUDE|AGENTS|GEMINI)\\.md$|^\\.cursorrules$|^\\.windsurfrules$|^\\.github/copilot-instructions\\.md$|^\\.mcp\\.json$"
+    tool: other
+    confidence: low
+    provenance: observed
+    disputed: true
+    notes: >
+      The PR touches an agent's configuration. Observed in synced data: .agents/skills/** and
+      AGENTS.md in 6 pull requests; no .cursor/, .windsurf/ or .aider/ anywhere. Disputed,
+      because editing an agent's instructions is not the same as using one to write the change —
+      a human tuning CLAUDE.md by hand matches it too.
+
+  # --- AI reviewers (reviewer_identity) --------------------------------------------------------
+  #
+  # These identify a machine REVIEWER, not an AI author. They are all disputed for that reason:
+  # a bot review says nothing about who wrote the code, so one must never be enough to call a PR
+  # AI-authored. They are seeded inactive as well — no login below has been confirmed against
+  # this installation's data.
+  - name: "CodeRabbit reviewer account"
+    detector: reviewer_identity
+    pattern: "^coderabbitai(\\[bot\\])?$"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      CodeRabbit reviews under the coderabbitai[bot] app account. Recalled login; an AI reviewer,
+      not an AI author, hence disputed.
+
+  - name: "GitHub Copilot reviewer account"
+    detector: reviewer_identity
+    pattern: "^copilot-pull-request-reviewer(\\[bot\\])?$"
+    tool: copilot
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Copilot code review submits its reviews under this app account. Recalled login; an AI
+      reviewer, not an AI author, hence disputed.
+
+  - name: "Gemini Code Assist reviewer account"
+    detector: reviewer_identity
+    pattern: "^gemini-code-assist(\\[bot\\])?$"
+    tool: gemini
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Gemini Code Assist reviews under the gemini-code-assist[bot] app account, the same
+      integration as the hidden review marker rule. Recalled login; reviewer, not author.
+
+  - name: "Qodo reviewer account"
+    detector: reviewer_identity
+    pattern: "^(qodo-merge-pro|codiumai-pr-agent-pro)(\\[bot\\])?$"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Qodo Merge (formerly CodiumAI PR-Agent) reviews under one of these two app accounts.
+      Recalled logins; reviewer, not author.
+
+  - name: "Ellipsis reviewer account"
+    detector: reviewer_identity
+    pattern: "^ellipsis-dev(\\[bot\\])?$"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Ellipsis reviews under the ellipsis-dev[bot] app account. Recalled login; reviewer, not
+      author.
+
+  # --- Agent-shaped title and merge (pr_title, merged_by_identity) -----------------------------
+  - name: "Agent-prefixed PR title"
+    detector: pr_title
+    pattern: "^\\[(codex|cursor|devin|jules|charlie|copilot|claude)\\]\\s|^(codex|cursor|devin|jules|charlie|copilot|claude)\\s*[:/-]\\s"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Some teams prefix an agent's pull requests by hand ("Codex: fix the flaky test"). Disputed:
+      this is a naming convention a human types, not something any tool writes.
+
+  - name: "Merged by an agent account"
+    detector: merged_by_identity
+    pattern: "^(devin-ai-integration|charliecreates|charliehelps|copilot-swe-agent)(\\[bot\\])?$"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      An agent account pressed merge. Disputed twice over: the agent that merges need not be the
+      one that wrote the change, and on many teams a bot merges every approved PR regardless of
+      who authored it. A hint that the repository is agent-driven, never proof about this PR.
+
+  # --- Stylometry (pr_body_footer) -------------------------------------------------------------
+  #
+  # Prose habits, not artefacts. Every rule here is low + disputed, so a stylometric match alone
+  # can only ever reach `ai_suspected` — never `ai_explicit` — and all five seed inactive. They
+  # exist so a lead can dry-run them against their own pull requests and see the false-positive
+  # rate for their team before switching any of them on.
+  - name: "Stylometry: assistant sign-off offer"
+    detector: pr_body_footer
+    pattern: "(let me know if you|happy to)[^.\\n]{0,60}(adjust|tweak|expand|refine|change)"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      An assistant closing a description by offering to revise it. Humans write this too,
+      especially on a draft PR, so it is a hint and nothing more.
+
+  - name: "Stylometry: bolded bullet lead-ins"
+    detector: pr_body_footer
+    pattern: "(?:^[ \\t]*[-*] \\*\\*[^*\\n]{2,60}\\*\\*[:.].*\\n){3,}"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Three or more consecutive bullets of the shape "- **Thing**: explanation", a layout habit
+      of chat models. A team whose PR template asks for it will match constantly.
+
+  - name: "Stylometry: 'Key changes' section heading"
+    detector: pr_body_footer
+    pattern: "^#{1,4}\\s*key (changes|benefits|improvements|points|takeaways)\\b"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      A section heading chat models reach for when summarising a diff. A perfectly normal thing
+      for a human to write, hence disputed.
+
+  - name: "Stylometry: promotional adjectives"
+    detector: pr_body_footer
+    pattern: "\\b(comprehensive|robust|seamless|meticulous)(ly)?\\b"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      Vocabulary over-represented in model-written prose. The weakest rule in the catalogue:
+      expect false positives on any well-written description, and never read a match as evidence
+      on its own.
+
+  - name: "Stylometry: first-person change report"
+    detector: pr_body_footer
+    pattern: "^i(?:'ve| have) (added|updated|refactored|implemented|fixed|introduced)\\b"
+    tool: other
+    confidence: low
+    provenance: unverified
+    disputed: true
+    notes: >
+      An assistant narrating what it did, at the start of a line. Developers write in the first
+      person as well, so this only ever contributes a hint.

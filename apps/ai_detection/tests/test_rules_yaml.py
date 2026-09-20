@@ -210,3 +210,49 @@ def test_samples_without_a_match_are_rejected(tmp_path):
     path.write_text("samples:\n  a rule:\n    non_matches:\n      - 'x'\n")
     with pytest.raises(RuleDefinitionError, match="must match"):
         load_rule_samples(path)
+
+
+# --- what the phase-12 detectors are allowed to claim -------------------------------------------
+
+
+def test_every_reviewer_identity_rule_is_disputed():
+    """A bot review says who *reviewed* the change, never who wrote it. If one of these ever
+    shipped undisputed, a single CodeRabbit review would resolve a human PR to AI-authored."""
+    rules = [d for d in load_rule_definitions() if d.detector == Detector.REVIEWER_IDENTITY]
+    assert rules, "the seed set should cover the AI reviewers"
+    for definition in rules:
+        assert definition.disputed is True, definition.name
+
+
+def test_every_merged_by_identity_rule_is_disputed():
+    """Merging is not authoring, and on many teams a bot merges every approved PR."""
+    rules = [d for d in load_rule_definitions() if d.detector == Detector.MERGED_BY_IDENTITY]
+    assert rules
+    for definition in rules:
+        assert definition.disputed is True, definition.name
+
+
+def test_every_stylometric_rule_is_disputed_and_low():
+    """Prose habits are a hint, so no stylometry rule may reach `ai_explicit` on its own."""
+    rules = [d for d in load_rule_definitions() if d.name.startswith("Stylometry:")]
+    assert len(rules) >= 5
+    for definition in rules:
+        assert definition.disputed is True, definition.name
+        assert definition.confidence == "low", definition.name
+        assert definition.seeds_active is False, definition.name
+
+
+def test_the_tool_written_file_rules_are_high_confidence_and_undisputed():
+    """The point of the `file_path` family: a tool's own transcript or settings file in the diff
+    is an artefact nobody types by hand, so it is worth as much as a commit trailer."""
+    names = {
+        "Aider chat history file in the diff",
+        "SpecStory transcript in the diff",
+        "Claude Code local settings in the diff",
+    }
+    by_name = {d.name: d for d in load_rule_definitions()}
+    for name in names:
+        definition = by_name[name]
+        assert definition.detector == Detector.FILE_PATH
+        assert definition.confidence == "high"
+        assert definition.disputed is False

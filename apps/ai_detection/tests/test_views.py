@@ -2,11 +2,14 @@ import pytest
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import AuditEntry
-from apps.activity.factories import PullRequestFactory
+from apps.activity.factories import PRFileFactory, PullRequestFactory, ReviewFactory
 from apps.ai_detection.factories import DetectionRuleFactory
 from apps.ai_detection.models import AISignal, Confidence, DetectionRule, Detector, Tool
+from apps.catalog.factories import IdentityFactory
+from apps.catalog.models import Identity
 
 URL_NAMES = ["ai_detection:rules", "ai_detection:rule_create"]
 
@@ -290,3 +293,35 @@ def test_unsaved_rule_can_be_dry_run(client, admin_user):
 
     assert response.status_code == 200
     assert not DetectionRule.objects.filter(pattern="Generated with Claude Code").exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("detector", "pattern"),
+    [
+        (Detector.FILE_PATH, r"^\.claude/settings\.local\.json$"),
+        (Detector.PR_TITLE, r"^codex\s*:\s"),
+        (Detector.REVIEWER_IDENTITY, r"^coderabbitai(\[bot\])?$"),
+        (Detector.MERGED_BY_IDENTITY, r"^devin-ai-integration(\[bot\])?$"),
+    ],
+)
+def test_dry_run_works_for_each_detector_added_in_phase_12(client, admin_user, detector, pattern):
+    reviewer = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="coderabbitai[bot]")
+    merger = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="devin-ai-integration[bot]")
+    pr = PullRequestFactory(title="Codex: fix the flaky sync test", merged_by=merger)
+    PRFileFactory(pull_request=pr, path=".claude/settings.local.json")
+    ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=timezone.now())
+    client.force_login(admin_user)
+
+    response = client.post(
+        reverse("ai_detection:rule_dry_run"),
+        {
+            "detector": detector,
+            "pattern": pattern,
+            "tool": Tool.OTHER,
+            "confidence": Confidence.LOW,
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"1 match" in response.content

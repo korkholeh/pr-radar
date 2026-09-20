@@ -186,3 +186,145 @@ samples:
     non_matches:
       - "fix: correct the rounding error"
       - "feat: add the robot illustration"
+
+  # --- file_path ------------------------------------------------------------------------------
+  # Samples here are single file paths, exactly as the detector feeds them in one at a time.
+  "Aider chat history file in the diff":
+    matches:
+      - ".aider.chat.history.md"
+      - "backend/.aider.input.history.md"
+    non_matches:
+      - "docs/aider.md"
+      - ".aider.conf.yml"
+
+  "SpecStory transcript in the diff":
+    matches:
+      - ".specstory/history/2026-09-18_refactor-the-sync.md"
+      - "apps/.specstory/ai_rules.md"
+    non_matches:
+      - "docs/specstory.md"
+      - "specstory/notes.md"
+
+  "Claude Code local settings in the diff":
+    matches:
+      - ".claude/settings.local.json"
+      - "backend/.claude/settings.local.json"
+    non_matches:
+      - ".claude/settings.json"
+      - ".claude/agents/reviewer.md"
+
+  "Agent configuration file touched":
+    matches:
+      - ".agents/skills/review/SKILL.md"
+      - "AGENTS.md"
+      - ".github/copilot-instructions.md"
+      - ".mcp.json"
+    non_matches:
+      - "docs/agents.md"
+      - "apps/agents/models.py"
+      - "CONTRIBUTING.md"
+
+  # --- reviewer_identity ----------------------------------------------------------------------
+  # Samples are single login values, one per review.
+  "CodeRabbit reviewer account":
+    matches:
+      - "coderabbitai[bot]"
+      - "coderabbitai"
+    non_matches:
+      - "coderabbitai-staging"
+      - "rabbit-reviewer"
+
+  "GitHub Copilot reviewer account":
+    matches:
+      - "copilot-pull-request-reviewer[bot]"
+    non_matches:
+      - "copilot-swe-agent[bot]"
+      - "copilot"
+
+  "Gemini Code Assist reviewer account":
+    matches:
+      - "gemini-code-assist[bot]"
+    non_matches:
+      - "gemini-code-assist-staging[bot]"
+      - "gemini"
+
+  "Qodo reviewer account":
+    matches:
+      - "qodo-merge-pro[bot]"
+      - "codiumai-pr-agent-pro[bot]"
+    non_matches:
+      - "qodo-merge"
+      - "codiumai-pr-agent"
+
+  "Ellipsis reviewer account":
+    matches:
+      - "ellipsis-dev[bot]"
+      - "ellipsis-dev"
+    non_matches:
+      - "ellipsis"
+      - "ellipsis-developer"
+
+  # --- pr_title and merged_by_identity ---------------------------------------------------------
+  "Agent-prefixed PR title":
+    matches:
+      - "Codex: fix the flaky sync test"
+      - "[Devin] Add the export endpoint"
+    non_matches:
+      - "fix(sync): retry on a 502"
+      - "Claude is mentioned in the middle of this title"
+
+  "Merged by an agent account":
+    matches:
+      - "devin-ai-integration[bot]"
+      - "charliehelps"
+    non_matches:
+      - "octocat"
+      - "devin-ai-integration-staging"
+
+  # --- stylometry -------------------------------------------------------------------------------
+  "Stylometry: assistant sign-off offer":
+    matches:
+      - "Let me know if you would like me to adjust the naming."
+      - "Happy to tweak the boundaries if that reads better."
+    non_matches:
+      - "Let me know what you think."
+      - "This adjusts the naming of the two helpers."
+
+  "Stylometry: bolded bullet lead-ins":
+    matches:
+      - |
+        - **Sync**: retries on a 502.
+        - **Metrics**: one new counter.
+        - **Docs**: regenerated.
+    non_matches:
+      - |
+        - **Sync**: retries on a 502.
+        - **Metrics**: one new counter.
+      - |
+        - Sync: retries on a 502.
+        - Metrics: one new counter.
+        - Docs: regenerated.
+
+  "Stylometry: 'Key changes' section heading":
+    matches:
+      - "## Key changes"
+      - "### Key takeaways"
+    non_matches:
+      - "The key changes are in the sync pipeline."
+      - "## Changes"
+
+  "Stylometry: promotional adjectives":
+    matches:
+      - "This adds comprehensive coverage of the sync path."
+      - "The retry logic is now robust."
+    non_matches:
+      - "This adds coverage of the sync path."
+      - "Comprehension of the payload is unchanged."
+
+  "Stylometry: first-person change report":
+    matches:
+      - "I've refactored the mapper into two functions."
+      - "I have added a regression test."
+    non_matches:
+      - "I think the mapper should be split."
+      - "Someone has updated the mapper already."

@@ -1,11 +1,15 @@
 import re
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from apps.activity.factories import PRFileFactory, PullRequestFactory, ReviewFactory
 from apps.activity.models import Commit, PullRequest, PullRequestCommit
 from apps.ai_detection.detectors import EVIDENCE_MAX_LENGTH, evidence_fragment, load_context
-from apps.catalog.models import Organization, Repository
+from apps.catalog.factories import IdentityFactory
+from apps.catalog.models import Identity, Organization, Repository
 from apps.connections.models import GitHubConnection
 
 
@@ -70,3 +74,77 @@ def test_load_context_orders_commits_by_committed_at_then_sha(repository):
         commit_late.pk,
         commit_none.pk,
     ]
+
+
+# --- the fields phase 12 added to the context ---------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_load_context_reads_paths_title_reviewers_and_merger():
+    pr = PullRequestFactory(title="Codex: fix the flaky sync test")
+    PRFileFactory(pull_request=pr, path="b.py")
+    PRFileFactory(pull_request=pr, path="a.py")
+    reviewer = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="coderabbitai[bot]")
+    merger = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="octocat")
+    ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=timezone.now())
+    pr.merged_by = merger
+    pr.save(update_fields=["merged_by"])
+
+    ctx = load_context(pr.pk)
+
+    assert ctx.title == "Codex: fix the flaky sync test"
+    assert ctx.file_paths == ("a.py", "b.py")  # ascending, so a rule always reports the same path
+    assert ctx.reviewer_values == ("coderabbitai[bot]",)
+    assert ctx.merged_by_values == ("octocat",)
+
+
+@pytest.mark.django_db
+def test_load_context_leaves_excluded_files_out():
+    """`is_excluded` files are lockfiles, vendored trees and generated output. A rule that fires
+    on one of those is describing the repository's tooling, not this pull request."""
+    pr = PullRequestFactory()
+    PRFileFactory(pull_request=pr, path="apps/sync/client.py")
+    PRFileFactory(pull_request=pr, path="vendor/lib.js", is_excluded=True)
+
+    assert load_context(pr.pk).file_paths == ("apps/sync/client.py",)
+
+
+@pytest.mark.django_db
+def test_load_context_orders_reviewers_by_submission_and_skips_reviews_without_one():
+    pr = PullRequestFactory()
+    now = timezone.now()
+    first = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="first-reviewer")
+    second = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="second-reviewer")
+    ReviewFactory(pull_request=pr, reviewer=second, submitted_at=now)
+    ReviewFactory(pull_request=pr, reviewer=first, submitted_at=now - timezone.timedelta(hours=1))
+    ReviewFactory(pull_request=pr, reviewer=None, submitted_at=now)
+
+    assert load_context(pr.pk).reviewer_values == ("first-reviewer", "second-reviewer")
+
+
+@pytest.mark.django_db
+def test_load_context_query_budget_does_not_grow_with_files_or_reviews():
+    """The `file_path` and `reviewer_identity` detectors read whole collections, so their cost
+    must stay in the prefetch, not in a query per row. Asserted as a comparison rather than a
+    pinned number: what matters is that forty files cost exactly what two do."""
+    small = PullRequestFactory()
+    for index in range(2):
+        PRFileFactory(pull_request=small, path=f"small-{index}.py")
+        ReviewFactory(pull_request=small)
+
+    load_context(small.pk)  # warm anything cached process-wide before counting
+    with CaptureQueriesContext(connection) as small_queries:
+        small_ctx = load_context(small.pk)
+
+    big = PullRequestFactory()
+    for index in range(40):
+        PRFileFactory(pull_request=big, path=f"big-{index}.py")
+        ReviewFactory(pull_request=big)
+
+    with CaptureQueriesContext(connection) as big_queries:
+        big_ctx = load_context(big.pk)
+
+    assert len(small_ctx.file_paths) == 2
+    assert len(big_ctx.file_paths) == 40
+    assert len(big_queries) == len(small_queries)
+    assert len(small_queries) <= 10, [q["sql"] for q in small_queries]

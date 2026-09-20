@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 20:57+0000\n"
+"POT-Creation-Date: 2026-09-20 06:04+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -64,7 +64,7 @@ msgstr "проєкт"
 
 #: apps/accounts/models.py:46 apps/accounts/models.py:69
 #: apps/activity/models.py:64 apps/activity/models.py:303
-#: apps/ai_detection/models.py:57 apps/connections/models.py:43
+#: apps/ai_detection/models.py:61 apps/connections/models.py:43
 #: apps/dashboards/models.py:60 apps/policy/models.py:20
 #: apps/policy/models.py:119
 msgid "created at"
@@ -388,7 +388,7 @@ msgstr "має подальше виправлення"
 #: apps/activity/models.py:127 apps/activity/models.py:202
 #: apps/activity/models.py:225 apps/activity/models.py:262
 #: apps/activity/models.py:293 apps/activity/models.py:326
-#: apps/ai_detection/models.py:93 apps/churn/models.py:16
+#: apps/ai_detection/models.py:97 apps/churn/models.py:16
 #: apps/policy/models.py:102
 msgid "pull request"
 msgstr "pull request"
@@ -434,7 +434,7 @@ msgid "trailers"
 msgstr "трейлери"
 
 #: apps/activity/models.py:186 apps/activity/models.py:205
-#: apps/ai_detection/models.py:101
+#: apps/ai_detection/models.py:105
 msgid "commit"
 msgstr "коміт"
 
@@ -652,115 +652,131 @@ msgstr "Шаблон гілки"
 msgid "Commit message"
 msgstr "Повідомлення коміту"
 
+#: apps/ai_detection/models.py:27
+msgid "File path"
+msgstr "Шлях до файлу"
+
+#: apps/ai_detection/models.py:28
+msgid "PR title"
+msgstr "Заголовок PR"
+
+#: apps/ai_detection/models.py:29
+msgid "Reviewer identity"
+msgstr "Ідентичність ревʼюера"
+
 #: apps/ai_detection/models.py:30
+msgid "Merged-by identity"
+msgstr "Ідентичність того, хто змерджив"
+
+#: apps/ai_detection/models.py:34
 msgid "Claude Code"
 msgstr "Claude Code"
 
-#: apps/ai_detection/models.py:31
+#: apps/ai_detection/models.py:35
 msgid "Copilot"
 msgstr "Copilot"
 
-#: apps/ai_detection/models.py:32
+#: apps/ai_detection/models.py:36
 msgid "Cursor"
 msgstr "Cursor"
 
-#: apps/ai_detection/models.py:33
+#: apps/ai_detection/models.py:37
 msgid "Codex"
 msgstr "Codex"
 
-#: apps/ai_detection/models.py:34
+#: apps/ai_detection/models.py:38
 msgid "Devin"
 msgstr "Devin"
 
-#: apps/ai_detection/models.py:35
+#: apps/ai_detection/models.py:39
 msgid "Gemini"
 msgstr "Gemini"
 
-#: apps/ai_detection/models.py:36
+#: apps/ai_detection/models.py:40
 msgid "Aider"
 msgstr "Aider"
 
-#: apps/ai_detection/models.py:37
+#: apps/ai_detection/models.py:41
 msgid "Windsurf"
 msgstr "Windsurf"
 
-#: apps/ai_detection/models.py:38
+#: apps/ai_detection/models.py:42
 msgid "ChatGPT"
 msgstr "ChatGPT"
 
-#: apps/ai_detection/models.py:39
+#: apps/ai_detection/models.py:43
 msgid "Charlie"
 msgstr "Charlie"
 
-#: apps/ai_detection/models.py:40 apps/catalog/models.py:94
+#: apps/ai_detection/models.py:44 apps/catalog/models.py:94
 #: apps/dashboards/reviews.py:84
 msgid "Other"
 msgstr "Інше"
 
-#: apps/ai_detection/models.py:44 apps/policy/models.py:88
+#: apps/ai_detection/models.py:48 apps/policy/models.py:88
 msgid "High"
 msgstr "Високий"
 
-#: apps/ai_detection/models.py:45 apps/policy/models.py:89
+#: apps/ai_detection/models.py:49 apps/policy/models.py:89
 msgid "Medium"
 msgstr "Середній"
 
-#: apps/ai_detection/models.py:46 apps/policy/models.py:90
+#: apps/ai_detection/models.py:50 apps/policy/models.py:90
 msgid "Low"
 msgstr "Низький"
 
-#: apps/ai_detection/models.py:50 apps/catalog/models.py:41
+#: apps/ai_detection/models.py:54 apps/catalog/models.py:41
 #: apps/catalog/models.py:64 apps/connections/models.py:19
 #: apps/github_sync/models.py:62
 msgid "name"
 msgstr "назва"
 
-#: apps/ai_detection/models.py:51
+#: apps/ai_detection/models.py:55
 msgid "detector"
 msgstr "детектор"
 
-#: apps/ai_detection/models.py:52
+#: apps/ai_detection/models.py:56
 msgid "pattern"
 msgstr "патерн"
 
-#: apps/ai_detection/models.py:53 apps/ai_detection/models.py:106
+#: apps/ai_detection/models.py:57 apps/ai_detection/models.py:110
 msgid "tool"
 msgstr "інструмент"
 
-#: apps/ai_detection/models.py:54 apps/ai_detection/models.py:107
+#: apps/ai_detection/models.py:58 apps/ai_detection/models.py:111
 msgid "confidence"
 msgstr "впевненість"
 
-#: apps/ai_detection/models.py:55 apps/catalog/models.py:17
+#: apps/ai_detection/models.py:59 apps/catalog/models.py:17
 #: apps/catalog/models.py:47 apps/catalog/models.py:73
 #: apps/catalog/models.py:97 apps/connections/models.py:34
 #: apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:56 apps/catalog/models.py:102
+#: apps/ai_detection/models.py:60 apps/catalog/models.py:102
 msgid "notes"
 msgstr "нотатки"
 
-#: apps/ai_detection/models.py:58 apps/connections/models.py:44
+#: apps/ai_detection/models.py:62 apps/connections/models.py:44
 #: apps/metrics/models.py:58 apps/policy/models.py:120
 msgid "updated at"
 msgstr "оновлено о"
 
-#: apps/ai_detection/models.py:61
+#: apps/ai_detection/models.py:65
 msgid "detection rule"
 msgstr "правило детекції"
 
-#: apps/ai_detection/models.py:62
+#: apps/ai_detection/models.py:66
 msgid "detection rules"
 msgstr "правила детекції"
 
-#: apps/ai_detection/models.py:74
+#: apps/ai_detection/models.py:78
 #, python-format
 msgid "Not a valid regular expression: %(error)s"
 msgstr "Не є коректним регулярним виразом: %(error)s"
 
-#: apps/ai_detection/models.py:80
+#: apps/ai_detection/models.py:84
 msgid ""
 "This pattern nests a repeated group inside another repetition (e.g. (a+)+), "
 "which can hang on a normal PR body. Rewrite it without the nested quantifier."
@@ -769,27 +785,27 @@ msgstr ""
 "(наприклад, (a+)+), що може призвести до зависання на звичайному тілі PR. "
 "Перепишіть його без вкладеного квантифікатора."
 
-#: apps/ai_detection/models.py:104
+#: apps/ai_detection/models.py:108
 msgid "rule"
 msgstr "правило"
 
-#: apps/ai_detection/models.py:108
+#: apps/ai_detection/models.py:112
 msgid "evidence"
 msgstr "доказ"
 
-#: apps/ai_detection/models.py:109
+#: apps/ai_detection/models.py:113
 msgid "evidence hash"
 msgstr "хеш доказу"
 
-#: apps/ai_detection/models.py:110
+#: apps/ai_detection/models.py:114
 msgid "detected at"
 msgstr "виявлено о"
 
-#: apps/ai_detection/models.py:113
+#: apps/ai_detection/models.py:117
 msgid "AI signal"
 msgstr "сигнал ШІ"
 
-#: apps/ai_detection/models.py:114
+#: apps/ai_detection/models.py:118
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:157
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:175
 msgid "AI signals"

@@ -3,14 +3,22 @@ from datetime import UTC, datetime
 import pytest
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 from apps.accounts.selectors import ScopeFilter
-from apps.activity.factories import CommitFactory, PullRequestCommitFactory, PullRequestFactory
+from apps.activity.factories import (
+    CommitFactory,
+    PRFileFactory,
+    PullRequestCommitFactory,
+    PullRequestFactory,
+    ReviewFactory,
+)
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest
 from apps.ai_detection.factories import DetectionRuleFactory
 from apps.ai_detection.models import AISignal, Confidence, DetectionRule, Detector, Tool
 from apps.ai_detection.services import detect_pull_request, detect_pull_requests, dry_run_rule
-from apps.catalog.factories import ProjectFactory, RepositoryFactory
+from apps.catalog.factories import IdentityFactory, ProjectFactory, RepositoryFactory
+from apps.catalog.models import Identity
 
 
 @pytest.mark.django_db
@@ -302,3 +310,156 @@ def test_dry_run_rule_restricted_scope_sees_only_its_own_prs():
     matches = dry_run_rule(unsaved_rule, scope, limit=50)
 
     assert len(matches) == 1
+
+
+# --- the detectors phase 12 added ----------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_a_tool_written_file_in_the_diff_resolves_the_pull_request_to_ai_explicit():
+    DetectionRuleFactory(
+        detector=Detector.FILE_PATH,
+        pattern=r"(^|/)\.aider\.(chat|input)\.history\.md$",
+        tool=Tool.AIDER,
+        confidence=Confidence.HIGH,
+    )
+    pr = PullRequestFactory()
+    PRFileFactory(pull_request=pr, path="apps/sync/client.py")
+    PRFileFactory(pull_request=pr, path=".aider.chat.history.md")
+
+    detect_pull_request(pr.pk)
+
+    signal = AISignal.objects.get(pull_request=pr)
+    assert signal.evidence == ".aider.chat.history.md"
+    assert signal.tool == Tool.AIDER
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_EXPLICIT
+
+
+@pytest.mark.django_db
+def test_a_file_path_rule_writes_one_signal_for_a_pull_request_with_many_matching_files():
+    DetectionRuleFactory(
+        detector=Detector.FILE_PATH,
+        pattern=r"^\.claude/",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    pr = PullRequestFactory()
+    for index in range(400):
+        PRFileFactory(pull_request=pr, path=f".claude/agents/agent-{index:03d}.md")
+
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 1
+
+
+@pytest.mark.django_db
+def test_an_excluded_file_produces_no_signal():
+    DetectionRuleFactory(
+        detector=Detector.FILE_PATH,
+        pattern=r"^\.claude/",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    pr = PullRequestFactory()
+    PRFileFactory(pull_request=pr, path=".claude/settings.local.json", is_excluded=True)
+
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 0
+
+
+@pytest.mark.django_db
+def test_a_stylometric_rule_alone_never_resolves_a_pull_request_to_ai_explicit():
+    """Every stylometric rule ships `low` + `disputed`, and prose habits are not proof. The most
+    a match may claim on its own is `ai_suspected`."""
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern=r"\b(comprehensive|robust|seamless|meticulous)(ly)?\b",
+        tool=Tool.OTHER,
+        confidence=Confidence.LOW,
+    )
+    pr = PullRequestFactory(body="This adds comprehensive coverage of the sync path.")
+
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 1
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_SUSPECTED
+
+
+@pytest.mark.django_db
+def test_a_reviewer_bot_is_detected_once_however_many_reviews_it_left():
+    DetectionRuleFactory(
+        detector=Detector.REVIEWER_IDENTITY,
+        pattern=r"^coderabbitai(\[bot\])?$",
+        tool=Tool.OTHER,
+        confidence=Confidence.LOW,
+    )
+    pr = PullRequestFactory()
+    reviewer = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="coderabbitai[bot]")
+    for _ in range(3):
+        ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=timezone.now())
+
+    detect_pull_request(pr.pk)
+
+    signals = AISignal.objects.filter(pull_request=pr)
+    assert signals.count() == 1
+    assert signals.get().evidence == "coderabbitai[bot]"
+
+
+@pytest.mark.django_db
+def test_a_title_rule_and_a_merged_by_rule_write_their_own_signals():
+    DetectionRuleFactory(
+        detector=Detector.PR_TITLE,
+        pattern=r"^codex\s*:\s",
+        tool=Tool.CODEX,
+        confidence=Confidence.LOW,
+    )
+    DetectionRuleFactory(
+        detector=Detector.MERGED_BY_IDENTITY,
+        pattern=r"^devin-ai-integration(\[bot\])?$",
+        tool=Tool.DEVIN,
+        confidence=Confidence.LOW,
+    )
+    merger = IdentityFactory(kind=Identity.Kind.GITHUB_LOGIN, value="devin-ai-integration[bot]")
+    pr = PullRequestFactory(title="Codex: fix the flaky sync test", merged_by=merger)
+
+    detect_pull_request(pr.pk)
+
+    assert {signal.tool for signal in AISignal.objects.filter(pull_request=pr)} == {
+        Tool.CODEX,
+        Tool.DEVIN,
+    }
+
+
+@pytest.mark.django_db
+def test_detecting_a_batch_costs_the_same_whether_its_pull_requests_touch_2_files_or_40():
+    """The widened prefetch must stay one query per relation per PR: an N+1 over files or
+    reviews would make `manage.py recompute` unusable on a real repository."""
+    DetectionRuleFactory(
+        detector=Detector.FILE_PATH,
+        pattern=r"^\.claude/",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+
+    def _seed(prefix: str, file_count: int) -> None:
+        for pr_index in range(20):
+            pr = PullRequestFactory(title=f"{prefix}-{pr_index}")
+            for file_index in range(file_count):
+                PRFileFactory(pull_request=pr, path=f"{prefix}/{pr_index}/{file_index}.py")
+                ReviewFactory(pull_request=pr)
+
+    _seed("small", 2)
+    small_queryset = PullRequest.objects.filter(title__startswith="small-")
+    detect_pull_requests(small_queryset)  # warm the process-wide settings cache
+    with CaptureQueriesContext(connection) as small_queries:
+        assert detect_pull_requests(small_queryset) == 20
+
+    _seed("big", 40)
+    big_queryset = PullRequest.objects.filter(title__startswith="big-")
+    with CaptureQueriesContext(connection) as big_queries:
+        assert detect_pull_requests(big_queryset) == 20
+
+    assert len(big_queries) == len(small_queries)

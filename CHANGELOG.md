@@ -14,6 +14,32 @@
 
 ### Added
 
+- **Detection now reads the diff, the title, the reviewers and the merger, not just the prose.** Four new
+  detectors join the eight that existed: **file path** (a path in the PR's own diff), **PR title**,
+  **reviewer identity** and **merged-by identity**. They are ordinary detectors, so any rule — shipped or
+  your own — can use them, and the dry run works for each.
+
+  Sixteen rules come with them:
+
+  - Four **file-path** rules. A tool's own artefact in the diff is the strongest evidence short of a commit
+    trailer, because nobody types a chat transcript by hand: Aider's `.aider.chat.history.md`, a SpecStory
+    transcript, and `.claude/settings.local.json` all resolve a PR to `AI explicit`. A fourth, disputed rule
+    notes when a PR merely *touches* an agent's configuration (`.agents/`, `.claude/`, `AGENTS.md`,
+    `.cursorrules`, `.github/copilot-instructions.md` and the rest) — editing an agent's instructions is not
+    the same as using one.
+  - Five **AI reviewer** rules (CodeRabbit, Copilot review, Gemini Code Assist, Qodo, Ellipsis). All five are
+    disputed and ship deactivated: a bot review tells you who reviewed the change, never who wrote it.
+  - Five **stylometric** rules over the PR body — an assistant sign-off, bolded bullet lead-ins, a "Key
+    changes" heading, promotional adjectives, a first-person change report. All are `low` + disputed, so a
+    match can never reach `AI explicit` on its own, and all ship deactivated so you can dry-run them against
+    your own pull requests and see the false-positive rate for your team before switching any on.
+  - An agent-prefixed **title** rule and a merged-by-an-agent rule, both disputed hints.
+
+  A rule that reads the diff or the reviews reports **at most one signal per pull request**, so a 400-file PR
+  produces one line of evidence rather than four hundred. Excluded files (lockfiles, vendored trees, generated
+  output) never reach a rule. Run `manage.py seed_detection_rules` to pick the new rules up, then
+  `manage.py recompute` to apply them to pull requests you already have.
+
 - **Eleven more detection rules, and a reason to trust each one.** The shipped rule set now covers the
   session and task permalinks agents leave in a PR body or commit trailer (Claude Code, Codex, Devin, Jules),
   the co-author trailers Cursor, Copilot and the Gemini CLI write, Copilot's hidden body marker, CodeRabbit's

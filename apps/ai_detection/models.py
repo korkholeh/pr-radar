@@ -24,6 +24,10 @@ class Detector(models.TextChoices):
     LABEL = "label", _("Label")
     BRANCH_PATTERN = "branch_pattern", _("Branch pattern")
     COMMIT_MESSAGE = "commit_message", _("Commit message")
+    FILE_PATH = "file_path", _("File path")
+    PR_TITLE = "pr_title", _("PR title")
+    REVIEWER_IDENTITY = "reviewer_identity", _("Reviewer identity")
+    MERGED_BY_IDENTITY = "merged_by_identity", _("Merged-by identity")
 
 
 class Tool(models.TextChoices):

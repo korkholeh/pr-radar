@@ -98,10 +98,19 @@ wanted-vs-existing diff, not an append. `AISignal` carries `evidence_hash` (a sh
 `UniqueConstraint(pull_request, rule, evidence_hash)`, so re-running detection twice never duplicates a row and
 deactivating a rule (or editing its pattern so it no longer matches) removes its signals on the very next run.
 
-**Eight detectors, each a pure function of `(compiled pattern, DetectionContext)`:** `commit_trailer`,
-`commit_author`, `pr_author`, `pr_body_footer`, `html_comment`, `label`, `branch_pattern`, `commit_message`
+**Twelve detectors, each a pure function of `(compiled pattern, DetectionContext)`:** `commit_trailer`,
+`commit_author`, `pr_author`, `pr_body_footer`, `html_comment`, `label`, `branch_pattern`, `commit_message`,
+and — added in phase 12 — `file_path`, `pr_title`, `reviewer_identity`, `merged_by_identity`
 (`apps/ai_detection/detectors.py`, keyed by `Detector`'s exact values, one detector per `Detector.choices`
-entry, checked by test so the registry can't silently fall short). `pr_body_footer` and `html_comment` read the
+entry, checked by test so the registry can't silently fall short). `file_path` and `reviewer_identity` read a
+collection rather than a single string and therefore **stop at the first match per rule**: a 400-file PR must
+produce one signal, not four hundred saying the same thing, and the iteration order (path ascending; review
+`submitted_at` then `github_id`) is fixed in the prefetch so the reported match is stable across runs.
+`file_path` never sees an `is_excluded` file — a rule firing on a lockfile or a vendored tree would be
+describing the repository, not the pull request. `review_body` was deliberately *not* added: `Review.body` is
+not stored, and putting reviewer prose into a tool whose users are the reviewers' managers is a product
+decision, not a detection one; every AI reviewer worth catching is identifiable from its login instead.
+`pr_body_footer` and `html_comment` read the
 same PR body through two different lenses on purpose: a marker inside an HTML comment is invisible to a human
 reviewer and must be attributable to its own rule and confidence rather than merged into the visible-text
 detector. Every `AISignal.evidence` is truncated to `EVIDENCE_MAX_LENGTH` (200 chars), centred on the match, so

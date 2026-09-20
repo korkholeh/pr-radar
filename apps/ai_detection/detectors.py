@@ -1,6 +1,7 @@
-"""The eight AI-detection heuristics (spec §6.1). Each detector is a pure function of a compiled
-rule pattern and a `DetectionContext` loaded once per PR; none of them writes to the database or
-knows about `DetectionRule` rows — that wiring lives in `services.py`."""
+"""The twelve AI-detection heuristics (spec §6.1; four of them added in phase 12). Each detector
+is a pure function of a compiled rule pattern and a `DetectionContext` loaded once per PR; none of
+them writes to the database or knows about `DetectionRule` rows — that wiring lives in
+`services.py`."""
 
 from __future__ import annotations
 
@@ -8,9 +9,9 @@ import re
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 
-from apps.activity.models import Commit, PullRequest
+from apps.activity.models import Commit, PRFile, PullRequest, Review
 from apps.ai_detection.models import Detector as DetectorCode
 
 EVIDENCE_MAX_LENGTH = 200
@@ -29,6 +30,10 @@ class DetectionContext:
     labels: tuple[str, ...]
     head_ref: str
     body: str
+    title: str = ""
+    file_paths: tuple[str, ...] = ()  # non-excluded, ordered by path
+    reviewer_values: tuple[str, ...] = ()  # ordered by submitted_at, then github_id
+    merged_by_values: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -144,6 +149,39 @@ def _detect_commit_message(pattern: re.Pattern[str], ctx: DetectionContext) -> I
             yield DetectorMatch(evidence=evidence_fragment(haystack, match), commit_id=commit.pk)
 
 
+def _detect_file_path(pattern: re.Pattern[str], ctx: DetectionContext) -> Iterator[DetectorMatch]:
+    """At most one match per rule, the first path in ascending order: a PR that touches 400 files
+    must not produce 400 signals that all say the same thing."""
+    for path in ctx.file_paths:
+        match = pattern.search(path)
+        if match is not None:
+            yield DetectorMatch(evidence=evidence_fragment(path, match), commit_id=None)
+            return
+
+
+def _detect_pr_title(pattern: re.Pattern[str], ctx: DetectionContext) -> Iterator[DetectorMatch]:
+    match = pattern.search(ctx.title)
+    if match is not None:
+        yield DetectorMatch(evidence=evidence_fragment(ctx.title, match), commit_id=None)
+
+
+def _detect_reviewer_identity(pattern: re.Pattern[str], ctx: DetectionContext) -> Iterator[DetectorMatch]:
+    """Bounded the same way as `file_path`: one match per rule, the earliest review that carries
+    it. Detects an AI *reviewer*, which is why every seeded rule for it is disputed."""
+    for value in ctx.reviewer_values:
+        match = pattern.search(value)
+        if match is not None:
+            yield DetectorMatch(evidence=evidence_fragment(value, match), commit_id=None)
+            return
+
+
+def _detect_merged_by_identity(pattern: re.Pattern[str], ctx: DetectionContext) -> Iterator[DetectorMatch]:
+    haystack = "\n".join(ctx.merged_by_values)
+    match = pattern.search(haystack)
+    if match is not None:
+        yield DetectorMatch(evidence=evidence_fragment(haystack, match), commit_id=None)
+
+
 DETECTORS: dict[str, Detector] = {
     DetectorCode.COMMIT_TRAILER: _detect_commit_trailer,
     DetectorCode.COMMIT_AUTHOR: _detect_commit_author,
@@ -153,6 +191,10 @@ DETECTORS: dict[str, Detector] = {
     DetectorCode.LABEL: _detect_label,
     DetectorCode.BRANCH_PATTERN: _detect_branch_pattern,
     DetectorCode.COMMIT_MESSAGE: _detect_commit_message,
+    DetectorCode.FILE_PATH: _detect_file_path,
+    DetectorCode.PR_TITLE: _detect_pr_title,
+    DetectorCode.REVIEWER_IDENTITY: _detect_reviewer_identity,
+    DetectorCode.MERGED_BY_IDENTITY: _detect_merged_by_identity,
 }
 
 
@@ -161,10 +203,20 @@ def _commit_sort_key(commit: Commit) -> tuple[bool, object, str]:
 
 
 def _prefetch_for_detection(queryset: QuerySet[PullRequest]) -> QuerySet[PullRequest]:
-    return queryset.select_related("author").prefetch_related(
+    """One query per relation, never one per row: the `file_path` and `reviewer_identity`
+    detectors read whole collections, so the budget must stay flat in files and reviews.
+
+    The two `Prefetch`es also fix the order the detectors iterate in — a rule that matches two
+    paths must always report the same one — and drop excluded files before they reach a rule."""
+    return queryset.select_related("author", "merged_by").prefetch_related(
         "pull_request_commits__commit__author_identity",
         "pull_request_commits__commit__author_email_identity",
         "pull_request_commits__commit__committer_identity",
+        Prefetch("files", queryset=PRFile.objects.filter(is_excluded=False).order_by("path")),
+        Prefetch(
+            "reviews",
+            queryset=Review.objects.select_related("reviewer").order_by("submitted_at", "github_id"),
+        ),
     )
 
 
@@ -178,6 +230,12 @@ def _context_from_pull_request(pr: PullRequest) -> DetectionContext:
         labels=tuple(pr.labels),
         head_ref=pr.head_ref,
         body=pr.body or "",
+        title=pr.title or "",
+        file_paths=tuple(pr_file.path for pr_file in pr.files.all()),
+        reviewer_values=tuple(
+            review.reviewer.value for review in pr.reviews.all() if review.reviewer is not None
+        ),
+        merged_by_values=(pr.merged_by.value,) if pr.merged_by is not None else (),
     )
 
 
