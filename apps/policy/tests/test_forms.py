@@ -153,10 +153,23 @@ def test_every_ai_policy_field_appears_in_a_fieldset():
     """A field missing from `FIELDSETS` lands in "Other" rather than vanishing, so this test is
     what keeps a new toggle from being merely misplaced."""
     form = AIPolicyForm()
-    grouped = {field.name for _legend, fields in form.fieldsets() for field in fields}
+    grouped = {field.name for _legend, _description, fields in form.fieldsets() for field in fields}
 
     assert grouped == set(form.fields)
-    assert "Other" not in {str(legend) for legend, _fields in form.fieldsets()}
+    assert "Other" not in {str(legend) for legend, _description, _fields in form.fieldsets()}
+
+
+@pytest.mark.django_db
+def test_every_ai_policy_option_explains_itself():
+    """The switches are the product here: a lead cannot decide whether to turn one on without
+    being told which violation it raises and on which pull requests. A new toggle added without a
+    help text is a checkbox nobody can act on, so this fails the build rather than shipping one."""
+    form = AIPolicyForm()
+
+    for legend, description, fields in form.fieldsets():
+        assert str(description), f"the {legend} group has no description"
+        for field in fields:
+            assert str(field.help_text), f"{field.name} has no help text"
 
 
 @pytest.mark.django_db

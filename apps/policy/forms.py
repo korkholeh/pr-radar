@@ -125,29 +125,70 @@ class AIPolicyForm(forms.ModelForm):
     carry, so `fieldsets` groups them the way a lead thinks about them: disclosure, review,
     description, quality gates, risk. The three risk limits and the reviewer logins are separate
     inputs rather than raw JSON — a lead configuring a policy should not have to type a dict.
+
+    Every switch carries a help text, and every group a sentence of its own: a lead deciding
+    whether to turn something on needs to know which rule code it raises, at what severity, on
+    which pull requests, and what else has to be true for it to fire at all. `docs/POLICY.md` is
+    the long form of the same contract, and `tests/test_docs.py` holds it to the code; these are
+    the two or three lines of it that belong next to the checkbox itself.
     """
 
-    allowed_tools = forms.MultipleChoiceField(choices=Tool.choices, required=False, label=_("Allowed tools"))
+    allowed_tools = forms.MultipleChoiceField(
+        choices=Tool.choices,
+        required=False,
+        label=_("Allowed tools"),
+        help_text=_(
+            "Raises TOOL_NOT_ALLOWED (high) once per tool that a pull request declares or that "
+            "detection finds, and that is not selected here. An empty selection allows every "
+            "tool: nothing is forbidden until something is allowed."
+        ),
+    )
     ai_reviewer_logins = forms.CharField(
         required=False,
         label=_("AI reviewer logins"),
-        help_text=_("One GitHub login per line, for example copilot-pull-request-reviewer."),
+        help_text=_(
+            "One GitHub login per line, for example copilot-pull-request-reviewer. These logins "
+            "are what the two checks above look for; while this box is empty, neither can fire."
+        ),
         widget=forms.Textarea(attrs={"rows": 3}),
     )
     designated_reviewers = forms.ModelMultipleChoiceField(
         queryset=Person.objects.none(),
         required=False,
         label=_("Designated reviewers"),
-        help_text=_("Their approval satisfies the extra review a migration needs."),
+        help_text=_(
+            "Raises MIGRATION_AI_INSUFFICIENT_REVIEW (high) on a merged AI pull request that "
+            "carries a database migration none of these people approved. Naming nobody leaves "
+            "the check switched off, because no approval could then satisfy it. Bots cannot be "
+            "designated: the point of the designation is that a named person read the migration."
+        ),
     )
     max_lines_low_risk = forms.IntegerField(
-        required=False, min_value=1, label=_("Maximum effective lines, low risk")
+        required=False,
+        min_value=1,
+        label=_("Maximum effective lines, low risk"),
+        help_text=_(
+            "Replaces the limit above for a change whose sensitive paths put it at low risk. "
+            "Empty means the flat limit applies."
+        ),
     )
     max_lines_medium_risk = forms.IntegerField(
-        required=False, min_value=1, label=_("Maximum effective lines, medium risk")
+        required=False,
+        min_value=1,
+        label=_("Maximum effective lines, medium risk"),
+        help_text=_(
+            "Replaces the limit above for a medium-risk change. The PLANEKS standards suggest "
+            "800 lines here; empty means the flat limit applies."
+        ),
     )
     max_lines_high_risk = forms.IntegerField(
-        required=False, min_value=1, label=_("Maximum effective lines, high risk")
+        required=False,
+        min_value=1,
+        label=_("Maximum effective lines, high risk"),
+        help_text=_(
+            "Replaces the limit above for a high-risk change. The PLANEKS standards suggest 400 "
+            "lines here; empty means the flat limit applies."
+        ),
     )
 
     _RISK_LIMIT_FIELDS = {
@@ -156,13 +197,24 @@ class AIPolicyForm(forms.ModelForm):
         "high": "max_lines_high_risk",
     }
 
-    FIELDSETS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    FIELDSETS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
         (
             _("Disclosure and tools"),
+            _(
+                "What a pull request has to say about the AI that helped write it, and which "
+                "tools may be used at all. Detection runs either way: these switches decide "
+                "whether a gap between what was declared and what was detected is written down "
+                "as a violation."
+            ),
             ("require_disclosure", "allowed_tools"),
         ),
         (
             _("Human review"),
+            _(
+                "How many people must have read an AI change before it merges, and whose "
+                "approval counts. An approval from the author or from a bot account is never a "
+                "human approval here."
+            ),
             (
                 "require_human_approval",
                 "min_human_approvals",
@@ -174,10 +226,19 @@ class AIPolicyForm(forms.ModelForm):
         ),
         (
             _("AI review"),
+            _(
+                "The checks about the AI reviewer itself: that it ran, and that its comments "
+                "were answered. Both need the reviewer logins below to be filled in, and both "
+                "are judged only once a pull request has merged."
+            ),
             ("require_ai_review_first", "require_ai_comments_resolved", "ai_reviewer_logins"),
         ),
         (
             _("What a description must state"),
+            _(
+                "Sections a pull request body has to carry. The headings that count are "
+                "configurable in Settings; a section that exists but is empty counts as missing."
+            ),
             (
                 "require_risk_level",
                 "require_verification_note",
@@ -187,6 +248,11 @@ class AIPolicyForm(forms.ModelForm):
         ),
         (
             _("Quality gates and tests"),
+            _(
+                "Whether the safety net around a change was left intact. These apply to every "
+                "pull request, not only AI ones: a bypassed gate or a deleted test is no better "
+                "for having been written by hand."
+            ),
             (
                 "forbid_ci_bypass",
                 "forbid_test_weakening",
@@ -196,6 +262,11 @@ class AIPolicyForm(forms.ModelForm):
         ),
         (
             _("Size and scope"),
+            _(
+                "How large an AI pull request may be and how far it may reach. Effective lines "
+                "leave out generated and vendored files, so the limits count the code somebody "
+                "actually has to review."
+            ),
             (
                 "ai_pr_max_effective_lines",
                 "max_lines_low_risk",
@@ -242,6 +313,109 @@ class AIPolicyForm(forms.ModelForm):
             "flag_new_dependencies_in_ai_prs": _("Flag new dependencies in AI PRs"),
             "high_risk_min_approvals": _("Minimum approvals for a high-risk change"),
         }
+        # Each of these says the same four things: which rule code the switch raises, at what
+        # severity, which pull requests it looks at, and what else has to be true before it can
+        # fire at all. The severities are `rules.SEVERITY`; the long form is `docs/POLICY.md`.
+        help_texts = {
+            "require_disclosure": _(
+                "Raises DISCLOSURE_MISSING (medium) on a pull request whose description neither "
+                "states that AI helped nor states that it did not. Switched off, disclosures are "
+                "still read and charted; nothing is raised. DISCLOSURE_MISMATCH — a description "
+                "that says 'no AI' on a change detection is highly confident about — is raised "
+                "either way, because a contradiction is always worth a look."
+            ),
+            "require_human_approval": _(
+                "Raises NO_HUMAN_APPROVAL (high) on a merged AI pull request with fewer human "
+                "approvals than the minimum below. Judged on merge only: an open pull request can "
+                "still get its review."
+            ),
+            "min_human_approvals": _(
+                "How many different people have to approve an AI pull request. A path a "
+                "sensitive-path rule marks as needing extra review asks for one more than this."
+            ),
+            "high_risk_min_approvals": _(
+                "Used instead of the minimum above when the change touches a path a "
+                "sensitive-path rule marks high risk. It only ever raises the requirement: a "
+                "lower number here than above changes nothing."
+            ),
+            "forbid_ai_only_approval": _(
+                "Raises AI_ONLY_APPROVAL (high) when every approval on a merged pull request came "
+                "from a bot account and none from a person. Applies to every pull request, not "
+                "only AI ones."
+            ),
+            "forbid_rubber_stamp_approval": _(
+                "Raises RUBBER_STAMP_ON_AI_PR (high) for a merged AI pull request approved with "
+                "an empty review, no comments, within the rubber-stamp window configured in "
+                "Settings."
+            ),
+            "require_ai_review_first": _(
+                "Raises AI_REVIEW_MISSING (medium) when a merged pull request was never reviewed "
+                "by any of the logins listed below. Silent while that list is empty: the policy "
+                "cannot require a reviewer nobody named."
+            ),
+            "require_ai_comments_resolved": _(
+                "Raises AI_REVIEW_UNRESOLVED (medium) when a pull request merged with a comment "
+                "thread from an AI reviewer that GitHub reports as unresolved. A thread whose "
+                "state GitHub never reported is not counted."
+            ),
+            "require_risk_level": _(
+                "Raises RISK_LEVEL_MISSING (low) when the description carries no risk section "
+                "under any of the recognised headings."
+            ),
+            "require_verification_note": _(
+                "Raises VERIFICATION_MISSING (low) when the description says nothing about how "
+                "the change was checked — tests run, manual steps, what was observed."
+            ),
+            "require_task_link": _(
+                "Raises TASK_LINK_MISSING (low) when no task reference appears anywhere in the "
+                "body. A heading is not needed: 'closes #431' on the first line satisfies it."
+            ),
+            "require_high_risk_plan": _(
+                "Raises HIGH_RISK_NO_PLAN (high) when a high-risk change states no plan, risks or "
+                "rollback. Needs a sensitive-path rule with risk level High to match the change, "
+                "so it stays silent until those rules are in place."
+            ),
+            "forbid_ci_bypass": _(
+                "Raises QUALITY_GATE_BYPASSED (high), once per reason, on a pull request merged "
+                "with red checks, with a skip-CI marker in a commit message, with the CI "
+                "configuration relaxed, or with a CI step removed. The last two reasons need the "
+                "repository to be opted in to diff analysis."
+            ),
+            "forbid_test_weakening": _(
+                "Raises TEST_WEAKENED (high) when a test file is deleted while non-test code "
+                "changes, a skip or xfail marker is added, or assertions are removed with none "
+                "added back. Deleting a test on its own is housekeeping and passes."
+            ),
+            "require_tests_for_ai_prs": _(
+                "Raises NO_TESTS (low) on an AI pull request that changes more non-test lines "
+                "than the threshold configured in Settings and touches no test at all."
+            ),
+            "forbid_secret_artifacts": _(
+                "Raises SECRET_ARTIFACT_COMMITTED (high) when a credential file, a private key or "
+                "an agent's own chat history is committed. Decided from the path alone — the "
+                "contents of the file are never read, logged or stored."
+            ),
+            "ai_pr_max_effective_lines": _(
+                "Raises AI_PR_TOO_LARGE (low) when an AI pull request's effective additions plus "
+                "deletions exceed this number. Leave it empty to switch the size check off; the "
+                "per-risk limits below override it where they are set."
+            ),
+            "forbid_scope_creep": _(
+                "Raises SCOPE_CREEP (medium) when an AI pull request mixes a wholesale reformat "
+                "into a change, or reaches into top-level modules its own stated scope never "
+                "mentions. A pull request that states no scope has nothing to exceed."
+            ),
+            "flag_new_dependencies_in_ai_prs": _(
+                "Raises NEW_DEPENDENCY_AI (medium) when an AI pull request changes a dependency "
+                "manifest or lockfile. A prompt to check that somebody chose the dependency, not "
+                "an accusation."
+            ),
+            "flag_agent_config_changes": _(
+                "Raises AGENT_CONFIG_CHANGED (low) when CLAUDE.md, AGENTS.md, .claude/ and their "
+                "kin change. Low on purpose: it marks a change that alters how every later agent "
+                "run behaves, so that somebody reads it."
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -259,17 +433,18 @@ class AIPolicyForm(forms.ModelForm):
                 self.fields[field_name].initial = limits.get(level)
 
     def fieldsets(self):
-        """`(legend, [bound field])` pairs for the template. A field missing from `FIELDSETS` would
-        vanish from the page, so the last group collects whatever was not named — a new toggle is
-        then visible and misplaced rather than invisible and forgotten."""
-        named = {name for _legend, names in self.FIELDSETS for name in names}
+        """`(legend, description, [bound field])` triples for the template. A field missing from
+        `FIELDSETS` would vanish from the page, so the last group collects whatever was not named —
+        a new toggle is then visible and misplaced rather than invisible and forgotten. That
+        fallback group has no description, because nobody wrote one for a field nobody placed."""
+        named = {name for _legend, _description, names in self.FIELDSETS for name in names}
         groups = [
-            (legend, [self[name] for name in names if name in self.fields])
-            for legend, names in self.FIELDSETS
+            (legend, description, [self[name] for name in names if name in self.fields])
+            for legend, description, names in self.FIELDSETS
         ]
         leftovers = [self[name] for name in self.fields if name not in named]
         if leftovers:
-            groups.append((_("Other"), leftovers))
+            groups.append((_("Other"), "", leftovers))
         return groups
 
     def clean(self) -> dict:

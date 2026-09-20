@@ -31,6 +31,10 @@ stamped to cover everything already synced.)
 | **Quality gates and tests** | Merging over red checks or `[skip ci]`, weakened tests, missing tests, committed credential files | `forbid_ci_bypass` and `forbid_secret_artifacts` |
 | **Size and scope** | Effective-line limits (flat, or one per risk level), scope creep, new dependencies, changed agent configuration | The per-risk limits — but read the numbers below before entering them |
 
+The form says the same thing next to each switch: which violation code it raises, at what severity, on which
+pull requests, and what else has to be true before it can fire. Read the help text under a checkbox before you
+tick it — this page is the order to turn things on in, that one is what each switch actually does.
+
 **AI reviewer logins** is a list of GitHub logins, one per line (`@` optional, case does not matter) — the
 account your AI reviewer posts as, for example `copilot`. Nothing about AI review is measured or checked until
 at least one login is there.

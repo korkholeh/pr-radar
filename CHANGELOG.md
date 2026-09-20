@@ -14,6 +14,16 @@
 
 ### Added
 
+- **Settings → AI policy explains itself.** Every switch on the page now carries the two or three lines a
+  lead needs to decide about it: which violation code it raises, at what severity, on which pull requests,
+  and what else has to be true before it can fire at all — that AI review needs a reviewer login named, that
+  the high-risk plan check needs a sensitive-path rule at high risk, that a merge-dependent check says
+  nothing about an open pull request. Each group of switches gained a sentence of its own, and the page now
+  opens by saying that saving publishes a new version which governs what comes next rather than rewriting
+  the verdict on work already done, and that violations are recomputed on the next sync. In English and
+  Ukrainian alike. The long form is still [`docs/POLICY.md`](docs/POLICY.md) and
+  [`docs/user/ai-policy.md`](docs/user/ai-policy.md).
+
 - **Five compliance numbers on every dashboard.** A fourth KPI row: **bot-only approval rate** (of the pull
   requests merged with any approval, the share whose approvals came only from bots), **quality-gate bypass
   rate** (merged with the last check rollup red, counted only where a repository runs checks at all), **AI

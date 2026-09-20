@@ -1,6 +1,33 @@
 {% load i18n %}
 <div class="mx-auto w-full max-w-3xl" id="policy-settings-page">
-  <h1 class="page-title mb-4">{% translate "AI policy" %}</h1>
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{% translate "AI policy" %}</h1>
+      <p class="page-subtitle">
+        {% blocktranslate trimmed %}
+          Every check below is off until you turn it on, and each one says which violation it
+          raises and on which pull requests.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </header>
+  <div class="card card-body mb-4">
+    <h2 class="section-title mb-2">{% translate "How saving works" %}</h2>
+    <p class="muted">
+      {% blocktranslate trimmed %}
+        Saving never edits the current policy: it publishes a new version, in effect from the
+        moment you save. A pull request is judged by the version that was in effect when the pull
+        request was opened, so a change here governs what comes next and never rewrites the
+        verdict on work already done.
+      {% endblocktranslate %}
+    </p>
+    <p class="muted mt-2">
+      {% blocktranslate trimmed %}
+        Violations are recomputed on the next sync, not on save, so a switch you turn on now shows
+        its effect once the pull requests it applies to have been synced again.
+      {% endblocktranslate %}
+    </p>
+  </div>
   <form method="post" novalidate class="card card-body form-stack">
     {% csrf_token %}
     {% if form.non_field_errors %}
@@ -8,21 +35,25 @@
         {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
       </div>
     {% endif %}
-    {% for legend, fields in form.fieldsets %}
+    {% for legend, description, fields in form.fieldsets %}
       <fieldset class="border-t border-border pt-4 first:border-t-0 first:pt-0">
         <legend class="section-title mb-2">{{ legend }}</legend>
+        {% if description %}<p class="muted mb-4">{{ description }}</p>{% endif %}
         {% for field in fields %}
           {% if field.field.widget.input_type == "checkbox" %}
-            <div class="field flex items-center gap-2">
-              {{ field }}
-              <label class="text-text" for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {% for error in field.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
+            <div class="field flex items-start gap-2">
+              <div class="pt-0.5">{{ field }}</div>
+              <div>
+                <label class="text-text" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+                {% for error in field.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
+              </div>
             </div>
           {% else %}
             <div class="field">
               <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
               {{ field }}
-              {% if field.help_text %}<p class="muted text-sm">{{ field.help_text }}</p>{% endif %}
+              {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
               {% for error in field.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
             </div>
           {% endif %}
@@ -34,7 +65,14 @@
     </button>
   </form>
 
-  <h2 class="section-title mt-8 mb-3">{% translate "Version history" %}</h2>
+  <h2 class="section-title mt-8 mb-1">{% translate "Version history" %}</h2>
+  <p class="muted mb-3">
+    {% blocktranslate trimmed %}
+      Newest first. Each row is a version that was in effect from its date until the next one was
+      published. The table shows the six oldest settings only; every save also records the values
+      it replaced in the audit trail.
+    {% endblocktranslate %}
+  </p>
   <div class="table-wrap">
     <table class="data-table" id="policy-history-table">
       <caption class="sr-only">{% translate "AI policy version history" %}</caption>
