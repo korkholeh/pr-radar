@@ -134,6 +134,17 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "metrics",
     ),
     SettingDef(
+        "AI_SUSPECTED_MIN_STRUCTURAL_KINDS",
+        "int",
+        2,
+        _(
+            "How many distinct structural signal kinds a pull request needs before its AI status "
+            "becomes 'suspected'. Counted over kinds, not rows: five commit bursts are one kind of "
+            "evidence. No number of structural signals ever reaches 'explicit'."
+        ),
+        "ai",
+    ),
+    SettingDef(
         "AI_TOOLING_PATH_GLOBS",
         "list",
         [

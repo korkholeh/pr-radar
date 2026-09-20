@@ -478,7 +478,9 @@ def _pr_violations_context(scope, pk: int, *, notice: str | None = None, action_
 def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
     pk = pull_request.pk
     signals = list(
-        signals_for_pull_request(scope, pk).select_related("rule", "commit").order_by("detected_at")
+        signals_for_pull_request(scope, pk)
+        .select_related("rule", "signal_rule", "commit")
+        .order_by("detected_at")
     )
     ai_tools_display = [
         Tool(value).label if value in Tool.values else value for value in pull_request.ai_tools

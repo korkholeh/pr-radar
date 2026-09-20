@@ -1,0 +1,97 @@
+# Seed set for `manage.py seed_signal_rules` (phase 12, stage 4).
+#
+# These are NOT regexes. Each rule is a tuned instance of a `SignalKind` — a named heuristic about
+# the *shape* of a pull request: how fast it arrived, how its commits are spaced, how many files it
+# created. The `params` dict tunes the thresholds; every key must be one the kind understands.
+#
+# Two things are true of every rule here and cannot be configured away:
+#
+#   1. None of them may be `high` confidence. A database CheckConstraint enforces it. Only an
+#      artefact the tool itself wrote (a commit trailer, a chat transcript in the diff) proves AI
+#      authorship; a heuristic about a pull request's shape is evidence for a human to read.
+#   2. One structural signal never moves a pull request's AI status on its own. From stage 5 it
+#      takes `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` (default 2) *distinct kinds* to reach
+#      `ai_suspected`, and no combination of them ever reaches `ai_explicit`.
+#
+# Every rule ships DEACTIVATED. Unlike a vendor's commit trailer, a threshold has no right answer
+# that holds across teams: a repository of generated API clients bursts commits all day, and a team
+# that squashes before merge trips `single_large_commit` on every PR. Dry-run each rule against your
+# own pull requests, read what it matched, adjust the numbers, then switch it on.
+# See docs/user/tune-ai-detection.md.
+
+rules:
+  - name: "Large change delivered within two hours"
+    kind: fast_large_pr
+    params:
+      min_lines: 400
+      min_files: 8
+      max_hours: 2
+    tool: other
+    confidence: medium
+    notes: >
+      Measures first commit to merge, not PR open to merge: opening the pull request late says
+      nothing about how long the change took. Expect false positives on a revert, a generated
+      migration, or a branch rebased shortly before merge — read the evidence before acting.
+
+  - name: "Five substantial commits within 90 seconds"
+    kind: commit_burst
+    params:
+      min_commits: 5
+      max_gap_seconds: 90
+      min_lines_per_commit: 20
+    tool: other
+    confidence: medium
+    notes: >
+      Only commits above min_lines_per_commit count, so a run of one-line fixups — a normal human
+      habit — does not read as a burst. A scripted refactor or a bulk formatting pass will trip it.
+
+  - name: "Whole change in one large commit"
+    kind: single_large_commit
+    params:
+      min_lines: 300
+      min_files: 5
+    tool: other
+    confidence: low
+    notes: >
+      Reads the pull request's own commit list, not the merge commit, so a squash *merge* does not
+      trip it — but a team that squashes locally before pushing will trip it on every pull request.
+      Low confidence for that reason; check your team's habits before activating.
+
+  - name: "Ten new files across three directories"
+    kind: mass_file_creation
+    params:
+      min_added_files: 10
+      min_directories: 3
+    tool: other
+    confidence: medium
+    notes: >
+      Scaffolding in one sitting. Counts only files the diff marks as added, and only non-excluded
+      paths, so a vendored tree or a lockfile never contributes. A new service or a code generator
+      will trip it legitimately.
+
+  - name: "New dependency nothing in the diff uses"
+    kind: unused_new_dependency
+    params:
+      manifests:
+        - pyproject.toml
+        - package.json
+        - requirements.txt
+    tool: other
+    confidence: medium
+    notes: >
+      Registered but silent until the diff pipeline lands (phase 12, stage 6): deciding whether
+      anything imports a package needs the file contents of the change, which are not in the
+      database. Create and tune it now and it will start producing evidence then.
+
+  - name: "Three commits within five minutes of a review comment"
+    kind: instant_review_response
+    params:
+      max_minutes: 5
+      min_occurrences: 3
+    tool: other
+    confidence: low
+    notes: >
+      Once is a reviewer catching something the author was already fixing. Three times is a
+      different pattern. Comments by the pull request's own author are ignored, and each comment
+      and each commit is counted at most once. An attentive developer sitting in the review will
+      trip it, which is why it is low confidence.

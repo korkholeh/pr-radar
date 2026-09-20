@@ -1,0 +1,69 @@
+{% load i18n %}
+<div class="mx-auto w-full max-w-6xl" id="signal-rules-page">
+  <div class="page-header">
+    <h1 class="page-title">{% translate "Structural signals" %}</h1>
+    <a href="{% url 'ai_detection:signal_rule_create' %}" class="btn btn-primary">
+      {% translate "New rule" %}
+    </a>
+  </div>
+  <p class="muted mb-4 max-w-3xl">
+    {% translate "These rules read the shape of a pull request — how fast it arrived, how its commits are spaced, how many files it created — rather than any text a tool wrote. None of them can be high confidence, and one structural signal on its own never changes a pull request's AI status. Every shipped rule starts deactivated: a threshold that is right for one team produces noise on another, so dry-run it against your own pull requests first." %}
+  </p>
+  <div class="table-wrap">
+    <table class="data-table" id="signal-rules-table">
+      <caption class="sr-only">{% translate "Structural signal rules" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Name" %}</th>
+          <th scope="col">{% translate "Kind" %}</th>
+          <th scope="col">{% translate "Parameters" %}</th>
+          <th scope="col">{% translate "Confidence" %}</th>
+          <th scope="col">{% translate "Is active" %}</th>
+          <th scope="col">{% translate "Notes" %}</th>
+          <th scope="col">{% translate "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rule in signal_rules %}
+          {% include "ai_detection/partials/signal_rule_row.html" %}
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            {% translate "No structural signal rules yet." as empty_title %}
+            {% translate "Run manage.py seed_signal_rules to add the shipped set, then dry-run each rule against your own pull requests before switching it on." as empty_explanation %}
+            {% include "partials/empty_state.html" with title=empty_title explanation=empty_explanation %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="signal-dry-run" class="card card-body form-stack mt-6 max-w-lg">
+    <h2 class="section-title mb-3">{% translate "Dry run" %}</h2>
+    <p class="muted mb-4">
+      {% translate "Test thresholds against recently stored pull requests before saving them as a rule." %}
+    </p>
+    <form
+      method="post"
+      action="{% url 'ai_detection:signal_rule_dry_run' %}"
+      hx-post="{% url 'ai_detection:signal_rule_dry_run' %}"
+      hx-target="#signal-dry-run-result"
+      hx-swap="innerHTML"
+    >
+      {% csrf_token %}
+      {% for field in dry_run_form %}
+        <div class="field">
+          <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+          {% for error in field.errors %}<p class="error-text" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">
+        {% translate "Run" %}
+      </button>
+    </form>
+    <div id="signal-dry-run-result" class="mt-4"></div>
+  </div>
+</div>

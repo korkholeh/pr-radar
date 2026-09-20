@@ -4,7 +4,15 @@ import factory
 from factory.django import DjangoModelFactory
 
 from apps.activity.factories import PullRequestFactory
-from apps.ai_detection.models import AISignal, Confidence, DetectionRule, Detector, Tool
+from apps.ai_detection.models import (
+    AISignal,
+    Confidence,
+    DetectionRule,
+    Detector,
+    SignalKind,
+    SignalRule,
+    Tool,
+)
 
 
 class DetectionRuleFactory(DjangoModelFactory):
@@ -16,6 +24,19 @@ class DetectionRuleFactory(DjangoModelFactory):
     pattern = "Co-Authored-By: Claude"
     tool = Tool.CLAUDE_CODE
     confidence = Confidence.HIGH
+
+
+class SignalRuleFactory(DjangoModelFactory):
+    """Never `high`: the database refuses it outright, so a factory defaulting to `high` would
+    fail at insert time in every test that touched it."""
+
+    class Meta:
+        model = SignalRule
+
+    name = factory.Sequence(lambda n: f"signal-rule-{n}")
+    kind = SignalKind.COMMIT_BURST
+    confidence = Confidence.MEDIUM
+    tool = Tool.OTHER
 
 
 class AISignalFactory(DjangoModelFactory):

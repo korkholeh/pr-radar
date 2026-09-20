@@ -14,6 +14,38 @@
 
 ### Added
 
+- **A second kind of evidence: what a pull request's shape says.** Detection rules match text a tool wrote.
+  The new **structural signals** read the pull request itself — a large change merged within two hours of its
+  first commit, five substantial commits ninety seconds apart, a whole change in one commit, ten new files
+  across three directories, a new dependency nothing imports, three commits landing minutes after review
+  comments. Settings → **Structural signals** lists them, and each one is tuned by thresholds you edit, with a
+  dry run over your recent pull requests before you save.
+
+  Two guarantees, and neither is a setting you can turn off:
+
+  - **A structural rule can never be high confidence.** The database refuses it, not just the form. Only an
+    artefact the tool itself wrote proves AI authorship; a heuristic about a pull request's shape is evidence
+    for a human to read, so no combination of these signals ever makes a pull request `AI explicit`.
+  - **One structural signal on its own changes nothing.** It takes `AI_SUSPECTED_MIN_STRUCTURAL_KINDS`
+    (default 2) *distinct kinds* before a pull request becomes `AI suspected` — five commit bursts are one
+    kind of evidence, not five. A lone signal is still written, still shown on the pull request page and still
+    exported. It is evidence, not a verdict.
+
+  Every shipped rule arrives **deactivated**, because a threshold that is right for one team is noise in
+  another: a repository of generated clients bursts commits all day, and a team that squashes before pushing
+  trips "whole change in one commit" on every pull request. Run `manage.py seed_signal_rules`, dry-run each
+  rule against your own pull requests, adjust the numbers, then switch it on.
+
+  Each signal explains itself in a full sentence that quotes both the measurement and the threshold that
+  produced it — "600 lines across 12 files arrived 0.7 hours after the first commit (the rule flags 400 lines
+  and 8 files within 2 hours)" — in English or Ukrainian, because the sentence is generated at read time from
+  a stored code and its parameters rather than saved as English. Re-tune a threshold and the old signal is
+  retired and replaced rather than left quoting numbers nobody uses any more.
+
+  Outcome data is deliberately *not* an input: churn, reverts and follow-up fixes are what PR Radar measures
+  **for** the AI cohort, so using them to decide who is in that cohort would make the AI-quality dashboards
+  prove themselves. A test enforces it.
+
 - **Every repository now shows whether it is set up for an AI agent.** Each sync reads the tip of the
   repository's default branch once and records which agent-configuration paths it carries — `.agents/`,
   `.claude/`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursorrules` and the rest of

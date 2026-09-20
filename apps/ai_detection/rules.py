@@ -22,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from apps.ai_detection.models import Confidence, Detector, Tool
+from apps.ai_detection.models import SIGNAL_PARAM_DEFAULTS, Confidence, Detector, SignalKind, Tool
 
 DEFAULT_RULES_PATH = Path(__file__).resolve().parent.parent.parent / "fixtures" / "detection_rules.yaml"
 DEFAULT_SAMPLES_PATH = Path(__file__).resolve().parent.parent.parent / "fixtures" / "detection_samples.yaml"
@@ -153,3 +153,75 @@ def load_rule_samples(path: Path = DEFAULT_SAMPLES_PATH) -> dict[str, RuleSample
             )
         samples[rule_name] = RuleSamples(matches=matches, non_matches=non_matches)
     return samples
+
+
+DEFAULT_SIGNAL_RULES_PATH = Path(__file__).resolve().parent.parent.parent / "fixtures" / "signal_rules.yaml"
+
+
+@dataclass(frozen=True)
+class SignalRuleDefinition:
+    """A seeded `SignalRule` (phase 12, stage 4). No `provenance` here, and no `disputed`: both
+    answer questions about a vendor's string, and a structural rule has no string. What it has
+    instead is thresholds with no right answer across teams, which is why every one of these seeds
+    deactivated regardless of anything in the file."""
+
+    name: str
+    kind: str
+    params: dict
+    tool: str
+    confidence: str
+    notes: str
+
+
+def load_signal_rule_definitions(path: Path = DEFAULT_SIGNAL_RULES_PATH) -> list[SignalRuleDefinition]:
+    with open(path) as handle:
+        raw = yaml.safe_load(handle)
+
+    rows = raw.get("rules") if isinstance(raw, dict) else raw
+    if not rows:
+        raise RuleDefinitionError(f"{path} defines no rules.")
+
+    definitions = []
+    for row in rows:
+        name = row.get("name")
+        kind = row.get("kind")
+        params = row.get("params") or {}
+        tool = row.get("tool") or Tool.OTHER
+        confidence = row.get("confidence")
+        notes = (row.get("notes") or "").strip()
+
+        if kind not in SignalKind.values:
+            raise RuleDefinitionError(f"Signal rule {name!r} has an unknown kind: {kind!r}.")
+        if tool not in Tool.values:
+            raise RuleDefinitionError(f"Signal rule {name!r} has an unknown tool: {tool!r}.")
+        if confidence not in Confidence.values:
+            raise RuleDefinitionError(f"Signal rule {name!r} has an unknown confidence: {confidence!r}.")
+        if confidence == Confidence.HIGH:
+            raise RuleDefinitionError(
+                f"Signal rule {name!r} ships high confidence. A structural heuristic can never be "
+                f"high: only an artefact the tool itself wrote proves AI authorship."
+            )
+        if not notes:
+            raise RuleDefinitionError(
+                f"Signal rule {name!r} has no notes. State what it measures and what will trip it "
+                f"legitimately, so a lead can judge the thresholds before activating it."
+            )
+        if not isinstance(params, dict):
+            raise RuleDefinitionError(f"Signal rule {name!r} has params that are not a mapping.")
+        unknown = sorted(set(params) - set(SIGNAL_PARAM_DEFAULTS[kind]))
+        if unknown:
+            raise RuleDefinitionError(
+                f"Signal rule {name!r} sets parameter(s) its kind does not understand: {', '.join(unknown)}."
+            )
+
+        definitions.append(
+            SignalRuleDefinition(
+                name=name,
+                kind=kind,
+                params=params,
+                tool=tool,
+                confidence=confidence,
+                notes=notes,
+            )
+        )
+    return definitions

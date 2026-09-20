@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n dashboards %}
+{% load i18n dashboards ai_detection %}
 {% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number }}{% endblock %}
 {% block content %}
 <div class="mx-auto w-full max-w-4xl" id="pull-request-detail">
@@ -185,10 +185,27 @@
         <tbody>
           {% for signal in signals %}
           <tr>
-            <td>{{ signal.rule.get_detector_display }}</td>
+            {% comment %}
+            Two families in one table. A regex signal names its detector and quotes the text it
+            matched; a structural one names its heuristic and renders a generated sentence from
+            its stored code and parameters, in the reader's language.
+            {% endcomment %}
+            <td>
+              {% if signal.rule %}
+                {{ signal.rule.get_detector_display }}
+              {% else %}
+                {{ signal.signal_rule.get_kind_display }}
+              {% endif %}
+            </td>
             <td>{{ signal.get_tool_display }}</td>
             <td>{{ signal.get_confidence_display }}</td>
-            <td>{{ signal.evidence }}</td>
+            <td>
+              {% if signal.evidence_code %}
+                {% signal_evidence signal.evidence_code signal.evidence_params %}
+              {% else %}
+                {{ signal.evidence }}
+              {% endif %}
+            </td>
             <td>{% if signal.commit %}{{ signal.commit.sha|slice:":12" }}{% endif %}</td>
           </tr>
           {% empty %}

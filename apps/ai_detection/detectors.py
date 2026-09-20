@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from django.db.models import Prefetch, QuerySet
 
-from apps.activity.models import Commit, PRFile, PullRequest, Review
+from apps.activity.models import Commit, PRFile, PullRequest, Review, ReviewComment
 from apps.ai_detection.models import Detector as DetectorCode
 
 EVIDENCE_MAX_LENGTH = 200
@@ -217,6 +217,10 @@ def _prefetch_for_detection(queryset: QuerySet[PullRequest]) -> QuerySet[PullReq
             "reviews",
             queryset=Review.objects.select_related("reviewer").order_by("submitted_at", "github_id"),
         ),
+        # Not read by any detector: the structural kinds in `structural.py` build their context
+        # from this same loaded pull request (`services.detect_pull_request` runs both families
+        # over one load), and `instant_review_response` needs the comment timestamps.
+        Prefetch("review_comments", queryset=ReviewComment.objects.order_by("created_at")),
     )
 
 

@@ -14,11 +14,19 @@ from apps.activity.factories import (
     ReviewFactory,
 )
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest
-from apps.ai_detection.factories import DetectionRuleFactory
-from apps.ai_detection.models import AISignal, Confidence, DetectionRule, Detector, Tool
+from apps.ai_detection.factories import DetectionRuleFactory, SignalRuleFactory
+from apps.ai_detection.models import (
+    AISignal,
+    Confidence,
+    DetectionRule,
+    Detector,
+    SignalKind,
+    Tool,
+)
 from apps.ai_detection.services import detect_pull_request, detect_pull_requests, dry_run_rule
 from apps.catalog.factories import IdentityFactory, ProjectFactory, RepositoryFactory
 from apps.catalog.models import Identity
+from apps.catalog.services import set_setting
 
 
 @pytest.mark.django_db
@@ -463,3 +471,194 @@ def test_detecting_a_batch_costs_the_same_whether_its_pull_requests_touch_2_file
         assert detect_pull_requests(big_queryset) == 20
 
     assert len(big_queries) == len(small_queries)
+
+
+# --- the structural signal family (phase 12, stage 4) -------------------------------------------
+
+
+def _fast_large_pull_request(**overrides):
+    defaults = dict(
+        state=PullRequest.State.MERGED,
+        first_commit_at=datetime(2026, 9, 20, 12, 0, tzinfo=UTC),
+        merged_at=datetime(2026, 9, 20, 12, 40, tzinfo=UTC),
+        additions=500,
+        deletions=100,
+        changed_files=12,
+        body="",
+    )
+    defaults.update(overrides)
+    return PullRequestFactory(**defaults)
+
+
+@pytest.mark.django_db
+def test_a_structural_rule_writes_a_code_and_parameters_not_a_sentence():
+    """CLAUDE.md: system-generated text is stored as a code plus params and rendered in the
+    reader's language. Storing the English sentence would make it untranslatable forever."""
+    rule = SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+
+    detect_pull_request(pr.pk)
+
+    signal = AISignal.objects.get(pull_request=pr)
+    assert signal.signal_rule_id == rule.pk
+    assert signal.rule_id is None
+    assert signal.evidence == ""  # the regex family's quote field stays empty
+    assert signal.evidence_code == "fast_large_pr"
+    assert signal.evidence_params["lines"] == 600
+    assert signal.evidence_params["max_hours"] == 2  # the threshold travels with the measurement
+
+
+@pytest.mark.django_db
+def test_re_running_detection_over_unchanged_data_writes_no_structural_row():
+    SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+
+    detect_pull_request(pr.pk)
+    first = AISignal.objects.get(pull_request=pr)
+    detect_pull_request(pr.pk)
+
+    second = AISignal.objects.get(pull_request=pr)
+    assert second.pk == first.pk
+    assert second.detected_at == first.detected_at
+
+
+@pytest.mark.django_db
+def test_changing_a_threshold_retires_the_old_signal_and_writes_a_new_one():
+    """The evidence hash covers the parameters, thresholds included, so a rule a lead re-tuned
+    cannot leave a sentence on the page quoting the old numbers."""
+    rule = SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+    detect_pull_request(pr.pk)
+    before = AISignal.objects.get(pull_request=pr)
+
+    rule.params = {"max_hours": 1}
+    rule.save(update_fields=["params"])
+    detect_pull_request(pr.pk)
+
+    after = AISignal.objects.get(pull_request=pr)
+    assert after.pk != before.pk
+    assert after.evidence_params["max_hours"] == 1
+
+
+@pytest.mark.django_db
+def test_deactivating_a_structural_rule_removes_its_signals():
+    rule = SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+    detect_pull_request(pr.pk)
+    assert AISignal.objects.filter(pull_request=pr).count() == 1
+
+    rule.is_active = False
+    rule.save(update_fields=["is_active"])
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 0
+
+
+@pytest.mark.django_db
+def test_the_two_families_coexist_on_one_pull_request():
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="Generated with Claude Code",
+        tool=Tool.CLAUDE_CODE,
+        confidence=Confidence.HIGH,
+    )
+    SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request(body="Generated with Claude Code")
+
+    detect_pull_request(pr.pk)
+
+    signals = AISignal.objects.filter(pull_request=pr)
+    assert signals.filter(rule__isnull=False).count() == 1
+    assert signals.filter(signal_rule__isnull=False).count() == 1
+
+
+# --- composite scoring --------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_one_structural_kind_alone_does_not_change_the_ai_status():
+    """A heuristic about a pull request's shape is something an honest developer produces on any
+    given day. The signal is still written, shown and exported — it is evidence, not a verdict."""
+    SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 1
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.UNKNOWN
+
+
+@pytest.mark.django_db
+def test_the_same_kind_many_times_over_is_still_one_kind_of_evidence():
+    SignalRuleFactory(name="a", kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    SignalRuleFactory(
+        name="b", kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM, params={"max_hours": 3}
+    )
+    pr = _fast_large_pull_request()
+
+    detect_pull_request(pr.pk)
+
+    assert AISignal.objects.filter(pull_request=pr).count() == 2
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.UNKNOWN
+
+
+@pytest.mark.django_db
+def test_two_distinct_structural_kinds_make_a_pull_request_suspected():
+    SignalRuleFactory(name="fast", kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    SignalRuleFactory(name="mass", kind=SignalKind.MASS_FILE_CREATION, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+    for index in range(12):
+        PRFileFactory(pull_request=pr, path=f"apps/mod{index % 4}/file{index}.py", status="added")
+
+    detect_pull_request(pr.pk)
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_SUSPECTED
+
+
+@pytest.mark.django_db
+def test_no_combination_of_structural_signals_ever_reaches_ai_explicit():
+    """Guaranteed at two levels: the database refuses a `high` structural rule, and
+    `resolve_ai_status` only reads `high` from the regex family."""
+    for kind in SignalKind.values:
+        SignalRuleFactory(name=f"rule-{kind}", kind=kind, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+    for index in range(12):
+        PRFileFactory(pull_request=pr, path=f"apps/mod{index % 4}/file{index}.py", status="added")
+
+    detect_pull_request(pr.pk)
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_SUSPECTED
+    assert pr.ai_status != AIStatus.AI_EXPLICIT
+
+
+@pytest.mark.django_db
+def test_the_threshold_is_a_setting():
+    set_setting("AI_SUSPECTED_MIN_STRUCTURAL_KINDS", 1)
+    SignalRuleFactory(kind=SignalKind.FAST_LARGE_PR, confidence=Confidence.MEDIUM)
+    pr = _fast_large_pull_request()
+
+    detect_pull_request(pr.pk)
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_SUSPECTED
+
+
+@pytest.mark.django_db
+def test_a_single_low_regex_signal_still_suspects_on_its_own():
+    """The families are weighed differently on purpose: a regex matched something a tool wrote."""
+    DetectionRuleFactory(
+        detector=Detector.PR_BODY_FOOTER,
+        pattern="comprehensive",
+        tool=Tool.OTHER,
+        confidence=Confidence.LOW,
+    )
+    pr = PullRequestFactory(body="This adds comprehensive coverage.")
+
+    detect_pull_request(pr.pk)
+
+    pr.refresh_from_db()
+    assert pr.ai_status == AIStatus.AI_SUSPECTED

@@ -53,6 +53,7 @@ selectors). The menu is a plain <details> element: no JS beyond what htmx alread
               <a href="{% url 'connections:discover' %}" class="menu-item">{% translate "Discover repositories" %}</a>
               <a href="{% url 'catalog:people' %}" class="menu-item">{% translate "People settings" %}</a>
               <a href="{% url 'ai_detection:rules' %}" class="menu-item">{% translate "Detection rules" %}</a>
+              <a href="{% url 'ai_detection:signal_rules' %}" class="menu-item">{% translate "Structural signals" %}</a>
               <a href="{% url 'policy:policy_settings' %}" class="menu-item">{% translate "AI policy" %}</a>
               <a href="{% url 'policy:sensitive_paths' %}" class="menu-item">{% translate "Sensitive paths" %}</a>
             {% endif %}

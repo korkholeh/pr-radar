@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if rule %}{% translate "Edit structural signal rule" %}{% else %}{% translate "New structural signal rule" %}{% endif %}{% endblock %}
+{% block content %}
+{% include "ai_detection/partials/signal_rule_form.html" %}
+{% endblock %}

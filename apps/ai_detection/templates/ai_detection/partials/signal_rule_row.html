@@ -1,0 +1,24 @@
+{% load i18n %}
+<tr id="signal-rule-row-{{ rule.pk }}">
+  <td>{{ rule.name }}</td>
+  <td>{{ rule.get_kind_display }}</td>
+  <td><code class="text-xs">{{ rule.params }}</code></td>
+  <td>{{ rule.get_confidence_display }}</td>
+  <td>{% if rule.is_active %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+  <td>{{ rule.notes|truncatechars:60 }}</td>
+  <td class="flex flex-wrap items-center gap-2">
+    <a href="{% url 'ai_detection:signal_rule_edit' rule.pk %}">{% translate "Edit" %}</a>
+    <form
+      method="post"
+      action="{% url 'ai_detection:signal_rule_toggle' rule.pk %}"
+      hx-post="{% url 'ai_detection:signal_rule_toggle' rule.pk %}"
+      hx-target="#signal-rules-page"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary btn-sm">
+        {% if rule.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
+      </button>
+    </form>
+  </td>
+</tr>

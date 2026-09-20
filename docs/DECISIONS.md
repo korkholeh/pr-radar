@@ -116,6 +116,33 @@ reviewer and must be attributable to its own rule and confidence rather than mer
 detector. Every `AISignal.evidence` is truncated to `EVIDENCE_MAX_LENGTH` (200 chars), centred on the match, so
 it always fits the field and is still readable on the PR page.
 
+**Structural signals are a second rule family, not more detectors** (`apps/ai_detection/structural.py`,
+phase 12). A `DetectionRule` matches a regex against text somebody wrote; a `SignalRule` names a *kind* — a
+piece of code reading the pull request's own shape — tuned by a `params` dict. `AISignal` became dual-sourced
+(`rule` or `signal_rule`, exactly one, enforced by a `CheckConstraint`) rather than gaining a second table, so
+one wanted-vs-existing diff, one PR-page section and one export path serve both.
+
+Four decisions inside it are load-bearing:
+
+- **`SignalRule.confidence` can never be `high`, at the database level.** A `CheckConstraint`, not only a form
+  validator: "only a tool-written artefact proves AI authorship" is the one property of this feature that must
+  not be reachable by editing a row in the Django admin.
+- **A single structural signal does not move `ai_status`.** `resolve_ai_status` takes the regex family's
+  confidences and the structural family's *distinct kinds* separately, and requires
+  `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` (default 2) of the latter. Five commit bursts are one kind of evidence.
+  This was pulled forward from the plan's stage 5 because without it stage 4 ships a heuristic that can flag a
+  developer on its own — which the feature's own design forbids.
+- **Structural evidence is stored as `evidence_code` + `evidence_params`, never as a sentence**, and rendered
+  by `apps/ai_detection/evidence.py` at read time, mirroring `policy/messages.py` down to its failure modes
+  (unknown code renders the code, missing param renders `?`). The regex family's `evidence` field keeps its
+  meaning: it quotes source data, which is the same in every language. `evidence_hash` covers the code plus
+  the exact parameters, thresholds included, so re-running is idempotent and re-tuning a threshold retires the
+  old signal instead of leaving a sentence quoting numbers nobody uses.
+- **Every seeded structural rule is created deactivated**, unconditionally, where a detection rule's
+  `provenance` decides. There is no equivalent of `provenance` here, because a threshold has no right answer
+  that holds across teams: a repository of generated clients bursts commits all day, and a team that squashes
+  before pushing trips `single_large_commit` on every pull request.
+
 **A repository's AI tooling is a `Repository` field, never an `AISignal`** (`apps/github_sync/tooling.py`,
 phase 12). `Repository.ai_tooling_paths` records which agent-configuration paths the repository carries at
 `HEAD` — `.agents/`, `.claude/`, `AGENTS.md`, `.github/copilot-instructions.md` and the rest of

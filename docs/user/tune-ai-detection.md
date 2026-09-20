@@ -95,6 +95,48 @@ If more than a handful of the matches are people rather than machines, leave the
 readers are the matched developers' managers, that kind of false positive costs far more than a missed
 signal.
 
+## Structural signals: when the shape of the work is the evidence
+
+Everything above matches *text* — a trailer, a file path, a login. A second family of rules reads the pull
+request itself: how fast it arrived, how its commits are spaced, how many files it created, how quickly it
+answered a review. Settings → **Structural signals**.
+
+Six kinds ship:
+
+| Kind | Fires when |
+|---|---|
+| Large change delivered very fast | first commit to merge is implausibly short for the size |
+| Burst of near-simultaneous substantial commits | several sizeable commits seconds apart |
+| Whole change in one large commit | a large multi-file change with no intermediate state |
+| Many files created across many directories | scaffolding, in one sitting |
+| New dependency nothing in the diff uses | a manifest gains a package nothing imports |
+| Repeated commits moments after review comments | not once, but three times over |
+
+**Two things these rules can never do.** They can never be high confidence — the database refuses it, not
+just the form — so no combination of them ever marks a pull request as `AI explicit`. And one signal on its
+own changes nothing: it takes two *distinct kinds* (`AI_SUSPECTED_MIN_STRUCTURAL_KINDS`) before a pull
+request becomes `AI suspected`, and five commit bursts count as one kind, not five. A single signal is still
+written, still shown, still exported — you are meant to read it, not act on it.
+
+**They all arrive switched off, and that is not caution for its own sake.** A threshold has no right answer
+across teams. A repository of generated API clients bursts commits all day. A team that squashes locally
+before pushing trips "whole change in one commit" on every pull request. A new service legitimately creates
+thirty files in one go. Run `manage.py seed_signal_rules`, then for each rule:
+
+1. Open the **Dry run** panel, pick the kind, paste the thresholds, run it.
+2. Read every match, not the count. Open two or three of the pull requests it names.
+3. If most matches are people doing ordinary work, raise the threshold and run it again. If most are
+   defensible either way, leave the rule off — this is a page your team's managers read.
+4. Only when the matches look like the pattern you meant to catch, save and activate the rule.
+5. Run `manage.py recompute` so stored pull requests are re-evaluated.
+
+Re-tuning a threshold later is safe: the old signals are retired and rewritten with the new numbers, so no
+pull request keeps a sentence quoting a threshold you no longer use.
+
+**What they will never read.** Churn, reverts and follow-up fixes are outcomes PR Radar measures *for* the
+AI cohort. They are deliberately not inputs to deciding who is in that cohort — otherwise the AI-quality
+dashboards would be proving themselves. A test enforces it.
+
 ## What the repository page tells you instead
 
 Some evidence is about the **repository**, not about any one pull request. If a repository has a `CLAUDE.md`,

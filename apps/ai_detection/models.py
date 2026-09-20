@@ -89,6 +89,108 @@ class DetectionRule(models.Model):
             )
 
 
+class SignalKind(models.TextChoices):
+    """The structural heuristics (phase 12). Unlike a `Detector`, a kind is not a regex over text:
+    it is a named piece of code that reads a pull request's own shape — how fast it arrived, how
+    its commits are spaced, how many files it created. Each one is tuned by a `SignalRule.params`
+    dict rather than by a pattern."""
+
+    FAST_LARGE_PR = "fast_large_pr", _("Large change delivered very fast")
+    COMMIT_BURST = "commit_burst", _("Burst of near-simultaneous substantial commits")
+    SINGLE_LARGE_COMMIT = "single_large_commit", _("Whole change in one large commit")
+    MASS_FILE_CREATION = "mass_file_creation", _("Many files created across many directories")
+    UNUSED_NEW_DEPENDENCY = "unused_new_dependency", _("New dependency nothing in the diff uses")
+    INSTANT_REVIEW_RESPONSE = "instant_review_response", _("Repeated commits moments after review comments")
+
+
+# Which `params` keys each kind understands, and the default every seeded rule starts from. A key
+# outside this set is a typo or a leftover from an older version of the kind, and `clean()` rejects
+# it: silently ignoring it would leave a lead believing they had tuned something.
+SIGNAL_PARAM_DEFAULTS: dict[str, dict[str, object]] = {
+    SignalKind.FAST_LARGE_PR: {"min_lines": 400, "min_files": 8, "max_hours": 2},
+    SignalKind.COMMIT_BURST: {"min_commits": 5, "max_gap_seconds": 90, "min_lines_per_commit": 20},
+    SignalKind.SINGLE_LARGE_COMMIT: {"min_lines": 300, "min_files": 5},
+    SignalKind.MASS_FILE_CREATION: {"min_added_files": 10, "min_directories": 3},
+    SignalKind.UNUSED_NEW_DEPENDENCY: {"manifests": ["pyproject.toml", "package.json", "requirements*.txt"]},
+    SignalKind.INSTANT_REVIEW_RESPONSE: {"max_minutes": 5, "min_occurrences": 3},
+}
+
+
+class SignalRule(models.Model):
+    """A tuned instance of a `SignalKind`, editable by an admin exactly like a `DetectionRule`.
+
+    A structural rule can never be `high` confidence, and that is a database `CheckConstraint`
+    rather than only a form validator: "only a tool-written artefact proves AI authorship" is the
+    one property of this feature that must not be reachable by editing a row in the Django admin.
+    Everything a heuristic produces is evidence a lead reads, never a verdict the tool reaches on
+    its own.
+    """
+
+    name = models.CharField(_("name"), max_length=200, unique=True)
+    kind = models.CharField(_("kind"), max_length=40, choices=SignalKind.choices)
+    params = models.JSONField(_("parameters"), default=dict, blank=True)
+    tool = models.CharField(_("tool"), max_length=20, choices=Tool.choices, default=Tool.OTHER)
+    confidence = models.CharField(_("confidence"), max_length=10, choices=Confidence.choices)
+    is_active = models.BooleanField(_("is active"), default=True)
+    notes = models.TextField(_("notes"), blank=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("structural signal rule")
+        verbose_name_plural = _("structural signal rules")
+        indexes = [models.Index(fields=["is_active", "kind"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(confidence=Confidence.HIGH),
+                name="signalrule_confidence_never_high",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def clean(self) -> None:
+        super().clean()
+        if self.confidence == Confidence.HIGH:
+            raise ValidationError(
+                {
+                    "confidence": _(
+                        "A structural rule can never be high confidence. Only an artefact the tool "
+                        "itself wrote proves AI authorship; a heuristic about a pull request's shape "
+                        "is evidence for a human to read."
+                    )
+                }
+            )
+        defaults = SIGNAL_PARAM_DEFAULTS.get(self.kind)
+        if defaults is None:
+            raise ValidationError({"kind": _("Unknown signal kind.")})
+        params = self.params or {}
+        if not isinstance(params, dict):
+            raise ValidationError({"params": _("Parameters must be a JSON object.")})
+        unknown = sorted(set(params) - set(defaults))
+        if unknown:
+            raise ValidationError(
+                {
+                    "params": _("Unknown parameter(s) for this kind: %(names)s. Known: %(known)s.")
+                    % {"names": ", ".join(unknown), "known": ", ".join(sorted(defaults))}
+                }
+            )
+        for key, value in params.items():
+            expected = defaults[key]
+            if isinstance(expected, bool) or not isinstance(expected, (int, float)):
+                continue
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValidationError({"params": _("Parameter %(name)s must be a number.") % {"name": key}})
+            if value < 0:
+                raise ValidationError({"params": _("Parameter %(name)s cannot be negative.") % {"name": key}})
+
+    def effective_params(self) -> dict:
+        """The stored parameters over the kind's defaults, so a rule that sets one threshold still
+        gets the rest — and so a kind that grows a parameter does not silently read it as absent."""
+        return {**SIGNAL_PARAM_DEFAULTS.get(self.kind, {}), **(self.params or {})}
+
+
 class AISignal(models.Model):
     pull_request = models.ForeignKey(
         "activity.PullRequest",
@@ -104,12 +206,33 @@ class AISignal(models.Model):
         related_name="ai_signals",
         verbose_name=_("commit"),
     )
+    # A signal comes from exactly one of the two rule families, enforced below by a constraint.
     rule = models.ForeignKey(
-        DetectionRule, on_delete=models.PROTECT, related_name="signals", verbose_name=_("rule")
+        DetectionRule,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="signals",
+        verbose_name=_("rule"),
+    )
+    signal_rule = models.ForeignKey(
+        SignalRule,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="signals",
+        verbose_name=_("structural signal rule"),
     )
     tool = models.CharField(_("tool"), max_length=20, choices=Tool.choices)
     confidence = models.CharField(_("confidence"), max_length=10, choices=Confidence.choices)
-    evidence = models.CharField(_("evidence"), max_length=200)
+    # A regex signal quotes the source data it matched, which needs no translation. A structural
+    # signal has no such quote — its evidence is a generated sentence — so it is stored as a code
+    # plus parameters and rendered in the reader's language (CLAUDE.md), exactly like a policy
+    # violation. The two are mutually exclusive in practice: `evidence` is blank for a structural
+    # signal, `evidence_code` is blank for a regex one.
+    evidence = models.CharField(_("evidence"), max_length=200, blank=True)
+    evidence_code = models.CharField(_("evidence code"), max_length=50, blank=True)
+    evidence_params = models.JSONField(_("evidence parameters"), default=dict, blank=True)
     evidence_hash = models.CharField(_("evidence hash"), max_length=64)
     detected_at = models.DateTimeField(_("detected at"), auto_now_add=True)
 
@@ -118,10 +241,26 @@ class AISignal(models.Model):
         verbose_name_plural = _("AI signals")
         indexes = [models.Index(fields=["pull_request", "confidence"])]
         constraints = [
+            # One uniqueness rule per family rather than one over both columns: SQLite treats
+            # every NULL as distinct, so a single constraint spanning a nullable FK would never
+            # fire for the family whose column is NULL, and re-running detection would duplicate
+            # every structural signal.
             models.UniqueConstraint(
-                fields=["pull_request", "rule", "evidence_hash"], name="uniq_aisignal_pr_rule_evidence"
+                fields=["pull_request", "rule", "evidence_hash"],
+                condition=models.Q(rule__isnull=False),
+                name="uniq_aisignal_pr_rule_evidence",
+            ),
+            models.UniqueConstraint(
+                fields=["pull_request", "signal_rule", "evidence_hash"],
+                condition=models.Q(signal_rule__isnull=False),
+                name="uniq_aisignal_pr_signal_rule_evidence",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(rule__isnull=False, signal_rule__isnull=True)
+                | models.Q(rule__isnull=True, signal_rule__isnull=False),
+                name="aisignal_exactly_one_rule_family",
             ),
         ]
 
     def __str__(self) -> str:
-        return f"{self.rule} on {self.pull_request}"
+        return f"{self.rule or self.signal_rule} on {self.pull_request}"
