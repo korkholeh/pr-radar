@@ -49,6 +49,13 @@ class Repository(models.Model):
     last_synced_at = models.DateTimeField(_("last synced at"), null=True, blank=True)
     sync_cursor = models.JSONField(_("sync cursor"), default=dict, blank=True)
     merge_strategy_hint = models.CharField(_("merge strategy hint"), max_length=50, blank=True)
+    # Which AI-agent configuration paths the repository carries at HEAD (phase 12, stage 3). A
+    # repository-level fact, never an AISignal: "this repository has a CLAUDE.md" says nothing
+    # about any individual pull request, and as a per-PR detector it would fire on every PR in
+    # the repository and drown the signals that do. `[]` means "probed, nothing found"; the
+    # `checked_at` timestamp is what separates that from "never probed".
+    ai_tooling_paths = models.JSONField(_("AI tooling paths"), default=list, blank=True)
+    ai_tooling_checked_at = models.DateTimeField(_("AI tooling checked at"), null=True, blank=True)
     raw = models.JSONField(_("raw payload"), null=True, blank=True)
 
     class Meta:

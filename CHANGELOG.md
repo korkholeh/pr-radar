@@ -14,6 +14,22 @@
 
 ### Added
 
+- **Every repository now shows whether it is set up for an AI agent.** Each sync reads the tip of the
+  repository's default branch once and records which agent-configuration paths it carries — `.agents/`,
+  `.claude/`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursorrules` and the rest of
+  `AI_TOOLING_PATH_GLOBS`. The repository page lists what it found, and **Repositories** gains an
+  **AI tooling** filter so you can ask which of your repositories are configured for an agent at all.
+
+  This is deliberately **not** an AI signal and never moves a pull request's AI status: "this repository has a
+  `CLAUDE.md`" is equally true of every PR in it, so as a per-PR signal it would drown the ones that actually
+  tell PRs apart. A pull request that *changes* one of those paths is a different fact, and that stays a
+  detection rule.
+
+  The probe costs one request for a repository with no agent tooling, and one more for each configured
+  directory it actually has. A repository whose default branch cannot be read keeps its previous answer rather
+  than being recorded as having none, and "never checked" stays visibly different from "checked, found
+  nothing".
+
 - **Detection now reads the diff, the title, the reviewers and the merger, not just the prose.** Four new
   detectors join the eight that existed: **file path** (a path in the PR's own diff), **PR title**,
   **reviewer identity** and **merged-by identity**. They are ordinary detectors, so any rule — shipped or

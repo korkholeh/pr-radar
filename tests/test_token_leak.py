@@ -17,6 +17,7 @@ from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
 from apps.github_sync.services import run_sync
 from apps.github_sync.tests.conftest import mock_graphql_sequence
+from apps.github_sync.tests.test_sync import _tooling_page
 
 TOKEN = "ghp_LeakTestSecretXYZ9876543210"
 # Everything but the stored last4 — any occurrence of this fragment anywhere is a leak.
@@ -119,7 +120,9 @@ def test_no_token_after_failing_sync(admin_user, tmp_path):
     connection = GitHubConnectionFactory(owner_login="acme")
     set_token(connection, TOKEN)
     RepositoryFactory(connection=connection, full_name="acme/widget")
-    mock_graphql_sequence(_pr_list_page(), _malformed_commits_page())
+    # The first response is the repository tooling probe `sync_repository` runs before any
+    # pull request (phase 12, stage 3).
+    mock_graphql_sequence(_tooling_page(), _pr_list_page(), _malformed_commits_page())
 
     run = run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
 

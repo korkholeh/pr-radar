@@ -46,6 +46,7 @@ missing.
 | ai | `AI_COHORT_INCLUDE_SUSPECTED` | bool | `False` | Whether PRs with a merely suspected AI status count in the AI cohort. |
 | ai | `BOT_LOGIN_SUFFIXES` | list | `["[bot]"]` | Login suffixes that mark an account as a bot. |
 | ai | `BOT_LOGINS` | list | `["dependabot", "renovate", "github-actions", "copilot-pull-request-reviewer", "charliecreates", "charliehelps"]` | Exact logins that mark an account as a bot. |
+| ai | `AI_TOOLING_PATH_GLOBS` | list | `.agents`, `.claude`, `.claude/skills`, `AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `.github/copilot-instructions.md`, `.github/agents`, `.cursor`, `.cursorrules`, `.windsurfrules`, `.codex`, `.gemini`, `GEMINI.md`, `.aider.conf.yml`, `.specstory` | Paths that mark a repository as configured for an AI agent. Matched against the repository's root tree, plus one level inside any directory a pattern names. |
 | ai | `DISCLOSURE_SECTION_HEADINGS` | list | `["AI assistance"]` | PR template section headings that hold the AI disclosure. |
 | ai | `DISCLOSURE_LABELS_NONE` | list | `["None"]` | Disclosure values meaning no AI assistance. |
 | ai | `DISCLOSURE_LABELS_PARTIAL` | list | `["Partial"]` | Disclosure values meaning partial AI assistance. |

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 06:04+0000\n"
+"POT-Creation-Date: 2026-09-20 06:27+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -57,7 +57,7 @@ msgstr "налаштування користувача"
 msgid "user preferences"
 msgstr "налаштування користувачів"
 
-#: apps/accounts/models.py:44 apps/catalog/models.py:82
+#: apps/accounts/models.py:44 apps/catalog/models.py:89
 #: apps/policy/models.py:42
 msgid "project"
 msgstr "проєкт"
@@ -213,7 +213,7 @@ msgid "Rebase"
 msgstr "Rebase"
 
 #: apps/activity/models.py:45 apps/activity/models.py:148
-#: apps/catalog/models.py:55
+#: apps/catalog/models.py:62
 msgid "repository"
 msgstr "репозиторій"
 
@@ -224,7 +224,7 @@ msgstr "номер"
 #: apps/activity/models.py:48 apps/activity/models.py:151
 #: apps/activity/models.py:276 apps/activity/models.py:306
 #: apps/catalog/models.py:16 apps/catalog/models.py:43
-#: apps/catalog/models.py:129
+#: apps/catalog/models.py:136
 msgid "GitHub node id"
 msgstr "GitHub node id"
 
@@ -336,7 +336,7 @@ msgstr "коміти після першого ревʼю"
 
 #: apps/activity/models.py:98 apps/activity/models.py:183
 #: apps/activity/models.py:277 apps/activity/models.py:307
-#: apps/catalog/models.py:18 apps/catalog/models.py:52
+#: apps/catalog/models.py:18 apps/catalog/models.py:59
 msgid "raw payload"
 msgstr "сирі дані"
 
@@ -361,7 +361,7 @@ msgid "has test changes"
 msgstr "має зміни в тестах"
 
 #: apps/activity/models.py:116 apps/dashboards/exports/columns.py:123
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:160
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:178
 msgid "AI status"
 msgstr "статус ШІ"
 
@@ -708,7 +708,7 @@ msgstr "ChatGPT"
 msgid "Charlie"
 msgstr "Charlie"
 
-#: apps/ai_detection/models.py:44 apps/catalog/models.py:94
+#: apps/ai_detection/models.py:44 apps/catalog/models.py:101
 #: apps/dashboards/reviews.py:84
 msgid "Other"
 msgstr "Інше"
@@ -726,7 +726,7 @@ msgid "Low"
 msgstr "Низький"
 
 #: apps/ai_detection/models.py:54 apps/catalog/models.py:41
-#: apps/catalog/models.py:64 apps/connections/models.py:19
+#: apps/catalog/models.py:71 apps/connections/models.py:19
 #: apps/github_sync/models.py:62
 msgid "name"
 msgstr "назва"
@@ -748,13 +748,13 @@ msgid "confidence"
 msgstr "впевненість"
 
 #: apps/ai_detection/models.py:59 apps/catalog/models.py:17
-#: apps/catalog/models.py:47 apps/catalog/models.py:73
-#: apps/catalog/models.py:97 apps/connections/models.py:34
+#: apps/catalog/models.py:47 apps/catalog/models.py:80
+#: apps/catalog/models.py:104 apps/connections/models.py:34
 #: apps/policy/models.py:48
 msgid "is active"
 msgstr "активний"
 
-#: apps/ai_detection/models.py:60 apps/catalog/models.py:102
+#: apps/ai_detection/models.py:60 apps/catalog/models.py:109
 msgid "notes"
 msgstr "нотатки"
 
@@ -940,8 +940,8 @@ msgstr ""
 msgid "Run"
 msgstr "Запустити"
 
-#: apps/catalog/admin.py:58 apps/catalog/models.py:66
-#: apps/catalog/models.py:158 apps/policy/models.py:47
+#: apps/catalog/admin.py:58 apps/catalog/models.py:73
+#: apps/catalog/models.py:165 apps/policy/models.py:47
 msgid "description"
 msgstr "опис"
 
@@ -1046,110 +1046,118 @@ msgstr "курсор синхронізації"
 msgid "merge strategy hint"
 msgstr "підказка стратегії мерджу"
 
-#: apps/catalog/models.py:56 apps/catalog/models.py:71
+#: apps/catalog/models.py:57
+msgid "AI tooling paths"
+msgstr "шляхи інструментів ШІ"
+
+#: apps/catalog/models.py:58
+msgid "AI tooling checked at"
+msgstr "інструменти ШІ перевірено о"
+
+#: apps/catalog/models.py:63 apps/catalog/models.py:78
 #: apps/github_sync/models.py:34
 msgid "repositories"
 msgstr "репозиторії"
 
-#: apps/catalog/models.py:65
+#: apps/catalog/models.py:72
 msgid "slug"
 msgstr "slug"
 
-#: apps/catalog/models.py:75
+#: apps/catalog/models.py:82
 msgid "color"
 msgstr "колір"
 
-#: apps/catalog/models.py:83
+#: apps/catalog/models.py:90
 msgid "projects"
 msgstr "проєкти"
 
-#: apps/catalog/models.py:91
+#: apps/catalog/models.py:98
 msgid "Developer"
 msgstr "Розробник"
 
-#: apps/catalog/models.py:92
+#: apps/catalog/models.py:99
 msgid "QA"
 msgstr "QA"
 
-#: apps/catalog/models.py:93
+#: apps/catalog/models.py:100
 msgid "Design"
 msgstr "Дизайн"
 
-#: apps/catalog/models.py:96
+#: apps/catalog/models.py:103
 msgid "display name"
 msgstr "відображуване імʼя"
 
-#: apps/catalog/models.py:98
+#: apps/catalog/models.py:105
 msgid "is bot"
 msgstr "бот"
 
-#: apps/catalog/models.py:99
+#: apps/catalog/models.py:106
 msgid "exclude from metrics"
 msgstr "виключити з метрик"
 
-#: apps/catalog/models.py:100
+#: apps/catalog/models.py:107
 msgid "team"
 msgstr "команда"
 
-#: apps/catalog/models.py:101
+#: apps/catalog/models.py:108
 msgid "role hint"
 msgstr "підказка ролі"
 
-#: apps/catalog/models.py:105 apps/catalog/models.py:124
+#: apps/catalog/models.py:112 apps/catalog/models.py:131
 msgid "person"
 msgstr "людина"
 
-#: apps/catalog/models.py:106
+#: apps/catalog/models.py:113
 msgid "people"
 msgstr "люди"
 
-#: apps/catalog/models.py:115
+#: apps/catalog/models.py:122
 msgid "GitHub login"
 msgstr "логін GitHub"
 
-#: apps/catalog/models.py:116
+#: apps/catalog/models.py:123
 msgid "Git email"
 msgstr "email Git"
 
-#: apps/catalog/models.py:126 apps/connections/models.py:20
+#: apps/catalog/models.py:133 apps/connections/models.py:20
 #: apps/dashboards/models.py:48
 msgid "kind"
 msgstr "вид"
 
-#: apps/catalog/models.py:127 apps/catalog/models.py:157
+#: apps/catalog/models.py:134 apps/catalog/models.py:164
 #: apps/metrics/models.py:24
 msgid "value"
 msgstr "значення"
 
-#: apps/catalog/models.py:131
+#: apps/catalog/models.py:138
 msgid "first seen at"
 msgstr "вперше побачено о"
 
-#: apps/catalog/models.py:134
+#: apps/catalog/models.py:141
 msgid "identity"
 msgstr "ідентичність"
 
-#: apps/catalog/models.py:135
+#: apps/catalog/models.py:142
 msgid "identities"
 msgstr "ідентичності"
 
-#: apps/catalog/models.py:155
+#: apps/catalog/models.py:162
 msgid "key"
 msgstr "ключ"
 
-#: apps/catalog/models.py:156
+#: apps/catalog/models.py:163
 msgid "value type"
 msgstr "тип значення"
 
-#: apps/catalog/models.py:161
+#: apps/catalog/models.py:168
 msgid "app setting"
 msgstr "налаштування застосунку"
 
-#: apps/catalog/models.py:162
+#: apps/catalog/models.py:169
 msgid "app settings"
 msgstr "налаштування застосунку"
 
-#: apps/catalog/models.py:163
+#: apps/catalog/models.py:170
 msgid "Can manage settings"
 msgstr "Може керувати налаштуваннями"
 
@@ -1231,15 +1239,22 @@ msgstr "Як обчислюється тривалість PR."
 msgid "Upper line-count boundary for each PR size bucket."
 msgstr "Верхня межа кількості рядків для кожної розмірної категорії PR."
 
-#: apps/catalog/setting_defs.py:148
+#: apps/catalog/setting_defs.py:162
+msgid ""
+"Paths that mark a repository as configured for an AI agent. Matched against "
+"the repository's root tree, plus one level inside any directory a pattern "
+"names."
+msgstr ""
+
+#: apps/catalog/setting_defs.py:179
 msgid "File path globs excluded from size and churn calculations."
 msgstr "Glob-шаблони шляхів, виключені з обчислення розміру та churn."
 
-#: apps/catalog/setting_defs.py:165
+#: apps/catalog/setting_defs.py:196
 msgid "File path globs recognised as test files."
 msgstr "Glob-шаблони шляхів, що розпізнаються як тестові файли."
 
-#: apps/catalog/setting_defs.py:172
+#: apps/catalog/setting_defs.py:203
 msgid ""
 "Maximum minutes between review request and approval to call a review a "
 "rubber stamp."
@@ -1247,44 +1262,44 @@ msgstr ""
 "Максимальна кількість хвилин між запитом ревʼю та апрувом, щоб вважати ревʼю "
 "формальним."
 
-#: apps/catalog/setting_defs.py:176
+#: apps/catalog/setting_defs.py:207
 msgid "How many top reviewers count toward review load."
 msgstr "Скільки провідних ревʼюерів враховується в навантаженні на ревʼю."
 
-#: apps/catalog/setting_defs.py:182
+#: apps/catalog/setting_defs.py:213
 msgid "Days after merge in which a follow-up fix is attributed."
 msgstr "Дні після мерджу, протягом яких виправлення відносять до PR."
 
-#: apps/catalog/setting_defs.py:189
+#: apps/catalog/setting_defs.py:220
 msgid "Minimum file overlap ratio to attribute a follow-up fix to a PR."
 msgstr "Мінімальна частка перетину файлів для віднесення виправлення до PR."
 
-#: apps/catalog/setting_defs.py:196
+#: apps/catalog/setting_defs.py:227
 msgid ""
 "How long a computed metrics result stays cached before it expires on its own."
 msgstr ""
 "Як довго обчислений результат метрики залишається в кеші, перш ніж застаріє "
 "сам по собі."
 
-#: apps/catalog/setting_defs.py:203
+#: apps/catalog/setting_defs.py:234
 msgid "Default number of days a dashboard period covers when none is chosen."
 msgstr ""
 "Кількість днів у періоді дашборду за замовчуванням, якщо період не обрано."
 
-#: apps/catalog/setting_defs.py:210
+#: apps/catalog/setting_defs.py:241
 msgid "Minimum changed lines before a missing-tests violation applies."
 msgstr ""
 "Мінімальна кількість змінених рядків для застосування порушення «немає "
 "тестів»."
 
-#: apps/catalog/setting_defs.py:217
+#: apps/catalog/setting_defs.py:248
 msgid ""
 "Rule codes switched off; an open violation for a disabled rule auto-resolves."
 msgstr ""
 "Коди правил, які вимкнено; відкрите порушення для вимкненого правила "
 "вирішується автоматично."
 
-#: apps/catalog/setting_defs.py:224
+#: apps/catalog/setting_defs.py:255
 msgid ""
 "Maximum sensitive paths stored in a violation's details; the total is kept "
 "separately."
@@ -1292,33 +1307,33 @@ msgstr ""
 "Максимальна кількість чутливих шляхів, що зберігаються в деталях порушення; "
 "загальна кількість зберігається окремо."
 
-#: apps/catalog/setting_defs.py:231
+#: apps/catalog/setting_defs.py:262
 msgid "Rows per page on the policy violations console."
 msgstr "Кількість рядків на сторінці консолі порушень політики."
 
-#: apps/catalog/setting_defs.py:234
+#: apps/catalog/setting_defs.py:265
 msgid "Days after merge over which churn is measured."
 msgstr "Дні після мерджу, за які вимірюється churn."
 
-#: apps/catalog/setting_defs.py:236
+#: apps/catalog/setting_defs.py:267
 msgid "Maximum files in a PR before churn analysis is skipped."
 msgstr ""
 "Максимальна кількість файлів у PR, після якої аналіз churn пропускається."
 
-#: apps/catalog/setting_defs.py:242
+#: apps/catalog/setting_defs.py:273
 msgid "Maximum concurrent git workers a churn run uses."
 msgstr ""
 "Максимальна кількість паралельних git-обробників, які використовує "
 "обчислення churn."
 
-#: apps/catalog/setting_defs.py:249
+#: apps/catalog/setting_defs.py:280
 msgid ""
 "Timeout in seconds for a single git subprocess call during churn analysis."
 msgstr ""
 "Час очікування в секундах для одного виклику підпроцесу git під час аналізу "
 "churn."
 
-#: apps/catalog/setting_defs.py:256
+#: apps/catalog/setting_defs.py:287
 msgid ""
 "Maximum seconds a churn run spends on a single repository before deferring "
 "the rest."
@@ -1326,7 +1341,7 @@ msgstr ""
 "Максимальний час у секундах, який обчислення churn витрачає на один "
 "репозиторій, перш ніж відкласти решту."
 
-#: apps/catalog/setting_defs.py:263
+#: apps/catalog/setting_defs.py:294
 msgid ""
 "Rows per page on a dashboard table (projects, repositories, people, recent "
 "PRs)."
@@ -1334,12 +1349,12 @@ msgstr ""
 "Кількість рядків на сторінці таблиці дашборду (проєкти, репозиторії, люди, "
 "останні PR)."
 
-#: apps/catalog/setting_defs.py:270
+#: apps/catalog/setting_defs.py:301
 msgid "Maximum files shown on the PR detail page before a '+N more' line."
 msgstr ""
 "Максимальна кількість файлів на сторінці деталей PR перед рядком «+N ще»."
 
-#: apps/catalog/setting_defs.py:277
+#: apps/catalog/setting_defs.py:308
 msgid ""
 "Authors/reviewers shown per axis on the reviews heat map; the rest fold into "
 "'Other'."
@@ -1347,33 +1362,33 @@ msgstr ""
 "Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
 "згортаються в «Інше»."
 
-#: apps/catalog/setting_defs.py:280
+#: apps/catalog/setting_defs.py:311
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:285
+#: apps/catalog/setting_defs.py:316
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:288
+#: apps/catalog/setting_defs.py:319
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:293
+#: apps/catalog/setting_defs.py:324
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:297
+#: apps/catalog/setting_defs.py:328
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:303
+#: apps/catalog/setting_defs.py:334
 msgid "Days a background export file is kept before cleanup deletes it."
 msgstr ""
 "Кількість днів, протягом яких файл фонового експорту зберігається до "
 "видалення."
 
-#: apps/catalog/setting_defs.py:310
+#: apps/catalog/setting_defs.py:341
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -1381,41 +1396,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:313
+#: apps/catalog/setting_defs.py:344
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:318
+#: apps/catalog/setting_defs.py:349
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:325
+#: apps/catalog/setting_defs.py:356
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:329
+#: apps/catalog/setting_defs.py:360
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:332
+#: apps/catalog/setting_defs.py:363
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:338
+#: apps/catalog/setting_defs.py:369
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:345
+#: apps/catalog/setting_defs.py:376
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:352
+#: apps/catalog/setting_defs.py:383
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -2258,7 +2273,7 @@ msgid "Duration"
 msgstr "Тривалість"
 
 #: apps/dashboards/charts.py:259 apps/dashboards/exports/columns.py:122
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:184
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:202
 msgid "Size"
 msgstr "Розмір"
 
@@ -2284,7 +2299,7 @@ msgid "Metric"
 msgstr "Метрика"
 
 #: apps/dashboards/charts.py:348 apps/dashboards/exports/columns.py:125
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:196
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:214
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:8
 #: apps/policy/forms.py:103 apps/policy/templates/policy/console.html:13
 msgid "Violations"
@@ -2381,14 +2396,14 @@ msgstr "Заголовок"
 #: apps/dashboards/exports/columns.py:118
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:15
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:46
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:136
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:154
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:20
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:45
 msgid "Author"
 msgstr "Автор"
 
 #: apps/dashboards/exports/columns.py:119
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:148
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:166
 msgid "State"
 msgstr "Стан"
 
@@ -2602,6 +2617,47 @@ msgstr "Повернутися до моїх експортів"
 msgid "My exports"
 msgstr "Мої експорти"
 
+#: apps/dashboards/templates/dashboards/partials/ai_tooling.html:12
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:136
+msgid "AI tooling"
+msgstr "Інструментарій ШІ"
+
+#: apps/dashboards/templates/dashboards/partials/ai_tooling.html:17
+msgid ""
+"Not checked yet. The next sync of this repository records which agent "
+"configuration it carries."
+msgstr ""
+"Ще не перевірено. Наступна синхронізація цього репозиторію запише, яку "
+"конфігурацію агента він містить."
+
+#: apps/dashboards/templates/dashboards/partials/ai_tooling.html:21
+msgid ""
+"This repository is configured for an AI agent. These paths were found at the "
+"tip of the default branch:"
+msgstr ""
+"Цей репозиторій налаштовано для агента ШІ. На вершині гілки за замовчуванням "
+"знайдено такі шляхи:"
+
+#: apps/dashboards/templates/dashboards/partials/ai_tooling.html:29
+#, python-format
+msgid ""
+"Checked %(checked_at)s. Configuring a repository for an agent says nothing "
+"about who wrote any individual pull request, so this never changes a PR's AI "
+"status on its own."
+msgstr ""
+"Перевірено %(checked_at)s. Налаштування репозиторію для агента нічого не "
+"говорить про те, хто написав конкретний pull request, тому це саме по собі "
+"ніколи не змінює статус ШІ у PR."
+
+#: apps/dashboards/templates/dashboards/partials/ai_tooling.html:36
+#, python-format
+msgid ""
+"No agent configuration was found at the tip of the default branch. Checked "
+"%(checked_at)s."
+msgstr ""
+"На вершині гілки за замовчуванням не знайдено конфігурації агента. "
+"Перевірено %(checked_at)s."
+
 #: apps/dashboards/templates/dashboards/partials/chart_card.html:39
 msgid "data table"
 msgstr "таблиця даних"
@@ -2671,7 +2727,7 @@ msgstr ""
 "Завантажте звіт CSV або XLSX з таблиці дашборду, щоб побачити його тут."
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:15
-#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:63
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:68
 #: apps/policy/templates/policy/console.html:26
 #: apps/policy/templates/policy/console.html:40
 msgid "Filters"
@@ -2779,29 +2835,40 @@ msgstr "ШІ проти не-ШІ"
 msgid "Projects"
 msgstr "Проєкти"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:172
-msgid "AI tool"
-msgstr "Інструмент ШІ"
-
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:200
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:140
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:218
 msgid "Any"
 msgstr "Будь-який"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:203
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:143
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:41
+msgid "Configured for an agent"
+msgstr "Налаштовано для агента"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:146
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:43
+msgid "No agent configuration"
+msgstr "Немає конфігурації агента"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:190
+msgid "AI tool"
+msgstr "Інструмент ШІ"
+
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:221
 msgid "Has open violations"
 msgstr "Є відкриті порушення"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:206
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:224
 msgid "No open violations"
 msgstr "Немає відкритих порушень"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:213
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:231
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:83
 #: apps/policy/templates/policy/partials/violations.html:85
 msgid "Apply"
 msgstr "Застосувати"
 
-#: apps/dashboards/templates/dashboards/partials/filter_bar.html:214
+#: apps/dashboards/templates/dashboards/partials/filter_bar.html:232
 #: apps/policy/templates/policy/console.html:113
 msgid "Reset"
 msgstr "Скинути"
@@ -2829,7 +2896,7 @@ msgstr[1] "%(counter)s репозиторії"
 msgstr[2] "%(counter)s репозиторіїв"
 msgstr[3] "%(counter)s репозиторії"
 
-#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:48
+#: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:53
 msgid "Download report (XLSX)"
 msgstr "Завантажити звіт (XLSX)"
 

@@ -37,6 +37,11 @@ redraws it along with the numbers it describes.
       {% blocktranslate count counter=params.repository_ids|length %}{{ counter }} repository{% plural %}{{ counter }} repositories{% endblocktranslate %}
     </span>
   {% endif %}
+  {% if params.ai_tooling == "yes" %}
+    <span class="badge badge-accent">{% translate "Configured for an agent" %}</span>
+  {% elif params.ai_tooling == "no" %}
+    <span class="badge badge-accent">{% translate "No agent configuration" %}</span>
+  {% endif %}
 
   <div class="ml-auto flex flex-wrap items-center gap-2">
     {% if show_report_link %}

@@ -95,6 +95,11 @@ class DashboardParams:
     page: int
     table: str
     pr_filters: PRFilters = PRFilters()
+    # Repositories table only (phase 12, stage 3): "" = every repository, "yes" = only those
+    # whose sync probe found agent configuration, "no" = only those it probed and found none.
+    # A repository that has never been probed is in neither cohort — "no" would otherwise claim
+    # an answer nobody has looked for.
+    ai_tooling: str = ""
 
     def to_query_dict(self) -> QueryDict:
         """Canonical, sorted, omits defaults — what the filter bar's links and every chart/export
@@ -138,6 +143,8 @@ class DashboardParams:
             query_dict.setlist("size", list(self.pr_filters.size_buckets))
         if self.pr_filters.has_violations:
             query_dict["has_violations"] = self.pr_filters.has_violations
+        if self.ai_tooling:
+            query_dict["ai_tooling"] = self.ai_tooling
         query_dict = query_dict.copy()
         query_dict._mutable = False  # noqa: SLF001 -- QueryDict has no public freeze API.
         return query_dict
@@ -209,6 +216,7 @@ def parse(
         page=cleaned["page"] or DEFAULT_PAGE,
         table=cleaned["table"],
         pr_filters=pr_filters,
+        ai_tooling=cleaned["ai_tooling"],
     )
 
 

@@ -1,0 +1,15 @@
+{
+  "data": {
+    "repository": {
+      "object": {
+        "oid": "cccc000000000000000000000000000000000000",
+        "entries": [
+          { "name": "README.md", "type": "blob" },
+          { "name": "pyproject.toml", "type": "blob" },
+          { "name": "src", "type": "tree" }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4900, "resetAt": "2026-01-01T01:00:00Z", "cost": 1 }
+  }
+}

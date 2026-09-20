@@ -83,6 +83,7 @@ class DashboardFilterForm(forms.Form):
     sort = forms.CharField(required=False)
     page = _LenientIntegerField(required=False)
     table = forms.CharField(required=False)
+    ai_tooling = _LenientChoiceField(choices=[("", "any"), ("yes", "yes"), ("no", "no")], required=False)
 
     def __init__(self, *args, projects=None, repositories=None, **kwargs):
         """`from`/`to` are the query string's names for the custom-range bounds; `from` shadows
@@ -122,6 +123,10 @@ class DashboardFilterForm(forms.Form):
     def clean_cohort(self) -> str:
         value = self.cleaned_data.get("cohort", "")
         return value if value in {"all", "ai", "non_ai", "compare"} else ""
+
+    def clean_ai_tooling(self) -> str:
+        value = self.cleaned_data.get("ai_tooling", "")
+        return value if value in {"", "yes", "no"} else ""
 
     def clean_page(self) -> int | None:
         value = self.cleaned_data.get("page")

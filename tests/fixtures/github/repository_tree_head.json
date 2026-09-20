@@ -1,0 +1,17 @@
+{
+  "data": {
+    "repository": {
+      "object": {
+        "oid": "aaaa000000000000000000000000000000000000",
+        "entries": [
+          { "name": ".agents", "type": "tree" },
+          { "name": ".github", "type": "tree" },
+          { "name": "AGENTS.md", "type": "blob" },
+          { "name": "README.md", "type": "blob" },
+          { "name": "src", "type": "tree" }
+        ]
+      }
+    },
+    "rateLimit": { "remaining": 4900, "resetAt": "2026-01-01T01:00:00Z", "cost": 1 }
+  }
+}

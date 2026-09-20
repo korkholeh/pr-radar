@@ -35,6 +35,7 @@ from apps.github_sync.queries import (
     PULL_REQUESTS_QUERY,
 )
 from apps.github_sync.rate_limit import RateBudgetRegistry
+from apps.github_sync.tooling import record_tooling_paths
 from apps.github_sync.upserts import upsert_pull_request
 from apps.metrics.rollups import rebuild_dirty
 from apps.metrics.services import bump_data_version
@@ -150,6 +151,10 @@ def sync_repository(
     since: datetime.datetime | None = None,
     full: bool = False,
 ) -> None:
+    # Before the pull requests: a repository-level fact, one request, and a dead credential is
+    # discovered here rather than after a full round of PR requests (apps/github_sync/tooling.py).
+    record_tooling_paths(client, repository, run.started_at)
+
     watermark = _watermark(repository, since=since, full=full)
     owner, name = repository.full_name.split("/", 1)
     page_size = get_int("SYNC_PR_PAGE_SIZE")

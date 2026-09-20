@@ -116,6 +116,24 @@ reviewer and must be attributable to its own rule and confidence rather than mer
 detector. Every `AISignal.evidence` is truncated to `EVIDENCE_MAX_LENGTH` (200 chars), centred on the match, so
 it always fits the field and is still readable on the PR page.
 
+**A repository's AI tooling is a `Repository` field, never an `AISignal`** (`apps/github_sync/tooling.py`,
+phase 12). `Repository.ai_tooling_paths` records which agent-configuration paths the repository carries at
+`HEAD` — `.agents/`, `.claude/`, `AGENTS.md`, `.github/copilot-instructions.md` and the rest of
+`AI_TOOLING_PATH_GLOBS` — probed once per repository per sync run. It is not a signal because it cannot
+discriminate: every pull request in a repository with a `CLAUDE.md` would carry it, so as a detector it would
+drown the signals that do tell PRs apart. A PR that *changes* one of those paths is a different fact and stays
+a `file_path` rule at `confidence: low, disputed: true`.
+
+Three consequences are deliberate. **`[]` and `None` mean different things** — `[]` is "probed, carries none",
+`None` (with `ai_tooling_checked_at` unset) is "never probed" — so the repositories table's "No agent
+configuration" filter excludes the unprobed ones rather than claiming an answer nobody obtained. **A failed
+probe keeps the previous value**: tooling is incidental to the pull requests a run exists to fetch, so a
+repository whose tree cannot be read is logged and skipped rather than failing the run or recording a false
+`[]`. And **the probe runs before the pull requests**, which bounds its cost (one request, plus one per
+configured directory the repository actually has, capped at `MAX_DIRECTORY_PROBES`) and surfaces a dead
+credential before a full round of PR requests is spent on it — `GitHubAuthError`/`GitHubSSOError` are the two
+exceptions it re-raises.
+
 **The disclosure parser (`apps/ai_detection/disclosure.py`) is deliberately tolerant, not strict**, because it
 reads free-form Markdown a human filled in, not a fixed form: the heading, the three checkbox labels and the
 tools-line label are all configurable settings (`DISCLOSURE_SECTION_HEADINGS`, `DISCLOSURE_LABELS_NONE`/

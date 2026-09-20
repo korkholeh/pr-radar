@@ -134,6 +134,37 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         "metrics",
     ),
     SettingDef(
+        "AI_TOOLING_PATH_GLOBS",
+        "list",
+        [
+            # Ordered by what this installation's synced data actually contains: `.agents/` and
+            # `AGENTS.md` were found in real pull requests, none of the others anywhere. The rest
+            # are kept because a repository that has one is unambiguously configured for an
+            # agent — they simply have not been seen here yet.
+            ".agents",
+            ".claude",
+            ".claude/skills",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".mcp.json",
+            ".github/copilot-instructions.md",
+            ".github/agents",
+            ".cursor",
+            ".cursorrules",
+            ".windsurfrules",
+            ".codex",
+            ".gemini",
+            "GEMINI.md",
+            ".aider.conf.yml",
+            ".specstory",
+        ],
+        _(
+            "Paths that mark a repository as configured for an AI agent. Matched against the "
+            "repository's root tree, plus one level inside any directory a pattern names."
+        ),
+        "ai",
+    ),
+    SettingDef(
         "EXCLUDED_PATH_GLOBS",
         "list",
         [

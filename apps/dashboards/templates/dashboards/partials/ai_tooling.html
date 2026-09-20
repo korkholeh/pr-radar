@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}
+The repository's AI tooling (phase 12, stage 3): which agent-configuration paths it carries at
+HEAD, recorded by the sync probe. A property of the repository, not of any pull request — it is
+deliberately not an AI signal and never moves a PR's `ai_status`.
+
+`ai_tooling_checked_at` is what separates "probed, carries none" from "never probed": an empty
+list on its own would read as the former while meaning the latter.
+{% endcomment %}
+<section class="card" data-testid="repository-ai-tooling">
+  <div class="card-header">
+    <h2 class="card-title">{% translate "AI tooling" %}</h2>
+  </div>
+  <div class="card-body">
+    {% if not scope_object.ai_tooling_checked_at %}
+      <p class="text-sm text-text-muted">
+        {% translate "Not checked yet. The next sync of this repository records which agent configuration it carries." %}
+      </p>
+    {% elif scope_object.ai_tooling_paths %}
+      <p class="text-sm text-text-muted">
+        {% translate "This repository is configured for an AI agent. These paths were found at the tip of the default branch:" %}
+      </p>
+      <ul class="mt-2 flex flex-wrap gap-2">
+        {% for path in scope_object.ai_tooling_paths %}
+          <li><code class="badge">{{ path }}</code></li>
+        {% endfor %}
+      </ul>
+      <p class="mt-3 text-sm text-text-muted">
+        {% blocktranslate trimmed with checked_at=scope_object.ai_tooling_checked_at|date:"Y-m-d H:i" %}
+          Checked {{ checked_at }}. Configuring a repository for an agent says nothing about who wrote any
+          individual pull request, so this never changes a PR's AI status on its own.
+        {% endblocktranslate %}
+      </p>
+    {% else %}
+      <p class="text-sm text-text-muted">
+        {% blocktranslate trimmed with checked_at=scope_object.ai_tooling_checked_at|date:"Y-m-d H:i" %}
+          No agent configuration was found at the tip of the default branch. Checked {{ checked_at }}.
+        {% endblocktranslate %}
+      </p>
+    {% endif %}
+  </div>
+</section>

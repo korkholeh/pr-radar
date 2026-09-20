@@ -180,3 +180,25 @@ def parse_default_query(query: dict) -> DashboardParams:
     for key, value in query.items():
         qd[key] = value
     return parse(qd)
+
+
+# -- the repositories table's AI-tooling filter (phase 12, stage 3) ------------------------------
+
+
+@pytest.mark.parametrize("value", ["yes", "no"])
+def test_ai_tooling_filter_round_trips_through_the_query_string(value):
+    params = _parse({"ai_tooling": value})
+    assert params.ai_tooling == value
+    assert params.to_query_dict()["ai_tooling"] == value
+
+
+def test_unset_ai_tooling_filter_is_omitted_from_the_query_string():
+    params = _parse({})
+    assert params.ai_tooling == ""
+    assert "ai_tooling" not in params.to_query_dict()
+
+
+def test_unknown_ai_tooling_value_falls_back_to_unfiltered():
+    """Same contract as every other filter: a hand-edited URL narrows nothing rather than
+    raising (RISKS row 3)."""
+    assert _parse({"ai_tooling": "maybe"}).ai_tooling == ""

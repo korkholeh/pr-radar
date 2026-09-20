@@ -20,6 +20,7 @@ from apps.github_sync.tests.test_sync import (
     _pr_list_page,
     _rate_limit_block,
     _reviews_page,
+    _tooling_page,
 )
 
 TOKEN = "ghp_secrettokenvalue0123456789"
@@ -33,8 +34,10 @@ def _connection_with_repo(full_name):
 
 
 def _pr_sequence(number, sha, *, remaining=4900):
-    responses = [_pr_list_page(number, "2026-01-05T09:00:00Z"), _commits_page([sha])]
-    responses[0]["data"]["rateLimit"] = _rate_limit_block()
+    # Starts with the repository tooling probe, which `sync_repository` runs before the pull
+    # requests (phase 12, stage 3).
+    responses = [_tooling_page(), _pr_list_page(number, "2026-01-05T09:00:00Z"), _commits_page([sha])]
+    responses[1]["data"]["rateLimit"] = _rate_limit_block()  # the pull-request page, not the probe
     responses.append(_reviews_page())
     responses.append(_empty_nested_page("reviewThreads"))
     responses.append(_files_page())

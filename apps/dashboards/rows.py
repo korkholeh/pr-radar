@@ -114,6 +114,12 @@ def repository_rows(
     queryset = repositories_in_scope(access)
     if project_id is not None:
         queryset = queryset.filter(projects__id=project_id)
+    if params.ai_tooling == "yes":
+        queryset = queryset.exclude(ai_tooling_paths=[])
+    elif params.ai_tooling == "no":
+        # `checked_at__isnull=False` on purpose: a repository nobody has probed yet is not
+        # evidence of an absence, so it belongs in neither cohort.
+        queryset = queryset.filter(ai_tooling_paths=[], ai_tooling_checked_at__isnull=False)
     repositories = list(queryset)
     results = compute_many(
         list(PROJECT_REPOSITORY_METRIC_KEYS),

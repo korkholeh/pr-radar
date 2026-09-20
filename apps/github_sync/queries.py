@@ -179,3 +179,25 @@ query ViewerRepositories($first: Int!, $after: String) {{
   {RATE_LIMIT_FIELD}
 }}
 """
+
+# The repository's tree at HEAD, one level deep, used once per repository per run to record which
+# AI-agent configuration paths it carries (phase 12, stage 3). `expression` is a git revision
+# path ("HEAD:" for the root, "HEAD:.github" for one directory), so the same document serves the
+# root probe and the directory probes that follow it. `oid` is requested so a caller can tell an
+# empty tree from a missing one.
+REPOSITORY_TREE_QUERY = f"""
+query RepositoryTree($owner: String!, $name: String!, $expression: String!) {{
+  repository(owner: $owner, name: $name) {{
+    object(expression: $expression) {{
+      ... on Tree {{
+        oid
+        entries {{
+          name
+          type
+        }}
+      }}
+    }}
+  }}
+  {RATE_LIMIT_FIELD}
+}}
+"""

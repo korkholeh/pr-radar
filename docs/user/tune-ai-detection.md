@@ -95,6 +95,24 @@ If more than a handful of the matches are people rather than machines, leave the
 readers are the matched developers' managers, that kind of false positive costs far more than a missed
 signal.
 
+## What the repository page tells you instead
+
+Some evidence is about the **repository**, not about any one pull request. If a repository has a `CLAUDE.md`,
+an `.agents/` directory or a `.github/copilot-instructions.md`, somebody configured it for an agent — but that
+is equally true of every pull request in it, so it is not a signal and it never changes a PR's AI status.
+
+Each sync records it separately. Open a repository's page and read the **AI tooling** card:
+
+- **a list of paths** — the agent configuration found at the tip of the default branch, at the time shown.
+- **"No agent configuration was found"** — the repository was inspected and carries none.
+- **"Not checked yet"** — nobody has looked. Not the same as the line above, and deliberately worded
+  differently.
+
+On the **Repositories** page, the filter drawer has an **AI tooling** select: *Configured for an agent* or
+*No agent configuration*. Repositories nobody has probed yet appear under neither — an absence of evidence is
+not evidence of absence. Which paths count is the `AI_TOOLING_PATH_GLOBS` setting (`docs/CONFIGURATION.md`);
+add your team's own convention there if you have one.
+
 ## Fix a false positive
 
 A rule that fires on text it shouldn't is a settings change, not a release. Open Settings → **Detection rules**,

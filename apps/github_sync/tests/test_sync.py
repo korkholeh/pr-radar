@@ -1,4 +1,6 @@
 import datetime
+import json
+from pathlib import Path
 
 import httpx
 import pytest
@@ -135,9 +137,22 @@ def _files_page():
     }
 
 
+_FIXTURES_DIR = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "github"
+
+
+def _tooling_page(name="repository_tree_no_tooling"):
+    """`sync_repository` probes the repository's tree before its pull requests (phase 12, stage
+    3), so every ordered response sequence starts with one of these. The default fixture is a
+    repository with no agent tooling at all, which costs exactly one request: nothing in it is a
+    directory any configured glob names, so no second-level probe follows."""
+    return json.loads((_FIXTURES_DIR / f"{name}.json").read_text())
+
+
 def _one_pr_sequence(number=1, updated_at="2026-01-05T09:00:00Z", sha="sha0001"):
-    """PULL_REQUESTS_QUERY, then commits/reviews/threads/files/timeline for the single PR."""
+    """The tooling probe, then PULL_REQUESTS_QUERY, then commits/reviews/threads/files/timeline
+    for the single PR."""
     return [
+        _tooling_page(),
         _pr_list_page(number, updated_at),
         _commits_page([sha]),
         _reviews_page(),
@@ -224,7 +239,7 @@ def test_pr_schema_error_is_recorded_and_repository_continues():
             "rateLimit": _rate_limit_block(),
         }
     }
-    mock_graphql_sequence(_pr_list_page(1, "2026-01-05T09:00:00Z"), malformed_commits_page)
+    mock_graphql_sequence(_tooling_page(), _pr_list_page(1, "2026-01-05T09:00:00Z"), malformed_commits_page)
 
     run = run_sync(SyncRun.Trigger.CLI, repo_full_names=["acme/widget"])
 
@@ -249,6 +264,7 @@ def test_older_pr_failure_does_not_advance_watermark_past_it():
         }
     }
     first_run_sequence = [
+        _tooling_page(),
         _pr_list_page_from_nodes([_pr_node(2, "2026-01-05T09:00:00Z"), _pr_node(1, "2026-01-04T09:00:00Z")]),
         _commits_page(["sha0002"]),
         _reviews_page(),

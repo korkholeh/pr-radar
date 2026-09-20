@@ -12,6 +12,7 @@ from apps.connections.services import set_token
 from apps.github_sync.models import SyncRun
 from apps.github_sync.services import run_sync
 from apps.github_sync.tests.conftest import mock_graphql_sequence
+from apps.github_sync.tests.test_sync import _tooling_page
 from apps.policy.factories import AIPolicyFactory
 from apps.policy.models import PolicyViolation
 
@@ -68,7 +69,10 @@ def _empty_nested_page(container_key):
 
 
 def _one_pr_sequence(number=1, updated_at="2026-01-05T09:00:00Z"):
+    # The first page is the repository tooling probe `sync_repository` runs before any pull
+    # request (phase 12, stage 3); see `test_sync._tooling_page`.
     return [
+        _tooling_page(),
         _pr_list_page(number, updated_at),
         _empty_nested_page("commits"),
         _empty_nested_page("reviews"),

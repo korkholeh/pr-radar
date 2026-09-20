@@ -5,6 +5,9 @@ The fragment `views.dashboard()` returns to an htmx swap and includes from the f
 carries the KPI rows and, in Period mode, the chart cards.
 {% endcomment %}
 {% include "dashboards/partials/filter_toolbar.html" %}
+{% if scope_type == "repo" and scope_object %}
+  {% include "dashboards/partials/ai_tooling.html" %}
+{% endif %}
 {% if mode == "day" %}
   <div data-testid="day-kpis">
     {% for row in kpi_rows %}

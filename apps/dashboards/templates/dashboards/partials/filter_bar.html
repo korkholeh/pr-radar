@@ -130,6 +130,24 @@ with `hx-push-url` is what keeps the address bar in sync with a filter change.
             </select>
           </div>
         {% endif %}
+        {% if table_ctx.table_key == "repositories" %}
+          <div class="field-row">
+            <label class="label" for="filter-ai-tooling">
+              {% translate "AI tooling" %}
+            </label>
+            <select id="filter-ai-tooling" name="ai_tooling">
+              <option value="" {% if params.ai_tooling == "" %}selected{% endif %}>
+                {% translate "Any" %}
+              </option>
+              <option value="yes" {% if params.ai_tooling == "yes" %}selected{% endif %}>
+                {% translate "Configured for an agent" %}
+              </option>
+              <option value="no" {% if params.ai_tooling == "no" %}selected{% endif %}>
+                {% translate "No agent configuration" %}
+              </option>
+            </select>
+          </div>
+        {% endif %}
         {% if table_ctx.table_key == "pull_requests" %}
           <div class="field-row">
             <label class="label" for="filter-author">

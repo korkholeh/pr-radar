@@ -6,6 +6,7 @@ from __future__ import annotations
 import datetime
 
 import pytest
+from django.utils import timezone
 
 from apps.accounts.selectors import ScopeFilter
 from apps.activity.factories import PullRequestFactory
@@ -218,3 +219,43 @@ def test_table_instance_has_a_column_per_export_column():
     spec = TABLE_SPECS["recent_prs"]
     column_names = {column.name for column in ctx.table.columns}
     assert column_names == {column.key for column in spec.columns}
+
+
+# -- the repositories table's AI-tooling filter (phase 12, stage 3) ------------------------------
+
+
+@pytest.mark.django_db
+def test_repositories_table_keeps_every_repository_when_the_tooling_filter_is_unset():
+    RepositoryFactory(ai_tooling_paths=["CLAUDE.md"], ai_tooling_checked_at=timezone.now())
+    RepositoryFactory(ai_tooling_paths=[], ai_tooling_checked_at=timezone.now())
+    RepositoryFactory()  # never probed
+
+    ctx = build_table_context("repositories", _scope(), _params())
+
+    assert len(ctx.page.object_list) == 3
+
+
+@pytest.mark.django_db
+def test_repositories_table_yes_keeps_only_repositories_with_agent_configuration():
+    configured = RepositoryFactory(
+        ai_tooling_paths=[".claude", "CLAUDE.md"], ai_tooling_checked_at=timezone.now()
+    )
+    RepositoryFactory(ai_tooling_paths=[], ai_tooling_checked_at=timezone.now())
+    RepositoryFactory()
+
+    ctx = build_table_context("repositories", _scope(), _params(ai_tooling="yes"))
+
+    assert [row["id"] for row in ctx.page.object_list] == [configured.id]
+
+
+@pytest.mark.django_db
+def test_repositories_table_no_excludes_repositories_nobody_has_probed():
+    """ "No agent configuration" must mean "we looked and found none", not "we never looked" —
+    an unprobed repository is not evidence of an absence."""
+    RepositoryFactory(ai_tooling_paths=["CLAUDE.md"], ai_tooling_checked_at=timezone.now())
+    probed_empty = RepositoryFactory(ai_tooling_paths=[], ai_tooling_checked_at=timezone.now())
+    RepositoryFactory()  # never probed
+
+    ctx = build_table_context("repositories", _scope(), _params(ai_tooling="no"))
+
+    assert [row["id"] for row in ctx.page.object_list] == [probed_empty.id]
