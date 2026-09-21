@@ -19,6 +19,10 @@ User = get_user_model()
 
 _WRITE_SCOPE = "repo"
 
+# The repository listing behind REPOS_VISIBLE is the same one discovery pages through, so it runs at
+# the same page size; verify_connection() is throttled and one page covers most connections.
+REPOSITORY_PROBE_PAGE_SIZE = 100
+
 
 def _parse_token_expiration_header(value: str | None) -> datetime.datetime | None:
     """GitHub sends 'github-authentication-token-expiration' as "YYYY-MM-DD HH:MM:SS UTC".
@@ -50,16 +54,14 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
     Throttled to once per CONNECTION_RECHECK_MIN_MINUTES unless force=True."""
     from apps.connections.auth import auth_for_connection
     from apps.github_sync.client import GitHubClient
+    from apps.github_sync.discovery import repository_nodes
     from apps.github_sync.errors import (
         GitHubAuthError,
         GitHubNotFoundError,
         GitHubSSOError,
         require,
     )
-    from apps.github_sync.queries import (
-        RATE_LIMIT_QUERY,
-        VIEWER_REPOSITORIES_QUERY,
-    )
+    from apps.github_sync.queries import RATE_LIMIT_QUERY
     from apps.github_sync.rate_limit import RateBudget
 
     now = timezone.now()
@@ -119,9 +121,13 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
     if auth_ok:
         sso_blocked = False
         try:
-            # Counted the way discovery lists them: everything the token can read, whoever owns it.
-            data = client.graphql(VIEWER_REPOSITORIES_QUERY, {"first": 5, "after": None})
-            repos = require(data, "viewer.repositories")
+            # Counted the way discovery lists them, over the same REST listing: everything the token
+            # can read, whoever owns it. GraphQL's viewer connection would report 0 repositories for
+            # an organization-owned fine-grained token that reads them perfectly well, which made
+            # this check disagree with what a sync could actually see.
+            repos = repository_nodes(
+                client, page_size=REPOSITORY_PROBE_PAGE_SIZE, owner_logins=[connection.owner_login]
+            )
         except GitHubSSOError as exc:
             sso_blocked = True
             checks.append(
@@ -131,9 +137,11 @@ def verify_connection(connection: GitHubConnection, *, force: bool = False) -> G
                     "params": {"org": exc.org, "url": exc.url},
                 }
             )
+        except (GitHubAuthError, GitHubNotFoundError):
+            checks.append({"code": "REPOS_VISIBLE_NONE", "outcome": "fail", "params": {}})
         else:
-            count = require(repos, "totalCount")
-            sample = [node["nameWithOwner"] for node in require(repos, "nodes")[:5]]
+            count = len(repos)
+            sample = [node["nameWithOwner"] for node in repos[:5]]
             if count:
                 checks.append(
                     {"code": "REPOS_VISIBLE", "outcome": "ok", "params": {"count": count, "sample": sample}}

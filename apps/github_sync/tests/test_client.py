@@ -1,3 +1,5 @@
+import logging
+
 import httpx
 import pytest
 import respx
@@ -10,7 +12,12 @@ from apps.github_sync.errors import (
     GitHubSSOError,
     SecondaryRateLimitError,
 )
-from apps.github_sync.queries import PR_REVIEWS_QUERY, PULL_REQUESTS_QUERY, RATE_LIMIT_QUERY
+from apps.github_sync.queries import (
+    PR_COMMITS_QUERY,
+    PR_REVIEWS_QUERY,
+    PULL_REQUESTS_QUERY,
+    RATE_LIMIT_QUERY,
+)
 from apps.github_sync.rate_limit import RateBudget
 from apps.github_sync.tests.conftest import mock_graphql_responses, mock_graphql_sequence
 
@@ -181,6 +188,37 @@ def test_graphql_errors_array_unauthorized_raises_auth_error(github_fixture):
     client = make_client()
     with pytest.raises(GitHubAuthError):
         client.graphql(RATE_LIMIT_QUERY, {})
+
+
+@pytest.mark.django_db
+def test_graphql_denial_of_a_root_field_raises_auth_error_naming_the_path(github_fixture):
+    """`repository` itself refused means the token may not read this repository at all, which is
+    worth quarantining the connection for — and the message has to say which field, or
+    SyncRun.error_log reads "authentication failed" with nothing to act on."""
+    mock_graphql_responses(httpx.Response(200, json=github_fixture("graphql_errors_repository_forbidden")))
+    client = make_client()
+    with pytest.raises(GitHubAuthError) as exc_info:
+        client.graphql(PULL_REQUESTS_QUERY, {"owner": "acme", "name": "widgets", "first": 1})
+    message = str(exc_info.value)
+    assert "FORBIDDEN at repository" in message
+    assert "Resource not accessible by personal access token" in message
+
+
+@pytest.mark.django_db
+def test_graphql_denial_of_a_nested_field_keeps_the_data_and_the_connection(github_fixture, caplog):
+    """A fine-grained token without **Checks** gets a FORBIDDEN on `statusCheckRollup` alone while
+    the rest of the document resolves. Treating that as a credential failure marked the whole
+    connection invalid over an optional permission; the resolved commits must come back instead,
+    with the denial logged once."""
+    mock_graphql_responses(httpx.Response(200, json=github_fixture("graphql_errors_field_forbidden")))
+    client = make_client()
+    with caplog.at_level(logging.WARNING, logger="apps.github_sync.client"):
+        data = client.graphql(PR_COMMITS_QUERY, {"id": "PR_1", "first": 1})
+
+    commits = data["node"]["commits"]["nodes"]
+    assert [commit["commit"]["oid"] for commit in commits] == ["commit0001"]
+    assert commits[0]["commit"]["statusCheckRollup"] is None
+    assert "statusCheckRollup" in caplog.text
 
 
 @pytest.mark.django_db

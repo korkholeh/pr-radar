@@ -1,0 +1,49 @@
+{
+  "data": {
+    "node": {
+      "commits": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "nodes": [
+          {
+            "commit": {
+              "oid": "commit0001",
+              "message": "commit number 1",
+              "authoredDate": "2026-01-01T10:00:00Z",
+              "committedDate": "2026-01-01T10:00:00Z",
+              "additions": 1,
+              "deletions": 0,
+              "author": {
+                "user": {
+                  "login": "octocat"
+                },
+                "email": "octocat@example.com"
+              },
+              "committer": {
+                "user": {
+                  "login": "octocat"
+                },
+                "email": "octocat@example.com"
+              },
+              "statusCheckRollup": null
+            }
+          }
+        ]
+      }
+    },
+    "rateLimit": {
+      "remaining": 4998,
+      "resetAt": "2026-01-01T11:00:00Z",
+      "cost": 1
+    }
+  },
+  "errors": [
+    {
+      "type": "FORBIDDEN",
+      "path": ["node", "commits", "nodes", 0, "commit", "statusCheckRollup"],
+      "message": "Resource not accessible by personal access token"
+    }
+  ]
+}

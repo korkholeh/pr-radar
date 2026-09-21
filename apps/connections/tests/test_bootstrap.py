@@ -7,6 +7,7 @@ from django.core.management import call_command
 from apps.connections.crypto import token_last4
 from apps.connections.factories import GitHubConnectionFactory
 from apps.connections.models import GitHubConnection
+from apps.connections.tests.rest_mocks import mock_repository_listing
 
 TOKEN = "ghp_bootstraptoken0123456789"
 
@@ -80,7 +81,8 @@ def test_existing_connection_without_env_var_is_a_noop(capsys, monkeypatch):
 def test_verify_flag_calls_client_only_against_respx(capsys, monkeypatch, github_fixture):
     monkeypatch.setenv("GITHUB_TOKEN", TOKEN)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    mock_repository_listing(github_fixture("rest_user_repos_page1"))
+    _mock_graphql(github_fixture("rate_limit"))
 
     call_command("bootstrap_connection", "--verify")
 

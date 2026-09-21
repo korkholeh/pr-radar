@@ -34,7 +34,7 @@ def shipped_documents():
 
 def test_queries_module_ships_at_least_the_known_documents():
     names = {name for name, _ in shipped_documents()}
-    assert {"RATE_LIMIT_QUERY", "PULL_REQUESTS_QUERY", "VIEWER_REPOSITORIES_QUERY"} <= names
+    assert {"RATE_LIMIT_QUERY", "PULL_REQUESTS_QUERY", "REPOSITORY_TREE_QUERY"} <= names
 
 
 @pytest.mark.parametrize("name,document", shipped_documents(), ids=lambda v: v if isinstance(v, str) else "")
@@ -79,8 +79,8 @@ def test_client_refuses_a_mutation_without_sending_a_request():
 
 
 def test_rest_surface_exposes_no_write_verb():
-    """`rest_get()` hardcodes GET. A `rest_post()`/`rest_delete()` added beside it would be a new
-    write path that no other test in the suite would notice."""
+    """`rest_get()` and `rest_paginate()` both hardcode GET. A `rest_post()`/`rest_delete()` added
+    beside them would be a new write path that no other test in the suite would notice."""
     members = inspect.getmembers(GitHubClient, inspect.isfunction)
     public = {name for name, _ in members if not name.startswith("_")}
-    assert public == {"graphql", "rest_get", "paginate"}
+    assert public == {"graphql", "rest_get", "rest_paginate", "paginate"}

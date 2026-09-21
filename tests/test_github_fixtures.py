@@ -4,9 +4,6 @@ import pytest
 
 GRAPHQL_ENVELOPE_FIXTURES = [
     "rate_limit",
-    "discovery_repos_page1",
-    "discovery_repos_page2",
-    "viewer_repositories",
     "pull_requests_page1",
     "pull_requests_page2",
     "pr_reviews_page2",
@@ -31,9 +28,53 @@ def test_graphql_error_fixture_has_no_data_and_names_a_type(github_fixture):
     assert body["errors"][0]["type"] == "UNAUTHORIZED"
 
 
+@pytest.mark.parametrize(
+    "name,path",
+    [
+        ("graphql_errors_repository_forbidden", ["repository"]),
+        (
+            "graphql_errors_field_forbidden",
+            ["node", "commits", "nodes", 0, "commit", "statusCheckRollup"],
+        ),
+    ],
+)
+def test_graphql_denial_fixtures_carry_data_and_the_path_that_was_refused(github_fixture, name, path):
+    """Both denials answer 200 with a resolved `data` block — that is what tells a root-field
+    refusal apart from a single field the token may not read, so a fixture that dropped `data`
+    or `path` would stop exercising the distinction."""
+    body = github_fixture(name)
+    assert body["data"]["rateLimit"]["remaining"] > 0
+    assert body["errors"][0]["type"] == "FORBIDDEN"
+    assert body["errors"][0]["path"] == path
+
+
 def test_rest_user_fixture_has_a_login(github_fixture):
     body = github_fixture("rest_user")
     assert "login" in body
+
+
+REST_REPOSITORY_LIST_FIXTURES = [
+    "rest_user_repos_page1",
+    "rest_user_repos_page2",
+    "rest_org_repos",
+]
+
+
+@pytest.mark.parametrize("name", REST_REPOSITORY_LIST_FIXTURES)
+def test_rest_repository_list_fixture_carries_what_discovery_reads(github_fixture, name):
+    """Discovery reshapes these into GraphQL-style nodes, so a fixture missing node_id or owner
+    would fail deep inside repository_node() rather than here."""
+    body = github_fixture(name)
+    assert isinstance(body, list) and body
+    for repository in body:
+        assert {"node_id", "name", "full_name", "private", "owner"} <= repository.keys()
+        assert {"node_id", "login", "type"} <= repository["owner"].keys()
+
+
+def test_rest_user_orgs_fixture_carries_a_login(github_fixture):
+    body = github_fixture("rest_user_orgs")
+    assert isinstance(body, list) and body
+    assert "login" in body[0]
 
 
 def test_error_body_fixtures_carry_a_message(github_fixture):

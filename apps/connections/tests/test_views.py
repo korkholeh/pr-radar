@@ -8,6 +8,7 @@ from apps.accounts.models import AuditEntry
 from apps.connections.factories import GitHubConnectionFactory
 from apps.connections.models import GitHubConnection
 from apps.connections.services import set_token
+from apps.connections.tests.rest_mocks import mock_repository_listing
 
 TOKEN = "ghp_secrettokenvalue0123456789"
 URL_NAMES = [
@@ -59,7 +60,8 @@ def test_edit_lead_gets_403_admin_gets_200(client, lead_user, admin_user):
 def test_create_form_verifies_before_saving(client, admin_user, github_fixture):
     client.force_login(admin_user)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    mock_repository_listing(github_fixture("rest_user_repos_page1"))
+    _mock_graphql(github_fixture("rate_limit"))
 
     response = client.post(
         reverse("connections:create"),
@@ -190,14 +192,16 @@ def test_check_button_returns_fragment_for_hx_request_and_full_page_otherwise(
     set_token(connection, TOKEN)
     client.force_login(admin_user)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    mock_repository_listing(github_fixture("rest_user_repos_page1"))
+    _mock_graphql(github_fixture("rate_limit"))
 
     response = client.post(reverse("connections:check", args=[connection.pk]), HTTP_HX_REQUEST="true")
     assert response.status_code == 200
     assert "<html" not in response.content.decode().lower()
 
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    mock_repository_listing(github_fixture("rest_user_repos_page1"))
+    _mock_graphql(github_fixture("rate_limit"))
     response = client.post(reverse("connections:check", args=[connection.pk]))
     assert response.status_code == 302
 
@@ -239,7 +243,8 @@ def test_check_on_an_inactive_connection_renders_visible_error_not_500(client, a
 def test_audit_entries_contain_no_token(client, admin_user, github_fixture):
     client.force_login(admin_user)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    mock_repository_listing(github_fixture("rest_user_repos_page1"))
+    _mock_graphql(github_fixture("rate_limit"))
 
     client.post(
         reverse("connections:create"),

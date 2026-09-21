@@ -238,19 +238,17 @@ def repository_connection(request: HttpRequest, pk: int) -> HttpResponse:
 def _discover_nodes(connection: GitHubConnection) -> list[dict[str, Any]]:
     """Every repository the connection's token can read, whoever owns it. A lead working on a
     client-owned repository has access but not ownership, so the list is never narrowed to the
-    connection's owner_login — that field labels the connection, it does not scope discovery."""
+    connection's owner_login — that field only widens the organization sweep, it does not scope
+    discovery. Listing runs over REST because GraphQL's viewer connection hides the repositories an
+    organization-owned fine-grained token was granted; see apps/github_sync/discovery.py."""
     from apps.connections.auth import auth_for_connection
     from apps.github_sync.client import GitHubClient
-    from apps.github_sync.queries import VIEWER_REPOSITORIES_QUERY
+    from apps.github_sync.discovery import repository_nodes
     from apps.github_sync.rate_limit import RateBudget
 
     auth = auth_for_connection(connection)
     client = GitHubClient(auth, RateBudget(key=auth.rate_limit_key))
-    return list(
-        client.paginate(
-            VIEWER_REPOSITORIES_QUERY, {}, page_path="viewer.repositories", page_size=DISCOVERY_PAGE_SIZE
-        )
-    )
+    return repository_nodes(client, page_size=DISCOVERY_PAGE_SIZE, owner_logins=[connection.owner_login])
 
 
 def _discovery_owners(nodes: list[dict[str, Any]]) -> list[str]:

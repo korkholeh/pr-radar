@@ -4,6 +4,24 @@
 
 ### Fixed
 
+- **A read-only fine-grained token no longer fails the whole sync over one permission it lacks.** GitHub
+  reports a field the token may not read as an error alongside the data it did resolve, and PR Radar treated
+  every such report as a dead credential: the run stopped with "authentication failed", the connection was
+  marked invalid, and its remaining repositories were skipped. The commonest case is `statusCheckRollup`,
+  refused to any token without **Checks: read** — the pull requests, reviews and commits it *can* read now
+  sync as normal and the check state is simply absent. A refusal on the repository itself still stops that
+  connection, as it should. Sync errors also name what was refused now, instead of only saying that something
+  was: **Settings → Sync** shows GitHub's own message and the field it applies to.
+
+- **Private organization repositories now show up in discovery for a fine-grained token.** A fine-grained token
+  whose resource owner is the organization reads its repositories fine, but GitHub's GraphQL API never listed
+  them — it answers that list through the authenticated user's affiliations, and the user has none with
+  repositories granted to the token. **Settings → Discover repositories** came up empty (or short) and the
+  connection check reported "cannot see any repository" while the same token worked in every other respect.
+  Listing now goes through the REST API instead: the account's own repositories plus the repositories of every
+  organization the token can see. The connection check counts that same list, so the two can no longer
+  disagree. Nothing to re-do — reopen the discovery page and the missing repositories are there.
+
 - **AI reviewers and agents whose login has no `[bot]` suffix are now recognised as bots.** GitHub's
   `copilot-pull-request-reviewer` and the Charlie agent accounts (`charliecreates`, `charliehelps`) were
   being counted as people, so their reviews inflated the review metrics of the teams they work on. They are

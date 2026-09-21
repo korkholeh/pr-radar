@@ -1,0 +1,28 @@
+[
+  {
+    "node_id": "R_kgDOA3",
+    "name": "archived-tool",
+    "full_name": "acme/archived-tool",
+    "private": false,
+    "archived": true,
+    "default_branch": "main",
+    "owner": {
+      "login": "acme",
+      "node_id": "O_kgDOacme",
+      "type": "Organization"
+    }
+  },
+  {
+    "node_id": "R_kgDOA4",
+    "name": "client-portal",
+    "full_name": "client-co/client-portal",
+    "private": true,
+    "archived": false,
+    "default_branch": "main",
+    "owner": {
+      "login": "client-co",
+      "node_id": "O_kgDOclientco",
+      "type": "Organization"
+    }
+  }
+]

@@ -157,35 +157,6 @@ query PullRequestTimeline($id: ID!, $first: Int!, $after: String) {{
 }}
 """
 
-# Access is the only condition for a repository to be listed: a lead who can read a client-owned
-# repository must be able to track it, so both the viewer's affiliation and the owner's are widened
-# to everything GitHub offers instead of narrowing the list to repositories the account owns.
-VIEWER_REPOSITORIES_QUERY = f"""
-query ViewerRepositories($first: Int!, $after: String) {{
-  viewer {{
-    repositories(
-      first: $first
-      after: $after
-      affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
-      ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
-    ) {{
-      totalCount
-      pageInfo {{ hasNextPage endCursor }}
-      nodes {{
-        id
-        name
-        nameWithOwner
-        isPrivate
-        isArchived
-        defaultBranchRef {{ name }}
-        owner {{ id login __typename }}
-      }}
-    }}
-  }}
-  {RATE_LIMIT_FIELD}
-}}
-"""
-
 # The repository's tree at HEAD, one level deep, used once per repository per run to record which
 # AI-agent configuration paths it carries (phase 12, stage 3). `expression` is a git revision
 # path ("HEAD:" for the root, "HEAD:.github" for one directory), so the same document serves the

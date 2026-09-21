@@ -11,6 +11,7 @@ from apps.connections.check_codes import CHECK_CODES
 from apps.connections.factories import GitHubConnectionFactory
 from apps.connections.models import GitHubConnection
 from apps.connections.services import plaintext_token, set_token, verify_connection
+from apps.connections.tests.rest_mocks import mock_repository_listing, mock_repository_listing_error
 
 TOKEN = "ghp_secrettokenvalue0123456789"
 
@@ -27,12 +28,18 @@ def _mock_graphql(*bodies):
     )
 
 
+def _mock_repos(github_fixture, *, orgs=()):
+    """The REPOS_VISIBLE listing: REST, the same one discovery pages through."""
+    return mock_repository_listing(github_fixture("rest_user_repos_page1"), orgs=list(orgs))
+
+
 @pytest.mark.django_db
 def test_healthy_connection_is_verified_ok(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -60,19 +67,8 @@ def test_token_that_sees_no_repository_is_degraded_not_ok(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     _mock_user()
-    empty = {
-        "data": {
-            "viewer": {
-                "repositories": {
-                    "totalCount": 0,
-                    "pageInfo": {"hasNextPage": False, "endCursor": None},
-                    "nodes": [],
-                }
-            },
-            "rateLimit": {"remaining": 4970, "resetAt": "2026-01-01T01:00:00Z", "cost": 1},
-        }
-    }
-    _mock_graphql(empty, github_fixture("rate_limit"))
+    mock_repository_listing([])
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -102,7 +98,8 @@ def test_classic_pat_with_repo_scope_is_degraded(github_fixture):
     connection = GitHubConnectionFactory(kind=GitHubConnection.Kind.CLASSIC_PAT)
     set_token(connection, TOKEN)
     _mock_user(headers={"X-OAuth-Scopes": "repo, read:org"})
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -121,8 +118,8 @@ def test_403_sso_stores_degraded_with_org_and_url():
     set_token(connection, TOKEN)
     _mock_user()
     sso_url = "https://github.com/orgs/acme/sso?authorization_request=abc"
-    respx.post(settings.GITHUB_GRAPHQL_URL).mock(
-        return_value=httpx.Response(
+    mock_repository_listing_error(
+        httpx.Response(
             403, json={"message": "SSO required"}, headers={"X-GitHub-SSO": f"required; url={sso_url}"}
         )
     )
@@ -168,7 +165,8 @@ def test_expired_token_header_yields_expired_status(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     _mock_user(headers={"github-authentication-token-expiration": "2020-01-01 00:00:00 UTC"})
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -182,7 +180,8 @@ def test_no_stored_param_contains_a_token_shape(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -197,7 +196,8 @@ def test_every_emitted_code_has_a_check_codes_entry(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
 
@@ -220,7 +220,8 @@ def test_second_call_within_the_hour_is_throttled(github_fixture):
     connection = GitHubConnectionFactory()
     set_token(connection, TOKEN)
     route = _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection)
     assert route.call_count == 1
@@ -236,10 +237,8 @@ def test_force_bypasses_the_throttle(github_fixture):
     connection.last_checked_at = timezone.now()
     connection.save(update_fields=["last_checked_at"])
     route = _mock_user()
-    _mock_graphql(
-        github_fixture("viewer_repositories"),
-        github_fixture("rate_limit"),
-    )
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
 
     verify_connection(connection, force=True)
 
@@ -268,7 +267,8 @@ def test_pull_request_access_is_probed_not_assumed(github_fixture):
     set_token(connection, TOKEN)
     repository = RepositoryFactory(connection=connection, full_name="acme/widget")
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
     pulls, _contents = _mock_repo_rest(repository.full_name)
 
     verify_connection(connection)
@@ -288,7 +288,8 @@ def test_a_404_on_pull_requests_is_denied_access_not_a_crash(github_fixture):
     set_token(connection, TOKEN)
     repository = RepositoryFactory(connection=connection, full_name="acme/private", is_private=True)
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
     _mock_repo_rest(repository.full_name, pulls_status=404, contents_status=404)
 
     verify_connection(connection)
@@ -310,7 +311,8 @@ def test_a_403_on_pull_requests_is_denied_access_too(github_fixture):
     set_token(connection, TOKEN)
     repository = RepositoryFactory(connection=connection, full_name="acme/forbidden")
     _mock_user()
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
     _mock_repo_rest(repository.full_name, pulls_status=403, contents_status=403)
 
     verify_connection(connection)
@@ -330,7 +332,8 @@ def test_classic_pat_without_repo_scope_is_degraded_when_a_private_repository_is
     set_token(connection, TOKEN)
     repository = RepositoryFactory(connection=connection, full_name="acme/private", is_private=True)
     _mock_user(headers={"X-OAuth-Scopes": "public_repo, read:org"})
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
     _mock_repo_rest(repository.full_name, pulls_status=404, contents_status=404)
 
     verify_connection(connection)
@@ -350,7 +353,8 @@ def test_classic_pat_without_repo_scope_is_fine_when_every_repository_is_public(
     set_token(connection, TOKEN)
     repository = RepositoryFactory(connection=connection, full_name="acme/public", is_private=False)
     _mock_user(headers={"X-OAuth-Scopes": "public_repo, read:org"})
-    _mock_graphql(github_fixture("viewer_repositories"), github_fixture("rate_limit"))
+    _mock_repos(github_fixture)
+    _mock_graphql(github_fixture("rate_limit"))
     _mock_repo_rest(repository.full_name)
 
     verify_connection(connection)

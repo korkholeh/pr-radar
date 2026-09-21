@@ -1,0 +1,28 @@
+[
+  {
+    "node_id": "R_kgDOA2",
+    "name": "gadget",
+    "full_name": "acme/gadget",
+    "private": true,
+    "archived": false,
+    "default_branch": "main",
+    "owner": {
+      "login": "acme",
+      "node_id": "O_kgDOacme",
+      "type": "Organization"
+    }
+  },
+  {
+    "node_id": "R_kgDOA5",
+    "name": "internal-tools",
+    "full_name": "acme/internal-tools",
+    "private": true,
+    "archived": false,
+    "default_branch": "main",
+    "owner": {
+      "login": "acme",
+      "node_id": "O_kgDOacme",
+      "type": "Organization"
+    }
+  }
+]

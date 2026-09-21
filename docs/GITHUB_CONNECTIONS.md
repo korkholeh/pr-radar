@@ -16,6 +16,13 @@ key rotation, recovery, rebinding, and the `.env` bootstrap shortcut. For per-da
 Both PAT kinds must be able to read: pull requests, reviews, review comments, commits, check runs, and files
 changed, on every repository the connection will sync.
 
+**Checks** is the one permission a sync can do without. A fine-grained token that lacks it still reads every
+pull request, review and commit; GitHub refuses the `statusCheckRollup` field alone, and PR Radar logs that
+denial and stores the commit without a check state. Metrics that read check status (the quality-gate policy
+rules) simply have nothing to read for those commits. Add **Checks: read** to the token if you want them.
+A refusal on the *repository* itself is a different matter: that means the token may not read the repository
+at all, and it sets the connection to `invalid` and stops the run for it.
+
 ## First-run checklist
 
 1. Set at least one key in `FIELD_ENCRYPTION_KEYS` (`.env`) — a connection cannot be saved without one; saving
@@ -46,9 +53,16 @@ hourly budget covers varies by repository. `RATE_LIMIT_MIN_REMAINING` (default 2
 is the remaining-points floor below which the client pauses and waits for GitHub's hourly reset instead of
 pushing through and risking a hard 403.
 
-Discovery is cheap but not free: opening **Settings → Repositories** for a connection walks every repository
-the token can read, 100 per request (1 point each), and re-walks them when you change the owner filter or the
-archived toggle. On a token that reaches thousands of repositories, that is tens of points per page load.
+Discovery does not spend that budget: listing repositories runs over the REST API, which is metered separately
+(5,000 requests/hour). Opening **Settings → Repositories** for a connection walks every repository the token can
+read, 100 per request, and re-walks them when you change the owner filter or the archived toggle. It asks
+`/user/repos` plus one `/orgs/{login}/repos` per organization the token can see, so a lead in several
+organizations costs a handful of requests per page load.
+
+Listing is REST rather than GraphQL on purpose: GraphQL's `viewer { repositories }` leaves out the repositories a
+fine-grained token whose **resource owner is the organization** was granted, because the token authenticates as
+the user and the user has no viewer affiliation with them. Such a token reads those repositories perfectly well —
+it just never appeared in the GraphQL list, which showed up as an empty discovery page.
 
 The **first** sync on a connection is the most expensive one: it walks `BACKFILL_DAYS` (default 180) of history
 for every repository you added. A connection with many repositories, or a long backfill window, can spend its
@@ -65,7 +79,7 @@ UI can translate it. This is every code `verify_connection()` can emit and what 
 |---|---|---|
 | `TOKEN_USER_OK` | The token authenticates and GitHub returned a login. | Nothing. |
 | `AUTH_FAILED` | GitHub rejected the token (expired, revoked, or never valid). Sets the connection to `invalid`. | Generate a new token and replace it on this connection. |
-| `REPOS_VISIBLE` | The token can see at least one repository, counted across every owner it has access to. | Nothing. |
+| `REPOS_VISIBLE` | The token can see at least one repository, counted over the same REST listing discovery uses — across every owner it has access to. | Nothing. |
 | `REPOS_VISIBLE_NONE` | The token can see no repository at all, so nothing can be discovered or synced through it. Sets the connection to `degraded`. | Grant the token read access to the repositories you track: select them explicitly on a fine-grained token, and authorize single sign-on if the organization requires it. |
 | `PERM_PULL_REQUESTS` | The token can read pull requests, checked by actually listing them on one of the connection's active repositories. | Nothing. |
 | `PERM_PULL_REQUESTS_DENIED` | The checked repository answered 403 or 404 — the token cannot read its pull requests. Sets the connection to `degraded`. | Grant read access to pull requests on that repository and re-check. A private repository needs more than a classic token's `public_repo` scope. |

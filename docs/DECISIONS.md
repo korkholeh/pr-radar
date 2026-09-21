@@ -525,13 +525,28 @@ repository instead of a JSON fixture, and every review-round fix — is in
 
 **Repository discovery lists everything a token can read, not what its account owns.** A tech lead usually
 tracks repositories owned by a client or by an organization they merely belong to; access is the condition
-worth checking, ownership is not. Discovery therefore always runs `VIEWER_REPOSITORIES_QUERY` with both
-`affiliations` and `ownerAffiliations` widened to `[OWNER, COLLABORATOR, ORGANIZATION_MEMBER]`, and the
+worth checking, ownership is not. Discovery therefore never narrows the list to the connection's owner, and the
 owner-scoped query it used whenever a connection carried an `owner_login` is gone. `owner_login` survives as a
 label on the connection (and for the fine-grained token that was issued per resource owner) but no longer
 filters anything; the discovery page groups by owner as before and offers an **Owner** dropdown, defaulting to
 all owners, when more than one shows up. The previous behaviour hid a client's repositories entirely and looked
 like an empty list rather than a filter.
+
+**Listing repositories is REST; everything else stays GraphQL.** The widened `viewer { repositories }` query
+above still could not see the repositories a fine-grained token was granted when the token's resource owner is
+the organization: GraphQL resolves that connection through the authenticated user's affiliations, and such a
+token's user has none with those repositories, so the list came back empty while REST returned every one of
+them. `apps/github_sync/discovery.py` therefore lists over REST — `/user/repos` for the account's own
+affiliations, plus `/orgs/{login}/repos` for every organization `/user/orgs` reports and for the connection's
+`owner_login` (which is swept even when the token may not list its memberships, since a fine-grained token
+without organization-read permission gets 403 there). Results are keyed by `node_id`, which is the same global
+id GraphQL returns, so `Repository.github_id` keeps matching and no migration was needed. Each REST row is
+reshaped into the GraphQL node dict discovery already passed around, which is why catalog, the view and the
+templates were untouched. A denial on the organization sweep is logged and skipped rather than failing the
+page; a denial on `/user/repos` is a real finding and `verify_connection()` records `REPOS_VISIBLE_NONE`.
+`REPOS_VISIBLE` now counts that same listing, so the check and the discovery page can no longer disagree.
+`client.rest_paginate()` follows the `Link: rel="next"` URL GitHub hands back and refuses one that points
+outside `GITHUB_API_BASE_URL` — an absolute URL out of a response header must not decide where the token goes.
 
 **A token that can see no repository verifies as `degraded`, not `ok`.** `REPOS_VISIBLE` with `count: 0` was
 recorded as a passing check, so the only symptom of a token without repository access was an empty discovery
@@ -749,3 +764,27 @@ split the groups.
 ordered deliberately, not alphabetically or by when each metric was written: the standards say the number of
 generated lines, prompts or AI pull requests is not a measure of a person, and the page a lead opens before a
 one-to-one is where that either holds or does not.
+
+**`run_git()` checks the subcommand against an allowlist, the way `graphql()` checks the document.**
+The read-only promise was enforced on both API surfaces — every GraphQL document must be a `query`, and the two
+REST entry points hardcode GET — but `git` was the third way out of the process and nothing checked it. A
+`push` added to `churn` would have run, with the token already in the environment, and no test would have
+noticed. `gitcmd.ALLOWED_SUBCOMMANDS` now names every verb PR Radar may run, split into the two that reach a
+remote (`clone`, `fetch`, both reads), the local reads, and the local writes the churn fixtures need to build
+throwaway repositories. Anything else — and any unrecognised option before the subcommand, which could hide the
+subcommand from the check — raises `GitCommandNotAllowedError` before `subprocess` is reached. It is
+deliberately not a `GitOperationError`: `blame.path_exists_at()` swallows that one to mean "the path is not
+there", and a forbidden command is a bug, not an answer about a repository.
+
+**A GraphQL denial is fatal only when it names a root field.** `errors[].type == "FORBIDDEN"` raised
+`GitHubAuthError` for every entry, which marked the connection `invalid` and skipped the rest of its
+repositories. GitHub uses the same entry for two very different things: a token that may not read the
+repository at all, and a single field outside a fine-grained token's permission set — `statusCheckRollup`
+without **Checks: read** is the one a read-only token hits, and GitHub answers 200, resolves the whole
+document and nulls just that field. The depth of `path` is what separates them, so a denial with no path or a
+one-segment path (`repository`, `node`) still quarantines the connection, and a deeper one is logged and the
+resolved data used as it stands; a field the sync actually needs still fails downstream in `require()`, which
+names it. The message also carries GitHub's own `type`, `path` and text now — the previous "GraphQL request
+was not authorized." told a lead the token was refused but never what for, which is the only part they can act
+on. Those strings come from GitHub's error envelope, never from repository content, and `run_sync` masks the
+line before it reaches `SyncRun.error_log` as it does every other error.

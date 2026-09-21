@@ -50,7 +50,7 @@ queries in `selectors.py`.
 | `accounts` | Session auth, the `admin`/`lead` groups, `UserProjectAccess`, `UserPreference` (theme, language), `AuditEntry`, and `scope_for_user()` | `selectors.py` (`scope_for_user`), `middleware.py` (`UserLanguageMiddleware`), `services.py` (`record_audit`) |
 | `connections` | `GitHubConnection`: Fernet token storage, the `GitHubAuth` protocol, verification, status/expiry banner, key rotation | `crypto.py`, `auth.py`, `check_codes.py`, `services.py` |
 | `catalog` | `Organization`, `Repository`, `Project`, `Person`, `Identity`, `AppSetting`; identity resolution and merges; path globs | `identity.py`, `globs.py`, `setting_defs.py`, `normalize.py` |
-| `github_sync` | The httpx GraphQL/REST client, pagination, per-connection rate budgeting, retries, `SyncRun`, `SyncLock`, the orchestration, the repository AI-tooling probe and the post-processing hook | `client.py`, `queries.py`, `rate_limit.py`, `mappers.py`, `upserts.py`, `tooling.py`, `pipeline.py`, `services.py` |
+| `github_sync` | The httpx GraphQL/REST client, pagination, per-connection rate budgeting, retries, `SyncRun`, `SyncLock`, the orchestration, the REST repository listing behind discovery, the repository AI-tooling probe and the post-processing hook | `client.py`, `queries.py`, `discovery.py`, `rate_limit.py`, `mappers.py`, `upserts.py`, `tooling.py`, `pipeline.py`, `services.py` |
 | `activity` | `PullRequest`, `Commit`, `PullRequestCommit`, `PRFile`, `Review`, `ReviewComment`, `CheckStatus`, the derived-field service and the follow-up-fix heuristic | `derive.py`, `followup.py` |
 | `ai_detection` | `DetectionRule`, `SignalRule`, `AISignal`, `DiffAnalysis`, twelve detectors, and three structural families — five per-PR kinds, four author baselines, four diff kinds — plus the PR-template disclosure parser and `ai_status` resolution | `detectors.py`, `structural.py`, `baselines.py`, `diffsignals.py`, `evidence.py`, `disclosure.py`, `rules.py`, `services.py`, `tasks.py` |
 | `policy` | `AIPolicy`, `SensitivePathRule`, `PolicyViolation`, twenty-four rule evaluators (nine from the spec, fifteen from the PLANEKS standards), idempotent evaluation and auto-resolve, message rendering | `rules.py`, `services.py`, `messages.py` |
@@ -166,6 +166,11 @@ its `last_synced_at` watermark minus `SYNC_OVERLAP`. Each PR's upserts run in on
   skipping a window.
 - A nested connection (reviews, comments, commits, files) that cannot be fully paginated fails that PR loudly
   instead of storing a truncated list; a truncated list would quietly corrupt a metric.
+- **Listing repositories is REST, reading them is GraphQL.** Discovery and the `REPOS_VISIBLE` check go through
+  `discovery.py` (`/user/repos`, plus `/orgs/{login}/repos` per organization the token can see), because
+  GraphQL's `viewer { repositories }` omits the repositories an organization-owned fine-grained token was
+  granted — it authenticates as the user, who has no viewer affiliation with them. Everything a sync then reads
+  out of those repositories is still GraphQL.
 - Errors are data, not exceptions: one failed PR does not stop a repository, one failed repository does not stop
   the run, and everything lands masked in `SyncRun.error_log` and `stats_by_connection`. `run_sync` guarantees a
   terminal `SyncRun` status on every escape path, including a killed process whose stale lock is later stolen.

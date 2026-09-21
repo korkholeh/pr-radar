@@ -1,0 +1,17 @@
+{
+  "data": {
+    "repository": null,
+    "rateLimit": {
+      "remaining": 4998,
+      "resetAt": "2026-01-01T11:00:00Z",
+      "cost": 1
+    }
+  },
+  "errors": [
+    {
+      "type": "FORBIDDEN",
+      "path": ["repository"],
+      "message": "Resource not accessible by personal access token"
+    }
+  ]
+}
