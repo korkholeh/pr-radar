@@ -130,7 +130,10 @@ def test_ai_pr_too_large_fires_over_limit():
     ctx = make_context(policy=policy, effective_additions=60, effective_deletions=50)
     findings = list(RULES["AI_PR_TOO_LARGE"](ctx))
     assert len(findings) == 1
-    assert findings[0].details_params == {"effective_lines": 110, "limit": 100}
+    # `risk_level` is empty here because no sensitive-path rule matched: the sentence says "the
+    # limit", not "the high-risk limit", and the key is present either way so the param schema
+    # stays the same shape for every finding of this rule.
+    assert findings[0].details_params == {"effective_lines": 110, "limit": 100, "risk_level": ""}
 
 
 def test_ai_pr_too_large_does_not_fire_under_limit():

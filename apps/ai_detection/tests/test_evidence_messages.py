@@ -51,19 +51,28 @@ def test_a_count_bearing_message_uses_the_plural_form():
 
 def _po_entries() -> dict[str, str]:
     """msgid -> msgstr, with continuation lines joined. A hand-rolled reader rather than polib:
-    the project has no such dependency and this only needs the two fields."""
+    the project has no such dependency and this only needs the fields below.
+
+    A plural entry carries two ids and several translations -- `msgid`/`msgid_plural` against
+    `msgstr[0..3]` for Ukrainian -- and both ids are recorded, each against the first non-empty
+    translation of the entry. Reading only `msgid`/`msgstr` used to fold the plural id's
+    continuation lines into the singular id, which made a translated sentence look missing.
+    """
     text = PO_PATH.read_text(encoding="utf-8")
     entries: dict[str, str] = {}
-    current_id: list[str] = []
-    current_str: list[str] = []
+    ids: list[list[str]] = []
+    translations: list[list[str]] = []
     target: list[str] | None = None
     fuzzy = False
     fuzzy_ids: set[str] = set()
 
     def flush():
-        if current_id:
-            msgid = "".join(current_id)
-            entries[msgid] = "".join(current_str)
+        if not ids:
+            return
+        translated = next(("".join(parts) for parts in translations if "".join(parts)), "")
+        for parts in ids:
+            msgid = "".join(parts)
+            entries[msgid] = translated
             if fuzzy:
                 fuzzy_ids.add(msgid)
 
@@ -71,21 +80,28 @@ def _po_entries() -> dict[str, str]:
         if line.startswith("#, ") and "fuzzy" in line:
             fuzzy = True
             continue
+        if line.startswith("#"):
+            # A comment, including the `#|` block that records what a fuzzy entry was before.
+            continue
+        if line.startswith("msgid_plural "):
+            ids.append([_po_value(line)])
+            target = ids[-1]
+            continue
         if line.startswith("msgid "):
             flush()
-            current_id, current_str = [_po_value(line)], []
-            target = current_id
+            ids, translations = [[_po_value(line)]], []
+            target = ids[-1]
             continue
-        if line.startswith("msgstr "):
-            current_str = [_po_value(line)]
-            target = current_str
+        if line.startswith("msgstr"):
+            translations.append([_po_value(line)])
+            target = translations[-1]
             continue
         if line.startswith('"') and target is not None:
             target.append(_po_value(line))
             continue
         if not line.strip():
             flush()
-            current_id, current_str, target, fuzzy = [], [], None, False
+            ids, translations, target, fuzzy = [], [], None, False
     flush()
     entries["__fuzzy__"] = "\n".join(sorted(fuzzy_ids))
     return entries

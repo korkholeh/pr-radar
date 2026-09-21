@@ -1,5 +1,5 @@
 """`evaluate_pull_request`/`evaluate_pull_requests`: the wanted-vs-existing diff that may only
-create an open violation or auto-resolve one, parametrized over all nine rule codes per
+create an open violation or auto-resolve one, parametrized over every rule code per
 RISKS row 6 and acceptance criteria 1-3."""
 
 import pytest
@@ -9,7 +9,14 @@ from django.utils import timezone
 
 from apps.accounts.factories import UserFactory
 from apps.accounts.models import AuditEntry
-from apps.activity.factories import PRFileFactory, PullRequestFactory, ReviewFactory
+from apps.activity.factories import (
+    CommitFactory,
+    PRFileFactory,
+    PullRequestCommitFactory,
+    PullRequestFactory,
+    ReviewCommentFactory,
+    ReviewFactory,
+)
 from apps.activity.models import AIDisclosure, AIStatus, PullRequest, Review
 from apps.ai_detection.factories import AISignalFactory
 from apps.ai_detection.models import Confidence
@@ -144,6 +151,220 @@ def _setup_ai_pr_too_large():
     return pr, fix
 
 
+def _merged_pr(**kwargs):
+    kwargs.setdefault("state", PullRequest.State.MERGED)
+    kwargs.setdefault("merged_at", timezone.now())
+    return PullRequestFactory(**kwargs)
+
+
+def _bot_approver(pr):
+    person = PersonFactory(is_bot=True)
+    ReviewFactory(pull_request=pr, reviewer=IdentityFactory(person=person), state=Review.State.APPROVED)
+
+
+# --- the fifteen PLANEKS standards (phase 12, stage 7) --------------------------------------
+#
+# Each one sets the switch its evaluator reads, because every flag on AIPolicy defaults to False:
+# a setup that forgot the switch would create no violation and fail as "no row" rather than as
+# "the rule is wrong", which is the harder failure to read.
+
+
+def _setup_quality_gate_bypassed():
+    AIPolicyFactory(forbid_ci_bypass=True, effective_from=_past())
+    pr = _merged_pr()
+    commit = CommitFactory(repository=pr.repository, message="feat: ship it [skip ci]")
+    PullRequestCommitFactory(pull_request=pr, commit=commit)
+
+    def fix():
+        commit.message = "feat: ship it"
+        commit.save(update_fields=["message"])
+
+    return pr, fix
+
+
+def _setup_test_weakened():
+    AIPolicyFactory(forbid_test_weakening=True, effective_from=_past())
+    pr = PullRequestFactory()
+    PRFileFactory(pull_request=pr, path="apps/billing/views.py", status="modified")
+    removed = PRFileFactory(
+        pull_request=pr, path="apps/billing/tests/test_views.py", is_test=True, status="removed"
+    )
+
+    def fix():
+        removed.status = "modified"
+        removed.save(update_fields=["status"])
+
+    return pr, fix
+
+
+def _setup_ai_only_approval():
+    AIPolicyFactory(forbid_ai_only_approval=True, effective_from=_past())
+    pr = _merged_pr()
+    _bot_approver(pr)
+
+    def fix():
+        _human_reviewer(pr)
+
+    return pr, fix
+
+
+def _setup_ai_review_missing():
+    AIPolicyFactory(require_ai_review_first=True, ai_reviewer_identities=["copilot"], effective_from=_past())
+    pr = _merged_pr()
+
+    def fix():
+        ReviewFactory(pull_request=pr, reviewer=IdentityFactory(value="copilot", person=PersonFactory()))
+
+    return pr, fix
+
+
+def _setup_ai_review_unresolved():
+    AIPolicyFactory(
+        require_ai_comments_resolved=True, ai_reviewer_identities=["copilot"], effective_from=_past()
+    )
+    pr = _merged_pr()
+    comment = ReviewCommentFactory(
+        pull_request=pr, author=IdentityFactory(value="copilot", person=PersonFactory()), is_resolved=False
+    )
+
+    def fix():
+        comment.is_resolved = True
+        comment.save(update_fields=["is_resolved"])
+
+    return pr, fix
+
+
+def _setup_high_risk_no_plan():
+    AIPolicyFactory(require_high_risk_plan=True, effective_from=_past())
+    # A glob of its own: `infra/**` belongs to _setup_sensitive_path_review, and the column is
+    # unique, so sharing it fails the moment a test runs every setup in one database.
+    SensitivePathRuleFactory(
+        glob="terraform/**",
+        ai_mode=SensitivePathRule.AiMode.NEEDS_EXTRA_REVIEW,
+        risk_level=SensitivePathRule.RiskLevel.HIGH,
+    )
+    pr = PullRequestFactory(body="Bumps the cluster size.")
+    PRFileFactory(pull_request=pr, path="terraform/main.tf")
+
+    def fix():
+        pr.body = (
+            "## Plan\n\nApply in the staging workspace first; roll back with "
+            "`terraform apply` on the previous revision."
+        )
+        pr.save(update_fields=["body"])
+
+    return pr, fix
+
+
+def _setup_risk_level_missing():
+    AIPolicyFactory(require_risk_level=True, effective_from=_past())
+    pr = PullRequestFactory(body="Renames a column.")
+
+    def fix():
+        pr.body = "## Risk level\n\nLow — one column, no data migration."
+        pr.save(update_fields=["body"])
+
+    return pr, fix
+
+
+def _setup_verification_missing():
+    AIPolicyFactory(require_verification_note=True, effective_from=_past())
+    pr = PullRequestFactory(body="Renames a column.")
+
+    def fix():
+        pr.body = "## Verification\n\nRan the suite and opened the page by hand."
+        pr.save(update_fields=["body"])
+
+    return pr, fix
+
+
+def _setup_task_link_missing():
+    AIPolicyFactory(require_task_link=True, effective_from=_past())
+    pr = PullRequestFactory(body="Renames a column.")
+
+    def fix():
+        pr.body = "Renames a column. Closes #431."
+        pr.save(update_fields=["body"])
+
+    return pr, fix
+
+
+def _setup_new_dependency_ai():
+    AIPolicyFactory(flag_new_dependencies_in_ai_prs=True, effective_from=_past())
+    pr = PullRequestFactory(ai_status=AIStatus.AI_EXPLICIT)
+    manifest = PRFileFactory(pull_request=pr, path="pyproject.toml")
+
+    def fix():
+        manifest.path = "docs/dependencies.md"
+        manifest.save(update_fields=["path"])
+
+    return pr, fix
+
+
+def _setup_migration_ai_insufficient_review():
+    policy = AIPolicyFactory(effective_from=_past())
+    reviewer = PersonFactory()
+    policy.designated_reviewers.add(reviewer)
+    pr = _merged_pr(ai_status=AIStatus.AI_EXPLICIT)
+    PRFileFactory(pull_request=pr, path="apps/billing/migrations/0002_add_column.py")
+
+    def fix():
+        ReviewFactory(
+            pull_request=pr,
+            reviewer=IdentityFactory(person=reviewer),
+            state=Review.State.APPROVED,
+        )
+
+    return pr, fix
+
+
+def _setup_secret_artifact_committed():
+    AIPolicyFactory(forbid_secret_artifacts=True, effective_from=_past())
+    pr = PullRequestFactory()
+    secret = PRFileFactory(pull_request=pr, path=".env")
+
+    def fix():
+        secret.path = ".env.example"
+        secret.save(update_fields=["path"])
+
+    return pr, fix
+
+
+def _setup_agent_config_changed():
+    AIPolicyFactory(flag_agent_config_changes=True, effective_from=_past())
+    pr = PullRequestFactory()
+    config_file = PRFileFactory(pull_request=pr, path="CLAUDE.md")
+
+    def fix():
+        config_file.path = "docs/conventions.md"
+        config_file.save(update_fields=["path"])
+
+    return pr, fix
+
+
+def _setup_scope_creep():
+    AIPolicyFactory(forbid_scope_creep=True, effective_from=_past())
+    pr = PullRequestFactory(ai_status=AIStatus.AI_EXPLICIT, body="## Scope\n\nThe policy app only.")
+    PRFileFactory(pull_request=pr, path="billing/views.py")
+
+    def fix():
+        pr.body = "## Scope\n\nThe policy app and billing."
+        pr.save(update_fields=["body"])
+
+    return pr, fix
+
+
+def _setup_rubber_stamp_on_ai_pr():
+    AIPolicyFactory(forbid_rubber_stamp_approval=True, effective_from=_past())
+    pr = _merged_pr(ai_status=AIStatus.AI_EXPLICIT, is_rubber_stamp=True)
+
+    def fix():
+        pr.is_rubber_stamp = False
+        pr.save(update_fields=["is_rubber_stamp"])
+
+    return pr, fix
+
+
 RULE_SETUPS = {
     RuleCode.DISCLOSURE_MISSING: _setup_disclosure_missing,
     RuleCode.DISCLOSURE_MISMATCH: _setup_disclosure_mismatch,
@@ -154,10 +375,27 @@ RULE_SETUPS = {
     RuleCode.SELF_MERGE: _setup_self_merge,
     RuleCode.NO_TESTS: _setup_no_tests,
     RuleCode.AI_PR_TOO_LARGE: _setup_ai_pr_too_large,
+    RuleCode.QUALITY_GATE_BYPASSED: _setup_quality_gate_bypassed,
+    RuleCode.TEST_WEAKENED: _setup_test_weakened,
+    RuleCode.AI_ONLY_APPROVAL: _setup_ai_only_approval,
+    RuleCode.AI_REVIEW_MISSING: _setup_ai_review_missing,
+    RuleCode.AI_REVIEW_UNRESOLVED: _setup_ai_review_unresolved,
+    RuleCode.HIGH_RISK_NO_PLAN: _setup_high_risk_no_plan,
+    RuleCode.RISK_LEVEL_MISSING: _setup_risk_level_missing,
+    RuleCode.VERIFICATION_MISSING: _setup_verification_missing,
+    RuleCode.TASK_LINK_MISSING: _setup_task_link_missing,
+    RuleCode.NEW_DEPENDENCY_AI: _setup_new_dependency_ai,
+    RuleCode.MIGRATION_AI_INSUFFICIENT_REVIEW: _setup_migration_ai_insufficient_review,
+    RuleCode.SECRET_ARTIFACT_COMMITTED: _setup_secret_artifact_committed,
+    RuleCode.AGENT_CONFIG_CHANGED: _setup_agent_config_changed,
+    RuleCode.SCOPE_CREEP: _setup_scope_creep,
+    RuleCode.RUBBER_STAMP_ON_AI_PR: _setup_rubber_stamp_on_ai_pr,
 }
 
 
-def test_rule_setups_cover_all_nine_codes():
+def test_rule_setups_cover_every_code():
+    """Deny-by-default: a rule code added without a setup here fails this test rather than
+    silently dropping out of the parametrized pair below."""
     assert set(RULE_SETUPS.keys()) == set(RuleCode.values)
 
 

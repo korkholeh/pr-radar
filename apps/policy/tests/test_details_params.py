@@ -1,5 +1,5 @@
 """CLAUDE.md: system-generated text is stored as a code plus params, never a rendered message.
-Fires all nine rules through the real pipeline (`apps.policy.services.evaluate_pull_request`,
+Fires every rule through the real pipeline (`apps.policy.services.evaluate_pull_request`,
 reusing `test_evaluate.RULE_SETUPS`) and checks every stored `details_params` value is data, not
 prose, and that the rendered sentence itself never lands in a database column (criterion 7)."""
 
@@ -16,7 +16,7 @@ pytestmark = pytest.mark.django_db
 ALLOWED_SCALAR_TYPES = (str, int, float, bool)
 
 
-def _fire_all_nine_rules() -> list[PolicyViolation]:
+def _fire_every_rule() -> list[PolicyViolation]:
     violations = []
     for rule_code, setup in RULE_SETUPS.items():
         pr, _fix = setup()
@@ -38,19 +38,19 @@ def _prose_words() -> set[str]:
     return words
 
 
-def test_all_nine_rules_actually_fired():
-    violations = _fire_all_nine_rules()
+def test_every_rule_actually_fired():
+    violations = _fire_every_rule()
     assert {v.rule_code for v in violations} == set(PolicyViolation.RuleCode.values)
 
 
 def test_every_param_key_is_declared_in_the_schema():
-    for violation in _fire_all_nine_rules():
+    for violation in _fire_every_rule():
         schema = PARAM_SCHEMA[violation.rule_code]
         assert set(violation.details_params.keys()) <= schema, violation.rule_code
 
 
 def test_every_param_value_is_data_not_a_rich_type():
-    for violation in _fire_all_nine_rules():
+    for violation in _fire_every_rule():
         for key, value in violation.details_params.items():
             if isinstance(value, list):
                 assert all(isinstance(item, str) for item in value), (violation.rule_code, key)
@@ -60,7 +60,7 @@ def test_every_param_value_is_data_not_a_rich_type():
 
 def test_no_param_value_contains_a_word_from_any_rule_message():
     prose_words = _prose_words()
-    for violation in _fire_all_nine_rules():
+    for violation in _fire_every_rule():
         for key, value in violation.details_params.items():
             text_values = value if isinstance(value, list) else [value]
             for item in text_values:
@@ -71,7 +71,7 @@ def test_no_param_value_contains_a_word_from_any_rule_message():
 
 
 def test_rendered_message_is_in_no_database_column():
-    for violation in _fire_all_nine_rules():
+    for violation in _fire_every_rule():
         rendered = render_violation(violation.rule_code, violation.details_params)
         for field in violation._meta.fields:
             value = getattr(violation, field.name)

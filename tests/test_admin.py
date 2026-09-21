@@ -22,7 +22,7 @@ from apps.activity.models import (
     ReviewComment,
 )
 from apps.ai_detection.factories import AISignalFactory
-from apps.ai_detection.models import AISignal, DetectionRule
+from apps.ai_detection.models import AISignal, DetectionRule, DiffAnalysis, SignalRule
 from apps.catalog.admin import PersonAdmin
 from apps.catalog.models import AppSetting, Identity, Organization, Person, Project, Repository
 from apps.churn.factories import ChurnResultFactory
@@ -46,6 +46,7 @@ READ_ONLY_MODELS = {
     ReviewComment,
     CheckStatus,
     AISignal,
+    DiffAnalysis,
     DailyRollup,
     DataVersion,
     DirtyDay,
@@ -63,6 +64,7 @@ EDITABLE_MODELS = {
     Identity,
     AppSetting,
     DetectionRule,
+    SignalRule,
     AIPolicy,
     SensitivePathRule,
     PolicyViolation,

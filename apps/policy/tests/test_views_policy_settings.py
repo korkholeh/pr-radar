@@ -15,6 +15,9 @@ VALID_POST = {
     "require_disclosure": "on",
     "require_human_approval": "on",
     "min_human_approvals": 1,
+    # Stage 7 added the high-risk approval count, and the form requires it like every other
+    # number on the page: a POST without it is rejected, not defaulted.
+    "high_risk_min_approvals": 2,
     "require_tests_for_ai_prs": "on",
     "ai_pr_max_effective_lines": 500,
     "effective_from": "2026-01-01 00:00:00",

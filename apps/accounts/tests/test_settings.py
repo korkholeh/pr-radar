@@ -105,17 +105,35 @@ def test_prod_settings_use_manifest_static_storage(settings_module_loader):
     )
 
 
-def test_prod_settings_refuse_the_insecure_default_secret_key():
+def _prod_setup(secret_key: str | None):
+    """`django.setup()` under the prod settings, in a subprocess so a refusal is an exit code
+    rather than a half-configured process here."""
     env = {key: value for key, value in os.environ.items() if key != "SECRET_KEY"}
-    result = subprocess.run(
+    if secret_key is not None:
+        env["SECRET_KEY"] = secret_key
+    return subprocess.run(
         [sys.executable, "-c", "import django; django.setup()"],
         cwd=str(settings.BASE_DIR),
         env={**env, "DJANGO_SETTINGS_MODULE": "config.settings.prod"},
         capture_output=True,
         text=True,
     )
+
+
+@pytest.mark.parametrize("secret_key", ["insecure-dev-key-change-me", "   "])
+def test_prod_settings_refuse_the_insecure_default_secret_key(secret_key):
+    """The key is passed in rather than removed: `base.py` reads the repository's `.env` when one
+    exists, so unsetting the variable only proves anything on a machine that has no `.env` — and
+    a deployment that copied a developer's file has the default in a real variable anyway, which
+    is the case worth refusing."""
+    result = _prod_setup(secret_key)
     assert result.returncode != 0
     assert "SECRET_KEY" in result.stderr
+
+
+def test_prod_settings_accept_a_real_secret_key():
+    result = _prod_setup("a-unique-key-for-this-deployment")
+    assert result.returncode == 0, result.stderr
 
 
 @pytest.fixture

@@ -188,12 +188,12 @@ def test_repository_budget_is_measured_from_when_the_worker_starts_not_when_it_w
     # Simulate a long queueing delay between submission and this worker actually starting.
     fake_clock["t"] = 10_000.0
 
-    outcomes = _compute_repository(
+    work = _compute_repository(
         repository, [pr], window_days=21, repo_budget=600, max_files=50, git_timeout=None
     )
 
-    assert len(outcomes) == 1
-    assert outcomes[0].status == ChurnResult.Status.OK
+    assert len(work.churn) == 1
+    assert work.churn[0].status == ChurnResult.Status.OK
 
 
 def test_settings_are_read_once_on_the_main_thread_not_per_worker(monkeypatch, git_origin, origin_remote):

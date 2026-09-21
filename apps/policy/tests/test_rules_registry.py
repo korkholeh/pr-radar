@@ -91,6 +91,14 @@ def test_ai_only_set_leaves_the_engineering_rules_applying_to_everybody():
         assert rule_code not in AI_ONLY
 
 
+# One query for the pull request, one for each prefetched relation, one for the sensitive-path
+# rules, the AI cohort statuses, the policy config and the policy's designated reviewers. It is a
+# constant, which is the point of the second half of this test: the number must not move with the
+# row count. It moves only when load_context() learns to read something new -- stage 7's
+# `review_comments` and `designated_reviewers` are the last two that raised it.
+QUERY_BUDGET = 11
+
+
 @pytest.mark.django_db
 def test_load_context_query_budget(django_assert_num_queries):
     pr = PullRequestFactory()
@@ -101,7 +109,7 @@ def test_load_context_query_budget(django_assert_num_queries):
 
     load_context(pr.pk, policy)  # warm the process-wide settings cache before pinning a count
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(QUERY_BUDGET):
         ctx = load_context(pr.pk, policy)
 
     assert len(ctx.files) == 5
@@ -113,7 +121,7 @@ def test_load_context_query_budget(django_assert_num_queries):
     for _ in range(10):
         PRFileFactory(pull_request=big_pr)
         ReviewFactory(pull_request=big_pr)
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(QUERY_BUDGET):
         big_ctx = load_context(big_pr.pk, policy)
     assert len(big_ctx.files) == 10
     assert len(big_ctx.reviews) == 10

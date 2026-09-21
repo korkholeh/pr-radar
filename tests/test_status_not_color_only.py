@@ -77,7 +77,9 @@ def test_heat_cell_carries_its_count_as_visible_text():
         {"heat_grid": rows, "heat_map": type("HM", (), {"reviewers": [reviewer]})()},
     )
     assert 'data-testid="heat-cell"' in html
-    assert re.search(r"data-heat-level=\"4\"\s*>\s*7\s*<", html)
+    # `[^>]*` because the cell gained a `title` after `data-heat-level`: what this guards is
+    # that the count is the cell's text, not the order of its attributes.
+    assert re.search(r"data-heat-level=\"4\"[^>]*>\s*7\s*<", html)
     assert "text-[var(--on-heat)]" in html
 
 

@@ -94,16 +94,6 @@ def _seed_project(n_people: int = 1) -> tuple[ProjectFactory, RepositoryFactory]
 
 
 # -- whole-page pins -----------------------------------------------------------------------------
-#
-# STALE AS OF PHASE 12, STAGE 8 for the four Period-mode pages — `test_overview_query_count`,
-# `test_project_query_count`, `test_repository_query_count` and `test_person_page_query_count`.
-# Each was measured before `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`, so those pages now issue the
-# extra `compute()` queries that row's four ratio metrics cost and the pinned numbers are too low.
-# They were not re-measured because test runs are switched off in this working tree
-# (`.claude/tests-disabled`); re-pin them from a real run — the number the failure reports is the
-# measurement — rather than guessing. `test_day_query_count` and the index/Reviews pins are
-# unaffected (`DAY_ROWS` is unchanged and those pages render no KPI row), and so are the per-row
-# growth tests below: the new row is a page-level cost, not a per-row one.
 
 
 @pytest.mark.django_db
@@ -125,7 +115,10 @@ def test_overview_query_count(client, lead_user, django_assert_num_queries):
     # instead of materializing every matching PR just to show page 1 — a net win on wall time
     # despite the extra query (profiling: ~15,000 fewer `PullRequest` rows built per render at
     # `--scale large`), see DECISIONS p11/implement for the measured before/after.
-    with django_assert_num_queries(162):
+    # +2 (phase 12, stage 8): `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`. Its four ratio
+    # metrics are batched like every other counter/ratio, so the row costs a fixed two
+    # queries on the page rather than one per metric -- re-measured here, not derived.
+    with django_assert_num_queries(164):
         client.get(reverse("dashboards:overview") + f"?{PERIOD_QS}")
 
 
@@ -134,7 +127,10 @@ def test_project_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     project, _repository = _seed_project(1)
     # See test_overview_query_count for both the +1s and the T11 reductions.
-    with django_assert_num_queries(163):
+    # +2 (phase 12, stage 8): `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`. Its four ratio
+    # metrics are batched like every other counter/ratio, so the row costs a fixed two
+    # queries on the page rather than one per metric -- re-measured here, not derived.
+    with django_assert_num_queries(165):
         client.get(reverse("dashboards:project", args=[project.pk]) + f"?{PERIOD_QS}")
 
 
@@ -143,7 +139,10 @@ def test_repository_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _project, repository = _seed_project(1)
     # See test_overview_query_count for both the +1s and the T11 reductions.
-    with django_assert_num_queries(157):
+    # +2 (phase 12, stage 8): `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`. Its four ratio
+    # metrics are batched like every other counter/ratio, so the row costs a fixed two
+    # queries on the page rather than one per metric -- re-measured here, not derived.
+    with django_assert_num_queries(159):
         client.get(reverse("dashboards:repository", args=[repository.pk]) + f"?{PERIOD_QS}")
 
 
@@ -209,7 +208,10 @@ def test_person_page_query_count(client, lead_user, django_assert_num_queries):
     # `person.py::build_comparison()`'s `person_set`/`project_set`/`org_set` now pass
     # `include_series=False` — `ComparisonRow` only reads `.value`/`.sample_size`/
     # `.previous_value`/`.below_min_sample`, never `.series`.
-    with django_assert_num_queries(171):
+    # +2 (phase 12, stage 8): `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`. Its four ratio
+    # metrics are batched like every other counter/ratio, so the row costs a fixed two
+    # queries on the page rather than one per metric -- re-measured here, not derived.
+    with django_assert_num_queries(173):
         client.get(reverse("dashboards:person", args=[person.id]) + f"?{PERIOD_QS}")
 
 

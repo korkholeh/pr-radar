@@ -295,7 +295,12 @@ def test_repository_level_error_is_recorded_and_run_continues_with_other_reposit
     repo_a = RepositoryFactory(connection=connection, full_name="acme/broken")
     repo_b = RepositoryFactory(connection=connection, full_name="acme/widget")
 
-    responses = [httpx.Response(502, json={"message": "bad gateway"}) for _ in range(6)]
+    # acme/broken answers its tooling probe and then fails its pull-request query for good. The
+    # probe runs first for every repository (`sync_repository`), so without a page of its own the
+    # 502s would land on the probe instead -- which `record_tooling_paths` swallows -- and the
+    # repository would go on to eat the next repository's responses.
+    responses = [httpx.Response(200, json=_tooling_page())]
+    responses += [httpx.Response(502, json={"message": "bad gateway"}) for _ in range(6)]
     responses += [httpx.Response(200, json=body) for body in _one_pr_sequence()]
     mock_graphql_responses(*responses)
 

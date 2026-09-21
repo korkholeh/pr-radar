@@ -118,11 +118,16 @@ def diff_origin(tmp_path_factory: pytest.TempPathFactory) -> DiffOrigin:
         {"src/a.py": block, "src/b.py": block, "src/c.py": block},
     )
 
+    # Two dependencies added, one of them imported by the same change: the detector must report
+    # the unused one and stay quiet about the used one, which is the whole point of the check.
     dependency_sha = _commit(
         repo_dir,
         "Add a dependency",
         datetime.datetime(2026, 1, 4, tzinfo=UTC),
-        {"requirements.txt": "django==5.2\nhttpx==0.27.0\n"},
+        {
+            "requirements.txt": "django==5.2\nhttpx==0.27.0\n",
+            "src/views.py": "import django\n\nSETTINGS = django.conf.settings\n",
+        },
     )
 
     _commit(
@@ -299,7 +304,7 @@ def test_a_new_dependency_nothing_uses_is_found_from_the_manifest_diff(repositor
         repository,
         diff_origin.dependency_sha,
         diff_origin.dependency_merged_at,
-        {"requirements.txt": False},
+        {"requirements.txt": False, "src/views.py": False},
     )
     rules = _specs(
         SignalRuleFactory(name="deps", kind=SignalKind.UNUSED_NEW_DEPENDENCY, confidence=Confidence.MEDIUM)
