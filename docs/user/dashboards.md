@@ -10,6 +10,23 @@ repository you have access to, each with the same KPI-and-table shape; click one
 repository that belongs to two projects contributes its full activity to each project's page, but is counted only
 once on Overview — the two numbers are not expected to add up, and that is by design.
 
+## Create or edit a project
+
+A project is a name over a set of repositories; every project dashboard, filter and export follows from that set.
+Admins (anyone who may manage settings) get two controls on the **Projects** page:
+
+- **New project** beside the page title.
+- **Edit** at the end of each row in the projects table.
+
+The form asks for a name, a slug, an optional description, the repositories the project reports on, and an active
+flag. The slug is what `manage.py sync --project <slug>` and
+`recompute --project <slug>` are typed with; leave it empty and it is derived from the name, unless the name has
+no Latin letters to derive it from, in which case type one yourself. Unticking **Is active** hides the project
+from dashboards and filters without deleting anything — its repositories and their pull requests are untouched.
+Archived repositories are offered in the form too, so editing a project never silently unlinks one.
+
+Every create and edit is written to the audit log with the repository set before and after it.
+
 ## Read a KPI card
 
 Each card shows one metric's value for the selected period, a delta against the immediately preceding period of
@@ -17,6 +34,11 @@ the same length, and a small trend line. The delta's arrow (▲/▼/–) tells y
 never the only signal, since not every reader can rely on colour. A green delta means the metric moved the way
 that's good for that particular metric — for `lead_time_p50`, going *down* is green, while for `prs_merged`, going
 *up* is green. A delta smaller than 5% is shown in neutral grey either way — treated as noise, not a trend.
+
+Next to the card's title is an **info icon**. Hover it, or tab to it, and it opens that metric's definition —
+the same sentence `docs/METRICS.md` carries, so the card and the reference can never disagree — with a line
+saying which direction is the good one for that metric. The bubble opens where there is room: below the icon
+normally, above it near the bottom of the window, and never past the edge of the screen.
 
 A card showing an em dash (—) instead of a number means there is no data for that period yet, not zero. A card
 with a "small sample" badge is based on fewer than 5 data points; the number is shown but greyed, since a rate or
@@ -30,6 +52,18 @@ check rollup, how much of the work an AI reviewer looked at, and how much AI wor
 the structural-signal rate under it). These read the pull requests themselves, not your policy settings, so they
 are worth watching *before* you switch a check on — [Set your AI policy](ai-policy.md) explains what each one
 enforces. AI review coverage stays an em dash until you tell PR Radar which login your AI reviewer posts as.
+
+## Read a chart
+
+Every chart card carries the same **info icon** next to its title. It opens a paragraph saying what the chart
+measures, how the number is computed and how to read it: which population the bars or lines are drawn from,
+whether the series stack, what the buckets on the x axis are, and the caveat worth
+knowing — that a percentile describes its own bucket only, or that churn stays empty until `compute_churn` has
+run. The text is the same explanation in English and Ukrainian, and it is the fastest way to settle "what exactly
+is this counting?" without leaving the page.
+
+Below each chart, screen readers get the same numbers as a data table, so nothing on a chart is available only as
+a picture.
 
 ## Change what you see
 

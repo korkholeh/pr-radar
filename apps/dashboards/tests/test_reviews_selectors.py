@@ -60,7 +60,28 @@ def test_reviewer_load_hand_computed_counts():
 
     result = reviewer_load(_scope(), _params())
 
-    assert result == [(reviewer_person, 3)]
+    assert [(load.person, load.reviews_given, load.pull_requests_reviewed) for load in result] == [
+        (reviewer_person, 3, 3)
+    ]
+
+
+@pytest.mark.django_db
+def test_reviewer_load_counts_repeat_rounds_on_one_pr_once_as_a_pull_request():
+    """The point of the second series on the Reviews chart: three rounds on one pull request is
+    three reviews but one pull request reviewed, so the two counts have to come apart."""
+    repository = RepositoryFactory()
+    author = IdentityFactory()
+    reviewer_person = PersonFactory(display_name="Rae")
+    reviewer = IdentityFactory(person=reviewer_person)
+    pr = PullRequestFactory(repository=repository, author=author, created_at=SUBMITTED)
+    for _index in range(3):
+        ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=SUBMITTED)
+
+    result = reviewer_load(_scope(), _params())
+
+    assert len(result) == 1
+    assert result[0].reviews_given == 3
+    assert result[0].pull_requests_reviewed == 1
 
 
 @pytest.mark.django_db

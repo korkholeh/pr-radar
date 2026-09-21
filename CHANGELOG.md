@@ -2,7 +2,36 @@
 
 ## Unreleased
 
+### Added
+
+- **Reviewer load separates reviews from the pull requests behind them.** The Reviews page's chart now draws two
+  bars per reviewer — reviews given, and the distinct pull requests those reviews fall on — and the table and its
+  exports carry both numbers as sortable columns. 43 reviews across 17 pull requests and 43 across 43 are very
+  different loads, and until now the page showed them as the same number.
+
+- **Every chart and KPI card says what it measures.** Their titles now carry an info icon that opens the
+  explanation: for a chart, which pull requests it is drawn from, how the value is computed, what the buckets on
+  the x axis are and the caveat worth knowing — that a percentile describes its own bucket only, that 21-day
+  churn stays empty until `manage.py compute_churn` has run, that violations are counted in the bucket they were
+  opened in. A KPI card shows its metric's own definition, the same sentence `docs/METRICS.md` documents, plus
+  which direction is the good one. It opens on hover and on keyboard focus, in both interface languages.
+
+- **The pull-request page names its author.** The header now carries the author under the title, linking to their
+  person dashboard when that person is one you have access to. A GitHub login with no person mapped to it yet is
+  shown as the login, with a note saying so.
+
+- **Projects can be created and edited in the app.** The **Projects** page has a **New project** button and an
+  **Edit** link on every row, for anyone who may manage settings — a project's name, slug, description,
+  repositories and active flag, with the slug derived from the name when you leave it empty. Until
+  now a project existed only if someone made it in the Django admin or a seeding command. Both actions are
+  recorded in the audit log.
+
 ### Fixed
+
+- **Chart tooltips were readable in one theme only.** The tooltip that follows the cursor over a chart was
+  painted from an inverted surface — dark in the light theme, light in the dark theme — while Chart.js drew its
+  text in white, so in the light theme the numbers were white on white. Tooltips now use a popover surface that
+  follows the theme, with ordinary body text, and so does the new info bubble.
 
 - **Links to GitHub were broken for any pull request numbered over a thousand.** A pull request
   number was rendered as an ordinary number, so PR 1208 read `#1,208` — and the link beside it on

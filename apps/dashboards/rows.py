@@ -307,19 +307,22 @@ def recent_pr_row_count(scope: Scope, params: DashboardParams) -> int:
 
 
 def reviewer_load_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object]]:
-    """The Reviews page's own table: `reviews.reviewer_load()`'s `[(Person, reviews_given)]`,
-    already descending by count — a workload view, not a people ranking (RISKS row 1), so this
-    preserves that order rather than re-sorting by name."""
+    """The Reviews page's own table: `reviews.reviewer_load()`'s `ReviewerLoad` list, already
+    descending by reviews given — a workload view, not a people ranking (RISKS row 1), so this
+    preserves that order rather than re-sorting by name. It carries the same two counts as the
+    page's chart (reviews given, and the distinct pull requests they fall on) so the table, the
+    chart and the exports cannot disagree."""
     from apps.dashboards.reviews import reviewer_load
 
     return [
         {
-            "id": person.id,
-            "name": person.display_name,
-            "url": reverse("dashboards:person", args=[person.id]),
-            "reviews_given": count,
+            "id": load.person.id,
+            "name": load.person.display_name,
+            "url": reverse("dashboards:person", args=[load.person.id]),
+            "reviews_given": load.reviews_given,
+            "pull_requests_reviewed": load.pull_requests_reviewed,
         }
-        for person, count in reviewer_load(scope, params)
+        for load in reviewer_load(scope, params)
     ]
 
 

@@ -209,6 +209,41 @@
     @apply mt-1 text-sm text-bad;
   }
 
+  /* Info tips -------------------------------------------------------------
+     `templates/partials/info_tip.html`. Opening is CSS-only — hover for a
+     mouse, `:focus-within` for keyboard and touch — so an htmx swap needs no
+     re-initialisation. `static/js/info_tip.js` then upgrades the *placement*:
+     it re-anchors the open bubble as `position: fixed`, flips it above the
+     icon when there is no room below and clamps it to the viewport, which CSS
+     alone cannot do. The rules below are the no-JS fallback placement, and
+     `--tooltip-bg` is a popover surface that follows the theme (a light bubble
+     in the light theme, a dark one in the dark theme), so the text is the
+     ordinary `--text`. */
+  .info-tip {
+    @apply relative inline-flex;
+  }
+
+  .info-tip-trigger {
+    @apply inline-flex cursor-help items-center justify-center rounded-full p-0.5 text-text-muted
+           transition-colors hover:text-accent;
+  }
+
+  .info-tip-bubble {
+    @apply pointer-events-none invisible absolute end-0 top-full z-30 mt-2 w-72 max-w-[min(20rem,calc(100vw-2.5rem))]
+           rounded-lg border border-border px-3 py-2 text-left text-xs leading-relaxed font-normal
+           normal-case text-text opacity-0 shadow-pop transition-opacity;
+    background-color: var(--tooltip-bg);
+  }
+
+  .info-tip-note {
+    @apply mt-1.5 block text-text-muted;
+  }
+
+  .info-tip:hover .info-tip-bubble,
+  .info-tip:focus-within .info-tip-bubble {
+    @apply visible opacity-100;
+  }
+
   /* Badges ---------------------------------------------------------------- */
   .badge {
     @apply inline-flex items-center gap-1 rounded-full border border-border bg-surface-2 px-2 py-0.5

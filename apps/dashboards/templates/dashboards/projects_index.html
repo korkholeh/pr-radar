@@ -7,6 +7,14 @@
   <h1 class="page-title">{% translate "Projects" %}</h1>
 {% endblock %}
 
+{% block heading_actions %}
+  {% if perms.catalog.manage_settings %}
+    <a href="{% url 'catalog:project_create' %}" class="btn btn-primary" data-testid="new-project">
+      {% translate "New project" %}
+    </a>
+  {% endif %}
+{% endblock %}
+
 {% block dashboard_content %}
   {% include "dashboards/partials/index_content.html" %}
 {% endblock %}

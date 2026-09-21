@@ -12,11 +12,17 @@ row's `compare_cohorts` is true or the filter bar's `cohort=compare` is active.
   data-testid="kpi-card"
   data-metric-key="{{ result.key }}"
 >
-  <div
-    class="card-title flex items-center gap-1 line-clamp-2 font-medium break-words text-text-muted hyphens-auto"
-    title="{% metric_title result.definition %}"
-  >
-    {% metric_title result.definition %}
+  <div class="flex items-start justify-between gap-1">
+    <div
+      class="card-title line-clamp-2 font-medium break-words text-text-muted hyphens-auto"
+      title="{% metric_title result.definition %}"
+    >
+      {% metric_title result.definition %}
+    </div>
+    {% metric_description result.definition as description %}
+    {% metric_direction_note result.definition as direction_note %}
+    {% translate "About this metric" as tip_label %}
+    {% include "partials/info_tip.html" with tip_id=result.key|add:"-metric-tip" text=description note=direction_note label=tip_label only %}
   </div>
 
   <div class="text-3xl font-semibold tracking-tight tabular-nums text-text" data-testid="kpi-value">

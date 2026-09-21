@@ -135,8 +135,11 @@ def test_reviewer_load_rows_carry_no_metric_result():
     result = reviewer_load(scope, _params())
 
     assert result != []
-    assert all(isinstance(count, int) for _person, count in result)
-    assert (reviewer_identity.person, 1) in result
+    assert all(isinstance(load.reviews_given, int) for load in result)
+    assert all(isinstance(load.pull_requests_reviewed, int) for load in result)
+    assert [(load.person, load.reviews_given, load.pull_requests_reviewed) for load in result] == [
+        (reviewer_identity.person, 1, 1)
+    ]
 
 
 # -- Declared-surface regression guard ------------------------------------------------------------

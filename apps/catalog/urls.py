@@ -5,6 +5,8 @@ from apps.catalog import views
 app_name = "catalog"
 
 urlpatterns = [
+    path("settings/projects/new/", views.project_create, name="project_create"),
+    path("settings/projects/<int:pk>/edit/", views.project_edit, name="project_edit"),
     path("settings/people/", views.people_list, name="people"),
     path("settings/people/new/", views.person_create, name="person_create"),
     path("settings/people/<int:pk>/edit/", views.person_edit, name="person_edit"),

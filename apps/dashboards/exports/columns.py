@@ -133,6 +133,7 @@ PULL_REQUESTS_COLUMNS = (
 REVIEWER_LOAD_COLUMNS = (
     ExportColumn(key="name", title=_("Reviewer"), type="url", link_key="url", width=30),
     ExportColumn(key="reviews_given", title=_("Reviews given"), type="int", width=14),
+    ExportColumn(key="pull_requests_reviewed", title=_("Pull requests reviewed"), type="int", width=22),
 )
 
 

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.text import slugify
 
 from apps.catalog.models import AppSetting, Organization, Project, Repository
 from apps.catalog.setting_defs import SETTING_DEFS
@@ -221,3 +222,33 @@ def seed_app_settings(model: type[AppSetting]) -> int:
         )
         created += 1
     return created
+
+
+def invalidate_project_metrics() -> None:
+    """A project's repository set is what every PROJECT-scope metric counts over, and `compute()`
+    caches per `scope_id` — so changing that set has to invalidate the cache the way a sync does.
+    Stored `DailyRollup` rows are per repository and per day, so none of them go stale."""
+    from apps.metrics.services import bump_data_version
+
+    bump_data_version()
+
+
+def generate_project_slug(name: str, *, exclude_pk: int | None = None) -> str:
+    """The slug a project gets when a lead leaves the field empty: `slugify(name)`, suffixed with
+    `-2`, `-3`, … until it is free. `exclude_pk` keeps a project's own slug out of the way when it
+    is being renamed, so re-saving a project without changing its name is a no-op.
+
+    Returns `""` when the name has no ASCII letters or digits to slugify — a Ukrainian project
+    name, say. A slug is what `sync --project` and `recompute --project` are typed with, so the
+    caller asks for one rather than inventing a meaningless `project-4`."""
+    base = slugify(name)[:200]
+    if not base:
+        return ""
+    taken = Project.objects.exclude(pk=exclude_pk) if exclude_pk is not None else Project.objects.all()
+    taken_slugs = set(taken.values_list("slug", flat=True))
+    if base not in taken_slugs:
+        return base
+    suffix = 2
+    while f"{base[:196]}-{suffix}" in taken_slugs:
+        suffix += 1
+    return f"{base[:196]}-{suffix}"

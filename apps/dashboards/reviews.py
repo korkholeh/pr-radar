@@ -40,18 +40,38 @@ def _period_reviews(scope: Scope, params: DashboardParams) -> QuerySet[Review]:
     )
 
 
-def reviewer_load(scope: Scope, params: DashboardParams) -> list[tuple[Person, int]]:
-    """`[(Person, reviews_given)]`, descending by count — a workload view, not a people ranking
-    (RISKS row 1; the page's own subtitle says so)."""
+@dataclass(frozen=True)
+class ReviewerLoad:
+    """One reviewer's workload in the period. `reviews_given` counts review submissions,
+    `pull_requests_reviewed` the distinct pull requests they fall on: the two are equal for a
+    reviewer who passes over each PR once, and diverge for one doing several rounds on the same
+    PR, which is the difference the Reviews page exists to show."""
+
+    person: Person
+    reviews_given: int
+    pull_requests_reviewed: int
+
+
+def reviewer_load(scope: Scope, params: DashboardParams) -> list[ReviewerLoad]:
+    """`ReviewerLoad` per reviewer, descending by reviews given — a workload view, not a people
+    ranking (RISKS row 1; the page's own subtitle says so). Both counts come from the one
+    `values(...).annotate(...)` query, so adding the distinct-PR count costs no extra round trip."""
     counts = list(
         _period_reviews(scope, params)
         .values("reviewer__person_id")
-        .annotate(reviews_given=Count("id"))
+        .annotate(
+            reviews_given=Count("id"),
+            pull_requests_reviewed=Count("pull_request_id", distinct=True),
+        )
         .order_by("-reviews_given", "reviewer__person_id")
     )
     people = Person.objects.in_bulk(row["reviewer__person_id"] for row in counts)
     return [
-        (people[row["reviewer__person_id"]], row["reviews_given"])
+        ReviewerLoad(
+            person=people[row["reviewer__person_id"]],
+            reviews_given=row["reviews_given"],
+            pull_requests_reviewed=row["pull_requests_reviewed"],
+        )
         for row in counts
         if row["reviewer__person_id"] in people
     ]

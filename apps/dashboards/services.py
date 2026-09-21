@@ -71,6 +71,7 @@ def build_chart_cards(
             {
                 "key": spec.key,
                 "title": spec.title,
+                "description": spec.description,
                 "payload": payload,
                 "url": _chart_url(scope, params, spec.key),
             }

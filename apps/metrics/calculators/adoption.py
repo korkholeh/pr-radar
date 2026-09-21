@@ -65,7 +65,7 @@ _register(
     MetricDef(
         key="ai_pr_share",
         title=_("AI PR share"),
-        description=_("Share of pull requests merged on a day that belong to the AI cohort (spec §15)."),
+        description=_("Share of pull requests merged on a day that belong to the AI cohort."),
         unit="ratio",
         direction="neutral",
         kind="ratio",

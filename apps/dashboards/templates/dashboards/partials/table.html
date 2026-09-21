@@ -4,8 +4,10 @@ Shared table partial (plan §5) — one template for `projects`/`repositories`/`
 driven entirely by `ctx` (a `tables.TableContext`). Search and sort reload only this table's
 fragment via htmx, `table=<key>` in the query string keeping every other table on the page in its
 own state; the Export control carries the same filters, sort and search as the visible page
-(acceptance criterion #5).
+(acceptance criterion #5). `row_actions` adds one extra column the exports never see — the
+projects table's Edit link, for a lead who may manage settings.
 {% endcomment %}
+{% table_row_actions ctx.table_key as row_actions %}
 <div class="card" data-testid="table-{{ ctx.table_key }}">
   {% if ctx.table_key == "people" and scope_type != "global" and not params.project_ids and not params.repository_ids %}
     <p class="border-b border-border px-4 pt-3 text-xs text-text-muted" data-testid="people-table-org-wide-note">
@@ -51,6 +53,9 @@ own state; the Export control carries the same filters, sort and search as the v
               </a>
             </th>
           {% endfor %}
+          {% if row_actions %}
+            <th scope="col" class="whitespace-nowrap">{% translate "Actions" %}</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -59,10 +64,17 @@ own state; the Export control carries the same filters, sort and search as the v
             {% for cell in row %}
               <td class="text-right tabular-nums first:text-left first:font-medium">{{ cell }}</td>
             {% endfor %}
+            {% if row_actions %}
+              <td class="whitespace-nowrap">
+                <a href="{% url 'catalog:project_edit' row.record.id %}"
+                   class="text-[var(--accent)] hover:underline"
+                   data-testid="edit-project-{{ row.record.id }}">{% translate "Edit" %}</a>
+              </td>
+            {% endif %}
           </tr>
         {% empty %}
           <tr>
-            <td colspan="{{ ctx.spec.columns|length }}" class="py-6 text-center text-text-muted">
+            <td colspan="{% if row_actions %}{{ ctx.spec.columns|length|add:1 }}{% else %}{{ ctx.spec.columns|length }}{% endif %}" class="py-6 text-center text-text-muted">
               {% translate "No matching rows." %}
             </td>
           </tr>

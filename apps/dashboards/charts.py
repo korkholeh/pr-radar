@@ -74,6 +74,12 @@ class ChartSpec:
     stacked: bool
     metric_keys: tuple[str, ...]
     build: Callable[[Scope, DashboardParams], ChartPayload]
+    description: Promise
+    """What the chart measures, how it is computed and how to read it — the text behind the info
+    icon in the card header (`partials/info_tip.html`). One chart-level explanation rather than the
+    concatenated `MetricDef.description`s of `metric_keys`: a chart's series are often a different
+    cohort, population or bucketing than the bare metric, and CLAUDE.md forbids assembling a
+    sentence from translated fragments."""
     levels: frozenset[str] = _ALL_LEVELS
 
 
@@ -359,19 +365,25 @@ def _build_reviewer_load(scope: Scope, params: DashboardParams) -> ChartPayload:
     table, this is the at-a-glance view."""
     from apps.dashboards.reviews import reviewer_load
 
-    pairs = reviewer_load(scope, params)[:_REVIEWER_LOAD_TOP_N]
-    labels = [person.display_name for person, _count in pairs]
-    data: list[float | None] = [float(count) for _person, count in pairs]
-    empty = not pairs
+    loads = reviewer_load(scope, params)[:_REVIEWER_LOAD_TOP_N]
+    reviews: list[float | None] = [float(load.reviews_given) for load in loads]
+    pull_requests: list[float | None] = [float(load.pull_requests_reviewed) for load in loads]
+    empty = not loads
     return ChartPayload(
         key="reviewer_load",
         type="bar",
         stacked=False,
         unit="count",
-        labels=labels,
+        labels=[load.person.display_name for load in loads],
         x_title=gettext("Reviewer"),
-        y_title=gettext("Reviews given"),
-        datasets=[ChartDataset(gettext("Reviews given"), "--series-1", data)],
+        y_title=gettext("Count"),
+        # Deliberately unstacked and side by side: reviews given is always >= the distinct pull
+        # requests behind it, so stacking would double-count, while the gap between the two bars
+        # is the thing to read — several rounds on the same pull request rather than broad cover.
+        datasets=[
+            ChartDataset(gettext("Reviews given"), "--series-1", reviews),
+            ChartDataset(gettext("Pull requests reviewed"), "--series-4", pull_requests),
+        ],
         empty=empty,
         empty_message=_empty_message() if empty else None,
     )
@@ -380,7 +392,20 @@ def _build_reviewer_load(scope: Scope, params: DashboardParams) -> ChartPayload:
 CHART_REGISTRY: dict[str, ChartSpec] = {
     spec.key: spec
     for spec in (
-        ChartSpec("throughput", _("Throughput"), "bar", True, ("prs_merged",), _build_throughput),
+        ChartSpec(
+            "throughput",
+            _("Throughput"),
+            "bar",
+            True,
+            ("prs_merged",),
+            _build_throughput,
+            description=_(
+                "Pull requests merged in each bucket of the selected period, with the AI and the "
+                "non-AI cohort stacked so the full bar is the bucket's whole merged volume. A pull "
+                "request counts in the bucket its merge time falls into, by the report time zone; "
+                "pull requests still open, or closed without a merge, appear nowhere on this chart."
+            ),
+        ),
         ChartSpec(
             "ai_adoption",
             _("AI adoption"),
@@ -388,8 +413,29 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             False,
             ("ai_pr_share", "disclosure_rate"),
             _build_ai_adoption,
+            description=_(
+                "Two shares over time, both plotted as a percentage of their own population. AI PR "
+                "share is the portion of pull requests merged in the bucket that AI detection put "
+                "in the AI cohort. Disclosure rate is the portion of AI-cohort pull requests created "
+                "in the bucket whose disclosure is partial or substantial, rather than missing or "
+                "ambiguous — it says how honestly AI use is declared, not how much of it there is."
+            ),
         ),
-        ChartSpec("latency", _("Latency"), "line", False, _LATENCY_METRIC_KEYS, _build_latency),
+        ChartSpec(
+            "latency",
+            _("Latency"),
+            "line",
+            False,
+            _LATENCY_METRIC_KEYS,
+            _build_latency,
+            description=_(
+                "How long pull requests merged in each bucket took, as a median (p50) and a 90th "
+                "percentile (p90). Lead time runs from a pull request becoming ready for review "
+                "to its merge; time to first review runs from that same start to the first review "
+                "submitted on it. Both percentiles are computed from the pull requests of one "
+                "bucket, so they describe that bucket only and never add up across buckets."
+            ),
+        ),
         ChartSpec(
             "pr_size_distribution",
             _("PR size distribution"),
@@ -397,6 +443,13 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             True,
             ("pr_size_buckets",),
             _build_pr_size_distribution,
+            description=_(
+                "Pull requests merged in the whole period, grouped by effective lines changed — "
+                "additions plus deletions, ignoring the files the exclusion rules drop, such as "
+                "lock files and generated code. Bucket boundaries come from the PR_SIZE_BUCKETS "
+                "setting, and the AI and non-AI cohorts stack within each bucket. A shift towards "
+                "L and XL is a review-load warning: large pull requests get reviewed worse."
+            ),
         ),
         ChartSpec(
             "churn_rework",
@@ -405,6 +458,13 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             False,
             ("churn_21d", "rework_rate"),
             _build_churn_rework,
+            description=_(
+                "Two quality shares for the whole period, AI cohort against non-AI. 21-day churn "
+                "is the median share of a merged pull request's lines that were changed again "
+                "within 21 days, and stays empty until manage.py compute_churn has run. Rework "
+                "rate is the share of merged pull requests that needed at least one more commit "
+                "after their first review. Lower is better for both."
+            ),
         ),
         ChartSpec(
             "violations_by_rule",
@@ -413,6 +473,13 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             True,
             ("violations_by_rule",),
             _build_violations_by_rule,
+            description=_(
+                "AI-policy violations created in each bucket, one stacked series per rule, so the "
+                "full bar is every violation the period opened. A violation counts in the bucket "
+                "it was created in and stays there whether it is still open or already resolved — "
+                "this is the flow of new violations, not a snapshot of the open ones. A long range "
+                "is bucketed more coarsely to keep the chart within 31 buckets."
+            ),
         ),
         ChartSpec(
             "reviewer_load",
@@ -421,6 +488,15 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             False,
             ("reviews_given",),
             _build_reviewer_load,
+            description=_(
+                "Two bars per reviewer for the period, for the twenty busiest reviewers in this "
+                "scope: every review they submitted, and the number of distinct pull requests "
+                "those reviews fall on. Equal bars mean one pass per pull request; a reviews bar "
+                "far taller than the pull-requests bar means repeated rounds on the same pull "
+                "requests, which is back-and-forth rather than breadth of cover. A few tall pairs "
+                "next to many short ones is the review-bottleneck pattern; the table below the "
+                "chart carries the full ranking."
+            ),
             levels=_REVIEWS_LEVELS,
         ),
     )

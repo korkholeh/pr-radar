@@ -9,6 +9,19 @@
         {{ pull_request.repository.full_name }}#{{ pull_request.number|unlocalize }}
       </p>
       <h1 class="page-title">{{ pull_request.title }}</h1>
+      <p class="mt-1 text-sm text-text-muted" data-testid="pr-author">
+        {% translate "Author" %}:
+        {% if author.url %}
+          <a href="{{ author.url }}" class="text-[var(--accent)] hover:underline">{{ author.label }}</a>
+        {% elif author.label %}
+          <span class="text-text">{{ author.label }}</span>
+        {% else %}
+          <span aria-hidden="true">—</span><span class="sr-only">{% translate "Unknown" %}</span>
+        {% endif %}
+        {% if author.label and not author.is_mapped %}
+          <span class="help">{% translate "This GitHub login is not mapped to a person yet." %}</span>
+        {% endif %}
+      </p>
     </div>
     <a
       href="https://github.com/{{ pull_request.repository.full_name }}/pull/{{ pull_request.number|unlocalize }}"

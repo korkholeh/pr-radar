@@ -14,7 +14,10 @@ and the export always carries your current filters — exactly the rows on scree
 
 ## The PR detail page (`/prs/<id>/`)
 
-Click any PR to open it. The page has five parts:
+Click any PR to open it. The header names the repository, the PR number, its title and its **author** — the
+author's name links to their person dashboard when they are someone you have access to, and shows the GitHub
+login as-is when no person has been mapped to it yet (map them in **Settings → People**). The page then has five
+parts:
 
 - **Timeline** — first commit, opened, ready for review, each review submitted, merged/closed, in order.
   An event that never happened (e.g. no "ready for review" on a PR opened straight out of draft) simply isn't

@@ -401,7 +401,7 @@ _register(
         title=_("21-day churn"),
         description=_(
             "Median share of a merged PR's lines that were themselves changed again within 21 "
-            "days, for PRs merged in the period. None until manage.py compute_churn has run."
+            "days, for PRs merged in the period. Empty until manage.py compute_churn has run."
         ),
         unit="ratio",
         direction="lower_is_better",

@@ -8,9 +8,12 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass
 
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from apps.accounts.selectors import ScopeFilter
 from apps.activity.models import PullRequest, Review
+from apps.catalog.selectors import people_in_scope
 from apps.metrics.calculators.base import duration_hours
 
 _EVENT_LABELS = {
@@ -97,3 +100,30 @@ def pr_metrics(pull_request: PullRequest) -> PRMetrics:
         is_rubber_stamp=pull_request.is_rubber_stamp,
         is_self_merged=pull_request.is_self_merged,
     )
+
+
+@dataclass(frozen=True)
+class Author:
+    """Who opened the pull request, as the page shows it. `label` is `None` only when GitHub gave
+    no author at all (a deleted account); an author with no `Person` mapped yet keeps its GitHub
+    login as the label, so the page still names someone."""
+
+    label: str | None
+    url: str | None
+    is_mapped: bool
+
+
+def author(scope: ScopeFilter, pull_request: PullRequest) -> Author:
+    """`url` is set only for a person `dashboards:person` would actually render: that page is
+    bound to `people_in_scope()`, which drops bots, people excluded from metrics and anyone
+    outside the reader's projects — linking to them would 404 (CLAUDE.md's one authorization
+    choke point, read here rather than guessed at)."""
+    identity = pull_request.author
+    if identity is None:
+        return Author(None, None, is_mapped=False)
+    person = identity.person
+    if person is None:
+        return Author(identity.value, None, is_mapped=False)
+    visible = people_in_scope(scope).filter(pk=person.pk).exists()
+    url = reverse("dashboards:person", args=[person.pk]) if visible else None
+    return Author(person.display_name, url, is_mapped=True)

@@ -5,9 +5,16 @@ and what's still waiting.
 
 ## Reviewer load
 
-A table and matching chart of how many reviews each person gave in the period, most active first. This is a
+A table and matching chart of how much reviewing each person did in the period, most active first. This is a
 **workload view, not a ranking** — it tells you who's carrying review load, not who's "best" at it. A
 self-review never counts, and a bot account never appears here.
+
+Both carry two numbers per reviewer: **reviews given**, every review they submitted, and **pull requests
+reviewed**, the distinct PRs those reviews landed on. Read the gap between them. Equal numbers mean one pass per
+PR. 43 reviews across 17 PRs means repeated rounds on the same pull requests — back-and-forth with a handful of
+authors, not broad cover — which is a different kind of load than 43 reviews across 43 PRs, and often a sign the
+PRs are too big or the feedback is arriving in instalments. Both numbers are in the CSV and XLSX exports, and the
+table sorts by either.
 
 ## Author × reviewer
 

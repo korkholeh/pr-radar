@@ -54,6 +54,30 @@ def test_reviewer_load_chart_json_endpoint(client, lead_user):
 
 
 @pytest.mark.django_db
+def test_reviewer_load_chart_separates_reviews_from_pull_requests(client, lead_user):
+    """Three rounds on one pull request and one review on another: five reviews across two pull
+    requests, drawn as two side-by-side series so the page shows the difference."""
+    repository = RepositoryFactory()
+    author = IdentityFactory()
+    reviewer = IdentityFactory(person=PersonFactory(display_name="Rae"))
+    busy_pr = PullRequestFactory(repository=repository, author=author, created_at=SUBMITTED)
+    for _index in range(3):
+        ReviewFactory(pull_request=busy_pr, reviewer=reviewer, submitted_at=SUBMITTED)
+    other_pr = PullRequestFactory(repository=repository, author=author, created_at=SUBMITTED)
+    ReviewFactory(pull_request=other_pr, reviewer=reviewer, submitted_at=SUBMITTED)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:chart_json", args=["reviewer_load"]) + f"?{PERIOD_QS}")
+
+    payload = response.json()
+    assert payload["stacked"] is False
+    index = payload["labels"].index("Rae")
+    by_label = {dataset["label"]: dataset["data"] for dataset in payload["datasets"]}
+    assert by_label["Reviews given"][index] == 4
+    assert by_label["Pull requests reviewed"][index] == 2
+
+
+@pytest.mark.django_db
 def test_heat_map_cells_carry_text_and_colour(client, lead_user):
     repository = RepositoryFactory()
     author = IdentityFactory(person=PersonFactory(display_name="Aria"))

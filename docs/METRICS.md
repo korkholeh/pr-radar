@@ -78,7 +78,7 @@ Pull requests created on a day that belong to the AI cohort.
 
 ### `ai_pr_share`
 
-Share of pull requests merged on a day that belong to the AI cohort (spec §15).
+Share of pull requests merged on a day that belong to the AI cohort.
 
 ### `ai_status_breakdown`
 
@@ -182,7 +182,7 @@ Open, non-draft pull requests divided by the number of distinct authors holding 
 
 ### `churn_21d`
 
-Median share of a merged PR's lines that were themselves changed again within 21 days, for PRs merged in the period. None until manage.py compute_churn has run.
+Median share of a merged PR's lines that were themselves changed again within 21 days, for PRs merged in the period. Empty until manage.py compute_churn has run.
 
 ### `ci_first_pass_rate`
 

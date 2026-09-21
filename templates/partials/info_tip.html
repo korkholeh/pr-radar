@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}
+Shared "what does this measure" affordance: an info icon that reveals one explanatory paragraph.
+Call sites pass `tip_id` (unique on the page — the `aria-describedby` target) and `text`, a full
+translated sentence supplied by the caller, never assembled here (CLAUDE.md). `note` is an
+optional second line for a short qualifier (e.g. which direction is good); `label` overrides the
+trigger's accessible name when "About this chart" is the wrong noun.
+
+Opening is CSS-only (`.info-tip` in `static/css/src/input.css`): the bubble shows on hover and on
+`:focus-within`, so keyboard and touch users reach it by focusing the button — no Alpine, and
+nothing for htmx to re-initialise when a fragment swaps the card out. `static/js/info_tip.js`
+only re-places an open bubble so it cannot open past the edge of the window.
+{% endcomment %}
+<span class="info-tip" data-testid="info-tip">
+  <button
+    type="button"
+    class="info-tip-trigger"
+    aria-describedby="{{ tip_id }}"
+    aria-label="{% if label %}{{ label }}{% else %}{% translate "About this chart" %}{% endif %}"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <circle cx="10" cy="10" r="8" />
+      <path d="M10 9v5" stroke-linecap="round" />
+      <path d="M10 6.2h.01" stroke-linecap="round" />
+    </svg>
+  </button>
+  <span role="tooltip" id="{{ tip_id }}" class="info-tip-bubble">
+    {{ text }}
+    {% if note %}<span class="info-tip-note">{{ note }}</span>{% endif %}
+  </span>
+</span>

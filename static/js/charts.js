@@ -44,6 +44,8 @@
   function buildConfig(payload) {
     var gridColor = resolveToken("--grid");
     var tooltipBg = resolveToken("--tooltip-bg");
+    var tooltipText = resolveToken("--text");
+    var tooltipBorder = resolveToken("--border");
     return {
       type: payload.type,
       data: { labels: payload.labels, datasets: buildDatasets(payload) },
@@ -64,7 +66,13 @@
         },
         plugins: {
           tooltip: {
+            // `--tooltip-bg` is a popover surface that follows the theme, so Chart.js's own
+            // white default for title and body would be unreadable on it in the light theme.
             backgroundColor: tooltipBg,
+            titleColor: tooltipText,
+            bodyColor: tooltipText,
+            borderColor: tooltipBorder,
+            borderWidth: 1,
             callbacks: {
               label: function (context) {
                 return context.dataset.label + ": " + formatValue(payload.unit, context.parsed.y);

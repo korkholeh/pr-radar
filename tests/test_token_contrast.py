@@ -65,6 +65,10 @@ _STATUS_TEXT_PAIRS: list[tuple[str, str]] = [
 ]
 _INVERTED_TEXT_PAIRS: list[tuple[str, str]] = [
     ("on-accent", "accent"),
+    # The info-tip bubble (`.info-tip-bubble`) and the Chart.js tooltip both print `--text` on
+    # `--tooltip-bg`, a popover surface that follows the theme — real body text, so AA applies.
+    ("text", "tooltip-bg"),
+    ("text-muted", "tooltip-bg"),
     ("on-heat", "heat-3"),
     ("on-heat", "heat-4"),
     ("text", "heat-0"),

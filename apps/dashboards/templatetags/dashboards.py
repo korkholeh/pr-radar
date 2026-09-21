@@ -191,6 +191,27 @@ def metric_title(definition: MetricDef) -> str:
     return gettext(str(definition.title))
 
 
+@register.simple_tag(name="metric_description")
+def metric_description(definition: MetricDef) -> str:
+    """The metric's own registry definition, rendered in the reader's language — the text behind
+    the info icon on a KPI card. The registry is the single source of it: `docs/METRICS.md`, the
+    metric catalogue and the card all read the same sentence, so an explanation cannot drift from
+    what the calculator does."""
+    return gettext(str(definition.description))
+
+
+@register.simple_tag(name="metric_direction_note")
+def metric_direction_note(definition: MetricDef) -> str:
+    """Which way is good for this metric, as a whole sentence per branch rather than a stitched
+    fragment (CLAUDE.md). A neutral metric gets no line: "neither direction is better" reads as a
+    hedge, and the absence says it more plainly."""
+    if definition.direction == "higher_is_better":
+        return gettext("Higher is better.")
+    if definition.direction == "lower_is_better":
+        return gettext("Lower is better.")
+    return ""
+
+
 @register.simple_tag(name="small_sample_note")
 def small_sample_note() -> SafeString:
     """The one rendering of the below-`MIN_SAMPLE` label (plan T4/T5): every `MetricResult`
@@ -260,3 +281,16 @@ def chart_rows(payload: ChartPayload) -> list[tuple[str, list[float | None]]]:
         (label, [dataset.data[index] for dataset in payload.datasets])
         for index, label in enumerate(payload.labels)
     ]
+
+
+@register.simple_tag(name="table_row_actions", takes_context=True)
+def table_row_actions(context: dict, table_key: str) -> bool:
+    """Whether the shared table partial renders its per-row Edit column. Only the projects table
+    has one — a project is the one table row a lead creates and edits by hand — and only for a
+    user who may manage settings, the same permission `catalog.project_edit` enforces. Kept out of
+    `ExportColumn` on purpose: those columns are shared with CSV and XLSX, where a link to an edit
+    form is meaningless."""
+    if table_key != "projects":
+        return False
+    request = context.get("request")
+    return request is not None and bool(request.user.has_perm("catalog.manage_settings"))

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
@@ -7,19 +8,89 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.selectors import scope_for_user
 from apps.accounts.services import record_audit
-from apps.catalog.forms import AssignIdentityForm, MergePeopleForm, PersonForm
+from apps.catalog.forms import AssignIdentityForm, MergePeopleForm, PersonForm, ProjectForm
 from apps.catalog.identity import create_person_from_identity, merge_people
-from apps.catalog.models import Identity, Person
+from apps.catalog.models import Identity, Person, Project, Repository
 from apps.catalog.selectors import (
     bot_person_count,
     people_for_settings,
+    projects_in_scope,
+    repositories_in_scope,
     unmapped_identities,
     unmapped_identity_count,
 )
+from apps.catalog.services import invalidate_project_metrics
 from config.htmx import is_htmx
 
 PERMISSION = "catalog.manage_settings"
 IDENTITY_PAGE_SIZE = 50
+
+
+def _render_project_form(request: HttpRequest, form: ProjectForm, project: Project | None) -> HttpResponse:
+    template = "catalog/partials/project_form.html" if is_htmx(request) else "catalog/project_form.html"
+    return render(request, template, {"form": form, "project": project})
+
+
+def _editable_repositories(request: HttpRequest) -> QuerySet[Repository]:
+    """Archived repositories are offered too: they are dropped from dashboards, not from a
+    project, and leaving them out of the field would silently unlink them on the next save."""
+    return repositories_in_scope(scope_for_user(request.user), include_inactive=True)
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def project_create(request: HttpRequest) -> HttpResponse:
+    repositories = _editable_repositories(request)
+    if request.method == "POST":
+        form = ProjectForm(request.POST, repositories=repositories)
+        if form.is_valid():
+            project = form.save()
+            record_audit(request.user, "project.create", project, after=_project_audit_values(form))
+            return redirect("dashboards:projects_index")
+    else:
+        form = ProjectForm(repositories=repositories)
+    return _render_project_form(request, form, None)
+
+
+@login_required
+@permission_required(PERMISSION, raise_exception=True)
+def project_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    scope = scope_for_user(request.user)
+    # `include_inactive=True`: an archived project is exactly the one a lead comes here to revive.
+    project = get_object_or_404(projects_in_scope(scope, include_inactive=True), pk=pk)
+    repositories = _editable_repositories(request)
+    if request.method == "POST":
+        before = _project_values(project)
+        form = ProjectForm(request.POST, instance=project, repositories=repositories)
+        if form.is_valid():
+            form.save()
+            after = _project_audit_values(form)
+            record_audit(request.user, "project.update", project, before=before, after=after)
+            if after["repositories"] != before["repositories"]:
+                invalidate_project_metrics()
+            return redirect("dashboards:projects_index")
+    else:
+        form = ProjectForm(instance=project, repositories=repositories)
+    return _render_project_form(request, form, project)
+
+
+def _project_values(project: Project) -> dict:
+    return {
+        "name": project.name,
+        "slug": project.slug,
+        "description": project.description,
+        "is_active": project.is_active,
+        "repositories": sorted(project.repositories.values_list("full_name", flat=True)),
+    }
+
+
+def _project_audit_values(form: ProjectForm) -> dict:
+    """The audit entry stores repository names, not primary keys — `AuditEntry.changes` is read by
+    a human, and a list of ids says nothing."""
+    return {
+        **{key: form.cleaned_data[key] for key in ("name", "slug", "description", "is_active")},
+        "repositories": sorted(repository.full_name for repository in form.cleaned_data["repositories"]),
+    }
 
 
 def _people_context(request: HttpRequest) -> dict:
