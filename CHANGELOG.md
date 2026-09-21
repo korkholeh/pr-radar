@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- **Links to GitHub were broken for any pull request numbered over a thousand.** A pull request
+  number was rendered as an ordinary number, so PR 1208 read `#1,208` — and the link beside it on
+  the pull-request page pointed at `https://github.com/owner/repo/pull/1,208`, which GitHub does
+  not resolve. Day lists, the reviews table, the pull-request page and both policy lists show the
+  number as the identifier it is now.
+
 - **Vendored and generated files no longer inflate the structural AI signals.** The structural
   detectors read every file a pull request touched, including the ones excluded from every size
   metric — a checked-in `vendor/` bundle or a regenerated lockfile counted towards mass file

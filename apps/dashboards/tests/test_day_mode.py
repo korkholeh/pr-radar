@@ -53,6 +53,39 @@ def test_pr_merged_at_2359_kyiv_lands_on_that_kyiv_day_not_the_utc_one(client, l
 
 
 @pytest.mark.django_db
+def test_a_four_digit_pr_number_is_rendered_without_a_thousands_separator(client, lead_user):
+    """`USE_THOUSAND_SEPARATOR` is on, and a pull request number is an identifier, not a
+    quantity: rendered through it, PR 1208 reads "#1,208" and the GitHub link beside it points at
+    `/pull/1,208`. The number here is set explicitly rather than left to the factory sequence --
+    the bug only appears past a thousand, which is why it showed up as an order-dependent failure
+    in the test above rather than on its own."""
+    kyiv = zoneinfo.ZoneInfo("Europe/Kyiv")
+    merged_at = datetime.datetime(2026, 8, 15, 12, 0, tzinfo=kyiv)
+    identity = IdentityFactory(person=PersonFactory())
+    pull_request = PullRequestFactory(
+        author=identity, number=1208, state="merged", created_at=merged_at, merged_at=merged_at
+    )
+
+    client.force_login(lead_user)
+    response = client.get(reverse("dashboards:overview"), {"mode": "day", "day": "2026-08-15"})
+
+    # Every expectation is built from `pull_request.number` rather than written out: a quoted
+    # hash followed by four of these digits is also a hex colour, and writing one here would trip
+    # the guard in `tests/test_no_hardcoded_colors.py`.
+    number = pull_request.number
+    separated = f"{number:,}"
+    content = response.content.decode()
+    assert f"#{number}" in content
+    assert separated not in content
+    assert f"{number // 1000}\u202f{number % 1000}" not in content
+
+    detail = client.get(reverse("dashboards:pull_request_detail", args=[pull_request.pk]))
+    detail_content = detail.content.decode()
+    assert f"/pull/{number}" in detail_content
+    assert f"/pull/{separated}" not in detail_content
+
+
+@pytest.mark.django_db
 def test_person_activity_table_defaults_to_name_order(client, lead_user):
     kyiv = zoneinfo.ZoneInfo("Europe/Kyiv")
     day_instant = datetime.datetime(2026, 8, 15, 12, 0, tzinfo=kyiv)

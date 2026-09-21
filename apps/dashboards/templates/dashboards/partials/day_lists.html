@@ -1,4 +1,4 @@
-{% load i18n dashboards %}
+{% load i18n dashboards l10n %}
 {% comment %}
 Day mode's raw lists (plan T8): the PRs opened/merged that Kyiv day, and a per-person activity
 table. `prs_opened`/`prs_merged`/`person_activity` come from `apps/dashboards/selectors.py`.
@@ -20,7 +20,7 @@ table. `prs_opened`/`prs_merged`/`person_activity` come from `apps/dashboards/se
               <tr>
                 <td>
                   <a class="text-accent" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
-                    {{ pr.repository.full_name }}#{{ pr.number }}
+                    {{ pr.repository.full_name }}#{{ pr.number|unlocalize }}
                   </a>
                   {{ pr.title }}
                 </td>
@@ -51,7 +51,7 @@ table. `prs_opened`/`prs_merged`/`person_activity` come from `apps/dashboards/se
               <tr>
                 <td>
                   <a class="text-accent" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
-                    {{ pr.repository.full_name }}#{{ pr.number }}
+                    {{ pr.repository.full_name }}#{{ pr.number|unlocalize }}
                   </a>
                   {{ pr.title }}
                 </td>

@@ -1,4 +1,4 @@
-{% load i18n pagination policy_extras %}
+{% load i18n pagination policy_extras l10n %}
 {% if notice %}
   <div class="mb-4 rounded-lg border border-good/40 bg-surface-2 px-3 py-2 text-sm text-good" role="status">{{ notice }}</div>
 {% endif %}
@@ -44,7 +44,7 @@
           </td>
           <td>
             <a href="{% url 'dashboards:pull_request_detail' violation.pull_request_id %}">
-              {{ violation.pull_request.repository.full_name }}#{{ violation.pull_request.number }}
+              {{ violation.pull_request.repository.full_name }}#{{ violation.pull_request.number|unlocalize }}
             </a>
           </td>
           <td>

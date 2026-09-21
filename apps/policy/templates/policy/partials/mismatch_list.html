@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n l10n %}
 <div class="card card-body mb-6" id="policy-mismatch-list">
   <h2 class="section-title mb-3">{% translate "Disclosure mismatches" %}</h2>
   {% if mismatch_prs %}
@@ -6,7 +6,7 @@
       {% for pr in mismatch_prs %}
         <li>
           <a class="link" href="{% url 'dashboards:pull_request_detail' pr.pk %}">
-            {{ pr.repository.full_name }}#{{ pr.number }}
+            {{ pr.repository.full_name }}#{{ pr.number|unlocalize }}
           </a>
           — {{ pr.title }}
         </li>

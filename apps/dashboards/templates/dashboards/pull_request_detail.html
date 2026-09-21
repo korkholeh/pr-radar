@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% load i18n dashboards ai_detection %}
-{% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number }}{% endblock %}
+{% load i18n dashboards ai_detection l10n %}
+{% block title %}{{ pull_request.repository.full_name }}#{{ pull_request.number|unlocalize }}{% endblock %}
 {% block content %}
 <div class="mx-auto w-full max-w-4xl" id="pull-request-detail">
   <div class="page-header">
     <div>
       <p class="text-sm font-medium text-text-muted">
-        {{ pull_request.repository.full_name }}#{{ pull_request.number }}
+        {{ pull_request.repository.full_name }}#{{ pull_request.number|unlocalize }}
       </p>
       <h1 class="page-title">{{ pull_request.title }}</h1>
     </div>
     <a
-      href="https://github.com/{{ pull_request.repository.full_name }}/pull/{{ pull_request.number }}"
+      href="https://github.com/{{ pull_request.repository.full_name }}/pull/{{ pull_request.number|unlocalize }}"
       class="btn btn-secondary btn-sm"
       target="_blank"
       rel="noopener"
