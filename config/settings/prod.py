@@ -1,4 +1,5 @@
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 from config.settings.base import *  # noqa: F401,F403
 
@@ -11,8 +12,16 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
-# Fail fast rather than silently sign sessions/CSRF with a published default key.
+# Fail fast rather than silently sign sessions/CSRF with a published default key. Absence is not
+# the only way to get one: `base.py` reads a `.env`, and a deployment that copied a developer's
+# file carries the published default in a real environment variable. Both are refused here.
+INSECURE_DEFAULT_SECRET_KEY = "insecure-dev-key-change-me"  # noqa: S105 - the value to refuse
 SECRET_KEY = environ.Env().str("SECRET_KEY")
+if not SECRET_KEY.strip() or SECRET_KEY == INSECURE_DEFAULT_SECRET_KEY:
+    raise ImproperlyConfigured(
+        "SECRET_KEY is empty or still the published development default. Set a unique "
+        "SECRET_KEY before running with config.settings.prod."
+    )
 
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000

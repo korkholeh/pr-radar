@@ -57,11 +57,11 @@ EVIDENCE_MESSAGES: dict[str, _MessageDef] = {
         ),
     },
     EvidenceCode.COMMIT_BURST: {
-        "singular": (
+        "singular": gettext_noop(
             "%(commits)s substantial commits landed less than %(gap_seconds)s seconds apart "
             "(the rule flags %(min_commits)s such commits within %(max_gap_seconds)s seconds)."
         ),
-        "plural": (
+        "plural": gettext_noop(
             "%(commits)s substantial commits landed less than %(gap_seconds)s seconds apart "
             "(the rule flags %(min_commits)s such commits within %(max_gap_seconds)s seconds)."
         ),
@@ -85,11 +85,11 @@ EVIDENCE_MESSAGES: dict[str, _MessageDef] = {
         ),
     },
     EvidenceCode.INSTANT_REVIEW_RESPONSE: {
-        "singular": (
+        "singular": gettext_noop(
             "A new commit followed a review comment within %(max_minutes)s minutes, %(occurrences)s time "
             "(the rule flags %(min_occurrences)s such times)."
         ),
-        "plural": (
+        "plural": gettext_noop(
             "A new commit followed a review comment within %(max_minutes)s minutes, %(occurrences)s times "
             "(the rule flags %(min_occurrences)s such times)."
         ),
@@ -137,12 +137,12 @@ EVIDENCE_MESSAGES: dict[str, _MessageDef] = {
         ),
     },
     EvidenceCode.DUPLICATED_BLOCKS: {
-        "singular": (
+        "singular": gettext_noop(
             "The same %(block_lines)s-line block of added code appears %(occurrences)s time across "
             "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
             "files)."
         ),
-        "plural": (
+        "plural": gettext_noop(
             "The same %(block_lines)s-line block of added code appears %(occurrences)s times across "
             "%(files)s files (the rule flags %(min_occurrences)s occurrences across %(min_files)s "
             "files)."

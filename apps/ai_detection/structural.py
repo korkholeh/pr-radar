@@ -290,6 +290,11 @@ def load_structural_context(pr: PullRequest) -> StructuralContext:
             )
             for pr_commit in pr_commits
         ),
+        # Excluded paths are left out here as everywhere else: a vendored bundle or a generated
+        # lockfile is not evidence about how the change was written, and counting it would make
+        # every repository that checks in `vendor/` look like mass file creation. Filtered in
+        # Python rather than with `.filter()` so the prefetched rows are reused -- a queryset call
+        # here would cost one query per pull request in a batch.
         files=tuple(
             StructuralFile(
                 path=pr_file.path,
@@ -298,6 +303,7 @@ def load_structural_context(pr: PullRequest) -> StructuralContext:
                 deletions=pr_file.deletions,
             )
             for pr_file in pr.files.all()
+            if not pr_file.is_excluded
         ),
         # The author commenting on their own pull request is not a review to answer. The identity
         # comparison is only made when both sides are known: an unresolved comment author (or an

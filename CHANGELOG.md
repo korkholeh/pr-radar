@@ -4,6 +4,24 @@
 
 ### Fixed
 
+- **Vendored and generated files no longer inflate the structural AI signals.** The structural
+  detectors read every file a pull request touched, including the ones excluded from every size
+  metric — a checked-in `vendor/` bundle or a regenerated lockfile counted towards mass file
+  creation and the duplicated-block search like hand-written code. They are left out now, the same
+  way they already were everywhere else. Signals recorded before this are unchanged; run
+  `manage.py recompute` if you want the affected pull requests re-read.
+
+- **Three evidence sentences were missing their Ukrainian translation.** The commit-burst,
+  duplicated-block and instant-review-response sentences were never extracted into the catalogue,
+  so a lead reading the interface in Ukrainian saw those three in English while every other
+  sentence on the page was translated. They are translated now.
+
+- **`config.settings.prod` refuses the published development `SECRET_KEY`.** It only ever refused a
+  *missing* key, so a deployment that copied a developer's `.env` — or set `SECRET_KEY` to the
+  documented default by hand — started normally and signed its sessions and CSRF tokens with a key
+  that is in this repository. An empty key is refused too. Both fail at startup with a message
+  saying what to do.
+
 - **A read-only fine-grained token no longer fails the whole sync over one permission it lacks.** GitHub
   reports a field the token may not read as an error alongside the data it did resolve, and PR Radar treated
   every such report as a dead credential: the run stopped with "authentication failed", the connection was
