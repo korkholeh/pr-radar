@@ -116,6 +116,12 @@
 
 ### Fixed
 
+- **The Policy page's by-rule chart no longer disagrees with the table without saying why.** The chart counts
+  every violation raised in the period, in any status; the table below lists open violations only by default. A
+  rule whose violations had all been resolved showed a bar and an empty table. The chart is now titled "New
+  violations by rule", states its dates, splits each bar into open and acknowledged/waived/resolved with an
+  "open / total" count, and each rule's name opens the table on exactly the violations its bar counts.
+
 - **"Tool not allowed" no longer fires for signals that name no tool.** Behavioural and stylometric signals — a
   commit burst, mass file creation, one large commit, an agent-configuration file — say a pull request looks
   AI-made without naming a tool, and were filed under "Other". With "Other" left out of the allowed tools, every

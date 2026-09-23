@@ -61,8 +61,32 @@ def test_chart_table_alternative_matches_violations_by_rule(client, lead_user):
 
     table_match = re.search(r'<table[^>]*id="policy-rule-chart-table".*?</table>', content, re.DOTALL)
     assert table_match is not None
-    rows = re.findall(r"<tr><td>(.*?)</td><td>(\d+)</td></tr>", table_match.group(0))
-    assert rows == [(rule_label(row.rule_code), str(row.count)) for row in series]
+    rows = re.findall(
+        r"<tr><td><a [^>]*>(.*?)</a></td><td>(\d+)</td><td>(\d+)</td></tr>", table_match.group(0)
+    )
+    assert rows == [(rule_label(row.rule_code), str(row.count), str(row.open_count)) for row in series]
+
+
+@freeze_time("2026-06-15T12:00:00Z")
+def test_chart_splits_open_from_closed_and_links_to_the_same_rows(client, lead_user):
+    """The chart counts every status over the period while the table defaults to open only, so a
+    rule whose violations were all auto-resolved shows a bar and an empty table. The bar says how
+    many are open, and its link opens the table on exactly the rows it counts."""
+    PolicyViolationFactory(rule_code=RuleCode.TOOL_NOT_ALLOWED, status=PolicyViolation.Status.RESOLVED)
+    PolicyViolationFactory(rule_code=RuleCode.TOOL_NOT_ALLOWED, status=PolicyViolation.Status.RESOLVED)
+    PolicyViolationFactory(rule_code=RuleCode.TOOL_NOT_ALLOWED)
+    client.force_login(lead_user)
+
+    content = client.get(reverse("policy:console")).content.decode()
+    table = re.search(r'<table[^>]*id="policy-rule-chart-table".*?</table>', content, re.DOTALL).group(0)
+    link, count, open_count = re.search(
+        r'<tr><td><a class="link" href="([^"]+)">[^<]*</a></td><td>(\d+)</td><td>(\d+)</td></tr>', table
+    ).groups()
+    assert (count, open_count) == ("3", "1")
+
+    followed = client.get(link.replace("&amp;", "&").split("#")[0])
+    followed_ids = {violation.pk for violation in followed.context["page_obj"].object_list}
+    assert followed_ids == set(PolicyViolation.objects.values_list("pk", flat=True))
 
 
 @freeze_time("2026-06-15T12:00:00Z")

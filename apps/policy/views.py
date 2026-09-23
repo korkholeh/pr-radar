@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from typing import Any
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
@@ -23,7 +24,7 @@ from apps.policy.forms import (
     ViolationFilterForm,
 )
 from apps.policy.messages import rule_label
-from apps.policy.models import AIPolicy, SensitivePathRule
+from apps.policy.models import AIPolicy, PolicyViolation, SensitivePathRule
 from apps.policy.selectors import (
     compliance_kpis,
     disclosure_mismatch_pull_requests,
@@ -128,7 +129,21 @@ def _console_page_context(
             "rule_code": row.rule_code,
             "label": rule_label(row.rule_code),
             "count": row.count,
-            "percent": round(row.count / max_count * 100) if max_count else 0,
+            "open_count": row.open_count,
+            "closed_count": row.count - row.open_count,
+            "open_percent": round(row.open_count / max_count * 100) if max_count else 0,
+            "closed_percent": round((row.count - row.open_count) / max_count * 100) if max_count else 0,
+            # The chart counts every status over the period; the table defaults to open only and
+            # no dates. The link opens the table on exactly what the bar counts.
+            "table_query": urlencode(
+                {
+                    "rule_code": row.rule_code,
+                    "status": PolicyViolation.Status.values,
+                    "date_from": start.isoformat(),
+                    "date_to": end.isoformat(),
+                },
+                doseq=True,
+            ),
         }
         for row in rule_counts
     ]

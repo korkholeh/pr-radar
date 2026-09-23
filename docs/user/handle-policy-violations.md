@@ -9,8 +9,12 @@ reference if you need to know exactly why a violation fired.
 Open **Policy** in the top bar. The top of the page shows four KPI cards for the selected period (last 30 days by
 default): open violations, new violations, the AI-PR compliance rate (share of AI PRs with no open violation),
 and the disclosure-mismatch count. A rate based on fewer than 5 AI PRs is shown greyed out with a note instead of
-a misleadingly precise number — there just isn't enough data yet. Below the cards, a by-rule distribution shows
-which of the nine rules fired most in the period, and a short list surfaces every PR with a `DISCLOSURE_MISMATCH`
+a misleadingly precise number — there just isn't enough data yet. Below the cards, **New violations by rule** shows
+which rules fired most in the period. It counts every violation raised in the period whatever its status now, so
+each bar is split into the part still open and the part acknowledged, waived or resolved, with "open / total" next
+to it. A rule can have a bar and still show nothing in the table below, which lists open violations only by
+default — typically because a later recompute found the condition gone and resolved them. Click a rule's name to
+open the table on exactly the violations its bar counts (every status, the same dates). A short list surfaces every PR with a `DISCLOSURE_MISMATCH`
 (disclosure says "none" but a high-confidence AI signal was found) so you can go straight to the PRs most worth a
 look.
 

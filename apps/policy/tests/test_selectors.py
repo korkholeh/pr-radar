@@ -191,3 +191,15 @@ def test_filter_dropdowns_still_list_an_archived_project_and_repository():
 
     assert archived_project in projects_in_scope(scope)
     assert archived_repository in repositories_in_scope(scope)
+
+
+def test_violations_by_rule_counts_open_separately():
+    project = ProjectFactory()
+    pr = _pr_in_project(project)
+    Status = PolicyViolation.Status
+    for status in (Status.OPEN, Status.RESOLVED, Status.WAIVED):
+        PolicyViolationFactory(pull_request=pr, rule_code=RuleCode.NO_TESTS, status=status)
+
+    today = timezone.now().date()
+    [row] = violations_by_rule(_scope_for(project), today, today)
+    assert (row.count, row.open_count) == (3, 1)

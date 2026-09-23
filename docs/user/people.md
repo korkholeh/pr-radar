@@ -54,7 +54,7 @@ scoped to the period.
 rule — highest severity first — with the total and how many are now open, acknowledged, waived or resolved, plus an
 "All rules" total. The line above the table says how many *distinct* pull requests the violations were found on —
 one pull request can break several rules. Violations are counted by the day they were recorded, the same window as
-the "Violations by rule" chart.
+the "New violations by rule" chart on the Policy page.
 
 **Review load.** How many reviews this person gave in the period, for context — this is workload, not a
 performance ranking.

@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
 
-from django.db.models import Count, QuerySet
+from django.db.models import Count, Q, QuerySet
 
 from apps.accounts.selectors import ScopeFilter
 from apps.activity.models import PullRequest
@@ -69,6 +69,10 @@ def violations_for_pull_request(scope: ScopeFilter, pk: int) -> QuerySet[PolicyV
 class RuleCount:
     rule_code: str
     count: int
+    # Of `count`, how many are still open. The rest were acknowledged, waived or resolved (often
+    # automatically, when a recompute found the condition gone), which is why the console's table —
+    # open only by default — can hold none of a rule the chart still shows.
+    open_count: int = 0
 
 
 def violations_by_rule(
@@ -81,8 +85,15 @@ def violations_by_rule(
     )
     if status:
         queryset = queryset.filter(status__in=status)
-    rows = queryset.values("rule_code").annotate(count=Count("id")).order_by("-count", "rule_code")
-    return [RuleCount(rule_code=row["rule_code"], count=row["count"]) for row in rows]
+    rows = (
+        queryset.values("rule_code")
+        .annotate(count=Count("id"), open_count=Count("id", filter=Q(status=PolicyViolation.Status.OPEN)))
+        .order_by("-count", "rule_code")
+    )
+    return [
+        RuleCount(rule_code=row["rule_code"], count=row["count"], open_count=row["open_count"])
+        for row in rows
+    ]
 
 
 @dataclass(frozen=True)

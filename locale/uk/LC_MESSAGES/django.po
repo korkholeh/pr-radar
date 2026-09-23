@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 17:48+0000\n"
+"POT-Creation-Date: 2026-09-23 17:49+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -194,6 +194,8 @@ msgstr "XL"
 #: apps/activity/models.py:31
 #: apps/dashboards/templates/dashboards/partials/person_violations.html:25
 #: apps/policy/models.py:169
+#: apps/policy/templates/policy/partials/rule_chart.html:12
+#: apps/policy/templates/policy/partials/rule_chart.html:37
 msgid "Open"
 msgstr "Відкрито"
 
@@ -2989,7 +2991,7 @@ msgid "Reviewer"
 msgstr "Ревʼюер"
 
 #: apps/dashboards/charts.py:374
-#: apps/policy/templates/policy/partials/rule_chart.html:22
+#: apps/policy/templates/policy/partials/rule_chart.html:36
 msgid "Count"
 msgstr "Кількість"
 
@@ -3094,7 +3096,6 @@ msgstr ""
 "Для обох менше — краще."
 
 #: apps/dashboards/charts.py:464 apps/metrics/calculators/adoption.py:426
-#: apps/policy/templates/policy/partials/rule_chart.html:3
 msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
@@ -4394,7 +4395,7 @@ msgstr "Порушення політики цієї людини за прав�
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:34
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:105
 #: apps/policy/templates/policy/console.html:61
-#: apps/policy/templates/policy/partials/rule_chart.html:21
+#: apps/policy/templates/policy/partials/rule_chart.html:35
 #: apps/policy/templates/policy/partials/violations.html:28
 msgid "Rule"
 msgstr "Правило"
@@ -5012,7 +5013,7 @@ msgstr "Обчислення churn перевищило час очікуван�
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:469 apps/policy/views.py:105
+#: apps/dashboards/views.py:469 apps/policy/views.py:106
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -5026,7 +5027,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:473 apps/policy/views.py:109
+#: apps/dashboards/views.py:473 apps/policy/views.py:110
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -7077,11 +7078,30 @@ msgid "Publish a policy version to start evaluating pull requests against it."
 msgstr ""
 "Опублікуйте версію політики, щоб почати оцінювати pull request-и за нею."
 
-#: apps/policy/templates/policy/partials/rule_chart.html:18
+#: apps/policy/templates/policy/partials/rule_chart.html:3
+msgid "New violations by rule"
+msgstr "Нові порушення за правилами"
+
+#: apps/policy/templates/policy/partials/rule_chart.html:5
+#, python-format
+msgid ""
+"Violations raised from %(start)s to %(end)s, in every status. The table "
+"below shows open violations only unless you change its filter; a rule's name "
+"opens the table on exactly what its bar counts."
+msgstr ""
+"Порушення, створені з %(start)s по %(end)s, у будь-якому статусі. Таблиця "
+"нижче показує лише нерозглянуті порушення, доки ви не зміните її фільтр; "
+"назва правила відкриває таблицю саме на тих записах, які рахує його стовпчик."
+
+#: apps/policy/templates/policy/partials/rule_chart.html:15
+msgid "Acknowledged, waived or resolved"
+msgstr "Взято до відома, знято вимогу або вирішено"
+
+#: apps/policy/templates/policy/partials/rule_chart.html:32
 msgid "Violations by rule (data table)"
 msgstr "Порушення за правилом (таблиця даних)"
 
-#: apps/policy/templates/policy/partials/rule_chart.html:33
+#: apps/policy/templates/policy/partials/rule_chart.html:48
 msgid "No violations in this period."
 msgstr "За цей період порушень немає."
 

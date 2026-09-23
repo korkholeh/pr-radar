@@ -1,15 +1,29 @@
 {% load i18n %}
 <div class="card card-body mb-6" id="policy-rule-chart">
-  <h2 class="section-title mb-3">{% translate "Violations by rule" %}</h2>
+  <h2 class="section-title mb-1">{% translate "New violations by rule" %}</h2>
+  <p class="text-sm text-text-muted mb-3">
+    {% blocktranslate with start=period_start|date:"SHORT_DATE_FORMAT" end=period_end|date:"SHORT_DATE_FORMAT" trimmed %}
+      Violations raised from {{ start }} to {{ end }}, in every status. The table below shows open violations only unless you change its filter; a rule's name opens the table on exactly what its bar counts.
+    {% endblocktranslate %}
+  </p>
   {% if chart_rows %}
+    <p class="flex flex-wrap items-center gap-4 mb-2 text-sm text-text-muted" aria-hidden="true">
+      <span class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded" style="background: var(--series-1)"></span>{% translate "Open" %}
+      </span>
+      <span class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded" style="background: var(--series-8)"></span>{% translate "Acknowledged, waived or resolved" %}
+      </span>
+    </p>
     <ul class="space-y-1 mb-2" aria-hidden="true">
       {% for row in chart_rows %}
         <li class="flex items-center gap-2">
-          <span class="w-56 truncate text-sm text-text">{{ row.label }}</span>
-          <span class="flex-1 bg-surface-2 rounded h-4">
-            <span class="block h-4 rounded bg-[var(--series-1)]" style="width: {{ row.percent }}%"></span>
+          <a class="link w-56 truncate text-sm" href="{% url 'policy:console' %}?{{ row.table_query }}#violations" tabindex="-1">{{ row.label }}</a>
+          <span class="flex-1 flex bg-surface-2 rounded h-4 overflow-hidden">
+            <span class="block h-4" style="width: {{ row.open_percent }}%; background: var(--series-1)"></span>
+            <span class="block h-4" style="width: {{ row.closed_percent }}%; background: var(--series-8)"></span>
           </span>
-          <span class="w-10 text-right text-sm text-text-muted">{{ row.count }}</span>
+          <span class="w-16 text-right text-sm text-text-muted">{{ row.open_count }} / {{ row.count }}</span>
         </li>
       {% endfor %}
     </ul>
@@ -20,11 +34,12 @@
           <tr>
             <th scope="col">{% translate "Rule" %}</th>
             <th scope="col">{% translate "Count" %}</th>
+            <th scope="col">{% translate "Open" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for row in chart_rows %}
-            <tr><td>{{ row.label }}</td><td>{{ row.count }}</td></tr>
+            <tr><td><a class="link" href="{% url 'policy:console' %}?{{ row.table_query }}#violations">{{ row.label }}</a></td><td>{{ row.count }}</td><td>{{ row.open_count }}</td></tr>
           {% endfor %}
         </tbody>
       </table>
