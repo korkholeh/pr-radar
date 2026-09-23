@@ -1,6 +1,7 @@
 """T14: `apps.dashboards.reviews` — `reviewer_load()`, `author_reviewer_matrix()` (with the
-"Other" fold) and `prs_waiting_for_review()`. Hand-computed counts, self-review excluded, bots
-excluded, an empty scope returns empty structures, and query counts stay constant as rows grow."""
+"Other" fold, axis counts, flags and self-review on the diagonal) and `prs_waiting_for_review()`.
+Hand-computed counts, self-review excluded from workload, bots excluded, an empty scope returns
+empty structures, and query counts stay constant as rows grow."""
 
 from __future__ import annotations
 
@@ -15,7 +16,12 @@ from apps.activity.factories import PullRequestFactory, ReviewFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, RepositoryFactory
 from apps.dashboards.params import DashboardParams
 from apps.dashboards.pr_filters import PRFilters
-from apps.dashboards.reviews import author_reviewer_matrix, prs_waiting_for_review, reviewer_load
+from apps.dashboards.reviews import (
+    author_reviewer_matrix,
+    heat_map_grid,
+    prs_waiting_for_review,
+    reviewer_load,
+)
 from apps.metrics.models import ScopeType
 from apps.metrics.types import Scope
 
@@ -129,9 +135,11 @@ def test_author_reviewer_matrix_hand_computed_cells():
     heatmap = author_reviewer_matrix(_scope(), _params())
 
     assert [axis.id for axis in heatmap.authors] == [author_person.id]
-    assert [axis.id for axis in heatmap.reviewers] == [reviewer_person.id]
-    assert heatmap.cells[author_person.id][reviewer_person.id] == 2
-    assert heatmap.max_value == 2
+    # The author never reviews, so they trail the reviewer axis as a zero column.
+    assert [axis.id for axis in heatmap.reviewers] == [reviewer_person.id, author_person.id]
+    # Two review rounds on one pull request: cells count distinct pull requests.
+    assert heatmap.cells[author_person.id][reviewer_person.id] == 1
+    assert heatmap.max_value == 1
 
 
 @pytest.mark.django_db
@@ -162,6 +170,111 @@ def test_author_reviewer_matrix_folds_the_rest_into_other():
     reviewer_ids = [axis.id for axis in heatmap.reviewers]
     assert big_reviewer.person_id in reviewer_ids
     assert None in reviewer_ids  # the folded "Other" bucket holds the small reviewer.
+
+
+MERGED = datetime.datetime(2026, 6, 20, tzinfo=datetime.UTC)
+
+
+def _merged_pr(repository, author):
+    return PullRequestFactory(
+        repository=repository,
+        author=author,
+        created_at=SUBMITTED,
+        state="merged",
+        merged_at=MERGED,
+    )
+
+
+@pytest.mark.django_db
+def test_author_reviewer_matrix_shows_self_review_on_the_diagonal_outside_the_heat_scale():
+    repository = RepositoryFactory()
+    person = PersonFactory(display_name="Solo")
+    identity = IdentityFactory(person=person)
+    other = IdentityFactory(person=PersonFactory(display_name="Other person"))
+    own_pr = PullRequestFactory(repository=repository, author=identity, created_at=SUBMITTED)
+    ReviewFactory(pull_request=own_pr, reviewer=identity, submitted_at=SUBMITTED)
+    ReviewFactory(pull_request=own_pr, reviewer=other, submitted_at=SUBMITTED)
+
+    heatmap = author_reviewer_matrix(_scope(), _params())
+    grid = heat_map_grid(heatmap)
+
+    assert heatmap.cells[person.id][person.id] == 1
+    diagonal = next(cell for cell in grid[0].cells if cell.reviewer.id == person.id)
+    assert diagonal.same_person and diagonal.is_self_review
+    assert diagonal.level == 0
+    # Self-review is not "reviewed by someone else" and does not count as review activity.
+    solo_column = next(axis for axis in heatmap.reviewers if axis.id == person.id)
+    assert solo_column.pr_count == 0
+
+
+@pytest.mark.django_db
+def test_author_reviewer_matrix_same_person_without_self_review_is_muted_not_flagged():
+    repository = RepositoryFactory()
+    person = PersonFactory(display_name="Author")
+    identity = IdentityFactory(person=person)
+    reviewer = IdentityFactory(person=PersonFactory(display_name="Reviewer"))
+    pr = PullRequestFactory(repository=repository, author=identity, created_at=SUBMITTED)
+    ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=SUBMITTED)
+
+    grid = heat_map_grid(author_reviewer_matrix(_scope(), _params()))
+
+    diagonal = next(cell for cell in grid[0].cells if cell.reviewer.id == person.id)
+    assert diagonal.same_person
+    assert not diagonal.is_self_review
+
+
+@pytest.mark.django_db
+def test_author_reviewer_matrix_flags_an_author_nobody_else_reviews():
+    repository = RepositoryFactory()
+    lonely = PersonFactory(display_name="Lonely")
+    lonely_identity = IdentityFactory(person=lonely)
+    for _index in range(5):
+        _merged_pr(repository, lonely_identity)
+
+    heatmap = author_reviewer_matrix(_scope(), _params())
+
+    author = next(axis for axis in heatmap.authors if axis.id == lonely.id)
+    assert author.pr_count == 5
+    assert author.reviewed_by_others == 0
+    assert author.flagged
+
+
+@pytest.mark.django_db
+def test_author_reviewer_matrix_does_not_flag_an_author_below_min_sample():
+    repository = RepositoryFactory()
+    person = PersonFactory(display_name="New")
+    identity = IdentityFactory(person=person)
+    for _index in range(4):
+        _merged_pr(repository, identity)
+
+    heatmap = author_reviewer_matrix(_scope(), _params())
+
+    assert not heatmap.authors[0].flagged
+
+
+@pytest.mark.django_db
+def test_author_reviewer_matrix_flags_a_very_low_activity_reviewer():
+    repository = RepositoryFactory()
+    author = IdentityFactory(person=PersonFactory(display_name="Author"))
+    busy = [IdentityFactory(person=PersonFactory(display_name=f"Busy {n}")) for n in range(3)]
+    idle_person = PersonFactory(display_name="Idle")
+    idle = IdentityFactory(person=idle_person)
+    for index in range(8):
+        pr = _merged_pr(repository, author)
+        for reviewer in busy:
+            ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=SUBMITTED)
+        if index == 0:
+            ReviewFactory(pull_request=pr, reviewer=idle, submitted_at=SUBMITTED)
+
+    heatmap = author_reviewer_matrix(_scope(), _params())
+
+    by_id = {axis.id: axis for axis in heatmap.reviewers}
+    assert by_id[idle_person.id].pr_count == 1
+    assert by_id[idle_person.id].flagged  # 1 < 25% of the median 8
+    assert not any(by_id[reviewer.person_id].flagged for reviewer in busy)
+    # The author never reviews: a zero column, flagged as well.
+    assert by_id[author.person_id].pr_count == 0
+    assert by_id[author.person_id].flagged
 
 
 @pytest.mark.django_db

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 08:44+0000\n"
+"POT-Creation-Date: 2026-09-23 09:11+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -960,7 +960,8 @@ msgid "Charlie"
 msgstr "Charlie"
 
 #: apps/ai_detection/models.py:44 apps/catalog/models.py:101
-#: apps/dashboards/reviews.py:104 apps/policy/forms.py:448
+#: apps/dashboards/reviews.py:252 apps/dashboards/reviews.py:270
+#: apps/policy/forms.py:448
 msgid "Other"
 msgstr "Інше"
 
@@ -2050,33 +2051,46 @@ msgstr ""
 "Кількість авторів/ревʼюерів на кожній осі теплової карти ревʼю; решта "
 "згортаються в «Інше»."
 
-#: apps/catalog/setting_defs.py:484
+#: apps/catalog/setting_defs.py:489
+msgid ""
+"Reviews heat map: a reviewer is flagged as very low-activity below this "
+"percentage of the median reviewer's pull-request count."
+msgstr "Теплова карта ревʼю: ревʼюера позначено як дуже малоактивного, якщо кількість переглянутих ним пул-реквестів нижча за цей відсоток від медіани ревʼюерів."
+
+#: apps/catalog/setting_defs.py:499
+msgid ""
+"Reviews heat map: an author with at least MIN_SAMPLE merged pull requests is "
+"flagged when fewer than this percentage of them were reviewed by someone "
+"else."
+msgstr "Теплова карта ревʼю: автора з щонайменше MIN_SAMPLE змердженими пул-реквестами позначено, якщо ревʼю від когось іншого отримали менше ніж цей відсоток із них."
+
+#: apps/catalog/setting_defs.py:504
 msgid "Default UI language for a new user."
 msgstr "Мова інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:489
+#: apps/catalog/setting_defs.py:509
 msgid "Whether to derive the initial UI language from the browser."
 msgstr "Чи визначати початкову мову інтерфейсу з браузера."
 
-#: apps/catalog/setting_defs.py:492
+#: apps/catalog/setting_defs.py:512
 msgid "Default UI theme for a new user."
 msgstr "Тема інтерфейсу за замовчуванням для нового користувача."
 
-#: apps/catalog/setting_defs.py:497
+#: apps/catalog/setting_defs.py:517
 msgid "Unit durations are rendered in for CSV/XLSX exports."
 msgstr "Одиниця, в якій відображається тривалість в експортах CSV/XLSX."
 
-#: apps/catalog/setting_defs.py:501
+#: apps/catalog/setting_defs.py:521
 msgid "Maximum rows a synchronous export may return."
 msgstr "Максимальна кількість рядків для синхронного експорту."
 
-#: apps/catalog/setting_defs.py:507
+#: apps/catalog/setting_defs.py:527
 msgid "Days a background export file is kept before cleanup deletes it."
 msgstr ""
 "Кількість днів, протягом яких файл фонового експорту зберігається до "
 "видалення."
 
-#: apps/catalog/setting_defs.py:514
+#: apps/catalog/setting_defs.py:534
 msgid ""
 "Minutes a sync re-reads before the last watermark, to absorb late-arriving "
 "updates."
@@ -2084,41 +2098,41 @@ msgstr ""
 "Скільки хвилин синхронізація перечитує до останньої позначки, щоб врахувати "
 "запізнілі оновлення."
 
-#: apps/catalog/setting_defs.py:517
+#: apps/catalog/setting_defs.py:537
 msgid "Pull requests fetched per GraphQL page."
 msgstr "Кількість PR, що завантажуються за одну сторінку GraphQL."
 
-#: apps/catalog/setting_defs.py:522
+#: apps/catalog/setting_defs.py:542
 msgid "Items fetched per page for a pull request's nested connections."
 msgstr ""
 "Кількість елементів, що завантажуються за сторінку для вкладених зв'язків PR."
 
-#: apps/catalog/setting_defs.py:529
+#: apps/catalog/setting_defs.py:549
 msgid "Primary rate-limit remaining below which the client waits for reset."
 msgstr "Залишок основного ліміту запитів, нижче якого клієнт чекає скидання."
 
-#: apps/catalog/setting_defs.py:533
+#: apps/catalog/setting_defs.py:553
 msgid "Maximum retry attempts for a transient request failure."
 msgstr "Максимальна кількість повторних спроб при тимчасовій помилці запиту."
 
-#: apps/catalog/setting_defs.py:536
+#: apps/catalog/setting_defs.py:556
 msgid "Maximum backoff delay between retry attempts."
 msgstr "Максимальна затримка між повторними спробами."
 
-#: apps/catalog/setting_defs.py:542
+#: apps/catalog/setting_defs.py:562
 msgid ""
 "Minutes after which an unreleased sync lock is considered stale and stolen."
 msgstr ""
 "Хвилини, після яких незвільнене блокування синхронізації вважається "
 "застарілим і перехоплюється."
 
-#: apps/catalog/setting_defs.py:549
+#: apps/catalog/setting_defs.py:569
 msgid "Days before token expiry at which the admin banner starts warning."
 msgstr ""
 "Дні до закінчення терміну дії токена, з яких банер починає попереджати "
 "адміністратора."
 
-#: apps/catalog/setting_defs.py:556
+#: apps/catalog/setting_defs.py:576
 msgid ""
 "Minimum minutes between two non-forced verifications of the same connection."
 msgstr ""
@@ -2967,7 +2981,7 @@ msgid "Violations"
 msgstr "Порушення"
 
 #: apps/dashboards/charts.py:378 apps/dashboards/exports/columns.py:134
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:27
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:31
 msgid "Reviewer"
 msgstr "Ревʼюер"
 
@@ -3178,7 +3192,7 @@ msgstr "Заголовок"
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:15
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:46
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:154
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:20
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:24
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:45
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:13
 msgid "Author"
@@ -3843,21 +3857,99 @@ msgstr ""
 msgid "Resolved policy violations for this pull request"
 msgstr "Закриті порушення політики для цього pull request"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:10
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:13
 msgid "Author × reviewer"
 msgstr "Автор × ревʼюер"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:13
-msgid ""
-"Each row is a pull-request author, each column is one of their reviewers."
-msgstr ""
-"Кожен рядок — автор пул-реквестів, кожен стовпець — один із його ревʼюерів."
-
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:16
+msgid ""
+"Each row is a pull-request author, each column is one of their reviewers. "
+"Cells count distinct pull requests. The number next to an author is their "
+"pull requests merged in the period; next to a reviewer, the pull requests by "
+"others they reviewed in the period."
+msgstr "Кожен рядок — автор пул-реквестів, кожен стовпець — один із його ревʼюерів. Клітинки рахують окремі пул-реквести. Число біля автора — його пул-реквести, змерджені за період; біля ревʼюера — пул-реквести інших авторів, які він переглянув за період."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:20
 msgid "Reviews by author and reviewer"
 msgstr "Ревʼю за автором і ревʼюером"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:41
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:37
+#, python-format
+msgid ""
+"%(name)s reviewed %(count)s pull request by others in the period — very low "
+"review activity"
+msgid_plural ""
+"%(name)s reviewed %(count)s pull requests by others in the period — very low "
+"review activity"
+msgstr[0] "%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період — дуже низька активність у ревʼю"
+msgstr[1] "%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період — дуже низька активність у ревʼю"
+msgstr[2] "%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період — дуже низька активність у ревʼю"
+msgstr[3] "%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період — дуже низька активність у ревʼю"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:43
+#, python-format
+msgid "%(name)s reviewed %(count)s pull request by others in the period"
+msgid_plural ""
+"%(name)s reviewed %(count)s pull requests by others in the period"
+msgstr[0] "%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період"
+msgstr[1] "%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період"
+msgstr[2] "%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період"
+msgstr[3] "%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:59
+msgid "very low review activity"
+msgstr "дуже низька активність у ревʼю"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:67
+#, python-format
+msgid ""
+"%(reviewed)s of %(merged)s pull request %(author)s merged in the period had "
+"a review by someone else — rarely reviewed by others"
+msgid_plural ""
+"%(reviewed)s of %(merged)s pull requests %(author)s merged in the period had "
+"a review by someone else — rarely reviewed by others"
+msgstr[0] "%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[1] "%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[2] "%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[3] "%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:73
+#, python-format
+msgid ""
+"%(reviewed)s of %(merged)s pull request %(author)s merged in the period had "
+"a review by someone else"
+msgid_plural ""
+"%(reviewed)s of %(merged)s pull requests %(author)s merged in the period had "
+"a review by someone else"
+msgstr[0] "%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось іншого отримали %(reviewed)s"
+msgstr[1] "%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось іншого отримали %(reviewed)s"
+msgstr[2] "%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось іншого отримали %(reviewed)s"
+msgstr[3] "%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось іншого отримали %(reviewed)s"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:90
+msgid "rarely reviewed by others"
+msgstr "рідко ревʼюється іншими"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:94
+#, python-format
+msgid "Self-review: %(author)s reviewed %(value)s of their own pull requests"
+msgid_plural ""
+"Self-review: %(author)s reviewed %(value)s of their own pull requests"
+msgstr[0] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власний пул-реквест"
+msgstr[1] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власні пул-реквести"
+msgstr[2] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власних пул-реквестів"
+msgstr[3] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власного пул-реквеста"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:106
+msgid "self-review"
+msgstr "саморевʼю"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:113
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:116
+msgid "Same person, no self-review"
+msgstr "Та сама людина, саморевʼю немає"
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:119
 #, python-format
 msgid "%(reviewer)s reviewed %(value)s pull request by %(author)s"
 msgid_plural "%(reviewer)s reviewed %(value)s pull requests by %(author)s"
@@ -3870,7 +3962,42 @@ msgstr[2] ""
 msgstr[3] ""
 "%(reviewer)s переглянув(-ла) %(value)s пул-реквеста автора %(author)s"
 
-#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:61
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:142
+#, python-format
+msgid ""
+"%(count)s self-reviewed pull request is not on the grid because its author "
+"is grouped under “Other”."
+msgid_plural ""
+"%(count)s self-reviewed pull requests are not on the grid because their "
+"authors are grouped under “Other”."
+msgstr[0] "%(count)s пул-реквест із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
+msgstr[1] "%(count)s пул-реквести із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
+msgstr[2] "%(count)s пул-реквестів із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
+msgstr[3] "%(count)s пул-реквеста із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:152
+#, python-format
+msgid ""
+"Reviewer: very low review activity — fewer pull requests reviewed than "
+"%(pct)s%% of the median active reviewer."
+msgstr "Ревʼюер: дуже низька активність у ревʼю — переглянуто менше пул-реквестів, ніж %(pct)s%% від медіани активних ревʼюерів."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:158
+#, python-format
+msgid ""
+"Author: rarely reviewed by others — fewer than %(pct)s%% of merged pull "
+"requests reviewed by someone else (at least %(min_sample)s merged)."
+msgstr "Автор: рідко ревʼюється іншими — ревʼю від когось іншого отримали менше ніж %(pct)s%% змерджених пул-реквестів (якщо їх щонайменше %(min_sample)s)."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:164
+msgid "Self-review: the author reviewed their own pull request."
+msgstr "Саморевʼю: автор переглянув власний пул-реквест."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:168
+msgid "Same person as author and reviewer, no self-review."
+msgstr "Та сама людина як автор і ревʼюер, саморевʼю немає."
+
+#: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:172
 msgid "No reviews in this period."
 msgstr "У цьому періоді немає ревʼю."
 
@@ -3899,7 +4026,7 @@ msgstr "Pull request"
 msgid "Waiting"
 msgstr "Час очікування"
 
-#: apps/dashboards/templates/dashboards/partials/reviews_content.html:68
+#: apps/dashboards/templates/dashboards/partials/reviews_content.html:66
 msgid "No pull request is waiting for review."
 msgstr "Жоден pull request не очікує ревʼю."
 
@@ -4172,7 +4299,7 @@ msgstr "Обчислення churn перевищило час очікуван�
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:463 apps/policy/views.py:105
+#: apps/dashboards/views.py:464 apps/policy/views.py:105
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -4186,7 +4313,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:467 apps/policy/views.py:109
+#: apps/dashboards/views.py:468 apps/policy/views.py:109
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -6475,6 +6602,12 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:17
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#~ msgid ""
+#~ "Each row is a pull-request author, each column is one of their reviewers."
+#~ msgstr ""
+#~ "Кожен рядок — автор пул-реквестів, кожен стовпець — один із його "
+#~ "ревʼюерів."
 
 #~ msgid "Colour"
 #~ msgstr "Колір"

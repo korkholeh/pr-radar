@@ -481,6 +481,26 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
         _("Authors/reviewers shown per axis on the reviews heat map; the rest fold into 'Other'."),
         "ui",
     ),
+    SettingDef(
+        "REVIEW_LOW_ACTIVITY_PCT",
+        "int",
+        25,
+        _(
+            "Reviews heat map: a reviewer is flagged as very low-activity below this percentage of "
+            "the median reviewer's pull-request count."
+        ),
+        "ui",
+    ),
+    SettingDef(
+        "REVIEW_LOW_COVERAGE_PCT",
+        "int",
+        50,
+        _(
+            "Reviews heat map: an author with at least MIN_SAMPLE merged pull requests is flagged "
+            "when fewer than this percentage of them were reviewed by someone else."
+        ),
+        "ui",
+    ),
     SettingDef("DEFAULT_UI_LANGUAGE", "str", "en", _("Default UI language for a new user."), "ui"),
     SettingDef(
         "DETECT_BROWSER_LANGUAGE",

@@ -303,6 +303,22 @@
     @apply bg-surface-2;
   }
 
+  /* Author × reviewer heat map: a wide team scrolls sideways inside its own wrapper instead of
+     widening the page, and the author column stays pinned while it does. `relative` makes the
+     wrapper the containing block of the cells' `sr-only` spans, which are absolutely positioned
+     and would otherwise escape the clip and widen the page anyway. */
+  .heat-map-scroll {
+    @apply relative max-w-full overflow-x-auto pb-2;
+  }
+
+  .heat-map {
+    @apply border-separate border-spacing-0 text-sm;
+  }
+
+  .heat-map .heat-map-sticky {
+    @apply sticky left-0 z-10 bg-bg;
+  }
+
   /* Table cells hold plain links (a PR, a person, an edit action); give them the link look
      without every row having to say so. */
   .data-table tbody a:not(.btn),

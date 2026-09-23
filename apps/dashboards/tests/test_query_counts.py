@@ -194,8 +194,9 @@ def test_pull_requests_index_query_count(client, lead_user, django_assert_num_qu
 def test_reviews_page_query_count(client, lead_user, django_assert_num_queries):
     client.force_login(lead_user)
     _seed_project(1)
-    # +1: see test_overview_query_count.
-    with django_assert_num_queries(22):
+    # +1: see test_overview_query_count. +2: the heat map also reads merged PRs per author (so
+    # an author nobody reviews still gets a row) and then resolves those authors' names.
+    with django_assert_num_queries(24):
         client.get(reverse("dashboards:reviews") + f"?{PERIOD_QS}")
 
 

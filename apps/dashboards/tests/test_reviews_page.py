@@ -111,6 +111,28 @@ def test_heat_map_cells_carry_text_and_colour(client, lead_user):
 
 
 @pytest.mark.django_db
+def test_heat_map_scrolls_on_its_own_and_marks_self_review_and_same_person(client, lead_user):
+    repository = RepositoryFactory()
+    author = IdentityFactory(person=PersonFactory(display_name="Aria"))
+    reviewer = IdentityFactory(person=PersonFactory(display_name="Rae"))
+    pr = PullRequestFactory(repository=repository, author=author, created_at=SUBMITTED)
+    ReviewFactory(pull_request=pr, reviewer=reviewer, submitted_at=SUBMITTED)
+    ReviewFactory(pull_request=pr, reviewer=author, submitted_at=SUBMITTED)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:reviews") + f"?{PERIOD_QS}")
+    content = response.content.decode()
+
+    assert 'data-testid="heat-map-scroll"' in content
+    assert "data-self-review" in content
+    assert "Self-review: Aria reviewed 1 of their own pull requests" in content
+    # Rae never authored, so there is no Rae row and hence no muted Rae×Rae cell; Aria's own
+    # cell is the self-review above, not a muted one.
+    assert "data-same-person" not in content
+    assert 'data-testid="heat-map-legend"' in content
+
+
+@pytest.mark.django_db
 def test_reviewer_load_table_defaults_to_workload_order(client, lead_user):
     repository = RepositoryFactory()
     heavy = IdentityFactory(person=PersonFactory(display_name="Heavy"))

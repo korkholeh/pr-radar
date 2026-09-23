@@ -4,59 +4,170 @@ Author x reviewer heat map (plan §4): a server-side HTML table since Chart.js h
 Rows are authors, columns are reviewers; the corner cell and the column-group header spell that
 out so the axes are never guessed, and every cell carries a `title` naming both people.
 Every cell carries the count as visible text as well as its `--heat-0`..`--heat-4` colour (spec
-§10.5: status is never colour-only). `id=None` on either axis is the folded "Other" bucket.
+§10.5: status is never colour-only) — and so does every flag: a flagged name carries a glyph, a
+`title` and screen-reader text, a self-review cell a glyph, a same-person cell a dash.
+`id=None` on either axis is the folded "Other" bucket. The table scrolls sideways inside its own
+wrapper with the author column pinned, so a wide team never widens the page.
 {% endcomment %}
 <section class="mb-6" data-testid="reviewer-heat-map">
-  <h2 class="text-lg font-semibold text-[var(--text)] mb-2">{% translate "Author × reviewer" %}</h2>
+  <h2 class="text-lg font-semibold text-[var(--text)] mb-2" id="reviewer-heat-map-heading">{% translate "Author × reviewer" %}</h2>
   {% if heat_grid %}
     <p class="text-sm text-[var(--text-muted)] mb-2">
-      {% translate "Each row is a pull-request author, each column is one of their reviewers." %}
+      {% translate "Each row is a pull-request author, each column is one of their reviewers. Cells count distinct pull requests. The number next to an author is their pull requests merged in the period; next to a reviewer, the pull requests by others they reviewed in the period." %}
     </p>
-    <table class="text-sm" id="reviewer-heat-map-table">
-      <caption class="sr-only">{% translate "Reviews by author and reviewer" %}</caption>
-      <thead>
-        <tr>
-          <th scope="col" rowspan="2" class="text-left px-2 py-1 align-bottom text-[var(--text-muted)]">
-            {% translate "Author" %} <span aria-hidden="true">↓</span>
-          </th>
-          <th
-            scope="colgroup"
-            colspan="{{ heat_map.reviewers|length }}"
-            class="text-center px-2 py-1 text-[var(--text-muted)] border-b border-[var(--border)]"
-          >
-            {% translate "Reviewer" %} <span aria-hidden="true">→</span>
-          </th>
-        </tr>
-        <tr>
-          {% for reviewer in heat_map.reviewers %}
-            <th scope="col" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ reviewer.label }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in heat_grid %}
+    <div class="heat-map-scroll" role="region" tabindex="0" aria-labelledby="reviewer-heat-map-heading" data-testid="heat-map-scroll">
+      <table class="heat-map" id="reviewer-heat-map-table">
+        <caption class="sr-only">{% translate "Reviews by author and reviewer" %}</caption>
+        <thead>
           <tr>
-            <th scope="row" class="text-left px-2 py-1 text-[var(--text-muted)]">{{ row.author.label }}</th>
-            {% for cell in row.cells %}
-              {% blocktranslate trimmed asvar cell_title count value=cell.value with author=row.author.label reviewer=cell.reviewer.label %}
-                {{ reviewer }} reviewed {{ value }} pull request by {{ author }}
-              {% plural %}
-                {{ reviewer }} reviewed {{ value }} pull requests by {{ author }}
-              {% endblocktranslate %}
-              <td
-                class="px-2 py-1 text-center {% if cell.level >= 3 %}text-[var(--on-heat)]{% else %}text-[var(--text)]{% endif %}"
-                style="background-color: var(--heat-{{ cell.level }})"
-                data-testid="heat-cell"
-                data-heat-level="{{ cell.level }}"
-                title="{{ cell_title }}"
+            <th scope="col" rowspan="2" class="heat-map-sticky text-left px-2 py-1 align-bottom text-[var(--text-muted)]">
+              {% translate "Author" %} <span aria-hidden="true">↓</span>
+            </th>
+            <th
+              scope="colgroup"
+              colspan="{{ heat_map.reviewers|length }}"
+              class="text-left px-2 py-1 text-[var(--text-muted)] border-b border-[var(--border)]"
+            >
+              {% translate "Reviewer" %} <span aria-hidden="true">→</span>
+            </th>
+          </tr>
+          <tr>
+            {% for reviewer in heat_map.reviewers %}
+              {% if reviewer.flagged %}
+                {% blocktranslate trimmed asvar reviewer_title count count=reviewer.pr_count with name=reviewer.label %}
+                  {{ name }} reviewed {{ count }} pull request by others in the period — very low review activity
+                {% plural %}
+                  {{ name }} reviewed {{ count }} pull requests by others in the period — very low review activity
+                {% endblocktranslate %}
+              {% else %}
+                {% blocktranslate trimmed asvar reviewer_title count count=reviewer.pr_count with name=reviewer.label %}
+                  {{ name }} reviewed {{ count }} pull request by others in the period
+                {% plural %}
+                  {{ name }} reviewed {{ count }} pull requests by others in the period
+                {% endblocktranslate %}
+              {% endif %}
+              <th
+                scope="col"
+                class="text-left align-bottom px-2 py-1 whitespace-nowrap {% if reviewer.flagged %}text-[var(--warning)] font-semibold{% else %}text-[var(--text-muted)]{% endif %}"
+                title="{{ reviewer_title }}"
+                data-testid="heat-reviewer"
+                {% if reviewer.flagged %}data-flagged="low-activity"{% endif %}
               >
-                {{ cell.value }}
-              </td>
+                {% if reviewer.flagged %}<span aria-hidden="true">⚠&#xFE0E;</span>{% endif %}
+                {{ reviewer.label }}
+                <span class="font-normal tabular-nums">· {{ reviewer.pr_count }}</span>
+                {% if reviewer.flagged %}<span class="sr-only">{% translate "very low review activity" %}</span>{% endif %}
+              </th>
             {% endfor %}
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for row in heat_grid %}
+            {% if row.author.flagged %}
+              {% blocktranslate trimmed asvar author_title count merged=row.author.pr_count with author=row.author.label reviewed=row.author.reviewed_by_others %}
+                {{ reviewed }} of {{ merged }} pull request {{ author }} merged in the period had a review by someone else — rarely reviewed by others
+              {% plural %}
+                {{ reviewed }} of {{ merged }} pull requests {{ author }} merged in the period had a review by someone else — rarely reviewed by others
+              {% endblocktranslate %}
+            {% else %}
+              {% blocktranslate trimmed asvar author_title count merged=row.author.pr_count with author=row.author.label reviewed=row.author.reviewed_by_others %}
+                {{ reviewed }} of {{ merged }} pull request {{ author }} merged in the period had a review by someone else
+              {% plural %}
+                {{ reviewed }} of {{ merged }} pull requests {{ author }} merged in the period had a review by someone else
+              {% endblocktranslate %}
+            {% endif %}
+            <tr>
+              <th
+                scope="row"
+                class="heat-map-sticky text-left px-2 py-1 whitespace-nowrap {% if row.author.flagged %}text-[var(--warning)] font-semibold{% else %}text-[var(--text-muted)]{% endif %}"
+                title="{{ author_title }}"
+                data-testid="heat-author"
+                {% if row.author.flagged %}data-flagged="rarely-reviewed"{% endif %}
+              >
+                {% if row.author.flagged %}<span aria-hidden="true">⚠&#xFE0E;</span>{% endif %}
+                {{ row.author.label }}
+                <span class="font-normal tabular-nums">· {{ row.author.pr_count }}</span>
+                {% if row.author.flagged %}<span class="sr-only">{% translate "rarely reviewed by others" %}</span>{% endif %}
+              </th>
+              {% for cell in row.cells %}
+                {% if cell.is_self_review %}
+                  {% blocktranslate trimmed asvar cell_title count value=cell.value with author=row.author.label %}
+                    Self-review: {{ author }} reviewed {{ value }} of their own pull requests
+                  {% plural %}
+                    Self-review: {{ author }} reviewed {{ value }} of their own pull requests
+                  {% endblocktranslate %}
+                  <td
+                    class="px-2 py-1 text-center font-semibold text-[var(--bad)] border-2 border-[var(--bad)]"
+                    data-testid="heat-cell"
+                    data-self-review
+                    title="{{ cell_title }}"
+                  >
+                    <span aria-hidden="true">↺</span> {{ cell.value }}
+                    <span class="sr-only">{% translate "self-review" %}</span>
+                  </td>
+                {% elif cell.same_person %}
+                  <td
+                    class="px-2 py-1 text-center text-[var(--text-muted)] opacity-60"
+                    data-testid="heat-cell"
+                    data-same-person
+                    title="{% translate "Same person, no self-review" %}"
+                  >
+                    <span aria-hidden="true">—</span>
+                    <span class="sr-only">{% translate "Same person, no self-review" %}</span>
+                  </td>
+                {% else %}
+                  {% blocktranslate trimmed asvar cell_title count value=cell.value with author=row.author.label reviewer=cell.reviewer.label %}
+                    {{ reviewer }} reviewed {{ value }} pull request by {{ author }}
+                  {% plural %}
+                    {{ reviewer }} reviewed {{ value }} pull requests by {{ author }}
+                  {% endblocktranslate %}
+                  <td
+                    class="px-2 py-1 text-center {% if cell.level >= 3 %}text-[var(--on-heat)]{% else %}text-[var(--text)]{% endif %}"
+                    style="background-color: var(--heat-{{ cell.level }})"
+                    data-testid="heat-cell"
+                    data-heat-level="{{ cell.level }}"
+                    title="{{ cell_title }}"
+                  >
+                    {{ cell.value }}
+                  </td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if heat_map.hidden_self_reviews %}
+      <p class="text-sm text-[var(--bad)] mt-2" data-testid="heat-hidden-self-reviews">
+        {% blocktranslate trimmed count count=heat_map.hidden_self_reviews %}
+          {{ count }} self-reviewed pull request is not on the grid because its author is grouped under “Other”.
+        {% plural %}
+          {{ count }} self-reviewed pull requests are not on the grid because their authors are grouped under “Other”.
+        {% endblocktranslate %}
+      </p>
+    {% endif %}
+    <ul class="text-sm text-[var(--text-muted)] mt-2 space-y-1" data-testid="heat-map-legend">
+      <li>
+        <span class="text-[var(--warning)] font-semibold" aria-hidden="true">⚠&#xFE0E;</span>
+        {% blocktranslate trimmed with pct=heat_thresholds.low_activity_pct %}
+          Reviewer: very low review activity — fewer pull requests reviewed than {{ pct }}% of the median active reviewer.
+        {% endblocktranslate %}
+      </li>
+      <li>
+        <span class="text-[var(--warning)] font-semibold" aria-hidden="true">⚠&#xFE0E;</span>
+        {% blocktranslate trimmed with pct=heat_thresholds.low_coverage_pct min_sample=heat_thresholds.min_sample %}
+          Author: rarely reviewed by others — fewer than {{ pct }}% of merged pull requests reviewed by someone else (at least {{ min_sample }} merged).
+        {% endblocktranslate %}
+      </li>
+      <li>
+        <span class="text-[var(--bad)] font-semibold" aria-hidden="true">↺</span>
+        {% translate "Self-review: the author reviewed their own pull request." %}
+      </li>
+      <li>
+        <span aria-hidden="true">—</span>
+        {% translate "Same person as author and reviewer, no self-review." %}
+      </li>
+    </ul>
   {% else %}
     <p class="text-[var(--text-muted)]">{% translate "No reviews in this period." %}</p>
   {% endif %}

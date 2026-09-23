@@ -93,6 +93,8 @@ missing.
 | ui | `DASHBOARD_TABLE_PAGE_SIZE` | int | `25` | Rows per page on a dashboard table (projects, repositories, people, recent PRs). |
 | ui | `PR_FILES_DISPLAY_LIMIT` | int | `300` | Maximum files shown on the PR detail page before a "+N more" line. |
 | ui | `REVIEW_HEATMAP_TOP_N` | int | `15` | Authors/reviewers shown per axis on the reviews heat map; the rest fold into "Other". |
+| ui | `REVIEW_LOW_ACTIVITY_PCT` | int | `25` | Reviews heat map: a reviewer is flagged as very low-activity below this percentage of the median reviewer's pull-request count (the median is over people with at least one review; a zero always flags). |
+| ui | `REVIEW_LOW_COVERAGE_PCT` | int | `50` | Reviews heat map: an author with at least `MIN_SAMPLE` merged pull requests is flagged when fewer than this percentage of them were reviewed by someone else. |
 | ui | `DEFAULT_UI_LANGUAGE` | str | `en` | Default UI language for a new user. Kept in sync with `UserPreference.language`'s field default by a test. |
 | ui | `DETECT_BROWSER_LANGUAGE` | bool | `False` | Whether to derive the initial UI language from the browser. |
 | ui | `DEFAULT_THEME` | str | `system` | Default UI theme for a new user. Kept in sync with `UserPreference.theme`'s field default by a test. |

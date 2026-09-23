@@ -205,6 +205,7 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
         "charts": build_chart_cards(scope, params, REVIEWS_CHART_KEYS),
         "heat_map": heat_map,
         "heat_grid": reviews.heat_map_grid(heat_map),
+        "heat_thresholds": reviews.heat_map_thresholds(),
         "waiting": reviews.prs_waiting_for_review(scope, params),
         "table_ctx": build_table_context("reviewer_load", scope, params),
     }

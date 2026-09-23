@@ -4,6 +4,15 @@
 
 ### Added
 
+- **The author × reviewer heat map points at the gaps.** It scrolls sideways on its own, with the author column
+  pinned, so a large team no longer widens the page. Each author carries their pull requests merged in the
+  period, each reviewer the pull requests by others they reviewed, and cells now count distinct pull requests
+  rather than review rounds. A reviewer far below the team's median (`REVIEW_LOW_ACTIVITY_PCT`) and an author
+  whose merged pull requests others rarely review (`REVIEW_LOW_COVERAGE_PCT`, from `MIN_SAMPLE` merged) are
+  flagged. Authors nobody reviews now get a row, and authors who never review a zero column. Where author and
+  reviewer are one person the cell is muted, unless they reviewed their own pull request: that self-review is
+  highlighted.
+
 - **The pull-request timeline shows how long each step took.** Every event after the first carries the time since
   the one before it — "+3 minutes", "+1d 4h" — next to its date, so where a pull request sat waiting (for a
   first review, for the merge after approval) is visible at a glance.
