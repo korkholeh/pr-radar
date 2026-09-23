@@ -526,6 +526,7 @@ def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
 
     return {
         "pull_request": pull_request,
+        "description": pr_detail.description(pull_request),
         "author": pr_detail.author(scope, pull_request),
         "signals": signals,
         "ai_tools_display": ai_tools_display,

@@ -9,11 +9,14 @@ import datetime
 from dataclasses import dataclass
 
 from django.urls import reverse
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.selectors import ScopeFilter
 from apps.activity.models import PullRequest, Review
+from apps.ai_detection.body_sections import HTML_COMMENT_RE
 from apps.catalog.selectors import people_in_scope
+from apps.dashboards.markdown import render_markdown
 from apps.metrics.calculators.base import duration_hours
 
 _EVENT_LABELS = {
@@ -127,3 +130,11 @@ def author(scope: ScopeFilter, pull_request: PullRequest) -> Author:
     visible = people_in_scope(scope).filter(pk=person.pk).exists()
     url = reverse("dashboards:person", args=[person.pk]) if visible else None
     return Author(person.display_name, url, is_mapped=True)
+
+
+def description(pull_request: PullRequest) -> SafeString:
+    """The body rendered from Markdown, as the reader sees it on GitHub: HTML comments — a PR
+    template's hints — are hidden there too, so they are left out here (the policy rules ignore them
+    for the same reason). Empty when nothing but comments and whitespace is left."""
+    body = HTML_COMMENT_RE.sub("", pull_request.body or "").strip()
+    return render_markdown(body) if body else SafeString("")

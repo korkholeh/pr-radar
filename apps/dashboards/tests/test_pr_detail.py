@@ -225,6 +225,29 @@ def test_violation_action_swaps_only_the_violations_fragment(client, lead_user):
 
 
 @pytest.mark.django_db
+def test_description_is_shown_escaped_without_template_comments(client, lead_user):
+    pr = PullRequestFactory(body="<!-- Link the task -->\nFixes the <script>alert(1)</script> retry loop.")
+    client.force_login(lead_user)
+
+    content = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk])).content.decode()
+
+    assert 'id="pr-description"' in content
+    assert "Fixes the &lt;script&gt;alert(1)&lt;/script&gt; retry loop." in content
+    assert "<script>alert(1)</script>" not in content
+    assert "Link the task" not in content
+
+
+@pytest.mark.django_db
+def test_an_empty_description_says_so(client, lead_user):
+    pr = PullRequestFactory(body="<!-- only the template -->")
+    client.force_login(lead_user)
+
+    content = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk])).content.decode()
+
+    assert "This pull request has no description." in content
+
+
+@pytest.mark.django_db
 def test_resolved_violations_are_listed_apart_without_a_checkbox(client, lead_user):
     pr = PullRequestFactory()
     open_violation = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.OPEN)

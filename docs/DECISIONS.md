@@ -571,6 +571,14 @@ A backfill deliberately does **not** widen `Repository.sync_since`. That field i
 floor a later `--full` starts from; moving it on every ad-hoc backfill would silently turn a one-off look at old
 data into a permanent, ever-growing full-sync window.
 
+**A pull request's Markdown body is rendered with markdown-it-py and sanitised with nh3.** The body is untrusted
+text from GitHub, so it gets two independent layers: markdown-it runs with raw HTML off, which shows any tag in the
+body as text, and nh3 then keeps only the tags this renderer emits and only `http`, `https` and `mailto` links.
+Either layer alone would stop a script; both together mean a renderer bug does not become an injection. Images are
+rendered as links, not `<img>`: loading one would make the reader's browser call a third-party host, and an
+attachment in a private repository does not load without a GitHub session anyway. GitHub's own HTML-in-Markdown
+(`<details>`, `<img width=…>`) therefore shows as source — the price of never passing body HTML through.
+
 ## UI redesign
 
 **The UI is built from component classes, not ad-hoc utilities.** `static/css/src/input.css` defines a small

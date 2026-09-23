@@ -3915,6 +3915,9 @@ msgstr "Цей GitHub-логін ще не зіставлено з людино�
 msgid "View on GitHub"
 msgstr "Переглянути на GitHub"
 
+#: apps/dashboards/templates/dashboards/pull_request_detail.html:42
+msgid "This pull request has no description."
+msgstr "Цей пул-реквест не має опису."
 
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:48
 msgid "Timeline"

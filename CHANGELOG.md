@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The pull-request page shows the description.** A collapsible block under the header renders the pull
+  request's Markdown body — headings, lists, task lists, code blocks, tables, links — so checking why a policy
+  rule fired no longer needs a trip to GitHub. HTML comments left over from a PR template are hidden, as GitHub
+  hides them. Raw HTML in a body shows as text, and images show as links rather than being loaded.
+
 - **Reviewer load separates reviews from the pull requests behind them.** The Reviews page's chart now draws two
   bars per reviewer — reviews given, and the distinct pull requests those reviews fall on — and the table and its
   exports carry both numbers as sortable columns. 43 reviews across 17 pull requests and 43 across 43 are very

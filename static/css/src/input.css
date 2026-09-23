@@ -608,4 +608,81 @@
   .menu-label {
     @apply px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-text-muted uppercase;
   }
+
+  /* A pull request's rendered Markdown body (apps/dashboards/markdown.py) ------------------- */
+  .markdown-body {
+    @apply text-sm leading-relaxed break-words text-text;
+  }
+
+  .markdown-body > * + * {
+    @apply mt-3;
+  }
+
+  .markdown-body :is(h1, h2, h3, h4, h5, h6) {
+    @apply mt-5 font-semibold text-text first:mt-0;
+  }
+
+  .markdown-body h1 {
+    @apply text-lg;
+  }
+
+  .markdown-body h2 {
+    @apply border-b border-border pb-1 text-base;
+  }
+
+  .markdown-body :is(h3, h4, h5, h6) {
+    @apply text-sm;
+  }
+
+  .markdown-body a {
+    @apply text-accent hover:underline;
+  }
+
+  .markdown-body :is(ul, ol) {
+    @apply pl-6;
+  }
+
+  .markdown-body ul {
+    @apply list-disc;
+  }
+
+  .markdown-body ol {
+    @apply list-decimal;
+  }
+
+  .markdown-body li + li {
+    @apply mt-1;
+  }
+
+  .markdown-body code {
+    @apply rounded bg-surface-2 px-1 py-0.5 font-mono text-[0.85em];
+  }
+
+  .markdown-body pre {
+    @apply overflow-x-auto rounded-lg border border-border bg-surface p-3;
+  }
+
+  .markdown-body pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .markdown-body blockquote {
+    @apply border-l-4 border-border pl-3 text-text-muted;
+  }
+
+  .markdown-body hr {
+    @apply border-border;
+  }
+
+  .markdown-body table {
+    @apply block overflow-x-auto border-collapse;
+  }
+
+  .markdown-body :is(th, td) {
+    @apply border border-border px-2 py-1 text-left;
+  }
+
+  .markdown-body th {
+    @apply bg-surface font-semibold;
+  }
 }
