@@ -14,7 +14,14 @@ from apps.activity.models import AIStatus
 from apps.catalog.factories import IdentityFactory, PersonFactory, ProjectFactory, RepositoryFactory
 from apps.dashboards.exports.columns import TABLE_SPECS, ExportColumn
 from apps.dashboards.params import DashboardParams
-from apps.dashboards.tables import _cell_html, build_table_context, paginate_rows, search_rows, sort_rows
+from apps.dashboards.tables import (
+    _cell_html,
+    _violations_cell_html,
+    build_table_context,
+    paginate_rows,
+    search_rows,
+    sort_rows,
+)
 from apps.metrics.models import ScopeType
 from apps.metrics.rollups import rebuild
 from apps.metrics.services import compute_many
@@ -259,3 +266,28 @@ def test_repositories_table_no_excludes_repositories_nobody_has_probed():
     ctx = build_table_context("repositories", _scope(), _params(ai_tooling="no"))
 
     assert [row["id"] for row in ctx.page.object_list] == [probed_empty.id]
+
+
+@pytest.mark.parametrize(
+    ("count", "tone", "label"),
+    [
+        (0, "good", "No open violations"),
+        (1, "warning", "1 open violation"),
+        (2, "bad", "2 open violations"),
+        (7, "bad", "7 open violations"),
+    ],
+)
+def test_violations_cell_icon_tone_follows_the_open_violation_count(count, tone, label):
+    html = _violations_cell_html(count)
+    assert f'data-tone="{tone}"' in html
+    assert f"text-[var(--{tone})]" in html
+    assert f'aria-label="{label}"' in html
+    assert html.endswith(f"{count}</span>")
+
+
+@pytest.mark.django_db
+def test_pull_requests_table_renders_the_violations_icon_in_its_cell():
+    table = build_table_context("pull_requests", _scope(), _params())
+    render = type(table.table).render_violations_count
+    assert 'data-tone="good"' in render(table.table, {"violations_count": 0})
+    assert 'data-tone="bad"' in render(table.table, {"violations_count": 3})

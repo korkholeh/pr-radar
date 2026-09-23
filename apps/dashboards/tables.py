@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeString
 from django.utils.timezone import localtime
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext
 
 from apps.catalog.services import get_int
 from apps.dashboards import rows as row_builders
@@ -66,9 +66,49 @@ def _cell_html(column: ExportColumn, value: object) -> str | SafeString:
     return str(value)
 
 
+_CHECK_PATH = "M8 12.5l2.5 2.5L16 9.5"
+_ALERT_PATH = "M12 7.5v5.5M12 16.5v.01"
+# Full literal class names so the Tailwind scanner picks them up.
+_TONE_CLASSES = {
+    "good": "text-[var(--good)]",
+    "warning": "text-[var(--warning)]",
+    "bad": "text-[var(--bad)]",
+}
+
+
+def _violations_cell_html(count: int) -> SafeString:
+    """A PR row's open-violation count behind a traffic-light icon: green check for none, amber
+    alert for exactly one, red alert for more. Colour is never the only signal — the shape
+    differs for zero, and the icon carries the count as its accessible label."""
+    if count == 0:
+        tone, path, label = "good", _CHECK_PATH, gettext("No open violations")
+    else:
+        tone = "warning" if count == 1 else "bad"
+        path = _ALERT_PATH
+        label = ngettext("%(count)d open violation", "%(count)d open violations", count) % {"count": count}
+    return format_html(
+        '<span class="inline-flex items-center gap-1.5">'
+        '<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 {}" fill="none" '
+        'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+        'role="img" aria-label="{}" data-testid="violations-icon" data-tone="{}">'
+        "<title>{}</title>"
+        '<circle cx="12" cy="12" r="9"></circle><path d="{}"></path></svg>'
+        "{}</span>",
+        _TONE_CLASSES[tone],
+        label,
+        tone,
+        label,
+        path,
+        format_count(count),
+    )
+
+
 def _make_render(column: ExportColumn):
     def render(self: tables.Table, record: dict[str, object]) -> str | SafeString:  # noqa: ARG001
-        html = _cell_html(column, extract_value(column, record))
+        value = extract_value(column, record)
+        if column.key == "violations_count" and isinstance(value, int):
+            return _violations_cell_html(value)
+        html = _cell_html(column, value)
         if not record.get(f"{column.key}__low"):
             return html
         return format_html(

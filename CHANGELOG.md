@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The pull request list flags violations at a glance.** The Violations cell carries a traffic-light icon: a
+  green check when the pull request has no open policy violations, an amber alert for exactly one and a red alert
+  for two or more. The same icon shows in the pull request table on the dashboards. Exports are unchanged.
+
 - **Dashboards explain what makes a pull request "AI".** A collapsed block under the filters on every dashboard page
   walks through the five AI statuses in the order they are decided — explicit, disclosed, suspected, no AI,
   unknown — says which of them are in the AI cohort, and lists the tools the active high-confidence rules
