@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.catalog.globs import compile_globs
 
@@ -166,7 +167,11 @@ class PolicyViolation(models.Model):
         LOW = "low", _("Low")
 
     class Status(models.TextChoices):
-        OPEN = "open", _("Open")
+        # A violation's status is the lead's triage state, not the pull request's: "open" means
+        # nobody has judged it yet. Its own context keeps the Ukrainian from reading like a
+        # pull request that is still open, which the bare "Open" msgid (shared with
+        # `PullRequest.State`) did on merged pull requests.
+        OPEN = "open", pgettext_lazy("policy violation status", "Open")
         ACKNOWLEDGED = "acknowledged", _("Acknowledged")
         WAIVED = "waived", _("Waived")
         RESOLVED = "resolved", _("Resolved")

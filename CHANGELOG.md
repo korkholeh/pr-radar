@@ -116,6 +116,12 @@
 
 ### Fixed
 
+- **A merged pull request no longer looks "open" in the Policy table.** The Status column is the violation's
+  triage state — "open" means no lead has judged it yet — but in Ukrainian it shared its translation with an open
+  pull request, so violations on merged pull requests read "Відкрито". The column (and its filter) is now
+  "Violation status", an unjudged violation reads "Не розглянуто" in Ukrainian, and the pull request's own state —
+  open, merged or closed — shows under its link.
+
 - **The Policy table's "Age" column is replaced by the pull request's date.** It showed the time since the
   violation row was written, and a sync or recompute writes hundreds of rows in one run, so most rows read the
   same "2 days, 3 hours". The column is now "PR opened" — the pull request's creation date, with the date the

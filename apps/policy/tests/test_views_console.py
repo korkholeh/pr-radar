@@ -5,12 +5,12 @@ import pytest
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from freezegun import freeze_time
 
 from apps.accounts.selectors import scope_for_user
 from apps.activity.factories import PullRequestFactory
-from apps.activity.models import AIStatus
+from apps.activity.models import AIStatus, PullRequest
 from apps.policy.factories import PolicyViolationFactory
 from apps.policy.messages import render_violation, rule_label
 from apps.policy.models import PolicyViolation
@@ -169,3 +169,22 @@ def test_table_shows_and_orders_by_the_pull_requests_date_not_the_recording_time
     content = response.content.decode()
     row = re.search(rf'<tr id="violation-row-{older.pk}">.*?</tr>', content, re.DOTALL).group(0)
     assert "05/02/2026" in row or "02.05.2026" in row
+
+
+def test_table_shows_the_pull_requests_state_apart_from_the_violations_status(client, lead_user):
+    """A violation's "open" is the lead's triage state; on a merged pull request it used to read,
+    in Ukrainian, exactly like the pull request's own "open" state."""
+    merged_pr = PullRequestFactory(state=PullRequest.State.MERGED, merged_at=timezone.now())
+    violation = PolicyViolationFactory(pull_request=merged_pr)
+    client.force_login(lead_user)
+
+    with translation.override("uk"):
+        content = client.get(reverse("policy:console")).content.decode()
+        merged_label = str(PullRequest.State.MERGED.label)
+        pr_open_label = str(PullRequest.State.OPEN.label)
+        violation_open_label = str(PolicyViolation.Status.OPEN.label)
+
+    row = re.search(rf'<tr id="violation-row-{violation.pk}">.*?</tr>', content, re.DOTALL).group(0)
+    assert merged_label in row
+    assert violation_open_label in row
+    assert violation_open_label != pr_open_label

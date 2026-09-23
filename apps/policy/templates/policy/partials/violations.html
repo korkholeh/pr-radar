@@ -27,7 +27,7 @@
         <th scope="col">{% translate "Pull request" %}</th>
         <th scope="col">{% translate "Rule" %}</th>
         <th scope="col">{% translate "Severity" %}</th>
-        <th scope="col">{% translate "Status" %}</th>
+        <th scope="col">{% translate "Violation status" %}</th>
         <th scope="col">{% translate "PR opened" %}</th>
       </tr>
     </thead>
@@ -46,6 +46,7 @@
             <a href="{% url 'dashboards:pull_request_detail' violation.pull_request_id %}">
               {{ violation.pull_request.repository.full_name }}#{{ violation.pull_request.number|unlocalize }}
             </a>
+            <div class="text-sm text-text-muted">{{ violation.pull_request.get_state_display }}</div>
           </td>
           <td>
             <div class="text-text">{{ violation.rule_code|rule_label }}</div>
