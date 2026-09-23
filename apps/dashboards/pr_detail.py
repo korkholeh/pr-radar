@@ -5,6 +5,7 @@ value is not a dashboard aggregate (same exception `rows.py` already documents f
 
 from __future__ import annotations
 
+import dataclasses
 import datetime
 from dataclasses import dataclass
 
@@ -35,6 +36,8 @@ class TimelineEvent:
     at: datetime.datetime
     label_code: str
     actor: str | None = None
+    # Seconds since the event before it; `None` on the first event, which has nothing to follow.
+    since_previous_seconds: float | None = None
 
     @property
     def label(self) -> str:
@@ -45,7 +48,8 @@ class TimelineEvent:
 def timeline(pull_request: PullRequest) -> list[TimelineEvent]:
     """Ordered by `at`; an event whose timestamp is absent (a draft PR has no
     `ready_for_review_at`, an open PR has no `merged_at`/`closed_at`) is omitted rather than
-    rendered as an empty row."""
+    rendered as an empty row. Each event after the first carries the time since the one before it,
+    so the page shows where the pull request waited."""
     events: list[TimelineEvent] = []
     if pull_request.first_commit_at is not None:
         events.append(TimelineEvent("first_commit", pull_request.first_commit_at, "first_commit"))
@@ -65,7 +69,13 @@ def timeline(pull_request: PullRequest) -> list[TimelineEvent]:
         events.append(TimelineEvent("merged", pull_request.merged_at, "merged"))
     elif pull_request.closed_at is not None:
         events.append(TimelineEvent("closed", pull_request.closed_at, "closed"))
-    return sorted(events, key=lambda event: event.at)
+    events.sort(key=lambda event: event.at)
+    return [
+        dataclasses.replace(event, since_previous_seconds=(event.at - events[index - 1].at).total_seconds())
+        if index
+        else event
+        for index, event in enumerate(events)
+    ]
 
 
 @dataclass(frozen=True)

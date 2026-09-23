@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The pull-request timeline shows how long each step took.** Every event after the first carries the time since
+  the one before it — "+3 minutes", "+1d 4h" — next to its date, so where a pull request sat waiting (for a
+  first review, for the merge after approval) is visible at a glance.
+
 - **The pull-request page shows the description.** A collapsible block under the header renders the pull
   request's Markdown body — headings, lists, task lists, code blocks, tables, links — so checking why a policy
   rule fired no longer needs a trip to GitHub. HTML comments left over from a PR template are hidden, as GitHub

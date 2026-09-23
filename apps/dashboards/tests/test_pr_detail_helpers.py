@@ -50,6 +50,18 @@ def test_timeline_includes_reviews_in_order_with_actor():
 
 
 @pytest.mark.django_db
+def test_timeline_events_carry_the_time_since_the_previous_one():
+    pull_request = PullRequestFactory(
+        first_commit_at=_dt(1), created_at=_dt(2), ready_for_review_at=_dt(2), merged_at=_dt(7)
+    )
+    ReviewFactory(pull_request=pull_request, state="APPROVED", submitted_at=_dt(5))
+
+    events = timeline(pull_request)
+
+    assert [event.since_previous_seconds for event in events] == [None, 3600, 0, 3 * 3600, 2 * 3600]
+
+
+@pytest.mark.django_db
 def test_timeline_reviews_with_no_submitted_at_are_omitted():
     pull_request = PullRequestFactory(created_at=_dt(1))
     ReviewFactory(pull_request=pull_request, submitted_at=None)
