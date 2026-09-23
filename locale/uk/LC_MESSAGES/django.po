@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 10:49+0000\n"
+"POT-Creation-Date: 2026-09-23 11:23+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -3022,6 +3022,7 @@ msgstr ""
 "request-и та закриті без мерджу на цьому графіку не показані."
 
 #: apps/dashboards/charts.py:406 apps/dashboards/exports/reports.py:204
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:41
 msgid "AI adoption"
 msgstr "Впровадження ШІ"
 
@@ -3357,6 +3358,262 @@ msgstr "завдання експорту"
 msgid "export jobs"
 msgstr "завдання експорту"
 
+#: apps/dashboards/person_guidance.py:340
+#, python-format
+msgid ""
+"%(count)s high-severity policy violation is still open (%(rules)s). Go "
+"through it with %(name)s this week and agree whether to fix the pull request "
+"or record a waiver with a reason."
+msgid_plural ""
+"%(count)s high-severity policy violations are still open (%(rules)s). Go "
+"through them with %(name)s this week and agree for each whether to fix the "
+"pull request or record a waiver with a reason."
+msgstr[0] ""
+"Досі відкрите %(count)s порушення політики високої серйозності (%(rules)s). "
+"Цього тижня розберіть його разом: %(name)s — і домовтеся, чи виправити пул-"
+"реквест, чи зафіксувати виняток із причиною."
+msgstr[1] ""
+"Досі відкриті %(count)s порушення політики високої серйозності (%(rules)s). "
+"Цього тижня розберіть їх разом: %(name)s — і домовтеся щодо кожного, чи "
+"виправити пул-реквест, чи зафіксувати виняток із причиною."
+msgstr[2] ""
+"Досі відкриті %(count)s порушень політики високої серйозності (%(rules)s). "
+"Цього тижня розберіть їх разом: %(name)s — і домовтеся щодо кожного, чи "
+"виправити пул-реквест, чи зафіксувати виняток із причиною."
+msgstr[3] ""
+"Досі відкриті %(count)s порушення політики високої серйозності (%(rules)s). "
+"Цього тижня розберіть їх разом: %(name)s — і домовтеся щодо кожного, чи "
+"виправити пул-реквест, чи зафіксувати виняток із причиною."
+
+#: apps/dashboards/person_guidance.py:350
+#, python-format
+msgid ""
+"%(count)s medium- or low-severity policy violation is still open. Ask "
+"%(name)s to triage it: fix it, or acknowledge it with a reason."
+msgid_plural ""
+"%(count)s medium- or low-severity policy violations are still open. Ask "
+"%(name)s to triage them: fix each one, or acknowledge it with a reason."
+msgstr[0] ""
+"Досі відкрите %(count)s порушення політики середньої або низької "
+"серйозності. Попросіть, щоб %(name)s його розібрав(-ла): виправив(-ла) або "
+"підтвердив(-ла) із причиною."
+msgstr[1] ""
+"Досі відкриті %(count)s порушення політики середньої або низької "
+"серйозності. Попросіть, щоб %(name)s їх розібрав(-ла): кожне виправити або "
+"підтвердити з причиною."
+msgstr[2] ""
+"Досі відкриті %(count)s порушень політики середньої або низької серйозності. "
+"Попросіть, щоб %(name)s їх розібрав(-ла): кожне виправити або підтвердити з "
+"причиною."
+msgstr[3] ""
+"Досі відкриті %(count)s порушення політики середньої або низької "
+"серйозності. Попросіть, щоб %(name)s їх розібрав(-ла): кожне виправити або "
+"підтвердити з причиною."
+
+#: apps/dashboards/person_guidance.py:358
+#, python-format
+msgid ""
+"The rule “%(rule)s” was broken %(count)s time in this period — a habit "
+"rather than a slip. Walk through the rule with %(name)s and check that the "
+"pull request template or checklist makes it hard to miss."
+msgid_plural ""
+"The rule “%(rule)s” was broken %(count)s times in this period — a habit "
+"rather than a slip. Walk through the rule with %(name)s and check that the "
+"pull request template or checklist makes it hard to miss."
+msgstr[0] ""
+"Правило «%(rule)s» за цей період порушено %(count)s раз — це вже звичка, а "
+"не випадковість. Пройдіть правило разом (%(name)s) і перевірте, що шаблон "
+"пул-реквесту або чекліст не дає його пропустити."
+msgstr[1] ""
+"Правило «%(rule)s» за цей період порушено %(count)s рази — це вже звичка, а "
+"не випадковість. Пройдіть правило разом (%(name)s) і перевірте, що шаблон "
+"пул-реквесту або чекліст не дає його пропустити."
+msgstr[2] ""
+"Правило «%(rule)s» за цей період порушено %(count)s разів — це вже звичка, а "
+"не випадковість. Пройдіть правило разом (%(name)s) і перевірте, що шаблон "
+"пул-реквесту або чекліст не дає його пропустити."
+msgstr[3] ""
+"Правило «%(rule)s» за цей період порушено %(count)s рази — це вже звичка, а "
+"не випадковість. Пройдіть правило разом (%(name)s) і перевірте, що шаблон "
+"пул-реквесту або чекліст не дає його пропустити."
+
+#: apps/dashboards/person_guidance.py:368
+#, python-format
+msgid ""
+"Merged pull requests are followed by a fix more often than usual (%(value)s "
+"against %(baseline)s). Agree with %(name)s on stronger verification before "
+"merge: tests for the changed paths and a stated verification step in the "
+"description."
+msgstr ""
+"Після злиття пул-реквестів частіше, ніж зазвичай, з’являються виправлення "
+"(%(value)s проти %(baseline)s). Домовтеся (%(name)s) про ретельнішу "
+"перевірку до злиття: тести для змінених шляхів і описаний крок перевірки в "
+"описі."
+
+#: apps/dashboards/person_guidance.py:374
+#, python-format
+msgid ""
+"Much of the merged code is rewritten within 21 days (%(value)s against "
+"%(baseline)s). Pick two recent examples with %(name)s and find out why: "
+"unclear design, missing tests or changing requirements."
+msgstr ""
+"Значну частину злитого коду переписують протягом 21 дня (%(value)s проти "
+"%(baseline)s). Візьміть два свіжі приклади, розберіть їх разом (%(name)s) і "
+"з’ясуйте причину: нечіткий дизайн, брак тестів чи зміна вимог."
+
+#: apps/dashboards/person_guidance.py:380
+#, python-format
+msgid ""
+"Pull requests often change after the first review (%(value)s against "
+"%(baseline)s). Ask %(name)s whether the task was unclear or the pull request "
+"went up too early; suggest a self-review pass or a draft pull request for "
+"early feedback."
+msgstr ""
+"Пул-реквести часто змінюються після першого рев’ю (%(value)s проти "
+"%(baseline)s). З’ясуйте, чи %(name)s мав(-ла) нечітку задачу, чи пул-реквест "
+"відкрито зарано; запропонуйте самоперевірку або чернетку пул-реквесту для "
+"раннього відгуку."
+
+#: apps/dashboards/person_guidance.py:386
+#, python-format
+msgid ""
+"Pull requests take longer from ready for review to merge (%(value)s against "
+"%(baseline)s). Find out with %(name)s where they wait — review, rework or CI "
+"— and help remove the blocker."
+msgstr ""
+"Від готовності до рев’ю до злиття пул-реквести йдуть довше (%(value)s проти "
+"%(baseline)s). З’ясуйте разом (%(name)s), де вони чекають — на рев’ю, "
+"доопрацювання чи CI, — і допоможіть прибрати перешкоду."
+
+#: apps/dashboards/person_guidance.py:392
+#, python-format
+msgid ""
+"Pull requests by %(name)s wait longer for a first review (%(value)s against "
+"%(baseline)s). This usually sits with the team, not the author: check who is "
+"assigned to review and ask reviewers to pick these up sooner."
+msgstr ""
+"Пул-реквести автора %(name)s довше чекають на перше рев’ю (%(value)s проти "
+"%(baseline)s). Зазвичай це питання до команди, а не до автора: перевірте, "
+"кого призначено рев’юерами, і попросіть братися за них швидше."
+
+#: apps/dashboards/person_guidance.py:398
+#, python-format
+msgid ""
+"Pull requests are larger than usual (%(value)s against %(baseline)s lines). "
+"Encourage %(name)s to split work into smaller pull requests that can be "
+"reviewed on their own."
+msgstr ""
+"Пул-реквести більші, ніж зазвичай (%(value)s проти %(baseline)s рядків). "
+"Заохочуйте, щоб %(name)s ділив(-ла) роботу на менші пул-реквести, які можна "
+"переглянути окремо."
+
+#: apps/dashboards/person_guidance.py:403
+#, python-format
+msgid ""
+"%(name)s merged %(count)s pull request but gave no reviews. Add them to the "
+"review rotation — reviewing others' code spreads knowledge both ways."
+msgid_plural ""
+"%(name)s merged %(count)s pull requests but gave no reviews. Add them to the "
+"review rotation — reviewing others' code spreads knowledge both ways."
+msgstr[0] ""
+"%(name)s: злито %(count)s пул-реквест, але жодного рев’ю. Додайте цю людину "
+"до черги рев’юерів — рев’ю чужого коду поширює знання в обидва боки."
+msgstr[1] ""
+"%(name)s: злито %(count)s пул-реквести, але жодного рев’ю. Додайте цю людину "
+"до черги рев’юерів — рев’ю чужого коду поширює знання в обидва боки."
+msgstr[2] ""
+"%(name)s: злито %(count)s пул-реквестів, але жодного рев’ю. Додайте цю "
+"людину до черги рев’юерів — рев’ю чужого коду поширює знання в обидва боки."
+msgstr[3] ""
+"%(name)s: злито %(count)s пул-реквесту, але жодного рев’ю. Додайте цю людину "
+"до черги рев’юерів — рев’ю чужого коду поширює знання в обидва боки."
+
+#: apps/dashboards/person_guidance.py:411
+#, python-format
+msgid ""
+"%(count)s pull request looks AI-assisted but does not say so. Remind "
+"%(name)s of the disclosure rule: name the tool in the description and what "
+"it was used for."
+msgid_plural ""
+"%(count)s pull requests look AI-assisted but do not say so. Remind %(name)s "
+"of the disclosure rule: name the tool in the description and what it was "
+"used for."
+msgstr[0] ""
+"%(count)s пул-реквест схожий на зроблений з AI, але не розкриває цього. "
+"Нагадайте, що %(name)s має дотримуватися правила розкриття: назвати в описі "
+"інструмент і для чого його використано."
+msgstr[1] ""
+"%(count)s пул-реквести схожі на зроблені з AI, але не розкривають цього. "
+"Нагадайте, що %(name)s має дотримуватися правила розкриття: назвати в описі "
+"інструмент і для чого його використано."
+msgstr[2] ""
+"%(count)s пул-реквестів схожі на зроблені з AI, але не розкривають цього. "
+"Нагадайте, що %(name)s має дотримуватися правила розкриття: назвати в описі "
+"інструмент і для чого його використано."
+msgstr[3] ""
+"%(count)s пул-реквесту схожі на зроблені з AI, але не розкривають цього. "
+"Нагадайте, що %(name)s має дотримуватися правила розкриття: назвати в описі "
+"інструмент і для чого його використано."
+
+#: apps/dashboards/person_guidance.py:419
+#, python-format
+msgid ""
+"AI-assisted pull requests by %(name)s hold up worse than their other ones — "
+"%(comparisons)s. Go through a few of them together and agree how AI output "
+"is checked before review: run the tests, read the whole diff, cut what the "
+"task did not ask for."
+msgstr ""
+"Пул-реквести з AI автора %(name)s тримаються гірше за інші його (її) пул-"
+"реквести — %(comparisons)s. Розберіть кілька з них разом і домовтеся, як "
+"перевіряти результат AI до рев’ю: запускати тести, читати весь diff, "
+"прибирати те, чого задача не вимагала."
+
+#: apps/dashboards/person_guidance.py:425
+#, python-format
+msgid ""
+"%(value)s of AI-assisted pull requests by %(name)s touched high-risk paths. "
+"Make sure those carry a stated plan and get a designated reviewer, not a "
+"quick approval."
+msgstr ""
+"%(value)s пул-реквестів з AI автора %(name)s зачіпають шляхи високого "
+"ризику. Подбайте, щоб такі зміни мали описаний план і призначеного рев’юера, "
+"а не швидке схвалення."
+
+#: apps/dashboards/person_guidance.py:430
+#, python-format
+msgid ""
+"Ask %(name)s what gets in the way of using AI — tool access, trust in the "
+"output, or tasks it does not fit — and consider pairing them with someone "
+"who uses it well. The aim is to remove blockers, not to push a number up."
+msgstr ""
+"З’ясуйте, що заважає користуватися AI (%(name)s): доступ до інструментів, "
+"довіра до результату чи задачі, які йому не підходять, — і подумайте про "
+"роботу в парі з кимось, хто використовує AI добре. Мета — прибрати "
+"перешкоди, а не підняти показник."
+
+#: apps/dashboards/person_guidance.py:435
+#, python-format
+msgid ""
+"AI-assisted pull requests hold up better than the other ones — "
+"%(comparisons)s."
+msgstr "Пул-реквести з AI тримаються краще за інші — %(comparisons)s."
+
+#: apps/dashboards/person_guidance.py:438
+#, python-format
+msgid ""
+"%(name)s gets results with AI at least as good as without it, with no open "
+"AI policy violations. Consider asking them to show the team how they work "
+"with it."
+msgstr ""
+"%(name)s: з AI результати не гірші, ніж без нього, і відкритих порушень AI-"
+"політики немає. Подумайте, чи не попросити показати команді, як саме "
+"працювати з AI."
+
+#: apps/dashboards/person_guidance.py:442
+#, python-format
+msgid "%(metric)s: %(value)s against %(baseline)s."
+msgstr "%(metric)s: %(value)s проти %(baseline)s."
+
 #: apps/dashboards/pr_detail.py:27
 msgid "First commit"
 msgstr "Перший коміт"
@@ -3385,7 +3642,7 @@ msgstr[3] "%(lower)s–%(upper)s рядка"
 
 #: apps/dashboards/tables.py:79 apps/dashboards/tables.py:80
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:63
-#: apps/dashboards/templatetags/dashboards.py:269
+#: apps/dashboards/templatetags/dashboards.py:272
 msgid "Small sample"
 msgstr "Мала вибірка"
 
@@ -3447,21 +3704,19 @@ msgid ""
 "a co-author trailer or footer in a commit, a footer or marker in the "
 "description, a bot as the author, the tool's own file in the diff."
 msgstr ""
-"правило виявлення з високою впевненістю знайшло те, що AI-інструмент написав"
-" сам: трейлер co-author або футер у коміті, футер чи маркер в описі, бота як"
-" автора, власний файл інструмента в диффі."
+"правило виявлення з високою впевненістю знайшло те, що AI-інструмент написав "
+"сам: трейлер co-author або футер у коміті, футер чи маркер в описі, бота як "
+"автора, власний файл інструмента в диффі."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:27
 #, python-format
 msgid "Tools the active rules recognise: %(tools)s."
-msgstr ""
-"Інструменти, які розпізнають активні правила: %(tools)s."
+msgstr "Інструменти, які розпізнають активні правила: %(tools)s."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:31
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:39
 msgid "In the AI cohort."
-msgstr ""
-"У когорті AI."
+msgstr "У когорті AI."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:35
 msgid ""
@@ -3491,8 +3746,8 @@ msgstr[0] ""
 msgstr[1] ""
 "лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
 "обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
-"%(count)s різні види структурних сигналів (велика зміна за дві години, серія"
-" комітів, багато нових файлів)."
+"%(count)s різні види структурних сигналів (велика зміна за дві години, серія "
+"комітів, багато нових файлів)."
 msgstr[2] ""
 "лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
 "обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
@@ -3501,8 +3756,8 @@ msgstr[2] ""
 msgstr[3] ""
 "лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
 "обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
-"%(count)s різні види структурних сигналів (велика зміна за дві години, серія"
-" комітів, багато нових файлів)."
+"%(count)s різні види структурних сигналів (велика зміна за дві години, серія "
+"комітів, багато нових файлів)."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:53
 msgid "In the AI cohort: this installation counts suspected pull requests."
@@ -3511,23 +3766,19 @@ msgstr ""
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:55
 msgid "Not in the AI cohort: it counts as non-AI."
-msgstr ""
-"Не в когорті AI: рахується як не-AI."
+msgstr "Не в когорті AI: рахується як не-AI."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:60
 msgid "the author ticked \"None\" and no rule matched."
-msgstr ""
-"автор відмітив «None», і жодне правило не спрацювало."
+msgstr "автор відмітив «None», і жодне правило не спрацювало."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:64
 msgid "no rule matched and nothing was ticked."
-msgstr ""
-"жодне правило не спрацювало, і нічого не відмічено."
+msgstr "жодне правило не спрацювало, і нічого не відмічено."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:65
 msgid "Neither is in the AI cohort; both count as non-AI."
-msgstr ""
-"Жоден із них не в когорті AI; обидва рахуються як не-AI."
+msgstr "Жоден із них не в когорті AI; обидва рахуються як не-AI."
 
 #: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:69
 msgid ""
@@ -3943,6 +4194,173 @@ msgstr[3] ""
 #: apps/dashboards/templates/dashboards/partials/person_notes.html:8
 msgid "Private notes"
 msgstr "Приватні нотатки"
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:10
+msgid "Recommendations for the lead"
+msgstr "Рекомендації для ліда"
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:12
+msgid "Action items"
+msgstr "Що зробити"
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:21
+msgid ""
+"No open policy violations outside the AI rules. Too few pull requests were "
+"merged in this period to judge delivery — widen the period for a fuller "
+"picture."
+msgstr ""
+"Відкритих порушень політики поза AI-правилами немає. Щоб оцінити поставку, "
+"за цей період злито замало пул-реквестів — розширте період, щоб побачити "
+"повнішу картину."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:25
+msgid ""
+"Nothing in delivery or general policy needs action in this period. Say what "
+"is going well in the next 1:1."
+msgstr ""
+"За цей період у поставці й загальній політиці нічого не потребує дій. На "
+"наступній зустрічі 1:1 відзначте, що вдається добре."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:30
+msgid "Worth acknowledging"
+msgstr "Варто відзначити"
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:44
+#, python-format
+msgid ""
+"%(name)s uses AI more than the team: %(share)s of their merged pull requests "
+"are AI-assisted, against %(baseline)s."
+msgstr ""
+"%(name)s: AI використовується більше, ніж у команді, — %(share)s злитих пул-"
+"реквестів зроблено з AI, проти %(baseline)s."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:49
+#, python-format
+msgid ""
+"%(name)s uses AI about as much as the team: %(share)s of their merged pull "
+"requests are AI-assisted, against %(baseline)s."
+msgstr ""
+"%(name)s: AI використовується приблизно як у команді, — %(share)s злитих пул-"
+"реквестів зроблено з AI, проти %(baseline)s."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:54
+#, python-format
+msgid ""
+"%(name)s uses AI less than the team: %(share)s of their merged pull requests "
+"are AI-assisted, against %(baseline)s."
+msgstr ""
+"%(name)s: AI використовується менше, ніж у команді, — %(share)s злитих пул-"
+"реквестів зроблено з AI, проти %(baseline)s."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:59
+#, python-format
+msgid ""
+"No pull request by %(name)s in this period shows AI use, against "
+"%(baseline)s for the team. A pull request without an AI marker counts as "
+"unknown, so this does not prove they do not use it."
+msgstr ""
+"Жоден пул-реквест автора %(name)s за цей період не показує використання AI, "
+"тоді як у команді — %(baseline)s. Пул-реквест без позначки AI вважається "
+"«невідомим», тож це не доводить, що AI не використовується."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:65
+msgid ""
+"Too few pull requests were merged in this period to compare AI use with the "
+"team."
+msgstr ""
+"За цей період злито замало пул-реквестів, щоб порівняти використання AI з "
+"командою."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:70
+#, python-format
+msgid ""
+"Of %(count)s pull request opened in this period: %(explicit)s with an "
+"explicit AI marker, %(disclosed)s with AI disclosed in the description, "
+"%(suspected)s suspected from signals, %(other)s with no AI mark."
+msgid_plural ""
+"Of %(count)s pull requests opened in this period: %(explicit)s with an "
+"explicit AI marker, %(disclosed)s with AI disclosed in the description, "
+"%(suspected)s suspected from signals, %(other)s with no AI mark."
+msgstr[0] ""
+"З %(count)s пул-реквесту, відкритого за період: %(explicit)s з явною "
+"позначкою AI, %(disclosed)s з AI, розкритим в описі, %(suspected)s з "
+"підозрою за сигналами, %(other)s без позначки AI."
+msgstr[1] ""
+"З %(count)s пул-реквестів, відкритих за період: %(explicit)s з явною "
+"позначкою AI, %(disclosed)s з AI, розкритим в описі, %(suspected)s з "
+"підозрою за сигналами, %(other)s без позначки AI."
+msgstr[2] ""
+"З %(count)s пул-реквестів, відкритих за період: %(explicit)s з явною "
+"позначкою AI, %(disclosed)s з AI, розкритим в описі, %(suspected)s з "
+"підозрою за сигналами, %(other)s без позначки AI."
+msgstr[3] ""
+"З %(count)s пул-реквесту, відкритих за період: %(explicit)s з явною "
+"позначкою AI, %(disclosed)s з AI, розкритим в описі, %(suspected)s з "
+"підозрою за сигналами, %(other)s без позначки AI."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:84
+#, python-format
+msgid "Tools named: %(tools)s."
+msgstr "Названі інструменти: %(tools)s."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:95
+msgid "Nothing about how AI is used needs action in this period."
+msgstr "За цей період у використанні AI нічого не потребує дій."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:112
+#, python-format
+msgid ""
+"Fewer than %(min_sample)s pull request was merged in this period, so only "
+"policy violations are listed; metric-based items need more data."
+msgid_plural ""
+"Fewer than %(min_sample)s pull requests were merged in this period, so only "
+"policy violations are listed; metric-based items need more data."
+msgstr[0] ""
+"За цей період злито менше ніж %(min_sample)s пул-реквест, тому показано лише "
+"порушення політики; для пунктів на основі метрик потрібно більше даних."
+msgstr[1] ""
+"За цей період злито менше ніж %(min_sample)s пул-реквести, тому показано "
+"лише порушення політики; для пунктів на основі метрик потрібно більше даних."
+msgstr[2] ""
+"За цей період злито менше ніж %(min_sample)s пул-реквестів, тому показано "
+"лише порушення політики; для пунктів на основі метрик потрібно більше даних."
+msgstr[3] ""
+"За цей період злито менше ніж %(min_sample)s пул-реквесту, тому показано "
+"лише порушення політики; для пунктів на основі метрик потрібно більше даних."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:122
+msgid ""
+"Every comparison is with the person’s primary project — the one where most "
+"of their pull requests in the period were opened."
+msgstr ""
+"Усі порівняння — з основним проєктом людини, тобто тим, де за період "
+"відкрито найбільше її пул-реквестів."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:124
+msgid ""
+"Every comparison is with the whole organization: the person has no project "
+"in your scope for this period."
+msgstr ""
+"Усі порівняння — з усією організацією: за цей період у людини немає проєкту "
+"у вашій зоні доступу."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:127
+msgid ""
+"In the AI adoption section, AI-assisted pull requests are compared with the "
+"person’s own other pull requests, and only on metrics with enough data on "
+"both sides. Violations of the AI rules are listed there rather than above."
+msgstr ""
+"У розділі про використання AI пул-реквести з AI порівнюються з іншими пул-"
+"реквестами тієї самої людини і лише за метриками, де даних достатньо з обох "
+"боків. Порушення AI-правил показано там, а не вище."
+
+#: apps/dashboards/templates/dashboards/partials/person_recommendations.html:130
+msgid ""
+"Generated by fixed rules from the tables below. A starting point for a "
+"conversation, not a verdict on the person."
+msgstr ""
+"Сформовано фіксованими правилами з таблиць нижче. Це відправна точка для "
+"розмови, а не вирок людині."
 
 #: apps/dashboards/templates/dashboards/partials/person_violations.html:8
 #: apps/policy/templates/policy/partials/violations.html:23
@@ -4532,49 +4950,59 @@ msgstr ""
 msgid "Reviews"
 msgstr "Ревʼю"
 
-#: apps/dashboards/templatetags/dashboards.py:146
+#: apps/dashboards/templatetags/dashboards.py:149
 #, python-format
 msgid "%(points)s pp"
 msgstr "%(points)s в. п."
 
-#: apps/dashboards/templatetags/dashboards.py:256
+#: apps/dashboards/templatetags/dashboards.py:259
 msgid "Higher is better."
 msgstr "Більше — краще."
 
-#: apps/dashboards/templatetags/dashboards.py:258
+#: apps/dashboards/templatetags/dashboards.py:261
 msgid "Lower is better."
 msgstr "Менше — краще."
 
-#: apps/dashboards/views.py:57
+#: apps/dashboards/templatetags/dashboards.py:364
+#, python-format
+msgid "%(metric)s: %(value)s with AI, %(baseline)s without"
+msgstr "%(metric)s: %(value)s з AI, %(baseline)s без"
+
+#: apps/dashboards/templatetags/dashboards.py:387
+#, python-format
+msgid "%(tool)s (%(count)s)"
+msgstr "%(tool)s (%(count)s)"
+
+#: apps/dashboards/views.py:58
 msgid ""
 "No commit was found on the default branch before the churn window ended."
 msgstr "Не знайдено жодного коміту в основній гілці до завершення вікна churn."
 
-#: apps/dashboards/views.py:58
+#: apps/dashboards/views.py:59
 msgid "The repository could not be fetched."
 msgstr "Не вдалося отримати репозиторій (fetch)."
 
-#: apps/dashboards/views.py:59
+#: apps/dashboards/views.py:60
 msgid "Measuring surviving lines with git blame failed."
 msgstr "Не вдалося виміряти рядки, що збереглися, за допомогою git blame."
 
-#: apps/dashboards/views.py:60
+#: apps/dashboards/views.py:61
 msgid "No commits could be attributed to this pull request."
 msgstr "Жодного коміту не вдалося співвіднести із цим pull request."
 
-#: apps/dashboards/views.py:61
+#: apps/dashboards/views.py:62
 msgid "The GitHub connection for this repository is not usable."
 msgstr "З'єднання GitHub для цього репозиторію непридатне для використання."
 
-#: apps/dashboards/views.py:62
+#: apps/dashboards/views.py:63
 msgid "The churn computation timed out."
 msgstr "Обчислення churn перевищило час очікування."
 
-#: apps/dashboards/views.py:63
+#: apps/dashboards/views.py:64
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:466 apps/policy/views.py:105
+#: apps/dashboards/views.py:469 apps/policy/views.py:105
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -4588,7 +5016,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:470 apps/policy/views.py:109
+#: apps/dashboards/views.py:473 apps/policy/views.py:109
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."

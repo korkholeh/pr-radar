@@ -11,8 +11,27 @@ dashboards.md`). Click a name to open that person's own page.
 
 ## The Person page (`/people/<id>/`)
 
-The same KPI cards, charts and filters as a project or repository page, plus five sections specific to a
+The same KPI cards, charts and filters as a project or repository page, plus six sections specific to a
 person:
+
+**Recommendations for the lead.** A short, numbered list of what to do before or during a 1:1, most
+important first: open high-severity policy violations, rules broken three or more times in the period, other open
+violations, then quality and flow gaps (follow-up fixes, 21-day churn, rework, lead time, time to first review, PR
+size) with the person's value, the baseline and a suggested next step. A person who merges pull requests but gave no
+reviews is pointed at the review rotation. Metrics at least 20% (and, for a share, 5 pp) better than the baseline
+appear under "Worth acknowledging". The baseline is the primary project, or the organisation when the person has
+none in your scope. Below 5 merged pull requests in the period only policy items are listed. The items are derived
+by fixed rules from the comparison and violation tables on the same page — a prompt for a conversation, not a
+verdict.
+
+Its **AI adoption** part is separate. It places the person against the team — more, about the same or less AI use,
+from the share of their merged pull requests in the AI cohort — and shows how their pull requests opened in the
+period split into explicit, disclosed, suspected and unmarked, plus the tools they named. A pull request with no AI
+marker is "unknown", not "no AI", so "no AI use" never proves the person does not use it. The action items here
+are violations of the AI rules (they are not repeated above), pull requests that look AI-assisted but are not
+disclosed, AI-assisted pull requests that hold up worse than the person's *own* other pull requests (compared only
+where both sides have at least 5), and AI work on high-risk paths. Low adoption becomes an item only when the team
+itself uses AI for at least 10% of its pull requests, and it asks what is in the way rather than setting a target.
 
 **Comparison.** Each metric in the comparison row shows the person's own value next to their *primary project*
 (the project where most of their PRs in the period landed) and the whole organisation you can see, plus the

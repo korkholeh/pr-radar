@@ -26,7 +26,8 @@ from apps.dashboards.exports.reports import build_report, report_filename
 from apps.dashboards.exports.xlsx import write_xlsx
 from apps.dashboards.kpis import KpiSpec, build_kpi_row
 from apps.dashboards.models import ExportJob
-from apps.dashboards.person import build_comparison, build_violation_stats
+from apps.dashboards.person import build_ai_profile, build_comparison, build_violation_stats
+from apps.dashboards.person_guidance import build_ai_guidance, build_guidance
 from apps.dashboards.selectors import (
     no_repositories_configured,
     nothing_ever_synced,
@@ -111,12 +112,14 @@ def dashboard(
         # a query when something is actually configured — this keeps the pinned query counts flat.
         context["nothing_synced"] = period_is_empty and not no_repositories and nothing_ever_synced()
     if scope_type == ScopeType.PERSON and scope_object is not None:
-        context["comparison"] = [
-            {"definition": get_metric(row.metric), "row": row}
-            for row in build_comparison(scope, params, scope_object)
-        ]
+        comparison = build_comparison(scope, params, scope_object)
+        context["comparison"] = [{"definition": get_metric(row.metric), "row": row} for row in comparison]
         context["min_sample"] = get_int("MIN_SAMPLE")
         context["violation_stats"] = build_violation_stats(scope, params)
+        context["guidance"] = build_guidance(comparison, context["violation_stats"], context["min_sample"])
+        context["ai_guidance"] = build_ai_guidance(
+            comparison, build_ai_profile(scope, params), context["violation_stats"], context["min_sample"]
+        )
 
     if is_htmx(request):
         return render(request, "dashboards/partials/dashboard_content.html", context)

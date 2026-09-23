@@ -10,6 +10,29 @@
   recognise. It reads the live settings, so turning on `AI_COHORT_INCLUDE_SUSPECTED` or changing
   `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` changes what it says. Admins get links to the rule pages from it.
 
+- **The person page recommends what a lead should do.** A "Recommendations for the lead" block under the charts
+  lists numbered action items, most important first: open high-severity policy violations to go through this
+  week, rules broken three or more times in the period, other open violations to triage, then quality and flow
+  gaps — follow-up fixes, 21-day churn, rework, lead time, time to first review, PR size — each with the person's
+  value, the baseline and a concrete next step, and a nudge into the review rotation for someone who merges but
+  never reviews. Metrics at least 20% better than the baseline are listed under "Worth acknowledging". The
+  baseline is the person's primary project, or the organization when they have none. Metric items need
+  `MIN_SAMPLE` merged pull requests; below that only policy items are listed and the block says why. The items
+  come from fixed rules over the comparison and violation tables on the same page, so they cannot disagree with
+  them.
+
+  An **AI adoption** section of the same block covers AI separately. It says whether the person uses AI more
+  than, about as much as or less than the team (their AI share of merged pull requests against the baseline),
+  how their pull requests opened in the period split into explicit, disclosed, suspected and unmarked, and which
+  tools they named. Its action items: violations of the AI rules (disclosure, allowed tools, AI review, human
+  approval, AI PR size, sensitive paths and the rest — listed here instead of among the general items),
+  pull requests that look AI-assisted but are not disclosed, AI-assisted pull requests that hold up worse than the
+  person's own other pull requests (follow-up fixes, reverts, churn, rework, CI first pass, test changes, size —
+  only where both sides have `MIN_SAMPLE` pull requests), AI work on high-risk paths, and — only when the team
+  itself uses AI for at least 10% of its pull requests — a question about what keeps the person from using it,
+  framed as removing blockers rather than raising a number. Someone whose AI-assisted work holds up and has no
+  open AI violations is suggested as a person to show the team how they work.
+
 - **The person page shows how far a person is from their team.** In the comparison table, under each value in
   the Person column, two lines give the gap to the project and to the organisation — percentage points for a
   share, a relative change for a duration or a size — coloured by the metric's direction and grey on a small

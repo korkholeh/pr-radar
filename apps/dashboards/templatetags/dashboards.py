@@ -17,6 +17,7 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.timezone import localtime
 from django.utils.translation import gettext
 
+from apps.ai_detection.models import Tool
 from apps.ai_detection.services import cohort_rules
 from apps.dashboards.charts import ChartPayload
 from apps.dashboards.export_messages import render_export_error
@@ -24,9 +25,11 @@ from apps.dashboards.formatting import EM_DASH
 from apps.dashboards.formatting import format_duration as _format_duration
 from apps.dashboards.params import DashboardParams
 from apps.dashboards.person import Deviation
+from apps.dashboards.person_guidance import Recommendation, render_recommendation
 from apps.github_sync.models import SyncRun
-from apps.metrics.registry import MetricDef
+from apps.metrics.registry import MetricDef, get_metric
 from apps.metrics.types import MetricResult, SeriesPoint
+from apps.policy.messages import rule_label
 
 register = template.Library()
 
@@ -341,3 +344,53 @@ def table_row_actions(context: dict, table_key: str) -> bool:
         return False
     request = context.get("request")
     return request is not None and bool(request.user.has_perm("catalog.manage_settings"))
+
+
+@register.simple_tag(name="recommendation_text")
+def recommendation_text(item: Recommendation, name: str) -> str:
+    """One item of the person page's recommendations block as a sentence in the reader's
+    language: the metric's value and baseline formatted by its unit, rule codes turned into rule
+    names, the person's display name filled in. Autoescaped by the template like any other tag
+    output, so a person's name can never inject markup."""
+    params: dict[str, object] = {**item.params, "name": name}
+    metric = item.params.get("metric")
+    if metric is not None:
+        definition = get_metric(metric)
+        params["metric"] = metric_title(definition)
+        params["value"] = metric_value(item.params.get("value"), definition.unit)
+        params["baseline"] = metric_value(item.params.get("baseline"), definition.unit)
+    if "comparisons" in item.params:
+        params["comparisons"] = "; ".join(
+            gettext("%(metric)s: %(value)s with AI, %(baseline)s without")
+            % {
+                "metric": metric_title(get_metric(pair["metric"])),
+                "value": metric_value(pair["value"], get_metric(pair["metric"]).unit),
+                "baseline": metric_value(pair["baseline"], get_metric(pair["metric"]).unit),
+            }
+            for pair in item.params["comparisons"]
+        )
+    if "rule" in item.params:
+        params["rule"] = rule_label(item.params["rule"])
+    if "rules" in item.params:
+        params["rules"] = ", ".join(rule_label(code) for code in item.params["rules"])
+    count = item.params.get("count")
+    if count is not None:
+        params["count"] = format_count(count)
+    return render_recommendation(item.code, params, count=count)
+
+
+@register.simple_tag(name="ai_tools_text")
+def ai_tools_text(tools: list[tuple[str, int]]) -> str:
+    """ "Claude Code (5), Copilot (2)" — the tools a person's AI-assisted pull requests disclosed,
+    by their translated name, most used first. An unknown code is shown as-is."""
+    return ", ".join(
+        gettext("%(tool)s (%(count)s)") % {"tool": _tool_label(code), "count": format_count(count)}
+        for code, count in tools
+    )
+
+
+def _tool_label(code: str) -> str:
+    try:
+        return str(Tool(code).label)
+    except ValueError:
+        return code

@@ -1,0 +1,134 @@
+{% load i18n dashboards %}
+{% comment %}
+Recommendations for the lead (`person_guidance.build_guidance`): action items and strengths derived
+by fixed rules from the comparison table and the violation statistics further down this page, so the
+block never disagrees with them. Each item is a code plus params rendered in the reader's language by
+`recommendation_text`.
+{% endcomment %}
+{% if guidance %}
+  <section class="card card-body mt-6" data-testid="person-recommendations">
+    <h2 class="section-title mb-3">{% translate "Recommendations for the lead" %}</h2>
+
+    <h3 class="font-semibold mb-2">{% translate "Action items" %}</h3>
+    {% if guidance.actions %}
+      <ol class="list-decimal pl-5 space-y-2" data-testid="person-action-items">
+        {% for item in guidance.actions %}
+          <li data-testid="person-action-item" data-code="{{ item.code }}">{% recommendation_text item scope_object.display_name %}</li>
+        {% endfor %}
+      </ol>
+    {% elif guidance.small_sample %}
+      <p data-testid="person-action-items-empty">
+        {% translate "No open policy violations outside the AI rules. Too few pull requests were merged in this period to judge delivery — widen the period for a fuller picture." %}
+      </p>
+    {% else %}
+      <p data-testid="person-action-items-empty">
+        {% translate "Nothing in delivery or general policy needs action in this period. Say what is going well in the next 1:1." %}
+      </p>
+    {% endif %}
+
+    {% if guidance.strengths %}
+      <h3 class="font-semibold mt-4 mb-2">{% translate "Worth acknowledging" %}</h3>
+      <ul class="list-disc pl-5 space-y-1" data-testid="person-strengths">
+        {% for item in guidance.strengths %}
+          <li data-testid="person-strength" data-metric="{{ item.params.metric }}">{% recommendation_text item scope_object.display_name %}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if ai_guidance %}
+      {% with name=scope_object.display_name share=ai_guidance.share|metric_value:"ratio" baseline=ai_guidance.baseline|metric_value:"ratio" counts=ai_guidance.status_counts %}
+        <div data-testid="person-ai-adoption" data-level="{{ ai_guidance.level }}">
+          <h3 class="font-semibold mt-4 mb-2">{% translate "AI adoption" %}</h3>
+          <p class="mb-2" data-testid="person-ai-level">
+            {% if ai_guidance.level == "above" %}
+              {% blocktranslate trimmed %}
+                {{ name }} uses AI more than the team: {{ share }} of their merged pull requests are
+                AI-assisted, against {{ baseline }}.
+              {% endblocktranslate %}
+            {% elif ai_guidance.level == "in_line" %}
+              {% blocktranslate trimmed %}
+                {{ name }} uses AI about as much as the team: {{ share }} of their merged pull requests
+                are AI-assisted, against {{ baseline }}.
+              {% endblocktranslate %}
+            {% elif ai_guidance.level == "below" %}
+              {% blocktranslate trimmed %}
+                {{ name }} uses AI less than the team: {{ share }} of their merged pull requests are
+                AI-assisted, against {{ baseline }}.
+              {% endblocktranslate %}
+            {% elif ai_guidance.level == "none" %}
+              {% blocktranslate trimmed %}
+                No pull request by {{ name }} in this period shows AI use, against {{ baseline }} for the
+                team. A pull request without an AI marker counts as unknown, so this does not prove they
+                do not use it.
+              {% endblocktranslate %}
+            {% else %}
+              {% translate "Too few pull requests were merged in this period to compare AI use with the team." %}
+            {% endif %}
+          </p>
+          {% if ai_guidance.profile.opened %}
+            <p class="mb-2" data-testid="person-ai-statuses">
+              {% blocktranslate trimmed with explicit=counts.explicit disclosed=counts.disclosed suspected=counts.suspected other=counts.other count count=ai_guidance.profile.opened %}
+                Of {{ count }} pull request opened in this period: {{ explicit }} with an explicit AI
+                marker, {{ disclosed }} with AI disclosed in the description, {{ suspected }} suspected
+                from signals, {{ other }} with no AI mark.
+              {% plural %}
+                Of {{ count }} pull requests opened in this period: {{ explicit }} with an explicit AI
+                marker, {{ disclosed }} with AI disclosed in the description, {{ suspected }} suspected
+                from signals, {{ other }} with no AI mark.
+              {% endblocktranslate %}
+            </p>
+          {% endif %}
+          {% if ai_guidance.profile.tools %}
+            {% ai_tools_text ai_guidance.profile.tools as tools %}
+            <p class="mb-2" data-testid="person-ai-tools">
+              {% blocktranslate trimmed %}Tools named: {{ tools }}.{% endblocktranslate %}
+            </p>
+          {% endif %}
+          {% if ai_guidance.actions %}
+            <ol class="list-decimal pl-5 space-y-2" data-testid="person-ai-action-items">
+              {% for item in ai_guidance.actions %}
+                <li data-testid="person-ai-action-item" data-code="{{ item.code }}">{% recommendation_text item name %}</li>
+              {% endfor %}
+            </ol>
+          {% elif ai_guidance.level != "small_sample" %}
+            <p data-testid="person-ai-action-items-empty">
+              {% translate "Nothing about how AI is used needs action in this period." %}
+            </p>
+          {% endif %}
+          {% if ai_guidance.strengths %}
+            <ul class="list-disc pl-5 space-y-1 mt-2" data-testid="person-ai-strengths">
+              {% for item in ai_guidance.strengths %}
+                <li data-testid="person-ai-strength" data-code="{{ item.code }}">{% recommendation_text item name %}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endwith %}
+    {% endif %}
+
+    <div class="mt-4 flex flex-col gap-1 text-sm text-text-muted" data-testid="person-recommendations-legend">
+      {% if guidance.actions and guidance.small_sample %}
+        <p>
+          {% blocktranslate trimmed count min_sample=min_sample %}
+            Fewer than {{ min_sample }} pull request was merged in this period, so only policy
+            violations are listed; metric-based items need more data.
+          {% plural %}
+            Fewer than {{ min_sample }} pull requests were merged in this period, so only policy
+            violations are listed; metric-based items need more data.
+          {% endblocktranslate %}
+        </p>
+      {% endif %}
+      {% if guidance.baseline_level == "project" %}
+        <p>{% translate "Every comparison is with the person’s primary project — the one where most of their pull requests in the period were opened." %}</p>
+      {% else %}
+        <p>{% translate "Every comparison is with the whole organization: the person has no project in your scope for this period." %}</p>
+      {% endif %}
+      <p>
+        {% translate "In the AI adoption section, AI-assisted pull requests are compared with the person’s own other pull requests, and only on metrics with enough data on both sides. Violations of the AI rules are listed there rather than above." %}
+      </p>
+      <p>
+        {% translate "Generated by fixed rules from the tables below. A starting point for a conversation, not a verdict on the person." %}
+      </p>
+    </div>
+  </section>
+{% endif %}

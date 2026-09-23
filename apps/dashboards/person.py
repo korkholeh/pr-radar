@@ -13,7 +13,7 @@ from django.db.models import Count
 
 from apps.catalog.models import Person
 from apps.dashboards.params import DashboardParams
-from apps.metrics.models import ScopeType
+from apps.metrics.models import Cohort, ScopeType
 from apps.metrics.registry import get_metric
 from apps.metrics.selectors import scoped_pull_requests, scoped_violations
 from apps.metrics.services import compute
@@ -227,3 +227,101 @@ def build_violation_stats(scope: Scope, params: DashboardParams) -> ViolationSta
     stats.sort(key=lambda row: (_SEVERITY_ORDER.get(row.severity, 3), -row.total, row.rule_code))
     totals = {field: sum(getattr(row, field) for row in stats) for field in _STATUS_FIELDS}
     return ViolationStats(rows=stats, totals=totals, pull_requests=len(pull_request_ids))
+
+
+# The quality metrics compared between a person's AI-assisted and other pull requests on the person
+# page's AI adoption section: outcomes first, then the signals of how the change was checked, then size.
+AI_COHORT_QUALITY_METRIC_KEYS: tuple[str, ...] = (
+    "followup_fix_rate",
+    "revert_rate",
+    "churn_21d",
+    "rework_rate",
+    "ci_first_pass_rate",
+    "test_change_ratio",
+    "pr_size_p50",
+)
+
+
+@dataclass(frozen=True)
+class CohortComparison:
+    """One quality metric measured separately on the person's AI-cohort and non-AI pull requests."""
+
+    metric: str
+    ai_value: float | None
+    ai_sample: int
+    non_ai_value: float | None
+    non_ai_sample: int
+
+
+@dataclass(frozen=True)
+class AIProfile:
+    # AI status (`AIStatus` code) -> pull requests opened in the period with it.
+    status_counts: dict[str, int]
+    # AI-cohort pull requests opened in the period — the cohort honours `AI_COHORT_INCLUDE_SUSPECTED`,
+    # so this is not always the explicit + disclosed sum.
+    ai_count: int
+    # (tool code, AI-cohort pull requests that disclosed it), most used first.
+    tools: list[tuple[str, int]]
+    cohort_quality: list[CohortComparison]
+    # Share of the person's AI-cohort pull requests merged in the period that touched a high-risk path.
+    high_risk_rate: float | None
+    high_risk_sample: int
+
+    @property
+    def opened(self) -> int:
+        return sum(self.status_counts.values())
+
+
+def build_ai_profile(scope: Scope, params: DashboardParams) -> AIProfile:
+    """The person's AI adoption at a glance: how their pull requests opened in the period split by AI
+    status and tool, and how their AI-assisted pull requests compare with their other ones on the
+    quality metrics (`AI_COHORT_QUALITY_METRIC_KEYS`). Three `compute()` calls — the whole person, the
+    AI cohort, the non-AI cohort — so every number is the same one the dashboards show with that
+    cohort filter. The share against the project/organization is not here: it is `ai_pr_share` in
+    `build_comparison`, which the caller already has."""
+    date_from, date_to = params.date_from, params.date_to
+    overall = compute(
+        ["ai_pr_count", "ai_status_breakdown", "ai_tool_breakdown", "high_risk_ai_pr_rate"],
+        scope,
+        date_from,
+        date_to,
+        granularity=params.granularity,
+        include_series=False,
+    )
+    by_cohort = {
+        cohort: compute(
+            list(AI_COHORT_QUALITY_METRIC_KEYS),
+            scope,
+            date_from,
+            date_to,
+            cohort=cohort,
+            granularity=params.granularity,
+            include_series=False,
+        )
+        for cohort in (Cohort.AI, Cohort.NON_AI)
+    }
+    tools = sorted(
+        ((item.label, int(item.value or 0)) for item in overall["ai_tool_breakdown"].breakdown if item.value),
+        key=lambda pair: (-pair[1], pair[0]),
+    )
+    return AIProfile(
+        status_counts={
+            item.label: int(item.value or 0)
+            for item in overall["ai_status_breakdown"].breakdown
+            if item.value
+        },
+        ai_count=int(overall["ai_pr_count"].value or 0),
+        tools=tools,
+        cohort_quality=[
+            CohortComparison(
+                metric=key,
+                ai_value=by_cohort[Cohort.AI][key].value,
+                ai_sample=by_cohort[Cohort.AI][key].sample_size,
+                non_ai_value=by_cohort[Cohort.NON_AI][key].value,
+                non_ai_sample=by_cohort[Cohort.NON_AI][key].sample_size,
+            )
+            for key in AI_COHORT_QUALITY_METRIC_KEYS
+        ],
+        high_risk_rate=overall["high_risk_ai_pr_rate"].value,
+        high_risk_sample=overall["high_risk_ai_pr_rate"].sample_size,
+    )
