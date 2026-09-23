@@ -496,9 +496,20 @@ class Command(BaseCommand):
 
         ack_pr = _get_or_create_pr(940, "E2E Policy Ack Target")
         comment_pr = _get_or_create_pr(941, "E2E Policy Missing Comment Target")
+        # TOOL_NOT_ALLOWED reads the declared tools from the body's "AI tools used" section, not
+        # from `ai_tools` alone (which also holds detected tools). Written on every reseed so a
+        # database seeded before that change gets it too.
+        waive_body = "### AI tools used\nCursor\n"
         waive_pr = _get_or_create_pr(
-            942, "E2E Policy Waive Target", ai_disclosure=AIDisclosure.NONE, ai_tools=["cursor"]
+            942,
+            "E2E Policy Waive Target",
+            ai_disclosure=AIDisclosure.NONE,
+            ai_tools=["cursor"],
+            body=waive_body,
         )
+        if waive_pr.body != waive_body:
+            waive_pr.body = waive_body
+            waive_pr.save(update_fields=["body"])
         bulk_pr_1 = _get_or_create_pr(943, "E2E Policy Bulk Target One")
         bulk_pr_2 = _get_or_create_pr(944, "E2E Policy Bulk Target Two")
         mismatch_pr, _ = PullRequest.objects.get_or_create(

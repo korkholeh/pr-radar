@@ -28,7 +28,7 @@ def _fire_every_rule() -> list[PolicyViolation]:
 def _prose_words() -> set[str]:
     words: set[str] = set()
     for entry in RULE_MESSAGES.values():
-        for template in (entry.get("singular"), entry.get("plural")):
+        for template in (entry.get("singular"), entry.get("plural"), *entry.get("variants", {}).values()):
             if not template:
                 continue
             for word in template.split():

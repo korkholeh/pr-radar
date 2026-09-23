@@ -9,7 +9,7 @@ RuleCode = PolicyViolation.RuleCode
 _SAMPLE_PARAMS: dict[str, dict] = {
     RuleCode.DISCLOSURE_MISSING: {},
     RuleCode.DISCLOSURE_MISMATCH: {},
-    RuleCode.TOOL_NOT_ALLOWED: {"tool": "cursor"},
+    RuleCode.TOOL_NOT_ALLOWED: {"tool": "cursor", "source": "detected"},
     RuleCode.SENSITIVE_PATH_FORBIDDEN: {"paths": ["secrets/a.py"], "path_count": 1, "sensitive_rule_id": 1},
     RuleCode.SENSITIVE_PATH_REVIEW: {
         "paths": ["infra/a.tf"],
@@ -155,3 +155,24 @@ def test_every_rule_code_renders_in_ukrainian_with_its_placeholders_filled(rule_
     assert text
     assert "%(" not in text
     assert "?" not in text
+
+
+@pytest.mark.parametrize("source", ["declared", "detected", "declared_and_detected"])
+def test_tool_not_allowed_says_where_the_tool_came_from(source):
+    with override("en"):
+        text = render_violation(RuleCode.TOOL_NOT_ALLOWED, {"tool": "cursor", "source": source})
+    assert text == RULE_MESSAGES[RuleCode.TOOL_NOT_ALLOWED]["variants"][source] % {"tool": "Cursor"}
+    with override("uk"):
+        assert render_violation(RuleCode.TOOL_NOT_ALLOWED, {"tool": "cursor", "source": source}) != text
+
+
+def test_tool_not_allowed_without_a_source_renders_the_generic_sentence():
+    """A row stored before `source` existed keeps rendering."""
+    with override("en"):
+        text = render_violation(RuleCode.TOOL_NOT_ALLOWED, {"tool": "claude_code"})
+    assert text == "Tool Claude Code is not in the policy's list of allowed tools."
+
+
+def test_an_unknown_tool_code_renders_the_code():
+    text = render_violation(RuleCode.TOOL_NOT_ALLOWED, {"tool": "some_future_tool", "source": "declared"})
+    assert "some_future_tool" in text

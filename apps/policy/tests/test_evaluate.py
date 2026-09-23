@@ -65,11 +65,12 @@ def _setup_disclosure_mismatch():
 
 def _setup_tool_not_allowed():
     AIPolicyFactory(allowed_tools=["copilot"], effective_from=_past())
-    pr = PullRequestFactory(ai_tools=["cursor"])
+    pr = PullRequestFactory(ai_tools=["cursor"], body="### AI tools used\nCursor\n")
 
     def fix():
         pr.ai_tools = ["copilot"]
-        pr.save(update_fields=["ai_tools"])
+        pr.body = "### AI tools used\nCopilot\n"
+        pr.save(update_fields=["ai_tools", "body"])
 
     return pr, fix
 

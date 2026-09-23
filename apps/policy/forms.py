@@ -139,8 +139,10 @@ class AIPolicyForm(forms.ModelForm):
         label=_("Allowed tools"),
         help_text=_(
             "Raises TOOL_NOT_ALLOWED (high) once per tool that a pull request declares or that "
-            "detection finds, and that is not selected here. An empty selection allows every "
-            "tool: nothing is forbidden until something is allowed."
+            "detection names, and that is not selected here. Signals that name no tool (commit "
+            "bursts, mass file creation and the like) never raise it, so Other applies only when "
+            "the author declares it. An empty selection allows every tool: nothing is forbidden "
+            "until something is allowed."
         ),
     )
     ai_reviewer_logins = forms.CharField(

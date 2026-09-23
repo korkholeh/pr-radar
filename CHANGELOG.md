@@ -116,6 +116,14 @@
 
 ### Fixed
 
+- **"Tool not allowed" no longer fires for signals that name no tool.** Behavioural and stylometric signals — a
+  commit burst, mass file creation, one large commit, an agent-configuration file — say a pull request looks
+  AI-made without naming a tool, and were filed under "Other". With "Other" left out of the allowed tools, every
+  such pull request got a "Tool Other is not allowed" violation. Now only a tool the author declares, or one that
+  detection actually names, is checked. The violation text also says where the tool came from — declared by the
+  author, identified by detection, or both — and shows the tool's name instead of its code. Run
+  `manage.py recompute` to clear existing false violations.
+
 - **Lead time, time to first review, cycle time and reviewer response time show real durations.** The calculators
   returned hours while every screen, chart and export read the value as seconds, so a 2h 43m median lead time
   showed as "3 seconds" — and a CSV or XLSX export showed it as 0.0 hours. They now report seconds, the unit

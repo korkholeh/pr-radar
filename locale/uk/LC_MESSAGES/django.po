@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 11:18+0000\n"
+"POT-Creation-Date: 2026-09-23 17:48+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -839,7 +839,7 @@ msgstr "Впевненість"
 #: apps/ai_detection/forms.py:17 apps/ai_detection/forms.py:77
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:18
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:21
-#: apps/catalog/forms.py:25 apps/policy/forms.py:477
+#: apps/catalog/forms.py:25 apps/policy/forms.py:479
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:22
 msgid "Is active"
 msgstr "Активне"
@@ -968,7 +968,7 @@ msgstr "Charlie"
 
 #: apps/ai_detection/models.py:44 apps/catalog/models.py:101
 #: apps/dashboards/reviews.py:252 apps/dashboards/reviews.py:270
-#: apps/policy/forms.py:448
+#: apps/policy/forms.py:450
 msgid "Other"
 msgstr "Інше"
 
@@ -1488,7 +1488,7 @@ msgstr "Слаг"
 
 #: apps/catalog/forms.py:23
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:38
-#: apps/policy/forms.py:476
+#: apps/policy/forms.py:478
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:21
 msgid "Description"
 msgstr "Опис"
@@ -3168,7 +3168,7 @@ msgstr "%(title)s (по всій організації)"
 
 #: apps/dashboards/exports/columns.py:108
 #: apps/dashboards/templates/dashboards/partials/person_comparison.html:16
-#: apps/metrics/models.py:7 apps/policy/forms.py:472
+#: apps/metrics/models.py:7 apps/policy/forms.py:474
 #: apps/policy/templates/policy/console.html:79
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:17
 msgid "Project"
@@ -5768,19 +5768,23 @@ msgstr "Дозволені інструменти"
 #: apps/policy/forms.py:141
 msgid ""
 "Raises TOOL_NOT_ALLOWED (high) once per tool that a pull request declares or "
-"that detection finds, and that is not selected here. An empty selection "
-"allows every tool: nothing is forbidden until something is allowed."
+"that detection names, and that is not selected here. Signals that name no "
+"tool (commit bursts, mass file creation and the like) never raise it, so "
+"Other applies only when the author declares it. An empty selection allows "
+"every tool: nothing is forbidden until something is allowed."
 msgstr ""
 "Створює порушення TOOL_NOT_ALLOWED (високе) окремо для кожного інструмента, "
-"який пулреквест декларує або який виявило визначення і якого немає в цьому "
-"списку. Порожній список дозволяє всі інструменти: доки нічого не дозволено "
-"явно, ніщо й не заборонено."
+"який pull request декларує або який назвала детекція і якого немає в цьому "
+"списку. Сигнали, що не називають інструмента (серії комітів, масове "
+"створення файлів тощо), його не створюють, тож «Інше» враховується лише "
+"тоді, коли його декларує автор. Порожній список дозволяє всі інструменти: "
+"доки нічого не дозволено явно, ніщо й не заборонено."
 
-#: apps/policy/forms.py:148 apps/policy/models.py:55
+#: apps/policy/forms.py:150 apps/policy/models.py:55
 msgid "AI reviewer logins"
 msgstr "Логіни AI-рецензентів"
 
-#: apps/policy/forms.py:150
+#: apps/policy/forms.py:152
 msgid ""
 "One GitHub login per line, for example copilot-pull-request-reviewer. These "
 "logins are what the two checks above look for; while this box is empty, "
@@ -5790,11 +5794,11 @@ msgstr ""
 "Саме ці логіни шукають дві перевірки вище; доки поле порожнє, жодна з них не "
 "спрацює."
 
-#: apps/policy/forms.py:158
+#: apps/policy/forms.py:160
 msgid "Designated reviewers"
 msgstr "Призначені рецензенти"
 
-#: apps/policy/forms.py:160
+#: apps/policy/forms.py:162
 msgid ""
 "Raises MIGRATION_AI_INSUFFICIENT_REVIEW (high) on a merged AI pull request "
 "that carries a database migration none of these people approved. Naming "
@@ -5808,11 +5812,11 @@ msgstr ""
 "може її задовольнити. Ботів призначити не можна: сенс призначення в тому, що "
 "міграцію прочитала конкретна людина."
 
-#: apps/policy/forms.py:169
+#: apps/policy/forms.py:171
 msgid "Maximum effective lines, low risk"
 msgstr "Максимум ефективних рядків, низький ризик"
 
-#: apps/policy/forms.py:171
+#: apps/policy/forms.py:173
 msgid ""
 "Replaces the limit above for a change whose sensitive paths put it at low "
 "risk. Empty means the flat limit applies."
@@ -5820,11 +5824,11 @@ msgstr ""
 "Замінює ліміт вище для зміни, яку чутливі шляхи відносять до низького "
 "ризику. Порожнє поле означає, що діє загальний ліміт."
 
-#: apps/policy/forms.py:178
+#: apps/policy/forms.py:180
 msgid "Maximum effective lines, medium risk"
 msgstr "Максимум ефективних рядків, середній ризик"
 
-#: apps/policy/forms.py:180
+#: apps/policy/forms.py:182
 msgid ""
 "Replaces the limit above for a medium-risk change. The PLANEKS standards "
 "suggest 800 lines here; empty means the flat limit applies."
@@ -5832,11 +5836,11 @@ msgstr ""
 "Замінює ліміт вище для зміни середнього ризику. Стандарти PLANEKS радять тут "
 "800 рядків; порожнє поле означає, що діє загальний ліміт."
 
-#: apps/policy/forms.py:187
+#: apps/policy/forms.py:189
 msgid "Maximum effective lines, high risk"
 msgstr "Максимум ефективних рядків, високий ризик"
 
-#: apps/policy/forms.py:189
+#: apps/policy/forms.py:191
 msgid ""
 "Replaces the limit above for a high-risk change. The PLANEKS standards "
 "suggest 400 lines here; empty means the flat limit applies."
@@ -5844,11 +5848,11 @@ msgstr ""
 "Замінює ліміт вище для зміни високого ризику. Стандарти PLANEKS радять тут "
 "400 рядків; порожнє поле означає, що діє загальний ліміт."
 
-#: apps/policy/forms.py:202
+#: apps/policy/forms.py:204
 msgid "Disclosure and tools"
 msgstr "Розкриття та інструменти"
 
-#: apps/policy/forms.py:204
+#: apps/policy/forms.py:206
 msgid ""
 "What a pull request has to say about the AI that helped write it, and which "
 "tools may be used at all. Detection runs either way: these switches decide "
@@ -5860,11 +5864,11 @@ msgstr ""
 "перемикачі вирішують лише, чи записувати розбіжність між задекларованим і "
 "виявленим як порушення."
 
-#: apps/policy/forms.py:212
+#: apps/policy/forms.py:214
 msgid "Human review"
 msgstr "Ревʼю людиною"
 
-#: apps/policy/forms.py:214
+#: apps/policy/forms.py:216
 msgid ""
 "How many people must have read an AI change before it merges, and whose "
 "approval counts. An approval from the author or from a bot account is never "
@@ -5873,11 +5877,11 @@ msgstr ""
 "Скільки людей має прочитати ШІ-зміну до злиття і чиє схвалення рахується. "
 "Схвалення від автора або від бота тут ніколи не є людським схваленням."
 
-#: apps/policy/forms.py:228
+#: apps/policy/forms.py:230
 msgid "AI review"
 msgstr "Ревʼю від AI"
 
-#: apps/policy/forms.py:230
+#: apps/policy/forms.py:232
 msgid ""
 "The checks about the AI reviewer itself: that it ran, and that its comments "
 "were answered. Both need the reviewer logins below to be filled in, and both "
@@ -5887,11 +5891,11 @@ msgstr ""
 "коментарі відповіли. Обидві потребують заповнених логінів рецензентів нижче "
 "й оцінюються лише після злиття пулреквеста."
 
-#: apps/policy/forms.py:237
+#: apps/policy/forms.py:239
 msgid "What a description must state"
 msgstr "Що має бути в описі"
 
-#: apps/policy/forms.py:239
+#: apps/policy/forms.py:241
 msgid ""
 "Sections a pull request body has to carry. The headings that count are "
 "configurable in Settings; a section that exists but is empty counts as "
@@ -5901,11 +5905,11 @@ msgstr ""
 "налаштовуються в параметрах; наявний, але порожній розділ вважається "
 "відсутнім."
 
-#: apps/policy/forms.py:250
+#: apps/policy/forms.py:252
 msgid "Quality gates and tests"
 msgstr "Ворота якості та тести"
 
-#: apps/policy/forms.py:252
+#: apps/policy/forms.py:254
 msgid ""
 "Whether the safety net around a change was left intact. These apply to every "
 "pull request, not only AI ones: a bypassed gate or a deleted test is no "
@@ -5915,11 +5919,11 @@ msgstr ""
 "стосуються всіх пулреквестів, не лише ШІ: обійдений гейт якості чи видалений "
 "тест не стають кращими від того, що їх зробила людина."
 
-#: apps/policy/forms.py:264
+#: apps/policy/forms.py:266
 msgid "Size and scope"
 msgstr "Розмір і обсяг"
 
-#: apps/policy/forms.py:266
+#: apps/policy/forms.py:268
 msgid ""
 "How large an AI pull request may be and how far it may reach. Effective "
 "lines leave out generated and vendored files, so the limits count the code "
@@ -5929,89 +5933,89 @@ msgstr ""
 "Ефективні рядки не враховують згенеровані та вендорені файли, тож ліміти "
 "рахують код, який комусь справді доведеться рецензувати."
 
-#: apps/policy/forms.py:295
+#: apps/policy/forms.py:297
 #: apps/policy/templates/policy/partials/policy_form.html:82
 msgid "Require disclosure"
 msgstr "Вимагати розкриття інформації"
 
-#: apps/policy/forms.py:296
+#: apps/policy/forms.py:298
 #: apps/policy/templates/policy/partials/policy_form.html:83
 msgid "Require human approval"
 msgstr "Вимагати підтвердження людини"
 
-#: apps/policy/forms.py:297
+#: apps/policy/forms.py:299
 msgid "Minimum human approvals"
 msgstr "Мінімальна кількість підтверджень людини"
 
-#: apps/policy/forms.py:298
+#: apps/policy/forms.py:300
 msgid "Require tests for AI PRs"
 msgstr "Вимагати тести для AI PR"
 
-#: apps/policy/forms.py:299
+#: apps/policy/forms.py:301
 msgid "Maximum effective lines for an AI PR"
 msgstr "Максимум ефективних рядків для AI PR"
 
-#: apps/policy/forms.py:300
+#: apps/policy/forms.py:302
 msgid "Require a review from an AI reviewer"
 msgstr "Вимагати ревʼю від AI-рецензента"
 
-#: apps/policy/forms.py:301
+#: apps/policy/forms.py:303
 msgid "Forbid merging with only bot approvals"
 msgstr "Забороняти мердж лише з затвердженнями ботів"
 
-#: apps/policy/forms.py:302
+#: apps/policy/forms.py:304
 msgid "Require AI review threads to be resolved"
 msgstr "Вимагати вирішення обговорень від AI-рецензента"
 
-#: apps/policy/forms.py:303
+#: apps/policy/forms.py:305
 msgid "Require a stated risk level"
 msgstr "Вимагати зазначений рівень ризику"
 
-#: apps/policy/forms.py:304
+#: apps/policy/forms.py:306
 msgid "Require a linked task"
 msgstr "Вимагати посилання на задачу"
 
-#: apps/policy/forms.py:305
+#: apps/policy/forms.py:307
 msgid "Require a note on how the change was verified"
 msgstr "Вимагати опис перевірки зміни"
 
-#: apps/policy/forms.py:306
+#: apps/policy/forms.py:308
 msgid "Require a plan for high-risk changes"
 msgstr "Вимагати план для високоризикових змін"
 
-#: apps/policy/forms.py:307
+#: apps/policy/forms.py:309
 msgid "Forbid bypassing the quality gate"
 msgstr "Забороняти обхід воріт якості"
 
-#: apps/policy/forms.py:308
+#: apps/policy/forms.py:310
 msgid "Forbid weakening tests"
 msgstr "Забороняти послаблення тестів"
 
-#: apps/policy/forms.py:309
+#: apps/policy/forms.py:311
 msgid "Forbid committing credential files"
 msgstr "Забороняти коміти файлів із доступами"
 
-#: apps/policy/forms.py:310
+#: apps/policy/forms.py:312
 msgid "Forbid scope creep in AI PRs"
 msgstr "Забороняти розповзання обсягу в AI-пул-реквестах"
 
-#: apps/policy/forms.py:311
+#: apps/policy/forms.py:313
 msgid "Forbid rubber-stamp approval of AI PRs"
 msgstr "Забороняти формальне затвердження AI-пул-реквестів"
 
-#: apps/policy/forms.py:312
+#: apps/policy/forms.py:314
 msgid "Flag agent configuration changes"
 msgstr "Позначати зміни конфігурації агента"
 
-#: apps/policy/forms.py:313
+#: apps/policy/forms.py:315
 msgid "Flag new dependencies in AI PRs"
 msgstr "Позначати нові залежності в AI-пул-реквестах"
 
-#: apps/policy/forms.py:314
+#: apps/policy/forms.py:316
 msgid "Minimum approvals for a high-risk change"
 msgstr "Мінімум затверджень для високоризикової зміни"
 
-#: apps/policy/forms.py:321
+#: apps/policy/forms.py:323
 msgid ""
 "Raises DISCLOSURE_MISSING (medium) on a pull request whose description "
 "neither states that AI helped nor states that it did not. Switched off, "
@@ -6027,7 +6031,7 @@ msgstr ""
 "визначення дуже впевнене в протилежному, — створюється в будь-якому разі, бо "
 "суперечність завжди варта уваги."
 
-#: apps/policy/forms.py:328
+#: apps/policy/forms.py:330
 msgid ""
 "Raises NO_HUMAN_APPROVAL (high) on a merged AI pull request with fewer human "
 "approvals than the minimum below. Judged on merge only: an open pull request "
@@ -6037,7 +6041,7 @@ msgstr ""
 "якого людських схвалень менше за мінімум нижче. Оцінюється лише після "
 "злиття: відкритий пулреквест ще може отримати рецензію."
 
-#: apps/policy/forms.py:333
+#: apps/policy/forms.py:335
 msgid ""
 "How many different people have to approve an AI pull request. A path a "
 "sensitive-path rule marks as needing extra review asks for one more than "
@@ -6047,7 +6051,7 @@ msgstr ""
 "чутливих шляхів позначає як такий, що потребує додаткової рецензії, вимагає "
 "на одне схвалення більше."
 
-#: apps/policy/forms.py:337
+#: apps/policy/forms.py:339
 msgid ""
 "Used instead of the minimum above when the change touches a path a sensitive-"
 "path rule marks high risk. It only ever raises the requirement: a lower "
@@ -6057,7 +6061,7 @@ msgstr ""
 "правило чутливих шляхів позначає як високий ризик. Вимогу лише підвищує: "
 "менше число тут нічого не змінює."
 
-#: apps/policy/forms.py:342
+#: apps/policy/forms.py:344
 msgid ""
 "Raises AI_ONLY_APPROVAL (high) when every approval on a merged pull request "
 "came from a bot account and none from a person. Applies to every pull "
@@ -6067,7 +6071,7 @@ msgstr ""
 "пулреквеста надійшли від ботів і жодного — від людини. Стосується всіх "
 "пулреквестів, не лише ШІ."
 
-#: apps/policy/forms.py:347
+#: apps/policy/forms.py:349
 msgid ""
 "Raises RUBBER_STAMP_ON_AI_PR (high) for a merged AI pull request approved "
 "with an empty review, no comments, within the rubber-stamp window configured "
@@ -6077,7 +6081,7 @@ msgstr ""
 "схваленого порожньою рецензією, без коментарів, у межах вікна формального "
 "схвалення, налаштованого в параметрах."
 
-#: apps/policy/forms.py:352
+#: apps/policy/forms.py:354
 msgid ""
 "Raises AI_REVIEW_MISSING (medium) when a merged pull request was never "
 "reviewed by any of the logins listed below. Silent while that list is empty: "
@@ -6087,7 +6091,7 @@ msgstr ""
 "рецензував жоден із логінів, перелічених нижче. Мовчить, доки список "
 "порожній: політика не може вимагати рецензента, якого ніхто не назвав."
 
-#: apps/policy/forms.py:357
+#: apps/policy/forms.py:359
 msgid ""
 "Raises AI_REVIEW_UNRESOLVED (medium) when a pull request merged with a "
 "comment thread from an AI reviewer that GitHub reports as unresolved. A "
@@ -6097,7 +6101,7 @@ msgstr ""
 "гілкою коментарів ШІ-рецензента, яку GitHub позначає як нерозв’язану. Гілка, "
 "про стан якої GitHub нічого не повідомив, не рахується."
 
-#: apps/policy/forms.py:362
+#: apps/policy/forms.py:364
 msgid ""
 "Raises RISK_LEVEL_MISSING (low) when the description carries no risk section "
 "under any of the recognised headings."
@@ -6105,7 +6109,7 @@ msgstr ""
 "Створює порушення RISK_LEVEL_MISSING (низьке), коли в описі немає розділу "
 "про ризик під жодним із розпізнаваних заголовків."
 
-#: apps/policy/forms.py:366
+#: apps/policy/forms.py:368
 msgid ""
 "Raises VERIFICATION_MISSING (low) when the description says nothing about "
 "how the change was checked — tests run, manual steps, what was observed."
@@ -6114,7 +6118,7 @@ msgstr ""
 "про те, як зміну перевірили — які тести пройшли, які кроки зробили вручну, "
 "що побачили."
 
-#: apps/policy/forms.py:370
+#: apps/policy/forms.py:372
 msgid ""
 "Raises TASK_LINK_MISSING (low) when no task reference appears in the title "
 "or anywhere in the body. No section is needed: '[ENG-175]' in the title or "
@@ -6124,7 +6128,7 @@ msgstr ""
 "описі немає посилання на задачу. Окремий розділ не потрібен: «[ENG-175]» у "
 "заголовку або «closes #431» у першому рядку опису задовольняє перевірку."
 
-#: apps/policy/forms.py:375
+#: apps/policy/forms.py:377
 msgid ""
 "Raises HIGH_RISK_NO_PLAN (high) when a high-risk change states no plan, "
 "risks or rollback. Needs a sensitive-path rule with risk level High to match "
@@ -6135,7 +6139,7 @@ msgstr ""
 "рівнем ризику «високий», яке збігається зі зміною, тож мовчить, доки таких "
 "правил немає."
 
-#: apps/policy/forms.py:380
+#: apps/policy/forms.py:382
 msgid ""
 "Raises QUALITY_GATE_BYPASSED (high), once per reason, on a pull request "
 "merged with red checks, with a skip-CI marker in a commit message, with the "
@@ -6147,7 +6151,7 @@ msgstr ""
 "повідомленні коміту, з послабленою конфігурацією CI або з вилученим кроком "
 "CI. Дві останні причини потребують увімкненого для репозиторію аналізу діфів."
 
-#: apps/policy/forms.py:386
+#: apps/policy/forms.py:388
 msgid ""
 "Raises TEST_WEAKENED (high) when a test file is deleted while non-test code "
 "changes, a skip or xfail marker is added, or assertions are removed with "
@@ -6158,7 +6162,7 @@ msgstr ""
 "твердження і не додано жодного натомість. Саме лише видалення тесту — це "
 "прибирання, і воно проходить."
 
-#: apps/policy/forms.py:391
+#: apps/policy/forms.py:393
 msgid ""
 "Raises NO_TESTS (low) on an AI pull request that changes more non-test lines "
 "than the threshold configured in Settings and touches no test at all."
@@ -6166,7 +6170,7 @@ msgstr ""
 "Створює порушення NO_TESTS (низьке) для ШІ-пулреквеста, який змінює більше "
 "нетестових рядків, ніж поріг у параметрах, і не торкається жодного тесту."
 
-#: apps/policy/forms.py:395
+#: apps/policy/forms.py:397
 msgid ""
 "Raises SECRET_ARTIFACT_COMMITTED (high) when a credential file, a private "
 "key or an agent's own chat history is committed. Decided from the path alone "
@@ -6177,7 +6181,7 @@ msgstr ""
 "агента. Рішення ухвалюється лише за шляхом — вміст файлу ніколи не "
 "читається, не логується і не зберігається."
 
-#: apps/policy/forms.py:400
+#: apps/policy/forms.py:402
 msgid ""
 "Raises AI_PR_TOO_LARGE (low) when an AI pull request's effective additions "
 "plus deletions exceed this number. Leave it empty to switch the size check "
@@ -6188,7 +6192,7 @@ msgstr ""
 "вимкнути перевірку розміру; ліміти за рівнем ризику нижче мають перевагу "
 "там, де їх задано."
 
-#: apps/policy/forms.py:405
+#: apps/policy/forms.py:407
 msgid ""
 "Raises SCOPE_CREEP (medium) when an AI pull request mixes a wholesale "
 "reformat into a change, or reaches into top-level modules its own stated "
@@ -6200,7 +6204,7 @@ msgstr ""
 "його власний опис обсягу. Пулреквест, який не заявив обсягу, не має чого "
 "перевищувати."
 
-#: apps/policy/forms.py:410
+#: apps/policy/forms.py:412
 msgid ""
 "Raises NEW_DEPENDENCY_AI (medium) when an AI pull request changes a "
 "dependency manifest or lockfile. A prompt to check that somebody chose the "
@@ -6210,7 +6214,7 @@ msgstr ""
 "маніфест залежностей або lock-файл. Це нагадування перевірити, що залежність "
 "обрала людина, а не звинувачення."
 
-#: apps/policy/forms.py:415
+#: apps/policy/forms.py:417
 msgid ""
 "Raises AGENT_CONFIG_CHANGED (low) when CLAUDE.md, AGENTS.md, .claude/ and "
 "their kin change. Low on purpose: it marks a change that alters how every "
@@ -6221,26 +6225,26 @@ msgstr ""
 "яка впливає на поведінку кожного наступного запуску агента, щоб хтось її "
 "прочитав."
 
-#: apps/policy/forms.py:473
+#: apps/policy/forms.py:475
 msgid "Path glob"
 msgstr "Glob-шаблон шляху"
 
-#: apps/policy/forms.py:474 apps/policy/models.py:97
+#: apps/policy/forms.py:476 apps/policy/models.py:97
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:19
 msgid "AI mode"
 msgstr "режим ШІ"
 
-#: apps/policy/forms.py:475
+#: apps/policy/forms.py:477
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:20
 msgid "Risk level"
 msgstr "Рівень ризику"
 
-#: apps/policy/forms.py:480
+#: apps/policy/forms.py:482
 msgid ""
 "Advisory classifies the path's risk without raising a violation of its own."
 msgstr "«Дорадче» лише класифікує ризик шляху і не створює власного порушення."
 
-#: apps/policy/forms.py:482
+#: apps/policy/forms.py:484
 msgid ""
 "A pull request's risk is the highest of the paths it touches. Leave empty "
 "for a rule that says nothing about risk."
@@ -6248,61 +6252,61 @@ msgstr ""
 "Ризик пул-реквеста — найвищий серед шляхів, яких він торкається. Залиште "
 "порожнім для правила, що не говорить про ризик."
 
-#: apps/policy/messages.py:32
+#: apps/policy/messages.py:37
 msgid "the checks were not green"
 msgstr "перевірки не були зеленими"
 
-#: apps/policy/messages.py:33
+#: apps/policy/messages.py:38
 msgid "a commit told CI to skip the run"
 msgstr "коміт наказав CI пропустити запуск"
 
-#: apps/policy/messages.py:34
+#: apps/policy/messages.py:39
 msgid "the change relaxed the CI configuration"
 msgstr "зміна послабила конфігурацію CI"
 
-#: apps/policy/messages.py:35
+#: apps/policy/messages.py:40
 msgid "the change removed a check from CI"
 msgstr "зміна прибрала перевірку з CI"
 
-#: apps/policy/messages.py:36
+#: apps/policy/messages.py:41
 msgid "a test file was deleted alongside code changes"
 msgstr "файл тестів видалено разом зі змінами коду"
 
-#: apps/policy/messages.py:37
+#: apps/policy/messages.py:42
 msgid "a skip or xfail marker was added"
 msgstr "додано маркер skip або xfail"
 
-#: apps/policy/messages.py:38
+#: apps/policy/messages.py:43
 msgid "assertions were removed and none added back"
 msgstr "перевірки (assert) прибрано і не додано натомість"
 
-#: apps/policy/messages.py:39
+#: apps/policy/messages.py:44
 msgid "a formatting sweep was mixed into the change"
 msgstr "до зміни домішано масове переформатування"
 
-#: apps/policy/messages.py:40
+#: apps/policy/messages.py:45
 msgid "it reaches outside the scope the description states"
 msgstr "вона виходить за межі обсягу, зазначеного в описі"
 
-#: apps/policy/messages.py:43
+#: apps/policy/messages.py:48
 msgid "low-risk"
 msgstr "низький ризик"
 
-#: apps/policy/messages.py:44
+#: apps/policy/messages.py:49
 msgid "medium-risk"
 msgstr "середній ризик"
 
-#: apps/policy/messages.py:45
+#: apps/policy/messages.py:50
 msgid "high-risk"
 msgstr "високий ризик"
 
-#: apps/policy/messages.py:52
+#: apps/policy/messages.py:57
 msgid "This pull request is missing the required AI-assistance disclosure."
 msgstr ""
 "У цьому pull request відсутнє обов’язкове розкриття інформації про допомогу "
 "ШІ."
 
-#: apps/policy/messages.py:56
+#: apps/policy/messages.py:61
 msgid ""
 "This pull request discloses no AI assistance, but a high-confidence AI "
 "signal was detected."
@@ -6310,13 +6314,40 @@ msgstr ""
 "Цей pull request заявляє про відсутність допомоги ШІ, але виявлено сигнал ШІ "
 "з високою впевненістю."
 
-#: apps/policy/messages.py:60
+#: apps/policy/messages.py:65
 #, python-format
 msgid "Tool %(tool)s is not in the policy's list of allowed tools."
 msgstr ""
 "Інструмент %(tool)s відсутній у переліку дозволених інструментів політики."
 
-#: apps/policy/messages.py:91
+#: apps/policy/messages.py:69
+#, python-format
+msgid ""
+"The author declared %(tool)s in the description, and it is not in the "
+"policy's list of allowed tools."
+msgstr ""
+"Автор задекларував %(tool)s в описі, а цього інструмента немає в переліку "
+"дозволених інструментів політики."
+
+#: apps/policy/messages.py:73
+#, python-format
+msgid ""
+"AI detection identified %(tool)s in this pull request, and it is not in the "
+"policy's list of allowed tools."
+msgstr ""
+"Детекція ШІ виявила %(tool)s у цьому pull request-і, а цього інструмента "
+"немає в переліку дозволених інструментів політики."
+
+#: apps/policy/messages.py:77
+#, python-format
+msgid ""
+"The author declared %(tool)s and AI detection confirmed it; it is not in the "
+"policy's list of allowed tools."
+msgstr ""
+"Автор задекларував %(tool)s, і детекція ШІ це підтвердила; цього інструмента "
+"немає в переліку дозволених інструментів політики."
+
+#: apps/policy/messages.py:111
 msgid ""
 "This merged AI pull request was self-merged with no approval from another "
 "human."
@@ -6324,17 +6355,17 @@ msgstr ""
 "Цей злитий AI pull request було влито автором самостійно, без підтвердження "
 "від іншої людини."
 
-#: apps/policy/messages.py:115
+#: apps/policy/messages.py:135
 #, python-format
 msgid "This pull request was merged although %(reason)s."
 msgstr "Цей пул-реквест змерджено, хоча %(reason)s."
 
-#: apps/policy/messages.py:118
+#: apps/policy/messages.py:138
 #, python-format
 msgid "The tests were weakened: %(reason)s."
 msgstr "Тести послаблено: %(reason)s."
 
-#: apps/policy/messages.py:133
+#: apps/policy/messages.py:153
 #, python-format
 msgid ""
 "None of the expected AI reviewers (%(reviewers)s) reviewed this pull request "
@@ -6343,25 +6374,25 @@ msgstr ""
 "Жоден з очікуваних AI-рецензентів (%(reviewers)s) не переглянув цей пул-"
 "реквест до мерджу."
 
-#: apps/policy/messages.py:157
+#: apps/policy/messages.py:177
 msgid "This pull request's description states no risk level."
 msgstr "В описі цього пул-реквеста не зазначено рівень ризику."
 
-#: apps/policy/messages.py:160
+#: apps/policy/messages.py:180
 msgid "This pull request's description says nothing about how it was verified."
 msgstr "В описі цього пул-реквеста не сказано, як зміну перевірено."
 
-#: apps/policy/messages.py:163
+#: apps/policy/messages.py:183
 msgid "Neither this pull request's title nor its description links a task."
 msgstr ""
 "Ні в заголовку, ні в описі цього пул-реквеста немає посилання на задачу."
 
-#: apps/policy/messages.py:204
+#: apps/policy/messages.py:224
 #, python-format
 msgid "This AI pull request did more than it stated: %(reason)s."
 msgstr "Цей AI-пул-реквест зробив більше, ніж заявлено: %(reason)s."
 
-#: apps/policy/messages.py:208
+#: apps/policy/messages.py:228
 msgid ""
 "This AI pull request was approved with an empty review, no comments and "
 "almost no time spent reading it."
@@ -6369,7 +6400,7 @@ msgstr ""
 "Цей AI-пул-реквест затверджено з порожнім ревʼю, без коментарів і майже без "
 "часу на читання."
 
-#: apps/policy/messages.py:223
+#: apps/policy/messages.py:243
 #, python-format
 msgid ""
 "This AI pull request touches %(path_count)s file forbidden by a sensitive-"
@@ -6390,7 +6421,7 @@ msgstr[3] ""
 "Цей AI pull request зачіпає %(path_count)s файла, забороненого правилом "
 "чутливого шляху: %(paths)s."
 
-#: apps/policy/messages.py:228
+#: apps/policy/messages.py:248
 #, python-format
 msgid ""
 "This AI pull request touches %(path_count)s file needing extra review "
@@ -6415,7 +6446,7 @@ msgstr[3] ""
 "перевірки (%(paths)s), і має %(approvals)s із %(required)s необхідних "
 "підтверджень людини."
 
-#: apps/policy/messages.py:235
+#: apps/policy/messages.py:255
 #, python-format
 msgid ""
 "This merged AI pull request has %(approvals)s of %(required)s required human "
@@ -6436,7 +6467,7 @@ msgstr[3] ""
 "Цей злитий AI pull request має %(approvals)s із %(required)s необхідного "
 "підтвердження людини."
 
-#: apps/policy/messages.py:240
+#: apps/policy/messages.py:260
 #, python-format
 msgid ""
 "Changes %(non_test_lines)s line of non-test code with no test changes "
@@ -6457,7 +6488,7 @@ msgstr[3] ""
 "Змінює %(non_test_lines)s рядка коду поза тестами без змін у тестах (поріг "
 "%(threshold)s)."
 
-#: apps/policy/messages.py:245
+#: apps/policy/messages.py:265
 #, python-format
 msgid ""
 "This AI pull request changes %(effective_lines)s effective line, over the "
@@ -6478,7 +6509,7 @@ msgstr[3] ""
 "Цей AI pull request змінює %(effective_lines)s ефективного рядка, що "
 "перевищує ліміт %(limit)s."
 
-#: apps/policy/messages.py:250
+#: apps/policy/messages.py:270
 #, python-format
 msgid ""
 "This pull request was merged with %(bot_approvals)s approval, all of them "
@@ -6499,7 +6530,7 @@ msgstr[3] ""
 "Цей пул-реквест змерджено з %(bot_approvals)s затвердженнями, і всі вони від "
 "ботів, а не від людей."
 
-#: apps/policy/messages.py:257
+#: apps/policy/messages.py:277
 #, python-format
 msgid ""
 "This pull request merged with %(threads)s comment thread from an AI reviewer "
@@ -6520,7 +6551,7 @@ msgstr[3] ""
 "Цей пул-реквест змерджено, коли %(threads)s обговорень від AI-рецензента "
 "залишалися невирішеними."
 
-#: apps/policy/messages.py:262
+#: apps/policy/messages.py:282
 #, python-format
 msgid ""
 "This pull request touches %(path_count)s high-risk path (%(paths)s) and its "
@@ -6541,7 +6572,7 @@ msgstr[3] ""
 "Цей пул-реквест торкається %(path_count)s високоризикових шляхів "
 "(%(paths)s), а в описі немає плану, ризиків чи відкату."
 
-#: apps/policy/messages.py:269
+#: apps/policy/messages.py:289
 #, python-format
 msgid ""
 "This AI pull request changes %(path_count)s dependency manifest (%(paths)s); "
@@ -6562,7 +6593,7 @@ msgstr[3] ""
 "Цей AI-пул-реквест змінює %(path_count)s маніфестів залежностей (%(paths)s); "
 "перевірте, що залежності обрала людина."
 
-#: apps/policy/messages.py:276
+#: apps/policy/messages.py:296
 #, python-format
 msgid ""
 "This AI pull request carries %(path_count)s migration file (%(paths)s) and "
@@ -6583,7 +6614,7 @@ msgstr[3] ""
 "Цей AI-пул-реквест містить %(path_count)s файлів міграцій (%(paths)s), і "
 "жоден призначений рецензент його не затвердив."
 
-#: apps/policy/messages.py:283
+#: apps/policy/messages.py:303
 #, python-format
 msgid ""
 "This pull request adds %(path_count)s file that should never be committed: "
@@ -6604,7 +6635,7 @@ msgstr[3] ""
 "Цей пул-реквест додає %(path_count)s файлів, яких не має бути в репозиторії: "
 "%(paths)s."
 
-#: apps/policy/messages.py:288
+#: apps/policy/messages.py:308
 #, python-format
 msgid ""
 "This pull request changes %(path_count)s agent-configuration file "
@@ -6625,7 +6656,7 @@ msgstr[3] ""
 "Цей пул-реквест змінює %(path_count)s файлів конфігурації агента "
 "(%(paths)s), що змінює поведінку наступних запусків."
 
-#: apps/policy/messages.py:307
+#: apps/policy/messages.py:327
 #, python-format
 msgid "%(shown)s and %(more)s more"
 msgstr "%(shown)s і ще %(more)s"

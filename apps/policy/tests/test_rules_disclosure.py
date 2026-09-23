@@ -1,7 +1,7 @@
 import pytest
 
 from apps.activity.models import AIDisclosure
-from apps.ai_detection.models import Confidence
+from apps.ai_detection.models import Confidence, Tool
 from apps.policy.factories import AIPolicyFactory
 from apps.policy.rules import RULES
 from apps.policy.tests.helpers import make_context
@@ -66,3 +66,46 @@ def test_tool_not_allowed_fires_nothing_when_allowed_tools_empty():
     ctx = make_context(ai_tools=["cursor"], policy=policy)
     findings = list(RULES["TOOL_NOT_ALLOWED"](ctx))
     assert findings == []
+
+
+def test_tool_not_allowed_ignores_a_detected_other():
+    """Behavioural signals (commit burst, mass file creation) file under `other` because they name
+    no tool; that must not read as "tool Other is not allowed"."""
+    policy = AIPolicyFactory(allowed_tools=["copilot"])
+    ctx = make_context(
+        ai_tools=[Tool.OTHER], signal_tools={Tool.OTHER}, declared_tools=frozenset(), policy=policy
+    )
+    assert list(RULES["TOOL_NOT_ALLOWED"](ctx)) == []
+
+
+def test_tool_not_allowed_still_fires_for_a_declared_other():
+    policy = AIPolicyFactory(allowed_tools=["copilot"])
+    ctx = make_context(
+        ai_tools=[Tool.OTHER],
+        signal_tools={Tool.OTHER},
+        declared_tools=frozenset({Tool.OTHER}),
+        policy=policy,
+    )
+    findings = list(RULES["TOOL_NOT_ALLOWED"](ctx))
+    assert [f.details_params for f in findings] == [{"tool": "other", "source": "declared"}]
+
+
+@pytest.mark.parametrize(
+    "declared,detected,source",
+    [
+        ({"cursor"}, set(), "declared"),
+        (set(), {"cursor"}, "detected"),
+        ({"cursor"}, {"cursor"}, "declared_and_detected"),
+    ],
+)
+def test_tool_not_allowed_records_where_the_tool_came_from(declared, detected, source):
+    policy = AIPolicyFactory(allowed_tools=["copilot"])
+    ctx = make_context(
+        ai_tools=sorted(declared | detected),
+        signal_tools=detected,
+        declared_tools=frozenset(declared),
+        policy=policy,
+    )
+    findings = list(RULES["TOOL_NOT_ALLOWED"](ctx))
+    assert [f.details_params for f in findings] == [{"tool": "cursor", "source": source}]
+    assert [f.identity_params for f in findings] == [{"tool": "cursor"}]

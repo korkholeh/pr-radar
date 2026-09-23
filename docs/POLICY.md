@@ -34,7 +34,7 @@ they approved.
 |---|---|---|---|---|
 | `DISCLOSURE_MISSING` | medium | The AI-assistance disclosure is missing or ambiguous | Any PR | `AIPolicy.require_disclosure = False` |
 | `DISCLOSURE_MISMATCH` | high | Disclosure says "none" but a high-confidence AI signal was detected | Any PR | Cannot be switched off (a mismatch is always worth a look) |
-| `TOOL_NOT_ALLOWED` | high | A declared or detected tool is outside `AIPolicy.allowed_tools` (one violation per offending tool) | Any PR | Leaving `allowed_tools` empty (nothing is disallowed until something is allowed) |
+| `TOOL_NOT_ALLOWED` | high | A tool the author declared, or one detection named, is outside `AIPolicy.allowed_tools` (one violation per offending tool; the message says whether it was declared, detected or both). Signals that name no tool — behavioural and stylometric ones, filed as `other` — never raise it, so `other` counts only when declared | Any PR | Leaving `allowed_tools` empty (nothing is disallowed until something is allowed) |
 | `SENSITIVE_PATH_FORBIDDEN` | high | The PR touches a file matching an active `forbidden` sensitive-path rule (one violation per matched rule) | AI only | Deactivating the matching `SensitivePathRule`, or `POLICY_DISABLED_RULES` |
 | `SENSITIVE_PATH_REVIEW` | medium | The PR touches a `needs_extra_review` glob and has fewer than `min_human_approvals + 1` human approvals | AI only | Deactivating the matching rule, or `POLICY_DISABLED_RULES` |
 | `NO_HUMAN_APPROVAL` | high | A merged PR has fewer human approvals than `AIPolicy.min_human_approvals` | AI only, merged only | `AIPolicy.require_human_approval = False` |

@@ -23,7 +23,9 @@ from typing import Any
 from apps.activity.models import AIDisclosure, CheckStatus, PRFile, PullRequest, Review
 from apps.ai_detection import body_sections
 from apps.ai_detection.diffsignals import DiffFacts
-from apps.ai_detection.models import Confidence, DiffAnalysis, SignalKind
+from apps.ai_detection.disclosure import DisclosureConfig, parse_disclosure
+from apps.ai_detection.disclosure import load_config as load_disclosure_config
+from apps.ai_detection.models import Confidence, DiffAnalysis, SignalKind, Tool
 from apps.ai_detection.services import ai_cohort_statuses as compute_ai_cohort_statuses
 from apps.catalog.globs import compile_globs, matches_any
 from apps.catalog.services import get_int
@@ -67,6 +69,9 @@ class PolicyContext:
     unresolved_ai_threads: int = 0
     designated_reviewer_person_ids: frozenset[int] = frozenset()
     designated_approver_person_ids: frozenset[int] = frozenset()
+    # The tools the author named in the disclosure section, apart from the ones detection found:
+    # `PullRequest.ai_tools` is the union of both. `None` (a hand-built context) reads `ai_tools`.
+    declared_tools: frozenset[str] | None = None
 
     @property
     def body(self) -> str:
@@ -161,7 +166,7 @@ AI_ONLY: frozenset[str] = frozenset(
 PARAM_SCHEMA: dict[str, frozenset[str]] = {
     RuleCode.DISCLOSURE_MISSING: frozenset(),
     RuleCode.DISCLOSURE_MISMATCH: frozenset(),
-    RuleCode.TOOL_NOT_ALLOWED: frozenset({"tool"}),
+    RuleCode.TOOL_NOT_ALLOWED: frozenset({"tool", "source"}),
     RuleCode.SENSITIVE_PATH_FORBIDDEN: frozenset({"sensitive_rule_id", "paths", "path_count"}),
     RuleCode.SENSITIVE_PATH_REVIEW: frozenset(
         {"sensitive_rule_id", "paths", "path_count", "approvals", "required"}
@@ -216,19 +221,36 @@ def _disclosure_mismatch(ctx: PolicyContext) -> Iterable[Finding]:
         yield Finding(RuleCode.DISCLOSURE_MISMATCH, SEVERITY[RuleCode.DISCLOSURE_MISMATCH])
 
 
+# Where a tool named by `TOOL_NOT_ALLOWED` came from, stored so the reader sees why it fired.
+TOOL_SOURCE_DECLARED = "declared"
+TOOL_SOURCE_DETECTED = "detected"
+TOOL_SOURCE_DECLARED_AND_DETECTED = "declared_and_detected"
+
+
 def _tool_not_allowed(ctx: PolicyContext) -> Iterable[Finding]:
+    """A detected `other` is not a tool: behavioural and stylometric signals (a commit burst, mass
+    file creation, an agent-config path) say "looks AI-made" without naming anything, and file under
+    `other` for want of a name. Only the author can name `other`, by declaring it."""
     allowed = set(ctx.policy.allowed_tools or [])
     if not allowed:
         return
-    tools = set(ctx.pull_request.ai_tools or []) | set(ctx.signal_tools)
-    for tool in sorted(tools):
-        if tool not in allowed:
-            yield Finding(
-                RuleCode.TOOL_NOT_ALLOWED,
-                SEVERITY[RuleCode.TOOL_NOT_ALLOWED],
-                details_params={"tool": tool},
-                identity_params={"tool": tool},
-            )
+    declared = set(ctx.declared_tools if ctx.declared_tools is not None else ctx.pull_request.ai_tools or [])
+    detected = set(ctx.signal_tools) - {Tool.OTHER}
+    for tool in sorted(declared | detected):
+        if tool in allowed:
+            continue
+        if tool in declared and tool in detected:
+            source = TOOL_SOURCE_DECLARED_AND_DETECTED
+        elif tool in declared:
+            source = TOOL_SOURCE_DECLARED
+        else:
+            source = TOOL_SOURCE_DETECTED
+        yield Finding(
+            RuleCode.TOOL_NOT_ALLOWED,
+            SEVERITY[RuleCode.TOOL_NOT_ALLOWED],
+            details_params={"tool": tool, "source": source},
+            identity_params={"tool": tool},
+        )
 
 
 def _matched_files_by_rule(ctx: PolicyContext, ai_mode: str) -> dict[int, list[str]]:
@@ -826,6 +848,7 @@ def load_context(
     config: PolicyConfig | None = None,
     designated_reviewer_person_ids: frozenset[int] | None = None,
     risk_matchers: Sequence[tuple[SensitivePathRule, Any]] | None = None,
+    disclosure_config: DisclosureConfig | None = None,
 ) -> PolicyContext:
     """Loads a PR with everything the evaluators read, in a fixed number of queries regardless of
     how many files/reviews/signals/commits it has. `sensitive_rules`, the settings, the config, the
@@ -860,6 +883,8 @@ def load_context(
         designated_reviewer_person_ids = frozenset(policy.designated_reviewers.values_list("pk", flat=True))
     if risk_matchers is None:
         risk_matchers = compile_risk_matchers(sensitive_rules)
+    if disclosure_config is None:
+        disclosure_config = load_disclosure_config()
 
     project_ids = {project.pk for project in pr.repository.projects.all()}
     applicable_rules = tuple(
@@ -910,6 +935,7 @@ def load_context(
         reviews=reviews,
         signal_confidences=frozenset(signal.confidence for signal in signals),
         signal_tools=frozenset(signal.tool for signal in signals),
+        declared_tools=frozenset(parse_disclosure(pr.body, disclosure_config).tools),
         sensitive_rules=applicable_rules,
         is_ai=pr.ai_status in ai_cohort_statuses,
         human_approver_person_ids=_human_approver_person_ids(pr, reviews),

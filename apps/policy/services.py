@@ -15,6 +15,8 @@ from django.utils import timezone
 
 from apps.accounts.services import record_audit
 from apps.activity.models import PRFile, PullRequest
+from apps.ai_detection.disclosure import DisclosureConfig
+from apps.ai_detection.disclosure import load_config as load_disclosure_config
 from apps.ai_detection.services import ai_cohort_statuses as compute_ai_cohort_statuses
 from apps.catalog.globs import compile_globs, matches_any
 from apps.catalog.services import get_int, get_list
@@ -121,6 +123,7 @@ def evaluate_pull_request(
     config: PolicyConfig | None = None,
     designated_reviewers_by_policy: Mapping[int, frozenset[int]] | None = None,
     risk_matchers: Sequence[tuple[SensitivePathRule, Any]] | None = None,
+    disclosure_config: DisclosureConfig | None = None,
 ) -> None:
     """The pipeline's fourth stage: a wanted-vs-existing diff over `PolicyViolation` rows, the
     same shape as `ai_detection.services.detect_pull_request`. May only create an open violation
@@ -177,6 +180,7 @@ def evaluate_pull_request(
                 else None
             ),
             risk_matchers=risk_matchers,
+            disclosure_config=disclosure_config,
         )
         for rule_code, evaluator in RULES.items():
             if rule_code in disabled_rules:
@@ -249,6 +253,7 @@ def evaluate_pull_requests(queryset: QuerySet[PullRequest]) -> int:
     ai_cohort_statuses = compute_ai_cohort_statuses()
     config = load_policy_config()
     risk_matchers = compile_risk_matchers(sensitive_rules)
+    disclosure_config = load_disclosure_config()
     # Per policy *version*, not per pull request: each PR is judged under the version in effect at
     # its own `created_at`, and a version's designated reviewers are the same for every PR it
     # governs.
@@ -270,6 +275,7 @@ def evaluate_pull_requests(queryset: QuerySet[PullRequest]) -> int:
             config=config,
             designated_reviewers_by_policy=designated_reviewers_by_policy,
             risk_matchers=risk_matchers,
+            disclosure_config=disclosure_config,
         )
         count += 1
     return count

@@ -42,7 +42,7 @@ def test_console_shows_seeded_violations_with_rendered_messages(page: Page) -> N
     tool_row = _violation_row(page, 942)
     expect(tool_row).to_contain_text("Tool not allowed")
     expect(tool_row).to_contain_text("High")
-    expect(tool_row).to_contain_text("cursor")
+    expect(tool_row).to_contain_text("The author declared Cursor")
 
 
 def test_by_rule_chart_and_data_table_agree(page: Page) -> None:

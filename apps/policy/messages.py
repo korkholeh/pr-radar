@@ -3,7 +3,9 @@ system-generated text is stored as a code plus params, never a rendered message)
 `RULE_MESSAGES` is a full sentence with named placeholders; a count-bearing message carries a
 `count_key` and a plural form, dispatched through `ngettext`. An unknown `rule_code` renders the
 code itself instead of raising, so a stale row can never 500 the console; a missing param renders
-`?` in its place instead of raising a `KeyError`."""
+`?` in its place instead of raising a `KeyError`. A message whose wording depends on a code-valued
+param carries a `variant_key` and one full sentence per value in `variants`; a value it does not
+know (or a row stored before the param existed) falls back to `singular`."""
 
 from __future__ import annotations
 
@@ -13,6 +15,7 @@ from typing import Any, TypedDict
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_noop, ngettext
 
+from apps.ai_detection.models import Tool
 from apps.policy.models import PolicyViolation
 
 RuleCode = PolicyViolation.RuleCode
@@ -22,6 +25,8 @@ class _MessageDef(TypedDict, total=False):
     singular: str
     plural: str
     count_key: str
+    variant_key: str
+    variants: dict[str, str]
 
 
 # A param whose value is a *code* rather than a number or a path: the reason a quality gate counts
@@ -58,6 +63,21 @@ RULE_MESSAGES: dict[str, _MessageDef] = {
     },
     RuleCode.TOOL_NOT_ALLOWED: {
         "singular": gettext_noop("Tool %(tool)s is not in the policy's list of allowed tools."),
+        "variant_key": "source",
+        "variants": {
+            "declared": gettext_noop(
+                "The author declared %(tool)s in the description, and it is not in the policy's list "
+                "of allowed tools."
+            ),
+            "detected": gettext_noop(
+                "AI detection identified %(tool)s in this pull request, and it is not in the policy's "
+                "list of allowed tools."
+            ),
+            "declared_and_detected": gettext_noop(
+                "The author declared %(tool)s and AI detection confirmed it; it is not in the "
+                "policy's list of allowed tools."
+            ),
+        },
     },
     RuleCode.SENSITIVE_PATH_FORBIDDEN: {
         "singular": (
@@ -328,6 +348,9 @@ def render_violation(rule_code: str, params: Mapping[str, Any] | None = None) ->
         merged["reviewers"] = _list_text(merged["reviewers"])
     if "codes" in merged:
         merged["codes"] = _list_text(merged["codes"])
+    tool = merged.get("tool")
+    if isinstance(tool, str) and tool in Tool.values:
+        merged["tool"] = str(Tool(tool).label)
     for name, labels in ENUM_PARAM_LABELS.items():
         value = merged.get(name)
         if isinstance(value, str) and value in labels:
@@ -335,7 +358,10 @@ def render_violation(rule_code: str, params: Mapping[str, Any] | None = None) ->
 
     plural = entry.get("plural")
     count_key = entry.get("count_key")
-    if plural is not None and count_key is not None:
+    variant = entry.get("variants", {}).get(str(merged.get(entry.get("variant_key", ""), "")))
+    if variant is not None:
+        template = _(variant)
+    elif plural is not None and count_key is not None:
         count = merged.get(count_key, 0)
         count = count if isinstance(count, int) else 0
         template = ngettext(entry["singular"], plural, count)
