@@ -37,6 +37,12 @@
   a rollup rebuild invalidated the metric cache, so violations it resolved still counted on every compliance
   chart and KPI until the cache expired. It now invalidates the cache after evaluation as well.
 
+- **A resolved violation looked current on the pull-request page.** The page listed resolved violations in the
+  same table as open ones, with a checkbox to acknowledge them, while the pull-request list counted only open
+  ones. Resolved violations now sit in a collapsed "resolved" block below, as history with no actions. The
+  dashboard's recent pull requests table also counted resolved violations; it now counts open ones, like the
+  pull-request list.
+
 - **Chart tooltips were readable in one theme only.** The tooltip that follows the cursor over a chart was
   painted from an inverted surface — dark in the light theme, light in the dark theme — while Chart.js drew its
   text in white, so in the light theme the numbers were white on white. Tooltips now use a popover surface that

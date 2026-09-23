@@ -85,4 +85,44 @@ page) — CLAUDE.md's htmx contract.
       </div>
     {% endif %}
   </form>
+  {% if resolved_violations %}
+    <details class="mt-4" id="pr-resolved-violations">
+      <summary class="text-text-muted">
+        {% blocktranslate count count=resolved_violations|length trimmed %}
+          {{ count }} resolved violation
+        {% plural %}
+          {{ count }} resolved violations
+        {% endblocktranslate %}
+      </summary>
+      <p class="text-text-muted mt-2">
+        {% translate "The condition behind these no longer holds. They are kept as history and need no action." %}
+      </p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <caption class="sr-only">{% translate "Resolved policy violations for this pull request" %}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{% translate "Rule" %}</th>
+              <th scope="col">{% translate "Severity" %}</th>
+              <th scope="col">{% translate "Age" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for violation in resolved_violations %}
+              <tr id="pr-violation-row-{{ violation.pk }}">
+                <td>
+                  <div class="text-text">{{ violation.rule_code|rule_label }}</div>
+                  <div class="text-text-muted">
+                    {% render_violation_message violation.rule_code violation.details_params %}
+                  </div>
+                </td>
+                <td>{{ violation.get_severity_display }}</td>
+                <td>{{ violation.created_at|timesince }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  {% endif %}
 </section>

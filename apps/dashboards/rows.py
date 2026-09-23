@@ -345,7 +345,9 @@ def recent_pr_rows(
         )
         .select_related("repository", "author__person")
         .only(*_PR_ROW_ONLY_FIELDS)
-        .annotate(violations_count=Count("violations"))
+        .annotate(
+            violations_count=Count("violations", filter=Q(violations__status=PolicyViolation.Status.OPEN))
+        )
         .order_by("-last_activity_at")
     )
     if limit is not None:

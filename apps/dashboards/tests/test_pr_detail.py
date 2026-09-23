@@ -225,6 +225,35 @@ def test_violation_action_swaps_only_the_violations_fragment(client, lead_user):
 
 
 @pytest.mark.django_db
+def test_resolved_violations_are_listed_apart_without_a_checkbox(client, lead_user):
+    pr = PullRequestFactory()
+    open_violation = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.OPEN)
+    resolved = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.RESOLVED)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk]))
+    content = response.content.decode()
+
+    assert [v.pk for v in response.context["violations"]] == [open_violation.pk]
+    assert [v.pk for v in response.context["resolved_violations"]] == [resolved.pk]
+    assert f'value="{open_violation.pk}"' in content
+    assert f'value="{resolved.pk}"' not in content
+    assert 'id="pr-resolved-violations"' in content
+
+
+@pytest.mark.django_db
+def test_only_resolved_violations_show_the_empty_state_and_no_action_bar(client, lead_user):
+    pr = PullRequestFactory()
+    PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.RESOLVED)
+    client.force_login(lead_user)
+
+    content = client.get(reverse("dashboards:pull_request_detail", args=[pr.pk])).content.decode()
+
+    assert "No policy violations on this pull request." in content
+    assert 'id="pr-violation-action-bar"' not in content
+
+
+@pytest.mark.django_db
 def test_violation_action_full_page_fallback_re_renders_the_whole_page(client, lead_user):
     pr = PullRequestFactory()
     violation = PolicyViolationFactory(pull_request=pr, status=PolicyViolation.Status.OPEN)

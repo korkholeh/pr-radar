@@ -46,6 +46,7 @@ from apps.metrics.models import ScopeType
 from apps.metrics.registry import get_metric
 from apps.metrics.services import scope_for
 from apps.policy.forms import BulkViolationActionForm
+from apps.policy.models import PolicyViolation
 from apps.policy.selectors import violations_for_pull_request
 from apps.policy.services import BulkStatusChangeResult, apply_bulk_status_change
 from config.htmx import is_htmx
@@ -469,10 +470,18 @@ def _violation_notice(result: BulkStatusChangeResult) -> str:
 
 
 def _pr_violations_context(scope, pk: int, *, notice: str | None = None, action_errors=None) -> dict:
+    """A resolved violation's condition is gone, so it is history, not something to act on: it is
+    listed apart, without a checkbox, and the main table matches the open count the PR list shows."""
     violations = list(
         violations_for_pull_request(scope, pk).select_related("resolved_by").order_by("-created_at")
     )
-    return {"violations": violations, "notice": notice, "action_errors": action_errors}
+    resolved = PolicyViolation.Status.RESOLVED
+    return {
+        "violations": [violation for violation in violations if violation.status != resolved],
+        "resolved_violations": [violation for violation in violations if violation.status == resolved],
+        "notice": notice,
+        "action_errors": action_errors,
+    }
 
 
 def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
