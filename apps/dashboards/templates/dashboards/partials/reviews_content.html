@@ -1,4 +1,4 @@
-{% load i18n l10n %}
+{% load i18n l10n dashboards %}
 {% comment %}
 The Reviews page's own fragment (plan §4/T15), returned to an htmx swap and included from the
 full page. Reviewer load is a workload view, not a people ranking (RISKS row 1) — the subtitle
@@ -58,9 +58,7 @@ says so explicitly.
             <td>
               {% if item.pull_request.author.person %}{{ item.pull_request.author.person.display_name }}{% endif %}
             </td>
-            <td>
-              {% if item.hours_waited is not None %}{{ item.hours_waited|floatformat:0 }}h{% endif %}
-            </td>
+            <td class="whitespace-nowrap tabular-nums">{{ item.hours_waited|humanize_duration_hours }}</td>
           </tr>
         {% empty %}
           <tr>

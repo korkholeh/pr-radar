@@ -41,6 +41,10 @@
 
 ### Fixed
 
+- **Review waiting times read as days and hours.** The Reviews page's "Waiting" column showed a bare hour count —
+  "173h" — with an untranslated "h". It now reads "7d 5h" past a day, "5h 12m" under one and minutes under an
+  hour, in both interface languages, the same format the pull-request page uses for its durations.
+
 - **A task key in the title now counts as a linked task.** `TASK_LINK_MISSING` looked for a task reference in the
   pull-request description only, so a title such as `[ENG-175] treat AptPay 200 as a successful bank/transit
   verification` with no key repeated in the body was flagged. The rule now accepts a reference in the title or

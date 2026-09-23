@@ -6,6 +6,7 @@ import datetime
 
 import pytest
 from django.urls import reverse
+from freezegun import freeze_time
 
 from apps.activity.factories import PullRequestFactory, ReviewFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory, RepositoryFactory
@@ -24,6 +25,22 @@ def test_reviews_page_renders(client, lead_user):
     assert b'data-testid="reviewer-load"' in response.content
     assert b'data-testid="reviewer-heat-map"' in response.content
     assert b'data-testid="waiting-for-review"' in response.content
+
+
+@pytest.mark.django_db
+@freeze_time("2026-06-20 12:00:00")
+def test_waiting_time_reads_as_days_and_hours(client, lead_user):
+    PullRequestFactory(
+        state="open",
+        is_draft=False,
+        ready_for_review_at=datetime.datetime(2026, 6, 18, 7, 0, tzinfo=datetime.UTC),
+        first_review_at=None,
+    )
+    client.force_login(lead_user)
+
+    response = client.get(reverse("dashboards:reviews") + f"?{PERIOD_QS}")
+
+    assert "2d 5h" in response.content.decode()
 
 
 @pytest.mark.django_db
