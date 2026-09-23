@@ -92,7 +92,10 @@
       <dt class="text-text-muted">{% translate "Effective size" %}</dt>
       <dd class="font-medium text-text">{{ pr_metrics.effective_size|format_lines }}</dd>
       <dt class="text-text-muted">{% translate "Size bucket" %}</dt>
-      <dd class="font-medium text-text">{{ pull_request.get_size_bucket_display|default:"—" }}</dd>
+      <dd class="font-medium text-text">
+        {{ pull_request.get_size_bucket_display|default:"—" }}
+        {% if size_bucket_range %}<span class="font-normal text-text-muted">({{ size_bucket_range }})</span>{% endif %}
+      </dd>
       <dt class="text-text-muted">{% translate "Review rounds" %}</dt>
       <dd class="font-medium text-text">{{ pr_metrics.review_rounds|format_count }}</dd>
       <dt class="text-text-muted">{% translate "Commits after first review" %}</dt>

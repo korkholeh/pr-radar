@@ -10,10 +10,13 @@ import datetime
 from dataclasses import dataclass
 
 from django.urls import reverse
+from django.utils.formats import number_format
 from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from apps.accounts.selectors import ScopeFilter
+from apps.activity.derive import size_bucket_bounds
 from apps.activity.models import PullRequest, Review
 from apps.ai_detection.body_sections import HTML_COMMENT_RE
 from apps.catalog.selectors import people_in_scope
@@ -148,3 +151,21 @@ def description(pull_request: PullRequest) -> SafeString:
     for the same reason). Empty when nothing but comments and whitespace is left."""
     body = HTML_COMMENT_RE.sub("", pull_request.body or "").strip()
     return render_markdown(body) if body else SafeString("")
+
+
+def size_bucket_range(bucket: str | None) -> str | None:
+    """The line range of a size bucket, e.g. "100–399 lines" or "1,000 lines or more", read from
+    the current `PR_SIZE_BUCKETS`. `None` when the pull request has no bucket."""
+    bounds = size_bucket_bounds(bucket) if bucket else None
+    if bounds is None:
+        return None
+    lower, upper = bounds
+    if upper is None:
+        return ngettext("%(lower)s line or more", "%(lower)s lines or more", lower) % {
+            "lower": number_format(lower, force_grouping=True)
+        }
+    last = upper - 1
+    return ngettext("%(lower)s–%(upper)s line", "%(lower)s–%(upper)s lines", last) % {
+        "lower": number_format(lower, force_grouping=True),
+        "upper": number_format(last, force_grouping=True),
+    }

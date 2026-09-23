@@ -8,6 +8,10 @@
   the one before it — "+3 minutes", "+1d 4h" — next to its date, so where a pull request sat waiting (for a
   first review, for the merge after approval) is visible at a glance.
 
+- **The size bucket says what it means.** On the pull-request page the size bucket now carries its line range —
+  "S (10–99 lines)", "XL (1,000 lines or more)" — read from the `PR_SIZE_BUCKETS` setting, so a custom boundary
+  shows as configured.
+
 - **The pull-request page shows the description.** A collapsible block under the header renders the pull
   request's Markdown body — headings, lists, task lists, code blocks, tables, links — so checking why a policy
   rule fired no longer needs a trip to GitHub. HTML comments left over from a PR template are hidden, as GitHub

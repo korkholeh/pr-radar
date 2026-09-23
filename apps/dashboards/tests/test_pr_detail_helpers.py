@@ -6,10 +6,11 @@ from __future__ import annotations
 import datetime
 
 import pytest
+from django.utils import translation
 
 from apps.activity.factories import PullRequestFactory, ReviewFactory
 from apps.catalog.factories import IdentityFactory, PersonFactory
-from apps.dashboards.pr_detail import pr_metrics, timeline
+from apps.dashboards.pr_detail import pr_metrics, size_bucket_range, timeline
 
 
 def _dt(hour: int) -> datetime.datetime:
@@ -115,3 +116,13 @@ def test_pr_metrics_draft_pr_has_none_durations_not_zero():
     assert metrics.lead_time_hours is None
     assert metrics.time_to_first_review_hours is None
     assert metrics.effective_size is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "bucket,expected",
+    [("XS", "0–9 lines"), ("M", "100–399 lines"), ("XL", "1,000 lines or more"), (None, None), ("", None)],
+)
+def test_size_bucket_range_names_the_line_range(bucket, expected):
+    with translation.override("en"):
+        assert size_bucket_range(bucket) == expected

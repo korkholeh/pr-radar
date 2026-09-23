@@ -84,6 +84,19 @@ def _effective_lines(pr: PullRequest, files: tuple[FileDerivedFields, ...]) -> t
     return additions, deletions
 
 
+def size_bucket_bounds(bucket: str) -> tuple[int, int | None] | None:
+    """The line range `bucket` covers under the current `PR_SIZE_BUCKETS`: the lower bound is
+    inclusive, the upper exclusive, and XL has none. `None` for an unknown bucket. The same
+    boundaries `_size_bucket()` assigns by, so the two cannot disagree."""
+    buckets = get_dict("PR_SIZE_BUCKETS")
+    lower = 0
+    for name in _SIZE_BUCKET_ORDER:
+        if name == bucket:
+            return lower, buckets[name]
+        lower = buckets[name]
+    return (lower, None) if bucket == "XL" else None
+
+
 def _size_bucket(effective_lines: int | None) -> str | None:
     if effective_lines is None:
         return None

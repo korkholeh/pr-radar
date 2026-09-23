@@ -5,7 +5,12 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
-from apps.activity.derive import compute_derived, derive_pull_request, derive_pull_requests
+from apps.activity.derive import (
+    compute_derived,
+    derive_pull_request,
+    derive_pull_requests,
+    size_bucket_bounds,
+)
 from apps.activity.factories import (
     CommitFactory,
     PRFileFactory,
@@ -17,6 +22,7 @@ from apps.activity.factories import (
 from apps.activity.models import PRFile, PullRequest, Review
 from apps.catalog.factories import IdentityFactory, PersonFactory
 from apps.catalog.models import Identity
+from apps.catalog.services import set_setting
 
 NOW = timezone.datetime(2026, 1, 10, tzinfo=datetime.UTC)
 
@@ -446,3 +452,27 @@ class TestDeriveWriterIdempotency:
         count = derive_pull_requests(PullRequest.objects.filter(pk__in=[pr1.pk, pr2.pk]))
 
         assert count == 2
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "bucket,bounds",
+    [
+        ("XS", (0, 10)),
+        ("S", (10, 100)),
+        ("M", (100, 400)),
+        ("L", (400, 1000)),
+        ("XL", (1000, None)),
+        ("XXL", None),
+    ],
+)
+def test_size_bucket_bounds_follow_the_default_boundaries(bucket, bounds):
+    assert size_bucket_bounds(bucket) == bounds
+
+
+@pytest.mark.django_db
+def test_size_bucket_bounds_follow_the_setting():
+    set_setting("PR_SIZE_BUCKETS", {"XS": 5, "S": 50, "M": 200, "L": 800})
+
+    assert size_bucket_bounds("M") == (50, 200)
+    assert size_bucket_bounds("XL") == (800, None)

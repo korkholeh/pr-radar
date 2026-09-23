@@ -3356,7 +3356,23 @@ msgstr "Перший коміт"
 msgid "Ready for review"
 msgstr "Готовий до ревʼю"
 
+#: apps/dashboards/pr_detail.py:164
+#, python-format
+msgid "%(lower)s line or more"
+msgid_plural "%(lower)s lines or more"
+msgstr[0] "%(lower)s рядок і більше"
+msgstr[1] "%(lower)s рядки і більше"
+msgstr[2] "%(lower)s рядків і більше"
+msgstr[3] "%(lower)s рядка і більше"
 
+#: apps/dashboards/pr_detail.py:168
+#, python-format
+msgid "%(lower)s–%(upper)s line"
+msgid_plural "%(lower)s–%(upper)s lines"
+msgstr[0] "%(lower)s–%(upper)s рядок"
+msgstr[1] "%(lower)s–%(upper)s рядки"
+msgstr[2] "%(lower)s–%(upper)s рядків"
+msgstr[3] "%(lower)s–%(upper)s рядка"
 
 #: apps/dashboards/tables.py:79 apps/dashboards/tables.py:80
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:63

@@ -532,6 +532,7 @@ def _pull_request_detail_context(scope, pull_request: PullRequest) -> dict:
         "ai_tools_display": ai_tools_display,
         "timeline": pr_detail.timeline(pull_request),
         "pr_metrics": pr_detail.pr_metrics(pull_request),
+        "size_bucket_range": pr_detail.size_bucket_range(pull_request.size_bucket),
         "files": files,
         "extra_files_count": extra_files_count,
         "churn_too_large_limit": churn_too_large_limit,
