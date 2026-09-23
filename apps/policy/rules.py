@@ -555,12 +555,14 @@ def _verification_missing(ctx: PolicyContext) -> Iterable[Finding]:
 
 
 def _task_link_missing(ctx: PolicyContext) -> Iterable[Finding]:
-    """A task reference anywhere in the body satisfies this, not only under a heading: plenty of
-    teams write "closes #431" in the first line and never fill a section in."""
+    """A task reference in the title or anywhere in the body satisfies this, not only under a
+    heading: plenty of teams write "closes #431" in the first line and never fill a section in, and
+    plenty more put the key in the title — "[ENG-175] treat a 200 as success" — and nowhere else."""
     if not ctx.policy.require_task_link:
         return
+    title = ctx.pull_request.title or ""
     body = body_sections.HTML_COMMENT_RE.sub("", ctx.body)
-    if any(pattern.search(body) for pattern in ctx.config.task_link_patterns):
+    if any(pattern.search(text) for text in (title, body) for pattern in ctx.config.task_link_patterns):
         return
     yield Finding(RuleCode.TASK_LINK_MISSING, SEVERITY[RuleCode.TASK_LINK_MISSING])
 

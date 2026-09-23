@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 15:56+0000\n"
+"POT-Creation-Date: 2026-09-23 07:40+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -832,7 +832,7 @@ msgstr "Впевненість"
 #: apps/ai_detection/forms.py:17 apps/ai_detection/forms.py:77
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:18
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:21
-#: apps/catalog/forms.py:25 apps/policy/forms.py:476
+#: apps/catalog/forms.py:25 apps/policy/forms.py:477
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:22
 msgid "Is active"
 msgstr "Активне"
@@ -960,7 +960,7 @@ msgid "Charlie"
 msgstr "Charlie"
 
 #: apps/ai_detection/models.py:44 apps/catalog/models.py:101
-#: apps/dashboards/reviews.py:104 apps/policy/forms.py:447
+#: apps/dashboards/reviews.py:104 apps/policy/forms.py:448
 msgid "Other"
 msgstr "Інше"
 
@@ -1476,7 +1476,7 @@ msgstr "опис"
 msgid "Slug"
 msgstr "Слаг"
 
-#: apps/catalog/forms.py:23 apps/policy/forms.py:475
+#: apps/catalog/forms.py:23 apps/policy/forms.py:476
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:21
 msgid "Description"
 msgstr "Опис"
@@ -2981,7 +2981,6 @@ msgid "Reviews given"
 msgstr "Надані ревʼю"
 
 #: apps/dashboards/charts.py:385 apps/dashboards/exports/columns.py:136
-#| msgid "Pull requests merged"
 msgid "Pull requests reviewed"
 msgstr "Pull request-и з ревʼю"
 
@@ -3109,12 +3108,6 @@ msgid "Reviewer load"
 msgstr "Навантаження ревʼюерів"
 
 #: apps/dashboards/charts.py:492
-#| msgid ""
-#| "Reviews submitted in the period, per reviewer, for the twenty busiest "
-#| "reviewers in this scope. Every review counts, so several reviews on one "
-#| "pull request count several times. A few tall bars next to many short ones "
-#| "is the review-bottleneck pattern; the table below the chart carries the "
-#| "full ranking."
 msgid ""
 "Two bars per reviewer for the period, for the twenty busiest reviewers in "
 "this scope: every review they submitted, and the number of distinct pull "
@@ -3163,7 +3156,7 @@ msgstr "%(title)s (по всій організації)"
 
 #: apps/dashboards/exports/columns.py:108
 #: apps/dashboards/templates/dashboards/partials/person_comparison.html:15
-#: apps/metrics/models.py:7 apps/policy/forms.py:471
+#: apps/metrics/models.py:7 apps/policy/forms.py:472
 #: apps/policy/templates/policy/console.html:79
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:17
 msgid "Project"
@@ -3838,8 +3831,6 @@ msgid "No reviews in this period."
 msgstr "У цьому періоді немає ревʼю."
 
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:22
-#| msgid ""
-#| "Workload, not a ranking — how many reviews each person gave in the period."
 msgid ""
 "Workload, not a ranking — how many reviews each person gave in the period, "
 "and how many distinct pull requests those reviews cover."
@@ -5231,15 +5222,15 @@ msgstr ""
 
 #: apps/policy/forms.py:370
 msgid ""
-"Raises TASK_LINK_MISSING (low) when no task reference appears anywhere in "
-"the body. A heading is not needed: 'closes #431' on the first line satisfies "
-"it."
+"Raises TASK_LINK_MISSING (low) when no task reference appears in the title "
+"or anywhere in the body. No section is needed: '[ENG-175]' in the title or "
+"'closes #431' on the first line of the body satisfies it."
 msgstr ""
-"Створює порушення TASK_LINK_MISSING (низьке), коли ніде в описі немає "
-"посилання на задачу. Заголовок не потрібен: «closes #431» у першому рядку "
-"задовольняє перевірку."
+"Створює порушення TASK_LINK_MISSING (низьке), коли ні в заголовку, ні в "
+"описі немає посилання на задачу. Окремий розділ не потрібен: «[ENG-175]» у "
+"заголовку або «closes #431» у першому рядку опису задовольняє перевірку."
 
-#: apps/policy/forms.py:374
+#: apps/policy/forms.py:375
 msgid ""
 "Raises HIGH_RISK_NO_PLAN (high) when a high-risk change states no plan, "
 "risks or rollback. Needs a sensitive-path rule with risk level High to match "
@@ -5250,7 +5241,7 @@ msgstr ""
 "рівнем ризику «високий», яке збігається зі зміною, тож мовчить, доки таких "
 "правил немає."
 
-#: apps/policy/forms.py:379
+#: apps/policy/forms.py:380
 msgid ""
 "Raises QUALITY_GATE_BYPASSED (high), once per reason, on a pull request "
 "merged with red checks, with a skip-CI marker in a commit message, with the "
@@ -5262,7 +5253,7 @@ msgstr ""
 "повідомленні коміту, з послабленою конфігурацією CI або з вилученим кроком "
 "CI. Дві останні причини потребують увімкненого для репозиторію аналізу діфів."
 
-#: apps/policy/forms.py:385
+#: apps/policy/forms.py:386
 msgid ""
 "Raises TEST_WEAKENED (high) when a test file is deleted while non-test code "
 "changes, a skip or xfail marker is added, or assertions are removed with "
@@ -5273,7 +5264,7 @@ msgstr ""
 "твердження і не додано жодного натомість. Саме лише видалення тесту — це "
 "прибирання, і воно проходить."
 
-#: apps/policy/forms.py:390
+#: apps/policy/forms.py:391
 msgid ""
 "Raises NO_TESTS (low) on an AI pull request that changes more non-test lines "
 "than the threshold configured in Settings and touches no test at all."
@@ -5281,7 +5272,7 @@ msgstr ""
 "Створює порушення NO_TESTS (низьке) для ШІ-пулреквеста, який змінює більше "
 "нетестових рядків, ніж поріг у параметрах, і не торкається жодного тесту."
 
-#: apps/policy/forms.py:394
+#: apps/policy/forms.py:395
 msgid ""
 "Raises SECRET_ARTIFACT_COMMITTED (high) when a credential file, a private "
 "key or an agent's own chat history is committed. Decided from the path alone "
@@ -5292,7 +5283,7 @@ msgstr ""
 "агента. Рішення ухвалюється лише за шляхом — вміст файлу ніколи не "
 "читається, не логується і не зберігається."
 
-#: apps/policy/forms.py:399
+#: apps/policy/forms.py:400
 msgid ""
 "Raises AI_PR_TOO_LARGE (low) when an AI pull request's effective additions "
 "plus deletions exceed this number. Leave it empty to switch the size check "
@@ -5303,7 +5294,7 @@ msgstr ""
 "вимкнути перевірку розміру; ліміти за рівнем ризику нижче мають перевагу "
 "там, де їх задано."
 
-#: apps/policy/forms.py:404
+#: apps/policy/forms.py:405
 msgid ""
 "Raises SCOPE_CREEP (medium) when an AI pull request mixes a wholesale "
 "reformat into a change, or reaches into top-level modules its own stated "
@@ -5315,7 +5306,7 @@ msgstr ""
 "його власний опис обсягу. Пулреквест, який не заявив обсягу, не має чого "
 "перевищувати."
 
-#: apps/policy/forms.py:409
+#: apps/policy/forms.py:410
 msgid ""
 "Raises NEW_DEPENDENCY_AI (medium) when an AI pull request changes a "
 "dependency manifest or lockfile. A prompt to check that somebody chose the "
@@ -5325,7 +5316,7 @@ msgstr ""
 "маніфест залежностей або lock-файл. Це нагадування перевірити, що залежність "
 "обрала людина, а не звинувачення."
 
-#: apps/policy/forms.py:414
+#: apps/policy/forms.py:415
 msgid ""
 "Raises AGENT_CONFIG_CHANGED (low) when CLAUDE.md, AGENTS.md, .claude/ and "
 "their kin change. Low on purpose: it marks a change that alters how every "
@@ -5336,26 +5327,26 @@ msgstr ""
 "яка впливає на поведінку кожного наступного запуску агента, щоб хтось її "
 "прочитав."
 
-#: apps/policy/forms.py:472
+#: apps/policy/forms.py:473
 msgid "Path glob"
 msgstr "Glob-шаблон шляху"
 
-#: apps/policy/forms.py:473 apps/policy/models.py:97
+#: apps/policy/forms.py:474 apps/policy/models.py:97
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:19
 msgid "AI mode"
 msgstr "режим ШІ"
 
-#: apps/policy/forms.py:474
+#: apps/policy/forms.py:475
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:20
 msgid "Risk level"
 msgstr "Рівень ризику"
 
-#: apps/policy/forms.py:479
+#: apps/policy/forms.py:480
 msgid ""
 "Advisory classifies the path's risk without raising a violation of its own."
 msgstr "«Дорадче» лише класифікує ризик шляху і не створює власного порушення."
 
-#: apps/policy/forms.py:481
+#: apps/policy/forms.py:482
 msgid ""
 "A pull request's risk is the highest of the paths it touches. Leave empty "
 "for a rule that says nothing about risk."
@@ -5467,8 +5458,9 @@ msgid "This pull request's description says nothing about how it was verified."
 msgstr "В описі цього пул-реквеста не сказано, як зміну перевірено."
 
 #: apps/policy/messages.py:163
-msgid "This pull request's description links no task."
-msgstr "В описі цього пул-реквеста немає посилання на задачу."
+msgid "Neither this pull request's title nor its description links a task."
+msgstr ""
+"Ні в заголовку, ні в описі цього пул-реквеста немає посилання на задачу."
 
 #: apps/policy/messages.py:204
 #, python-format

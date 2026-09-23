@@ -28,6 +28,11 @@
 
 ### Fixed
 
+- **A task key in the title now counts as a linked task.** `TASK_LINK_MISSING` looked for a task reference in the
+  pull-request description only, so a title such as `[ENG-175] treat AptPay 200 as a successful bank/transit
+  verification` with no key repeated in the body was flagged. The rule now accepts a reference in the title or
+  anywhere in the description. Run `manage.py recompute --skip-rollups` to clear the violations already raised.
+
 - **Chart tooltips were readable in one theme only.** The tooltip that follows the cursor over a chart was
   painted from an inverted surface — dark in the light theme, light in the dark theme — while Chart.js drew its
   text in white, so in the light theme the numbers were white on white. Tooltips now use a popover surface that

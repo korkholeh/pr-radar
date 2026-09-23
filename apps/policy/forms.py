@@ -367,8 +367,9 @@ class AIPolicyForm(forms.ModelForm):
                 "the change was checked — tests run, manual steps, what was observed."
             ),
             "require_task_link": _(
-                "Raises TASK_LINK_MISSING (low) when no task reference appears anywhere in the "
-                "body. A heading is not needed: 'closes #431' on the first line satisfies it."
+                "Raises TASK_LINK_MISSING (low) when no task reference appears in the title or "
+                "anywhere in the body. No section is needed: '[ENG-175]' in the title or "
+                "'closes #431' on the first line of the body satisfies it."
             ),
             "require_high_risk_plan": _(
                 "Raises HIGH_RISK_NO_PLAN (high) when a high-risk change states no plan, risks or "

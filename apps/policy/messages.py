@@ -160,7 +160,7 @@ RULE_MESSAGES: dict[str, _MessageDef] = {
         "singular": gettext_noop("This pull request's description says nothing about how it was verified."),
     },
     RuleCode.TASK_LINK_MISSING: {
-        "singular": gettext_noop("This pull request's description links no task."),
+        "singular": gettext_noop("Neither this pull request's title nor its description links a task."),
     },
     RuleCode.NEW_DEPENDENCY_AI: {
         "singular": (

@@ -352,6 +352,21 @@ def test_task_link_missing_accepts_a_reference_anywhere_in_the_body(body):
     assert _run(RuleCode.TASK_LINK_MISSING, ctx) == []
 
 
+@pytest.mark.parametrize(
+    "title",
+    [
+        "[ENG-175] treat AptPay 200 as a successful bank/transit verification",
+        "ENG-175: treat a 200 as success",
+        "Fix the retry loop (#431)",
+    ],
+)
+def test_task_link_missing_accepts_a_reference_in_the_title(title):
+    """Many teams put the tracker key in the title and leave the body without one."""
+    policy = AIPolicyFactory(require_task_link=True)
+    ctx = make_context(pull_request=_merged_pr(title=title, body="Tidy up the imports."), policy=policy)
+    assert _run(RuleCode.TASK_LINK_MISSING, ctx) == []
+
+
 def test_task_link_missing_fires_on_a_body_with_no_reference():
     policy = AIPolicyFactory(require_task_link=True)
     ctx = make_context(pull_request=_merged_pr(body="Tidy up the imports."), policy=policy)
