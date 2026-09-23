@@ -33,6 +33,10 @@
   verification` with no key repeated in the body was flagged. The rule now accepts a reference in the title or
   anywhere in the description. Run `manage.py recompute --skip-rollups` to clear the violations already raised.
 
+- **`recompute --skip-rollups` left dashboards showing the old numbers.** It re-evaluated pull requests but only
+  a rollup rebuild invalidated the metric cache, so violations it resolved still counted on every compliance
+  chart and KPI until the cache expired. It now invalidates the cache after evaluation as well.
+
 - **Chart tooltips were readable in one theme only.** The tooltip that follows the cursor over a chart was
   painted from an inverted surface — dark in the light theme, light in the dark theme — while Chart.js drew its
   text in white, so in the light theme the numbers were white on white. Tooltips now use a popover surface that

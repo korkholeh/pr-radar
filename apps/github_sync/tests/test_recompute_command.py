@@ -237,6 +237,18 @@ def test_skip_rollups_leaves_no_rollup_rows():
 
 
 @pytest.mark.django_db
+def test_skip_rollups_still_bumps_the_data_version():
+    """Evaluation alone changes what cached compliance metrics count, so a recompute that skips the
+    rollups must still invalidate them."""
+    PullRequestFactory()
+    version_before = data_version()
+
+    call_command("recompute", **{"skip_rollups": True})
+
+    assert data_version() > version_before
+
+
+@pytest.mark.django_db
 def test_command_bumps_the_data_version():
     PullRequestFactory()
     version_before = data_version()

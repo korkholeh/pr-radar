@@ -78,6 +78,10 @@ class Command(BaseCommand):
             followup = update_followup_fixes_for(queryset)
             detected = detect_pull_requests(queryset)
             evaluated = evaluate_pull_requests(queryset)
+            # Cached metric results are keyed on the data version, and evaluation alone changes
+            # what they count (violations, AI status) — so bump it here too, not only after a
+            # rollup rebuild, or `--skip-rollups` leaves every dashboard showing the old numbers.
+            bump_data_version()
             self.stdout.write(
                 f"Recomputed {derived} pull request(s) "
                 f"(derive={derived}, followup={followup}, detect={detected}, evaluate={evaluated})."
