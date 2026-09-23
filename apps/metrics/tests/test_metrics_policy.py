@@ -32,20 +32,31 @@ def _period_ctx(date_from: datetime.date = DAY, date_to: datetime.date = DAY) ->
 
 
 def _violation_created_on(day: datetime.date, **kwargs) -> PolicyViolation:
-    violation = PolicyViolationFactory(pull_request=PullRequestFactory(), **kwargs)
-    violation.created_at = day_start(day)
+    """A violation on a pull request opened at the start of `day`. The violation row itself is
+    recorded a month later, as a backfill would: the metrics must follow the pull request."""
+    violation = PolicyViolationFactory(pull_request=PullRequestFactory(created_at=day_start(day)), **kwargs)
+    violation.created_at = day_start(day + datetime.timedelta(days=30))
     violation.save(update_fields=["created_at"])
     return violation
 
 
-def test_violations_new_counts_by_created_at_in_kyiv_days():
+def test_violations_new_counts_by_the_pull_requests_created_at_in_kyiv_days():
     _violation_created_on(DAY, rule_code=PolicyViolation.RuleCode.NO_TESTS)
     just_before = _violation_created_on(DAY, rule_code=PolicyViolation.RuleCode.SELF_MERGE)
-    just_before.created_at = day_start(DAY) - datetime.timedelta(seconds=1)
-    just_before.save(update_fields=["created_at"])
+    just_before.pull_request.created_at = day_start(DAY) - datetime.timedelta(seconds=1)
+    just_before.pull_request.save(update_fields=["created_at"])
 
     metric_def = get_metric("violations_new")
     assert metric_def.calculator.daily(_day_ctx()) == MetricValue(1.0, 1)
+
+
+def test_violations_new_ignores_the_day_the_violation_was_recorded():
+    violation = _violation_created_on(DAY)
+
+    metric_def = get_metric("violations_new")
+    recorded_day = _day_ctx(date=DAY + datetime.timedelta(days=30))
+    assert metric_def.calculator.daily(recorded_day) == MetricValue.empty()
+    assert violation.pull_request.created_at == day_start(DAY)
 
 
 def test_acknowledged_violation_leaves_violations_open_but_stays_in_violations_new():

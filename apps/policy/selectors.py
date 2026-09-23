@@ -78,10 +78,11 @@ class RuleCount:
 def violations_by_rule(
     scope: ScopeFilter, start: date, end: date, status: Sequence[str] | None = None
 ) -> list[RuleCount]:
-    """One row per rule code with at least one matching violation in the period, ordered by
-    count descending then rule code — the by-rule distribution chart's series."""
+    """One row per rule code with at least one violation on a pull request opened in the period,
+    ordered by count descending then rule code — the by-rule distribution chart's series. Dated by
+    the pull request, not the violation's own `created_at`, which is when a sync wrote the row."""
     queryset = violations_in_scope(scope).filter(
-        created_at__gte=day_start(start), created_at__lt=day_end_exclusive(end)
+        pull_request__created_at__gte=day_start(start), pull_request__created_at__lt=day_end_exclusive(end)
     )
     if status:
         queryset = queryset.filter(status__in=status)
@@ -108,8 +109,9 @@ class ComplianceKPIs:
 def compliance_kpis(scope: ScopeFilter, start: date, end: date) -> ComplianceKPIs:
     """`ai_pr_compliance_rate` is the share of AI-cohort PRs created in the period with no open
     violation; `None` (never `0`) when the denominator (`sample_size`) is empty, per CLAUDE.md.
-    `violations_open` is a current snapshot; `violations_new` is counted by violation `created_at`
-    inside the period. `disclosure_mismatch_count` counts the same pull requests as
+    `violations_open` is a current snapshot; `violations_new` counts violations on pull requests
+    opened inside the period (the PR's `created_at`, not the violation's recording time).
+    `disclosure_mismatch_count` counts the same pull requests as
     `disclosure_mismatch_pull_requests` (anchored on the PR's own `created_at`), so the KPI card
     and the list under it on the console never disagree."""
     period_start = day_start(start)
@@ -117,7 +119,9 @@ def compliance_kpis(scope: ScopeFilter, start: date, end: date) -> ComplianceKPI
 
     scoped_violations = violations_in_scope(scope)
     violations_open = scoped_violations.filter(status=PolicyViolation.Status.OPEN).count()
-    violations_new = scoped_violations.filter(created_at__gte=period_start, created_at__lt=period_end).count()
+    violations_new = scoped_violations.filter(
+        pull_request__created_at__gte=period_start, pull_request__created_at__lt=period_end
+    ).count()
     disclosure_mismatch_count = disclosure_mismatch_pull_requests(scope, start, end).count()
 
     ai_prs = ai_cohort_pull_requests(scope).filter(created_at__gte=period_start, created_at__lt=period_end)

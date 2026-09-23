@@ -201,12 +201,9 @@ def test_violations_sheet_is_narrowed_to_the_report_scope(seeded_org, django_use
     `metrics.selectors.scoped_violations(scope)`, same as the PRs sheet and every other table."""
 
     def _violation_in_period(pull_request):
-        # `PolicyViolation.created_at` is `auto_now_add`, so it can only be backdated with a
-        # second `save(update_fields=...)`, never at creation time.
-        violation = PolicyViolationFactory(pull_request=pull_request)
-        violation.created_at = datetime.datetime(2026, 8, 12, tzinfo=datetime.UTC)
-        violation.save(update_fields=["created_at"])
-        return violation
+        # In the period through its pull request, opened on 2026-08-05: the sheet is dated by the
+        # pull request, not by when the violation row was written (today, outside the period).
+        return PolicyViolationFactory(pull_request=pull_request)
 
     other_repository = RepositoryFactory()
     other_project = ProjectFactory()

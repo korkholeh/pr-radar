@@ -50,11 +50,11 @@ number of pull requests a person produced is not a measure of that person.
 **Pull requests and violations.** The same PR list and violations you'd see filtered to this person elsewhere,
 scoped to the period.
 
-**Policy violations.** A table of the violations on this person's pull requests recorded in the period, one row per
+**Policy violations.** A table of the violations on this person's pull requests opened in the period, one row per
 rule — highest severity first — with the total and how many are now open, acknowledged, waived or resolved, plus an
 "All rules" total. The line above the table says how many *distinct* pull requests the violations were found on —
-one pull request can break several rules. Violations are counted by the day they were recorded, the same window as
-the "New violations by rule" chart on the Policy page.
+one pull request can break several rules. Violations are dated by their pull request's opening day, not by when PR Radar recorded them, the
+same window as the "New violations by rule" chart on the Policy page.
 
 **Review load.** How many reviews this person gave in the period, for context — this is workload, not a
 performance ranking.

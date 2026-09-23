@@ -327,7 +327,7 @@ _register(
 def _violations_open_at_date(ctx: DayContext) -> MetricValue:
     count = (
         scoped_violations(ctx.scope)
-        .filter(status=PolicyViolation.Status.OPEN, created_at__lt=day_end_exclusive(ctx.date))
+        .filter(status=PolicyViolation.Status.OPEN, pull_request__created_at__lt=day_end_exclusive(ctx.date))
         .count()
     )
     return count_value(count)
@@ -338,7 +338,7 @@ def _violations_open_at_date_by_person(ctx: DayContextMany) -> dict[int, MetricV
         scoped_violations(GLOBAL_SCOPE)
         .filter(
             status=PolicyViolation.Status.OPEN,
-            created_at__lt=day_end_exclusive(ctx.date),
+            pull_request__created_at__lt=day_end_exclusive(ctx.date),
             pull_request__author__person_id__in=ctx.person_ids,
         )
         .values_list("pull_request__author__person_id", flat=True)
@@ -351,8 +351,8 @@ _register(
         key="violations_open",
         title=_("Open violations"),
         description=_(
-            "Violations created on or before the end of the period that are still open — a "
-            "current snapshot bounded by created_at, matching the policy console."
+            "Violations still open on pull requests opened on or before the end of the period — a "
+            "current snapshot bounded by the pull request's created_at, matching the policy console."
         ),
         unit="count",
         direction="lower_is_better",
@@ -362,21 +362,27 @@ _register(
         calculator=StateCalc(
             at_date=_violations_open_at_date, at_date_by_person=_violations_open_at_date_by_person
         ),
-        formula="open violations with created_at <= end of the day",
+        formula="open violations on PRs with created_at <= end of the day",
     )
 )
 
 
+# Violations are dated by their pull request's `created_at`, not their own: a violation's own
+# `created_at` is when a sync or recompute wrote the row, so a backfill would file a year of
+# pull requests' violations under the day it ran.
 def _violations_new_population(_cohort: str, date: datetime.date) -> QuerySet[PolicyViolation]:
     return scoped_violations(GLOBAL_SCOPE).filter(
-        created_at__gte=day_start(date), created_at__lt=day_end_exclusive(date)
+        pull_request__created_at__gte=day_start(date), pull_request__created_at__lt=day_end_exclusive(date)
     )
 
 
 def _violations_new_daily(ctx: DayContext) -> MetricValue:
     count = (
         scoped_violations(ctx.scope)
-        .filter(created_at__gte=day_start(ctx.date), created_at__lt=day_end_exclusive(ctx.date))
+        .filter(
+            pull_request__created_at__gte=day_start(ctx.date),
+            pull_request__created_at__lt=day_end_exclusive(ctx.date),
+        )
         .count()
     )
     return count_value(count)
@@ -386,7 +392,9 @@ _register(
     MetricDef(
         key="violations_new",
         title=_("New violations"),
-        description=_("Violations created on a day, regardless of their current status."),
+        description=_(
+            "Violations on pull requests opened on a day, regardless of the violations' current status."
+        ),
         unit="count",
         direction="lower_is_better",
         kind="counter",
@@ -400,14 +408,15 @@ _register(
                 person_field="pull_request__author__person_id",
             ),
         ),
-        formula="count of violations with created_at on the day",
+        formula="count of violations whose PR has created_at on the day",
     )
 )
 
 
 def _violations_by_rule_counts(ctx: PeriodContext) -> Counter[str]:
     queryset = scoped_violations(ctx.scope).filter(
-        created_at__gte=day_start(ctx.date_from), created_at__lt=day_end_exclusive(ctx.date_to)
+        pull_request__created_at__gte=day_start(ctx.date_from),
+        pull_request__created_at__lt=day_end_exclusive(ctx.date_to),
     )
     return Counter(queryset.values_list("rule_code", flat=True))
 
@@ -424,13 +433,13 @@ _register(
     MetricDef(
         key="violations_by_rule",
         title=_("Violations by rule"),
-        description=_("Violations created in the period, grouped by rule code."),
+        description=_("Violations on pull requests opened in the period, grouped by rule code."),
         unit="breakdown",
         direction="neutral",
         kind="distribution",
         levels=_ALL_LEVELS,
         supports_cohorts=False,
         calculator=DistributionCalc(period=_violations_by_rule_period, breakdown=_violations_by_rule_items),
-        formula="count of violations created in the period, grouped by rule_code",
+        formula="count of violations whose PR was created in the period, grouped by rule_code",
     )
 )

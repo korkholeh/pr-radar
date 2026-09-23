@@ -10,7 +10,8 @@ Open **Policy** in the top bar. The top of the page shows four KPI cards for the
 default): open violations, new violations, the AI-PR compliance rate (share of AI PRs with no open violation),
 and the disclosure-mismatch count. A rate based on fewer than 5 AI PRs is shown greyed out with a note instead of
 a misleadingly precise number — there just isn't enough data yet. Below the cards, **New violations by rule** shows
-which rules fired most in the period. It counts every violation raised in the period whatever its status now, so
+which rules fired most in the period. It counts every violation on a pull request opened in the period, whatever
+its status now, so
 each bar is split into the part still open and the part acknowledged, waived or resolved, with "open / total" next
 to it. A rule can have a bar and still show nothing in the table below, which lists open violations only by
 default — typically because a later recompute found the condition gone and resolved them. Click a rule's name to
@@ -20,8 +21,8 @@ look.
 
 ## Filter the violation table
 
-Use the **Filters** button to narrow by rule, severity, status (defaults to `open`), project, repository, date range, or
-a PR title/number search. Filters apply on submit and stay set as you page through results or take an action, so
+Use the **Filters** button to narrow by rule, severity, status (defaults to `open`), project, repository, the dates
+the pull request was opened, or a PR title/number search. Filters apply on submit and stay set as you page through results or take an action, so
 you don't lose your place. Clicking a violation's PR link opens that pull request.
 
 ## Acknowledge or waive

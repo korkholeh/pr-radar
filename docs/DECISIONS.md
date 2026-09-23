@@ -523,6 +523,18 @@ repository instead of a JSON fixture, and every review-round fix — is in
 
 ## Post-1.0 fixes
 
+**Violations are dated by their pull request, not by when they were recorded.** `PolicyViolation.created_at`
+is `auto_now_add`: the moment a sync or recompute wrote the row. A first sync over a year of history, a
+recompute after a policy change or a new rule writes hundreds of rows in one run, so every metric keyed on it —
+`violations_new`, `violations_open`, `violations_by_rule`, the Policy console's KPI, chart and date filter, the
+person page's violation table and the report's Violations sheet — filed a year of pull requests' violations under
+the day the job ran, and "new in the last 30 days" meant "everything". They are all keyed on the pull request's
+`created_at` now: a violation is a property of the pull request, present from the day it was opened. This
+departs from the spec's literal "new violations" (§8.2), which assumed rows are written as pull requests
+arrive. `mark_dirty()` no longer nominates the violation's own day (the pull request's day is already there),
+and `compute()`'s cache key moves to `metrics:v3`. The violation's recording time is still stored and shown as
+"Recorded" on the pull request page and in the export.
+
 **Repository discovery lists everything a token can read, not what its account owns.** A tech lead usually
 tracks repositories owned by a client or by an organization they merely belong to; access is the condition
 worth checking, ownership is not. Discovery therefore never narrows the list to the connection's owner, and the

@@ -100,10 +100,9 @@ def test_mark_dirty_records_the_previously_reverted_pr_merge_day_when_repointed(
     assert datetime.date(2026, 6, 5) in days
 
 
-def test_mark_dirty_records_the_violation_creation_day():
-    """`PolicyViolation.created_at` is `auto_now_add` — the moment the row was written, unrelated
-    to the PR's own dates — and `violations_new` is keyed on it, so a PR created long ago that
-    gains a violation today must still dirty today's day."""
+def test_mark_dirty_does_not_record_the_violation_recording_day():
+    """The violation metrics are dated by the pull request's `created_at`, which is already
+    dirtied; the day a sync wrote the violation row (`auto_now_add`) affects no metric."""
     old_day = datetime.datetime(2026, 1, 1, 8, 0, tzinfo=KYIV).astimezone(datetime.UTC)
     pull_request = PullRequestFactory(created_at=old_day, merged_at=old_day)
     violation = PolicyViolationFactory(pull_request=pull_request, rule_code=PolicyViolation.RuleCode.NO_TESTS)
@@ -115,7 +114,7 @@ def test_mark_dirty_records_the_violation_creation_day():
 
     days = set(DirtyDay.objects.values_list("date", flat=True))
     assert datetime.date(2026, 1, 1) in days
-    assert violation_day in days
+    assert violation_day not in days
 
 
 def test_mark_dirty_records_extra_pull_request_ids_merge_days():

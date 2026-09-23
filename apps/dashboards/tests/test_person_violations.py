@@ -45,13 +45,12 @@ Severity = PolicyViolation.Severity
 Status = PolicyViolation.Status
 
 
-def _violation(pull_request, rule_code, severity, status, created_at):
-    violation = PolicyViolationFactory(
+def _violation(pull_request, rule_code, severity, status):
+    # Counted by the pull request's `created_at`; the violation's own (`auto_now_add`, today) is
+    # when a sync wrote it and must not matter.
+    return PolicyViolationFactory(
         pull_request=pull_request, rule_code=rule_code, severity=severity, status=status
     )
-    # `created_at` is `auto_now_add`, so it is backdated after the insert.
-    PolicyViolation.objects.filter(pk=violation.pk).update(created_at=created_at)
-    return violation
 
 
 def _august(day):
@@ -65,21 +64,24 @@ def _seed():
     person = PersonFactory(display_name="Ada Lovelace")
     other = PersonFactory(display_name="Grace Hopper")
     identity = IdentityFactory(person=person)
-    pr = PullRequestFactory(repository=repository, author=identity)
-    second_pr = PullRequestFactory(repository=repository, author=identity)
-    other_pr = PullRequestFactory(repository=repository, author=IdentityFactory(person=other))
-
-    _violation(pr, Rule.NO_TESTS, Severity.LOW, Status.OPEN, _august(5))
-    _violation(pr, Rule.NO_TESTS, Severity.LOW, Status.OPEN, _august(6))
-    _violation(second_pr, Rule.NO_TESTS, Severity.LOW, Status.RESOLVED, _august(7))
-    _violation(pr, Rule.SELF_MERGE, Severity.HIGH, Status.WAIVED, _august(8))
-    _violation(pr, Rule.DISCLOSURE_MISSING, Severity.MEDIUM, Status.ACKNOWLEDGED, _august(9))
-    # Recorded before the period: not counted.
-    _violation(
-        pr, Rule.SELF_MERGE, Severity.HIGH, Status.OPEN, datetime.datetime(2026, 7, 15, tzinfo=datetime.UTC)
+    pr = PullRequestFactory(repository=repository, author=identity, created_at=_august(5))
+    second_pr = PullRequestFactory(repository=repository, author=identity, created_at=_august(7))
+    july_pr = PullRequestFactory(
+        repository=repository, author=identity, created_at=datetime.datetime(2026, 7, 15, tzinfo=datetime.UTC)
     )
+    other_pr = PullRequestFactory(
+        repository=repository, author=IdentityFactory(person=other), created_at=_august(10)
+    )
+
+    _violation(pr, Rule.NO_TESTS, Severity.LOW, Status.OPEN)
+    _violation(pr, Rule.NO_TESTS, Severity.LOW, Status.OPEN)
+    _violation(second_pr, Rule.NO_TESTS, Severity.LOW, Status.RESOLVED)
+    _violation(pr, Rule.SELF_MERGE, Severity.HIGH, Status.WAIVED)
+    _violation(pr, Rule.DISCLOSURE_MISSING, Severity.MEDIUM, Status.ACKNOWLEDGED)
+    # On a pull request opened before the period: not counted.
+    _violation(july_pr, Rule.SELF_MERGE, Severity.HIGH, Status.OPEN)
     # Someone else's pull request: not counted.
-    _violation(other_pr, Rule.SELF_MERGE, Severity.HIGH, Status.OPEN, _august(10))
+    _violation(other_pr, Rule.SELF_MERGE, Severity.HIGH, Status.OPEN)
     return person
 
 

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 13:44+0000\n"
+"POT-Creation-Date: 2026-09-23 17:56+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -1287,7 +1287,7 @@ msgstr "Зберегти"
 #: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
-#: apps/dashboards/exports/reports.py:349
+#: apps/dashboards/exports/reports.py:354
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:106
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:110
 #: apps/policy/templates/policy/partials/policy_form.html:93
@@ -1305,7 +1305,7 @@ msgstr "Так"
 #: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
-#: apps/dashboards/exports/reports.py:349
+#: apps/dashboards/exports/reports.py:354
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:106
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:110
 #: apps/policy/templates/policy/partials/policy_form.html:93
@@ -1572,7 +1572,7 @@ msgstr "Не можна об'єднати людину із самою собо�
 msgid "Organization"
 msgstr "Організація"
 
-#: apps/catalog/models.py:12 apps/dashboards/exports/reports.py:335
+#: apps/catalog/models.py:12 apps/dashboards/exports/reports.py:340
 msgid "User"
 msgstr "Користувач"
 
@@ -3089,7 +3089,7 @@ msgstr ""
 "request-ів, які потребували щонайменше ще одного коміту після першого ревʼю. "
 "Для обох менше — краще."
 
-#: apps/dashboards/charts.py:464 apps/metrics/calculators/adoption.py:426
+#: apps/dashboards/charts.py:464 apps/metrics/calculators/adoption.py:435
 msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
@@ -3222,46 +3222,46 @@ msgstr "Змерджені PR (ШІ)"
 msgid "PRs merged (Non-AI)"
 msgstr "Змерджені PR (не ШІ)"
 
-#: apps/dashboards/exports/reports.py:303
+#: apps/dashboards/exports/reports.py:308
 msgid "all, ai, non_ai"
 msgstr "усі, ai, non_ai"
 
-#: apps/dashboards/exports/reports.py:303
+#: apps/dashboards/exports/reports.py:308
 msgid "all only"
 msgstr "лише «усі»"
 
-#: apps/dashboards/exports/reports.py:326
-#: apps/dashboards/exports/reports.py:328
-#: apps/dashboards/exports/reports.py:330
+#: apps/dashboards/exports/reports.py:331
+#: apps/dashboards/exports/reports.py:333
+#: apps/dashboards/exports/reports.py:335
 #, python-format
 msgid "Filter: %(key)s"
 msgstr "Фільтр: %(key)s"
 
-#: apps/dashboards/exports/reports.py:337
+#: apps/dashboards/exports/reports.py:342
 msgid "Generated at"
 msgstr "Згенеровано"
 
-#: apps/dashboards/exports/reports.py:341
+#: apps/dashboards/exports/reports.py:346
 msgid "Last successful sync"
 msgstr "Остання успішна синхронізація"
 
-#: apps/dashboards/exports/reports.py:344
+#: apps/dashboards/exports/reports.py:349
 msgid "Never"
 msgstr "Ніколи"
 
-#: apps/dashboards/exports/reports.py:346
+#: apps/dashboards/exports/reports.py:351
 msgid "Tool version"
 msgstr "Версія інструмента"
 
-#: apps/dashboards/exports/reports.py:348
+#: apps/dashboards/exports/reports.py:353
 msgid "AI cohort includes suspected"
 msgstr "Когорта ШІ включає підозрювані"
 
-#: apps/dashboards/exports/reports.py:351
+#: apps/dashboards/exports/reports.py:356
 msgid "Report timezone"
 msgstr "Часовий пояс звіту"
 
-#: apps/dashboards/exports/reports.py:352
+#: apps/dashboards/exports/reports.py:357
 msgid "Report language"
 msgstr "Мова звіту"
 
@@ -3971,12 +3971,10 @@ msgid "Custom range"
 msgstr "Довільний період"
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:63
-#: apps/policy/templates/policy/console.html:91
 msgid "From"
 msgstr "Від"
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:68
-#: apps/policy/templates/policy/console.html:97
 msgid "To"
 msgstr "До"
 
@@ -5012,7 +5010,7 @@ msgstr "Обчислення churn перевищило час очікуван�
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:469 apps/policy/views.py:108
+#: apps/dashboards/views.py:469 apps/policy/views.py:109
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -5026,7 +5024,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:473 apps/policy/views.py:112
+#: apps/dashboards/views.py:473 apps/policy/views.py:113
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -5295,23 +5293,31 @@ msgstr "Відкриті порушення"
 
 #: apps/metrics/calculators/adoption.py:354
 msgid ""
-"Violations created on or before the end of the period that are still open — "
-"a current snapshot bounded by created_at, matching the policy console."
+"Violations still open on pull requests opened on or before the end of the "
+"period — a current snapshot bounded by the pull request's created_at, "
+"matching the policy console."
 msgstr ""
-"Порушення, створені до кінця періоду включно, які досі відкриті — поточний "
-"зріз, обмежений за created_at, що відповідає консолі політик."
+"Порушення на pull request-ах, відкритих до кінця періоду включно, які досі "
+"не розглянуто — поточний зріз, обмежений за created_at pull request-у, що "
+"відповідає консолі політик."
 
-#: apps/metrics/calculators/adoption.py:388
+#: apps/metrics/calculators/adoption.py:394
 msgid "New violations"
 msgstr "Нові порушення"
 
-#: apps/metrics/calculators/adoption.py:389
-msgid "Violations created on a day, regardless of their current status."
-msgstr "Порушення, створені за день, незалежно від їхнього поточного статусу."
+#: apps/metrics/calculators/adoption.py:396
+msgid ""
+"Violations on pull requests opened on a day, regardless of the violations' "
+"current status."
+msgstr ""
+"Порушення на pull request-ах, відкритих за день, незалежно від поточного "
+"статусу порушень."
 
-#: apps/metrics/calculators/adoption.py:427
-msgid "Violations created in the period, grouped by rule code."
-msgstr "Порушення, створені за період, згруповані за кодом правила."
+#: apps/metrics/calculators/adoption.py:436
+msgid "Violations on pull requests opened in the period, grouped by rule code."
+msgstr ""
+"Порушення на pull request-ах, відкритих за період, згруповані за кодом "
+"правила."
 
 #: apps/metrics/calculators/compliance.py:152
 msgid "Bot-only approval rate"
@@ -6963,13 +6969,21 @@ msgstr "порушення політики"
 msgid "Policy"
 msgstr "Політика"
 
+#: apps/policy/templates/policy/console.html:91
+msgid "PR opened from"
+msgstr "PR відкрито з"
+
+#: apps/policy/templates/policy/console.html:97
+msgid "PR opened to"
+msgstr "PR відкрито по"
+
 #: apps/policy/templates/policy/console.html:110
 msgid "Filter"
 msgstr "Фільтр"
 
 #: apps/policy/templates/policy/partials/kpis.html:8
-msgid "New violations (30 days)"
-msgstr "Нові порушення (30 днів)"
+msgid "Violations on PRs opened in the last 30 days"
+msgstr "Порушення на PR, відкритих за останні 30 днів"
 
 #: apps/policy/templates/policy/partials/kpis.html:13
 msgid "AI PR compliance rate"
@@ -7091,13 +7105,14 @@ msgstr "Нові порушення за правилами"
 #: apps/policy/templates/policy/partials/rule_chart.html:5
 #, python-format
 msgid ""
-"Violations raised from %(start)s to %(end)s, in every status. The table "
-"below shows open violations only unless you change its filter; a rule's name "
-"opens the table on exactly what its bar counts."
+"Violations on pull requests opened from %(start)s to %(end)s, in every "
+"status. The table below shows open violations only unless you change its "
+"filter; a rule's name opens the table on exactly what its bar counts."
 msgstr ""
-"Порушення, створені з %(start)s по %(end)s, у будь-якому статусі. Таблиця "
-"нижче показує лише нерозглянуті порушення, доки ви не зміните її фільтр; назва "
-"правила відкриває таблицю саме на тих записах, які рахує його стовпчик."
+"Порушення на pull request-ах, відкритих з %(start)s по %(end)s, у будь-якому "
+"статусі. Таблиця нижче показує лише нерозглянуті порушення, доки ви не "
+"зміните її фільтр; назва правила відкриває таблицю саме на тих записах, які "
+"рахує його стовпчик."
 
 #: apps/policy/templates/policy/partials/rule_chart.html:15
 msgid "Acknowledged, waived or resolved"
@@ -7365,6 +7380,9 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:17
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#~ msgid "New violations (30 days)"
+#~ msgstr "Нові порушення (30 днів)"
 
 #~ msgid ""
 #~ "Two shares over time, both plotted as a percentage of their own "

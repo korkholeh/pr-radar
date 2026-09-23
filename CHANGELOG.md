@@ -116,6 +116,15 @@
 
 ### Fixed
 
+- **Violations are counted by the day their pull request was opened, not the day PR Radar recorded them.**
+  A sync or recompute writes hundreds of violations in one run, so "new violations in the last 30 days" counted
+  almost every violation right after a first sync or recompute, whatever the age of the pull request. The
+  "New violations" and "Open violations" metrics, the "Violations by rule" metric, the Policy page's KPI card
+  (now "Violations on PRs opened in the last 30 days"), by-rule chart and date filter ("PR opened from" / "PR
+  opened to"), the person page's violation table and the report's Violations sheet now all use the pull
+  request's opening date. The Violations sheet gains a "PR opened" column; its "Created" column is renamed
+  "Recorded". Run `manage.py recompute` to rebuild the daily rollups.
+
 - **A merged pull request no longer looks "open" in the Policy table.** The Status column is the violation's
   triage state — "open" means no lead has judged it yet — but in Ukrainian it shared its translation with an open
   pull request, so violations on merged pull requests read "Відкрито". The column (and its filter) is now

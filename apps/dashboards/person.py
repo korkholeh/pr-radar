@@ -191,7 +191,7 @@ class ViolationStats:
 
 def build_violation_stats(scope: Scope, params: DashboardParams) -> ViolationStats:
     """One row per (rule, severity) with at least one violation on the person's pull requests
-    recorded in the period — the violation's own `created_at`, the same window as the
+    opened in the period — the pull request's `created_at`, the same window as the
     `violations_by_rule` metric — split by each violation's *current* status. Highest severity
     first, then the most frequent rule, plus how many distinct pull requests the violations sit
     on. One grouped query; `scoped_violations` is the metrics layer's own scoped
@@ -199,8 +199,8 @@ def build_violation_stats(scope: Scope, params: DashboardParams) -> ViolationSta
     rows = (
         scoped_violations(scope)
         .filter(
-            created_at__gte=day_start(params.date_from),
-            created_at__lt=day_end_exclusive(params.date_to),
+            pull_request__created_at__gte=day_start(params.date_from),
+            pull_request__created_at__lt=day_end_exclusive(params.date_to),
         )
         .values("rule_code", "severity", "status", "pull_request_id")
         .annotate(count=Count("id"))

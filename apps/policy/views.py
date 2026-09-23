@@ -77,10 +77,11 @@ def _filtered_violations(scope: ScopeFilter, cleaned: dict[str, Any]):
         queryset = queryset.filter(pull_request__repository__projects=cleaned["project"])
     if cleaned.get("repository"):
         queryset = queryset.filter(pull_request__repository=cleaned["repository"])
+    # Dates filter on the pull request's opening, like the chart and KPIs above the table.
     if cleaned.get("date_from"):
-        queryset = queryset.filter(created_at__gte=day_start(cleaned["date_from"]))
+        queryset = queryset.filter(pull_request__created_at__gte=day_start(cleaned["date_from"]))
     if cleaned.get("date_to"):
-        queryset = queryset.filter(created_at__lt=day_end_exclusive(cleaned["date_to"]))
+        queryset = queryset.filter(pull_request__created_at__lt=day_end_exclusive(cleaned["date_to"]))
     query = (cleaned.get("q") or "").strip()
     if query:
         text_match = Q(pull_request__title__icontains=query)

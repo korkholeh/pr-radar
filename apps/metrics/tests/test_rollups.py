@@ -26,7 +26,6 @@ from apps.metrics.rollups import (
 )
 from apps.metrics.selectors import scoped_pull_requests  # noqa: F401  (import sanity for scope helpers)
 from apps.metrics.services import mark_dirty
-from apps.metrics.timeframe import day_start
 from apps.metrics.types import MetricValue, Scope
 from apps.policy.factories import PolicyViolationFactory
 from apps.policy.models import PolicyViolation
@@ -273,16 +272,12 @@ def test_rebuild_matches_the_per_scope_calculator_for_every_additive_metric():
     PolicyViolationFactory(
         pull_request=pr1, rule_code=PolicyViolation.RuleCode.NO_TESTS, status=PolicyViolation.Status.OPEN
     )
-    disclosure_violation = PolicyViolationFactory(
+    # Dated by pr1's and pr3's `created_at` (on DAY), not by when these rows are written.
+    PolicyViolationFactory(
         pull_request=pr3,
         rule_code=PolicyViolation.RuleCode.DISCLOSURE_MISMATCH,
         status=PolicyViolation.Status.OPEN,
     )
-    for violation in PolicyViolation.objects.filter(
-        pull_request__in=[pr1, disclosure_violation.pull_request]
-    ):
-        violation.created_at = day_start(DAY)
-        violation.save(update_fields=["created_at"])
 
     rebuild(DAY, DAY)
 

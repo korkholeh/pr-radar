@@ -71,21 +71,21 @@ def test_violations_for_pull_request_is_scoped():
 
 
 @freeze_time("2026-06-15T12:00:00Z")
-def test_violations_new_counts_inside_kyiv_period_and_excludes_one_second_before():
-    pr = PullRequestFactory()
+def test_violations_new_counts_by_the_pull_requests_kyiv_day_and_excludes_one_second_before():
+    """Dated by the pull request: every violation here is recorded now (inside the period), but
+    only the one whose pull request was opened in the period counts."""
     period_day = datetime.date(2026, 6, 15)
     from apps.metrics.timeframe import day_start
 
-    inside = PolicyViolationFactory(pull_request=pr, rule_code=RuleCode.NO_TESTS)
-    inside.created_at = day_start(period_day)
-    inside.save(update_fields=["created_at"])
-
-    just_before = PolicyViolationFactory(pull_request=pr, rule_code=RuleCode.SELF_MERGE)
-    just_before.created_at = day_start(period_day) - datetime.timedelta(seconds=1)
-    just_before.save(update_fields=["created_at"])
+    inside_pr = PullRequestFactory(created_at=day_start(period_day))
+    before_pr = PullRequestFactory(created_at=day_start(period_day) - datetime.timedelta(seconds=1))
+    PolicyViolationFactory(pull_request=inside_pr, rule_code=RuleCode.NO_TESTS)
+    PolicyViolationFactory(pull_request=before_pr, rule_code=RuleCode.SELF_MERGE)
 
     kpis = compliance_kpis(ScopeFilter(unrestricted=True), period_day, period_day)
     assert kpis.violations_new == 1
+    [row] = violations_by_rule(ScopeFilter(unrestricted=True), period_day, period_day)
+    assert row.rule_code == RuleCode.NO_TESTS
 
 
 @freeze_time("2026-06-15T12:00:00Z")

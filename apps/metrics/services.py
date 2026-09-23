@@ -36,7 +36,6 @@ from apps.metrics.registry import (
 from apps.metrics.rollups import DENOMINATOR_SUFFIX, NUMERATOR_SUFFIX
 from apps.metrics.timeframe import bucket_ranges, date_range, day_of, previous_period
 from apps.metrics.types import BreakdownItem, MetricResult, MetricResultSet, MetricValue, Scope, SeriesPoint
-from apps.policy.models import PolicyViolation
 
 _DATA_VERSION_ROW_ID = 1
 _DATA_VERSION_CACHE_KEY = "metrics:data-version"
@@ -97,12 +96,10 @@ def mark_dirty(
     extra_pull_request_ids: set[int] | None = None,
 ) -> None:
     """Records, in `DirtyDay`, every Kyiv day a synced PR can affect: `created_at`, `merged_at`,
-    `closed_at`, each of its reviews' `submitted_at` day, each of its violations' own `created_at`
-    day (spec: dirty-days set, ADR 0007), and — for `revert_rate`, whose numerator is a property of
-    the *reverted* PR's own merge day, not the reverting PR's — the merge day of the PR its
-    `reverts_pr` points at. The violation's `created_at` is `auto_now_add` — the moment it was
-    recorded, unrelated to the PR's own dates — and `violations_new` is keyed on it, so that day
-    must be nominated too or an incremental sync leaves it uncounted until the next full recompute.
+    `closed_at`, each of its reviews' `submitted_at` day (spec: dirty-days set, ADR 0007), and —
+    for `revert_rate`, whose numerator is a property of the *reverted* PR's own merge day, not the
+    reverting PR's — the merge day of the PR its `reverts_pr` points at. Violations need no day of
+    their own: the violation metrics are dated by the PR's `created_at`, already nominated.
     `previous_reverts_pr_id` lets a caller that captured the PR's `reverts_pr_id` *before* this
     sync's `derive_pull_request()` ran also dirty the previously targeted PR's merge day, in case
     detection repointed or cleared the link. `extra_pull_request_ids` dirties the merge day of
@@ -124,12 +121,6 @@ def mark_dirty(
             pull_request_id=pull_request_id, submitted_at__isnull=False
         ).values_list("submitted_at", flat=True)
         if submitted_at is not None
-    )
-    days.update(
-        day_of(created_at)
-        for created_at in PolicyViolation.objects.filter(pull_request_id=pull_request_id).values_list(
-            "created_at", flat=True
-        )
     )
     reverted_pr_ids = {pr_id for pr_id in (reverts_pr_id, previous_reverts_pr_id) if pr_id is not None}
     days.update(
@@ -386,7 +377,7 @@ def _cache_key(
     keys_digest = hashlib.sha1(",".join(sorted(set(metric_keys))).encode()).hexdigest()
     series_flag = "series" if include_series else "noseries"
     return (
-        f"metrics:v2:{data_version()}:{scope.scope_type}:{scope.scope_id}:"
+        f"metrics:v3:{data_version()}:{scope.scope_type}:{scope.scope_id}:"
         f"{_access_fingerprint(scope.access)}:{cohort}:{granularity}:"
         f"{date_from.isoformat()}:{date_to.isoformat()}:{keys_digest}:{series_flag}"
     )

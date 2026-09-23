@@ -188,3 +188,16 @@ def test_table_shows_the_pull_requests_state_apart_from_the_violations_status(cl
     assert merged_label in row
     assert violation_open_label in row
     assert violation_open_label != pr_open_label
+
+
+@freeze_time("2026-06-15T12:00:00Z")
+def test_date_filter_uses_the_pull_requests_opening_day(client, lead_user):
+    may_pr = PullRequestFactory(created_at=datetime.datetime(2026, 5, 2, 9, tzinfo=datetime.UTC))
+    june_pr = PullRequestFactory(created_at=datetime.datetime(2026, 6, 10, 9, tzinfo=datetime.UTC))
+    PolicyViolationFactory(pull_request=may_pr)  # recorded today, like its sibling
+    june_violation = PolicyViolationFactory(pull_request=june_pr)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("policy:console"), {"date_from": "2026-06-01", "date_to": "2026-06-15"})
+
+    assert [violation.pk for violation in response.context["page_obj"]] == [june_violation.pk]

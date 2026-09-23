@@ -3,7 +3,7 @@
   <h2 class="section-title mb-1">{% translate "New violations by rule" %}</h2>
   <p class="text-sm text-text-muted mb-3">
     {% blocktranslate with start=period_start|date:"SHORT_DATE_FORMAT" end=period_end|date:"SHORT_DATE_FORMAT" trimmed %}
-      Violations raised from {{ start }} to {{ end }}, in every status. The table below shows open violations only unless you change its filter; a rule's name opens the table on exactly what its bar counts.
+      Violations on pull requests opened from {{ start }} to {{ end }}, in every status. The table below shows open violations only unless you change its filter; a rule's name opens the table on exactly what its bar counts.
     {% endblocktranslate %}
   </p>
   {% if chart_rows %}

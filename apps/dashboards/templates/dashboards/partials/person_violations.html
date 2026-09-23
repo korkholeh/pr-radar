@@ -1,7 +1,7 @@
 {% load i18n policy_extras %}
 {% comment %}
-Per-rule violation statistics on the person page: violations on the person's pull requests recorded
-in the selected period (by the violation's `created_at`), one row per rule, split by each violation's current status
+Per-rule violation statistics on the person page: violations on the person's pull requests opened
+in the selected period (by the pull request's `created_at`), one row per rule, split by each violation's current status
 (`person.build_violation_stats`).
 {% endcomment %}
 <section class="card card-body mt-6" data-testid="person-violations">

@@ -231,7 +231,8 @@ _VIOLATIONS_COLUMNS = (
     ExportColumn(key="rule", title="Rule", type="text", width=28),
     ExportColumn(key="severity", title="Severity", type="text", width=10),
     ExportColumn(key="status", title="Status", type="text", width=14),
-    ExportColumn(key="created_at", title="Created", type="datetime", width=18),
+    ExportColumn(key="pr_created_at", title="PR opened", type="datetime", width=18),
+    ExportColumn(key="created_at", title="Recorded", type="datetime", width=18),
     ExportColumn(key="resolved_by", title="Resolved by", type="text", width=20),
 )
 
@@ -239,9 +240,12 @@ _VIOLATIONS_COLUMNS = (
 def _violation_rows(scope: Scope, params: DashboardParams, base_url: str) -> list[dict[str, object]]:
     queryset = (
         scoped_violations(scope)
-        .filter(created_at__gte=day_start(params.date_from), created_at__lt=day_end_exclusive(params.date_to))
+        .filter(
+            pull_request__created_at__gte=day_start(params.date_from),
+            pull_request__created_at__lt=day_end_exclusive(params.date_to),
+        )
         .select_related("pull_request", "pull_request__repository", "resolved_by")
-        .order_by("-created_at")
+        .order_by("-pull_request__created_at", "-pk")
     )
     rows = [
         {
@@ -251,6 +255,7 @@ def _violation_rows(scope: Scope, params: DashboardParams, base_url: str) -> lis
             "rule": rule_label(violation.rule_code),
             "severity": violation.get_severity_display(),
             "status": violation.get_status_display(),
+            "pr_created_at": violation.pull_request.created_at,
             "created_at": violation.created_at,
             "resolved_by": violation.resolved_by.get_username() if violation.resolved_by else "",
         }
