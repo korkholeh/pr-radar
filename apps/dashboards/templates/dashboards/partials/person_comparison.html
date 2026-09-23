@@ -3,7 +3,8 @@
 The person-vs-baseline comparison table (plan §2): one row per `person.PERSON_COMPARISON_METRIC_KEYS`,
 with the person's value, their primary project's value (blank when they have none in scope for the
 period) and the reader's whole visible organization's value — both baselines real medians/sums over
-raw rows (ADR 0007), never a median of per-person medians (RISKS row 1).
+raw rows (ADR 0007), never a median of per-person medians (RISKS row 1). Under the person's value, how
+far it sits from each baseline (`person.Deviation`), coloured by the metric's direction; counters get none.
 {% endcomment %}
 {% if comparison %}
   <div class="table-wrap mt-6" data-testid="person-comparison">
@@ -25,6 +26,26 @@ raw rows (ADR 0007), never a median of per-person medians (RISKS row 1).
               {% if entry.row.below_min_sample %}
                 {% small_sample_note %}
               {% endif %}
+              {% if entry.row.project_deviation or entry.row.org_deviation %}
+                <div class="mt-1 flex flex-col text-xs tabular-nums" data-testid="comparison-deviation">
+                  {% if entry.row.project_deviation %}
+                    <span class="{% deviation_class entry.row.project_deviation entry.definition entry.row.below_min_sample %}">
+                      <span aria-hidden="true">{{ entry.row.project_deviation.delta|delta_arrow }}</span>
+                      {% blocktranslate trimmed with deviation=entry.row.project_deviation|deviation_text:entry.definition.unit %}
+                        {{ deviation }} vs project
+                      {% endblocktranslate %}
+                    </span>
+                  {% endif %}
+                  {% if entry.row.org_deviation %}
+                    <span class="{% deviation_class entry.row.org_deviation entry.definition entry.row.below_min_sample %}">
+                      <span aria-hidden="true">{{ entry.row.org_deviation.delta|delta_arrow }}</span>
+                      {% blocktranslate trimmed with deviation=entry.row.org_deviation|deviation_text:entry.definition.unit %}
+                        {{ deviation }} vs organization
+                      {% endblocktranslate %}
+                    </span>
+                  {% endif %}
+                </div>
+              {% endif %}
             </td>
             <td data-testid="comparison-project">
               {{ entry.row.project_value|metric_value:entry.definition.unit }}
@@ -36,5 +57,37 @@ raw rows (ADR 0007), never a median of per-person medians (RISKS row 1).
         {% endfor %}
       </tbody>
     </table>
+  </div>
+  <div class="mt-3 flex flex-col gap-1 text-sm text-text-muted" data-testid="person-comparison-legend">
+    <p>
+      {% blocktranslate trimmed %}
+        <strong>Project</strong> is this person's primary project — the one where most of their pull
+        requests in the period were opened. <strong>Organization</strong> is every project you can see.
+      {% endblocktranslate %}
+    </p>
+    <p>
+      {% blocktranslate trimmed %}
+        Neither is an average of people. A median (times, size, churn) is the median over every pull
+        request in the project or organization; a rate is the share of all its pull requests; pull
+        requests merged and reviews given are the project's or organization's total.
+      {% endblocktranslate %}
+    </p>
+    <p>
+      {% blocktranslate trimmed %}
+        Under the person's value is the gap to each: in percentage points (pp) for a rate, as a relative
+        change otherwise. Green is the better side, red the worse; grey means the metric has no better
+        side, the gap is under 5%, or the sample is small. Totals get no gap — they are not comparable
+        with one person's number.
+      {% endblocktranslate %}
+    </p>
+    <p>
+      {% blocktranslate trimmed count min_sample=min_sample %}
+        "Small sample": fewer than {{ min_sample }} data point, so read it with care. A dash means no
+        data.
+      {% plural %}
+        "Small sample": fewer than {{ min_sample }} data points, so read it with care. A dash means no
+        data.
+      {% endblocktranslate %}
+    </p>
   </div>
 {% endif %}

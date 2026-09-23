@@ -23,7 +23,6 @@ from apps.policy.models import PolicyViolation
 PROJECT_REPOSITORY_METRIC_KEYS: tuple[str, ...] = (
     "prs_merged",
     "ai_pr_share",
-    "disclosure_rate",
     "violations_open",
     "lead_time_p50",
     "rework_rate",
@@ -32,7 +31,6 @@ PROJECT_REPOSITORY_METRIC_KEYS: tuple[str, ...] = (
 PEOPLE_METRIC_KEYS: tuple[str, ...] = (
     "prs_merged",
     "ai_pr_share",
-    "disclosure_rate",
     "violations_open",
     "lead_time_p50",
     "pr_size_p50",

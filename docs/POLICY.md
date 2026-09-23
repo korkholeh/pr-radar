@@ -24,9 +24,9 @@ never evaluated: no violation is created for it, and any violation still `open` 
 
 ## The nine spec rules
 
-"AI PR" below means `pull_request.ai_status` is in the AI cohort (`ai_explicit`, `ai_disclosed`, and
-`ai_suspected` when `AI_COHORT_INCLUDE_SUSPECTED` is on) — the same cohort the AI-adoption dashboards use, not a
-second definition. "Human approval" is a `Review` with `state=approved` whose reviewer resolves to a `Person`
+"AI PR" below means `pull_request.ai_status` is in the AI cohort (`ai_explicit`, `ai_disclosed` and `ai_suspected`;
+turning `AI_COHORT_INCLUDE_SUSPECTED` off drops `ai_suspected`) — the same cohort the AI-adoption dashboards use,
+not a second definition. "Human approval" is a `Review` with `state=approved` whose reviewer resolves to a `Person`
 that is neither the pull request's author nor marked as a bot, counted once per person no matter how many times
 they approved.
 

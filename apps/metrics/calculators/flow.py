@@ -21,7 +21,7 @@ from apps.metrics.calculators.base import (
     batch_count,
     breakdown_value,
     count_value,
-    duration_hours,
+    duration_seconds,
     percentile,
 )
 from apps.metrics.models import ScopeType
@@ -235,13 +235,13 @@ def _merged_population(ctx: PeriodContext) -> QuerySet:
 
 def _durations(queryset: QuerySet, start_field: str, end_field: str) -> list[float | None]:
     # `get_str("DURATION_MODE")` read once for the whole population, not once per row (T11
-    # continuation: profiling on `--scale large` found `duration_hours()`'s per-row default
+    # continuation: profiling on `--scale large` found `duration_seconds()`'s per-row default
     # `mode=None` was reading this setting up to once per merged PR, ~129,000 settings reads for
     # one Overview render — by far the largest remaining cost once the people table's own N+1 was
     # fixed).
     mode = get_str("DURATION_MODE")
     return [
-        duration_hours(start, end, mode=mode) for start, end in queryset.values_list(start_field, end_field)
+        duration_seconds(start, end, mode=mode) for start, end in queryset.values_list(start_field, end_field)
     ]
 
 
@@ -266,7 +266,7 @@ def _make_duration_distribution(
         mode = get_str("DURATION_MODE")
         durations_by_person: dict[int, list[float | None]] = {}
         for person_id, start, end in population.values_list("author__person_id", start_field, end_field):
-            durations_by_person.setdefault(person_id, []).append(duration_hours(start, end, mode=mode))
+            durations_by_person.setdefault(person_id, []).append(duration_seconds(start, end, mode=mode))
         return {person_id: percentile(values, pct) for person_id, values in durations_by_person.items()}
 
     _register(
@@ -365,7 +365,8 @@ _register(
         title=_("PR size (median)"),
         description=_("Median effective lines changed (additions + deletions) for PRs merged in the period."),
         unit="lines",
-        direction="neutral",
+        # Smaller is better: the PLANEKS standards cap PR size, and a small PR is reviewed properly.
+        direction="lower_is_better",
         kind="distribution",
         levels=_ALL_LEVELS,
         supports_cohorts=True,
@@ -444,7 +445,7 @@ _register(
 )
 
 
-def _reviewer_response_hours(ctx: PeriodContext) -> list[float | None]:
+def _reviewer_response_seconds(ctx: PeriodContext) -> list[float | None]:
     queryset = _reviews_given_in_scope(ctx.scope, ctx.cohort).filter(
         submitted_at__gte=day_start(ctx.date_from), submitted_at__lt=day_end_exclusive(ctx.date_to)
     )
@@ -454,16 +455,16 @@ def _reviewer_response_hours(ctx: PeriodContext) -> list[float | None]:
         "pull_request__ready_for_review_at", "pull_request__created_at", "submitted_at"
     ):
         requested_at = ready_for_review_at if ready_for_review_at is not None else created_at
-        durations.append(duration_hours(requested_at, submitted_at, mode=mode))
+        durations.append(duration_seconds(requested_at, submitted_at, mode=mode))
     return durations
 
 
 def _reviewer_response_p50_period(ctx: PeriodContext) -> MetricValue:
-    return percentile(_reviewer_response_hours(ctx), 50)
+    return percentile(_reviewer_response_seconds(ctx), 50)
 
 
 def _reviewer_response_p50_period_by_person(ctx: PeriodContextMany) -> dict[int, MetricValue]:
-    """The batched counterpart of `_reviewer_response_hours()`, grouped by the *reviewer*
+    """The batched counterpart of `_reviewer_response_seconds()`, grouped by the *reviewer*
     (`_reviews_given_in_scope`'s own PERSON-level distinction: reviews given, not reviews
     received) — `scoped_reviews` at `GLOBAL_SCOPE` is the population before reviewer narrowing."""
     queryset = scoped_reviews(GLOBAL_SCOPE, ctx.cohort).filter(
@@ -478,7 +479,7 @@ def _reviewer_response_p50_period_by_person(ctx: PeriodContextMany) -> dict[int,
     ):
         requested_at = ready_for_review_at if ready_for_review_at is not None else created_at
         durations_by_person.setdefault(reviewer_id, []).append(
-            duration_hours(requested_at, submitted_at, mode=mode)
+            duration_seconds(requested_at, submitted_at, mode=mode)
         )
     return {person_id: percentile(values, 50) for person_id, values in durations_by_person.items()}
 

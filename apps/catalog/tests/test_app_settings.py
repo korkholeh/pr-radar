@@ -143,6 +143,17 @@ def test_set_setting_bumps_the_data_version_for_a_metrics_group_key():
 
 
 @pytest.mark.django_db
+def test_set_setting_bumps_the_data_version_for_the_ai_cohort_switch():
+    """`AI_COHORT_INCLUDE_SUSPECTED` sits in the `ai` group but decides what the AI/non-AI cohorts
+    hold, so flipping it must not leave cached cohort numbers on the dashboards."""
+    from apps.metrics.services import data_version
+
+    before = data_version()
+    set_setting("AI_COHORT_INCLUDE_SUSPECTED", False)
+    assert data_version() == before + 1
+
+
+@pytest.mark.django_db
 def test_set_setting_does_not_bump_the_data_version_for_a_non_metrics_key():
     from apps.metrics.services import data_version
 

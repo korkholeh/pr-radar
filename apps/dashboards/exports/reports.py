@@ -150,10 +150,7 @@ _TRENDS_COLUMNS = (
     ExportColumn(key="ai_merged", title="PRs merged (AI)", type="int", width=14),
     ExportColumn(key="non_ai_merged", title="PRs merged (Non-AI)", type="int", width=16),
     ExportColumn(key="ai_pr_share", title="AI PR share", type="percent", width=12),
-    ExportColumn(key="disclosure_rate", title="Disclosure rate", type="percent", width=14),
-    ExportColumn(key="lead_time_p50", title="Lead time (p50)", type="duration", width=14),
     ExportColumn(key="lead_time_p90", title="Lead time (p90)", type="duration", width=14),
-    ExportColumn(key="ttfr_p50", title="Time to first review (p50)", type="duration", width=18),
     ExportColumn(key="ttfr_p90", title="Time to first review (p90)", type="duration", width=18),
 )
 
@@ -173,11 +170,8 @@ def _trends_rows(scope: Scope, params: DashboardParams) -> list[dict[str, object
                 "ai_merged": throughput.datasets[0].data[index],
                 "non_ai_merged": throughput.datasets[1].data[index],
                 "ai_pr_share": ai_adoption.datasets[0].data[index],
-                "disclosure_rate": ai_adoption.datasets[1].data[index],
-                "lead_time_p50": latency.datasets[0].data[index],
-                "lead_time_p90": latency.datasets[1].data[index],
-                "ttfr_p50": latency.datasets[2].data[index],
-                "ttfr_p90": latency.datasets[3].data[index],
+                "lead_time_p90": latency.datasets[0].data[index],
+                "ttfr_p90": latency.datasets[1].data[index],
             }
         )
     return rows
@@ -207,14 +201,11 @@ def _add_trends_charts(workbook, worksheet, sheet_name: str, row_count: int) -> 
     ai_share_chart.add_series(
         {"name": _("AI PR share"), "categories": categories, "values": [sheet_name, 1, 3, last_row, 3]}
     )
-    ai_share_chart.add_series(
-        {"name": _("Disclosure rate"), "categories": categories, "values": [sheet_name, 1, 4, last_row, 4]}
-    )
     ai_share_chart.set_title({"name": _("AI adoption")})
     worksheet.insert_chart(last_row + 3, 6, ai_share_chart)
 
     lead_time_chart = workbook.add_chart({"type": "line"})
-    for col_index, series_name in ((5, _("Lead time (p50)")), (6, _("Lead time (p90)"))):
+    for col_index, series_name in ((4, _("Lead time (p90)")), (5, _("Time to first review (p90)"))):
         lead_time_chart.add_series(
             {
                 "name": series_name,

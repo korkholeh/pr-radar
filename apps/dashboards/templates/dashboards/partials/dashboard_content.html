@@ -1,10 +1,11 @@
-{% load i18n %}
+{% load i18n dashboards %}
 {% comment %}
 The fragment `views.dashboard()` returns to an htmx swap and includes from the full page (ADR
 0006) — one entry point for both Period and Day mode. Tables (T17) join this fragment; for now it
 carries the KPI rows and, in Period mode, the chart cards.
 {% endcomment %}
 {% include "dashboards/partials/filter_toolbar.html" %}
+{% ai_cohort_info %}
 {% if scope_type == "repo" and scope_object %}
   {% include "dashboards/partials/ai_tooling.html" %}
 {% endif %}

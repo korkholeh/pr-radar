@@ -4,6 +4,24 @@
 
 ### Added
 
+- **Dashboards explain what makes a pull request "AI".** A collapsed block under the filters on every dashboard page
+  walks through the five AI statuses in the order they are decided — explicit, disclosed, suspected, no AI,
+  unknown — says which of them are in the AI cohort, and lists the tools the active high-confidence rules
+  recognise. It reads the live settings, so turning on `AI_COHORT_INCLUDE_SUSPECTED` or changing
+  `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` changes what it says. Admins get links to the rule pages from it.
+
+- **The person page shows how far a person is from their team.** In the comparison table, under each value in
+  the Person column, two lines give the gap to the project and to the organisation — percentage points for a
+  share, a relative change for a duration or a size — coloured by the metric's direction and grey on a small
+  sample. Pull requests merged and reviews given get none: their baselines are totals, not a typical person. A
+  legend under the table says what the Project and Organization columns are — medians and rates over every pull
+  request at that level, never an average of people — and what the colours and "Small sample" mean.
+
+- **The person page counts policy violations by rule.** A new table lists every rule this person's pull requests
+  broke in the period, highest severity first, with the total and how many of those violations are now open,
+  acknowledged, waived or resolved, and an "All rules" row underneath. What to raise in a 1:1 — and what has
+  already been dealt with — is readable without filtering the Policy console.
+
 - **The author × reviewer heat map points at the gaps.** It scrolls sideways on its own, with the author column
   pinned, so a large team no longer widens the page. Each author carries their pull requests merged in the
   period, each reviewer the pull requests by others they reviewed, and cells now count distinct pull requests
@@ -48,7 +66,37 @@
   now a project existed only if someone made it in the Django admin or a seeding command. Both actions are
   recorded in the audit log.
 
+### Changed
+
+- **Suspected AI pull requests are in the AI cohort.** `AI_COHORT_INCLUDE_SUSPECTED` now defaults to on: a pull
+  request only medium- or low-confidence rules matched, or that tripped two kinds of structural signal, counts as
+  AI in AI PR share, the AI/non-AI comparisons and the AI-specific policy rules. An installation that saved the
+  old value keeps it until it is changed on the settings page. After changing it, run `manage.py recompute`: the
+  cohort rollups on disk and the violations the policy engine already raised were computed under the old value.
+  Changing the setting now also refreshes the dashboards straight away instead of after the metrics cache expires.
+
+- **The disclosure rate is off the dashboards.** It counts AI pull requests whose author ticked a level in the "AI
+  assistance" section of the recommended PR template (`docs/pull_request_template.md`), so until a team adopts that
+  template it reads 0% for everyone — which looked like a finding and was not one. It is gone from the KPI row, the
+  AI adoption chart, the project, repository and people tables, the person comparison and the report's Trends
+  sheet. The metric itself stays in the registry and in `docs/METRICS.md`, and the disclosure policy rules are
+  unchanged.
+
+- **The Latency chart draws the p90 lines only.** Lead time and time to first review each keep their 90th
+  percentile — how long the slow pull requests took; the medians are on the KPI cards above, and four lines
+  made the chart hard to read. The report's Trends sheet, built from the same chart, follows: its latency columns
+  and chart are the two p90s.
+
 ### Fixed
+
+- **Lead time, time to first review, cycle time and reviewer response time show real durations.** The calculators
+  returned hours while every screen, chart and export read the value as seconds, so a 2h 43m median lead time
+  showed as "3 seconds" — and a CSV or XLSX export showed it as 0.0 hours. They now report seconds, the unit
+  everything downstream already expected. Cached results from before the fix are not reused.
+
+- **A larger PR size now reads as worse, not neutral.** `PR size (median)` is marked lower-is-better: its KPI card
+  delta, its export delta column and the person page's gap to the project and organisation are now green when the
+  pull requests got smaller and red when they grew, instead of always grey.
 
 - **Review waiting times read as days and hours.** The Reviews page's "Waiting" column showed a bare hour count —
   "173h" — with an untranslated "h". It now reads "7d 5h" past a day, "5h 12m" under one and minutes under an

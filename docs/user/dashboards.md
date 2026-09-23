@@ -79,6 +79,14 @@ Every filter you set is written into the page's URL. This means a link you copy 
 looking at, say, the last 90 days for one repository with the AI cohort selected reopens to exactly that view for
 whoever you send it to — no need to explain which filters to set.
 
+**Which pull requests are "AI".** Under the filters, the collapsed **How a pull request gets into the AI cohort**
+block explains it on the page itself: each pull request gets one AI status — explicit (a high-confidence rule
+matched something the tool wrote, such as a co-author trailer), disclosed (the PR template's "AI assistance" box),
+suspected (only weaker signals), no AI or unknown — and the AI cohort is the explicit, disclosed and suspected ones
+(turning `AI_COHORT_INCLUDE_SUSPECTED` off leaves suspected out). The block reads the live settings and lists the
+tools the active rules recognise; an admin also gets links to the rules. How to tune them is in [tune-ai-
+detection.md](tune-ai-detection.md).
+
 ## Export a table
 
 Every table (projects, repositories, people, recent PRs) has an **Export** control offering CSV or XLSX. Both

@@ -28,7 +28,6 @@ class KpiCard:
 
 ADOPTION_ROW: tuple[KpiSpec, ...] = (
     KpiSpec("ai_pr_share"),
-    KpiSpec("disclosure_rate"),
     KpiSpec("violations_open"),
     KpiSpec("ai_active_people"),
 )

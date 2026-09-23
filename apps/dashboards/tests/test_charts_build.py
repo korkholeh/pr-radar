@@ -175,22 +175,21 @@ def test_ai_adoption_matches_compute():
     payload = charts.CHART_REGISTRY["ai_adoption"].build(scope, params)
 
     result_set = compute(
-        ["ai_pr_share", "disclosure_rate"],
+        ["ai_pr_share"],
         scope,
         params.date_from,
         params.date_to,
         cohort=Cohort.ALL,
         granularity=params.granularity,
     )
-    share_dataset, disclosure_dataset = payload.datasets
+    # One line: `disclosure_rate` is off the dashboards until teams adopt the PR template.
+    (share_dataset,) = payload.datasets
     assert share_dataset.data == [point.value for point in result_set["ai_pr_share"].series]
-    assert disclosure_dataset.data == [point.value for point in result_set["disclosure_rate"].series]
     assert any(value is not None for value in share_dataset.data)
-    assert any(value is not None for value in disclosure_dataset.data)
 
 
 @pytest.mark.django_db
-def test_latency_matches_compute_for_all_four_metrics():
+def test_latency_matches_compute_for_both_p90_metrics():
     _seed_period_data()
     scope = _scope()
     params = _params(datetime.date(2026, 8, 1), datetime.date(2026, 8, 31))
@@ -207,6 +206,10 @@ def test_latency_matches_compute_for_all_four_metrics():
     for key, dataset in zip(charts._LATENCY_METRIC_KEYS, payload.datasets, strict=True):
         assert dataset.data == [point.value for point in result_set[key].series]
     assert any(value is not None for dataset in payload.datasets for value in dataset.data)
+
+
+def test_latency_draws_only_the_p90_lines():
+    assert charts._LATENCY_METRIC_KEYS == ("lead_time_p90", "time_to_first_review_p90")
 
 
 @pytest.mark.django_db

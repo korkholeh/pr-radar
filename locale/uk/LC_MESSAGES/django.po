@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PR Radar\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 09:11+0000\n"
+"POT-Creation-Date: 2026-09-23 10:49+0000\n"
 "PO-Revision-Date: 2026-09-17 04:48+0000\n"
 "Last-Translator: PR Radar\n"
 "Language-Team: Ukrainian\n"
@@ -125,22 +125,27 @@ msgid "Invalid language value."
 msgstr "Некоректне значення мови."
 
 #: apps/activity/models.py:6
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:20
 msgid "AI explicit"
 msgstr "ШІ явно"
 
 #: apps/activity/models.py:7
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:34
 msgid "AI disclosed"
 msgstr "ШІ розкрито"
 
 #: apps/activity/models.py:8
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:42
 msgid "AI suspected"
 msgstr "ШІ підозрюється"
 
 #: apps/activity/models.py:9
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:59
 msgid "No AI"
 msgstr "Без ШІ"
 
 #: apps/activity/models.py:10 apps/activity/models.py:39
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:63
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:19
 msgid "Unknown"
 msgstr "Невідомо"
@@ -186,7 +191,9 @@ msgstr "L"
 msgid "XL"
 msgstr "XL"
 
-#: apps/activity/models.py:31 apps/policy/models.py:169
+#: apps/activity/models.py:31
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:25
+#: apps/policy/models.py:169
 msgid "Open"
 msgstr "Відкрито"
 
@@ -1281,7 +1288,7 @@ msgstr "Зберегти"
 #: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
-#: apps/dashboards/exports/reports.py:358
+#: apps/dashboards/exports/reports.py:349
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:106
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:110
 #: apps/policy/templates/policy/partials/policy_form.html:93
@@ -1299,7 +1306,7 @@ msgstr "Так"
 #: apps/connections/templates/connections/partials/repositories_content.html:42
 #: apps/connections/templates/connections/partials/row.html:18
 #: apps/dashboards/exports/reports.py:140
-#: apps/dashboards/exports/reports.py:358
+#: apps/dashboards/exports/reports.py:349
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:106
 #: apps/dashboards/templates/dashboards/pull_request_detail.html:110
 #: apps/policy/templates/policy/partials/policy_form.html:93
@@ -1335,6 +1342,7 @@ msgstr "Активувати"
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:4
 #: apps/ai_detection/templates/ai_detection/partials/rules_content.html:11
 #: apps/ai_detection/templates/ai_detection/rules.html:3
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:77
 #: templates/partials/nav.html:55
 msgid "Detection rules"
 msgstr "Правила детекції"
@@ -1424,6 +1432,7 @@ msgstr ""
 
 #: apps/ai_detection/templates/ai_detection/partials/signal_rules_content.html:4
 #: apps/ai_detection/templates/ai_detection/signal_rules.html:3
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:79
 #: templates/partials/nav.html:56
 msgid "Structural signals"
 msgstr "Структурні сигнали"
@@ -1542,7 +1551,7 @@ msgstr "Виключити з метрик"
 
 #: apps/catalog/forms.py:73 apps/dashboards/exports/columns.py:103
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:77
-#: apps/dashboards/templates/dashboards/partials/person_comparison.html:14
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:15
 #: apps/metrics/models.py:9
 msgid "Person"
 msgstr "Людина"
@@ -1560,11 +1569,11 @@ msgid "Cannot merge a person into themselves."
 msgstr "Не можна об'єднати людину із самою собою."
 
 #: apps/catalog/models.py:11
-#: apps/dashboards/templates/dashboards/partials/person_comparison.html:16
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:17
 msgid "Organization"
 msgstr "Організація"
 
-#: apps/catalog/models.py:12 apps/dashboards/exports/reports.py:344
+#: apps/catalog/models.py:12 apps/dashboards/exports/reports.py:335
 msgid "User"
 msgstr "Користувач"
 
@@ -2055,14 +2064,20 @@ msgstr ""
 msgid ""
 "Reviews heat map: a reviewer is flagged as very low-activity below this "
 "percentage of the median reviewer's pull-request count."
-msgstr "Теплова карта ревʼю: ревʼюера позначено як дуже малоактивного, якщо кількість переглянутих ним пул-реквестів нижча за цей відсоток від медіани ревʼюерів."
+msgstr ""
+"Теплова карта ревʼю: ревʼюера позначено як дуже малоактивного, якщо "
+"кількість переглянутих ним пул-реквестів нижча за цей відсоток від медіани "
+"ревʼюерів."
 
 #: apps/catalog/setting_defs.py:499
 msgid ""
 "Reviews heat map: an author with at least MIN_SAMPLE merged pull requests is "
 "flagged when fewer than this percentage of them were reviewed by someone "
 "else."
-msgstr "Теплова карта ревʼю: автора з щонайменше MIN_SAMPLE змердженими пул-реквестами позначено, якщо ревʼю від когось іншого отримали менше ніж цей відсоток із них."
+msgstr ""
+"Теплова карта ревʼю: автора з щонайменше MIN_SAMPLE змердженими пул-"
+"реквестами позначено, якщо ревʼю від когось іншого отримали менше ніж цей "
+"відсоток із них."
 
 #: apps/catalog/setting_defs.py:504
 msgid "Default UI language for a new user."
@@ -2885,8 +2900,8 @@ msgstr "Позначте підтвердження, щоб прив'язати 
 msgid "No data in this period."
 msgstr "За цей період немає даних."
 
-#: apps/dashboards/charts.py:123 apps/dashboards/charts.py:250
-#: apps/dashboards/charts.py:296
+#: apps/dashboards/charts.py:123 apps/dashboards/charts.py:245
+#: apps/dashboards/charts.py:291
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:98
 #: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:24
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:42
@@ -2894,8 +2909,8 @@ msgstr "За цей період немає даних."
 msgid "AI"
 msgstr "ШІ"
 
-#: apps/dashboards/charts.py:124 apps/dashboards/charts.py:253
-#: apps/dashboards/charts.py:297
+#: apps/dashboards/charts.py:124 apps/dashboards/charts.py:248
+#: apps/dashboards/charts.py:292
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:99
 #: apps/dashboards/templates/dashboards/partials/filter_toolbar.html:26
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:46
@@ -2904,7 +2919,7 @@ msgid "Non-AI"
 msgstr "Без ШІ"
 
 #: apps/dashboards/charts.py:133 apps/dashboards/charts.py:163
-#: apps/dashboards/charts.py:217 apps/dashboards/charts.py:353
+#: apps/dashboards/charts.py:212 apps/dashboards/charts.py:348
 msgid "Date"
 msgstr "Дата"
 
@@ -2912,47 +2927,35 @@ msgstr "Дата"
 msgid "Pull requests merged"
 msgstr "Змерджені pull request-и"
 
-#: apps/dashboards/charts.py:153 apps/dashboards/exports/reports.py:208
+#: apps/dashboards/charts.py:154 apps/dashboards/exports/reports.py:202
 #: apps/metrics/calculators/adoption.py:67
 msgid "AI PR share"
 msgstr "Частка AI PR"
 
-#: apps/dashboards/charts.py:154 apps/dashboards/exports/reports.py:211
-#: apps/metrics/calculators/adoption.py:223
-msgid "Disclosure rate"
-msgstr "Рівень розкриття"
-
-#: apps/dashboards/charts.py:164 apps/dashboards/charts.py:307
+#: apps/dashboards/charts.py:164 apps/dashboards/charts.py:302
 msgid "Share"
 msgstr "Частка"
 
-#: apps/dashboards/charts.py:178 apps/dashboards/exports/reports.py:217
-msgid "Lead time (p50)"
-msgstr "Час виконання (p50)"
-
-#: apps/dashboards/charts.py:179 apps/dashboards/exports/reports.py:217
+#: apps/dashboards/charts.py:177 apps/dashboards/exports/reports.py:208
 #: apps/metrics/calculators/flow.py:299
 msgid "Lead time (p90)"
 msgstr "Час виконання (p90)"
 
-#: apps/dashboards/charts.py:180
-msgid "Time to first review (p50)"
-msgstr "Час до першого ревʼю (p50)"
-
-#: apps/dashboards/charts.py:181 apps/metrics/calculators/flow.py:326
+#: apps/dashboards/charts.py:178 apps/dashboards/exports/reports.py:208
+#: apps/metrics/calculators/flow.py:326
 msgid "Time to first review (p90)"
 msgstr "Час до першого ревʼю (p90)"
 
-#: apps/dashboards/charts.py:218
+#: apps/dashboards/charts.py:213
 msgid "Duration"
 msgstr "Тривалість"
 
-#: apps/dashboards/charts.py:265 apps/dashboards/exports/columns.py:122
+#: apps/dashboards/charts.py:260 apps/dashboards/exports/columns.py:122
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:202
 msgid "Size"
 msgstr "Розмір"
 
-#: apps/dashboards/charts.py:266
+#: apps/dashboards/charts.py:261
 #: apps/dashboards/templates/dashboards/pull_requests.html:4
 #: apps/dashboards/templates/dashboards/pull_requests.html:7
 #: apps/github_sync/templates/github_sync/partials/runs.html:12
@@ -2960,51 +2963,51 @@ msgstr "Розмір"
 msgid "Pull requests"
 msgstr "Пул-реквести"
 
-#: apps/dashboards/charts.py:305 apps/metrics/calculators/quality.py:401
+#: apps/dashboards/charts.py:300 apps/metrics/calculators/quality.py:401
 msgid "21-day churn"
 msgstr "Churn за 21 день"
 
-#: apps/dashboards/charts.py:305 apps/metrics/calculators/quality.py:130
+#: apps/dashboards/charts.py:300 apps/metrics/calculators/quality.py:130
 msgid "Rework rate"
 msgstr "Рівень доопрацювань"
 
-#: apps/dashboards/charts.py:306
-#: apps/dashboards/templates/dashboards/partials/person_comparison.html:13
+#: apps/dashboards/charts.py:301
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:14
 msgid "Metric"
 msgstr "Метрика"
 
-#: apps/dashboards/charts.py:354 apps/dashboards/exports/columns.py:125
+#: apps/dashboards/charts.py:349 apps/dashboards/exports/columns.py:125
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:214
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:8
 #: apps/policy/forms.py:104 apps/policy/templates/policy/console.html:13
 msgid "Violations"
 msgstr "Порушення"
 
-#: apps/dashboards/charts.py:378 apps/dashboards/exports/columns.py:134
+#: apps/dashboards/charts.py:373 apps/dashboards/exports/columns.py:134
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:31
 msgid "Reviewer"
 msgstr "Ревʼюер"
 
-#: apps/dashboards/charts.py:379
+#: apps/dashboards/charts.py:374
 #: apps/policy/templates/policy/partials/rule_chart.html:22
 msgid "Count"
 msgstr "Кількість"
 
-#: apps/dashboards/charts.py:384 apps/dashboards/exports/columns.py:135
+#: apps/dashboards/charts.py:379 apps/dashboards/exports/columns.py:135
 #: apps/dashboards/templates/dashboards/partials/day_lists.html:80
 #: apps/metrics/calculators/flow.py:174
 msgid "Reviews given"
 msgstr "Надані ревʼю"
 
-#: apps/dashboards/charts.py:385 apps/dashboards/exports/columns.py:136
+#: apps/dashboards/charts.py:380 apps/dashboards/exports/columns.py:136
 msgid "Pull requests reviewed"
 msgstr "Pull request-и з ревʼю"
 
-#: apps/dashboards/charts.py:397 apps/dashboards/exports/reports.py:203
+#: apps/dashboards/charts.py:392 apps/dashboards/exports/reports.py:197
 msgid "Throughput"
 msgstr "Пропускна здатність"
 
-#: apps/dashboards/charts.py:403
+#: apps/dashboards/charts.py:398
 msgid ""
 "Pull requests merged in each bucket of the selected period, with the AI and "
 "the non-AI cohort stacked so the full bar is the bucket's whole merged "
@@ -3018,51 +3021,43 @@ msgstr ""
 "який припадає час його мерджу за звітним часовим поясом; відкриті pull "
 "request-и та закриті без мерджу на цьому графіку не показані."
 
-#: apps/dashboards/charts.py:411 apps/dashboards/exports/reports.py:213
+#: apps/dashboards/charts.py:406 apps/dashboards/exports/reports.py:204
 msgid "AI adoption"
 msgstr "Впровадження ШІ"
 
-#: apps/dashboards/charts.py:417
+#: apps/dashboards/charts.py:412
 msgid ""
-"Two shares over time, both plotted as a percentage of their own population. "
-"AI PR share is the portion of pull requests merged in the bucket that AI "
-"detection put in the AI cohort. Disclosure rate is the portion of AI-cohort "
-"pull requests created in the bucket whose disclosure is partial or "
-"substantial, rather than missing or ambiguous — it says how honestly AI use "
-"is declared, not how much of it there is."
+"AI PR share over time: the portion of pull requests merged in the bucket "
+"that AI detection put in the AI cohort."
 msgstr ""
-"Дві частки в часі, кожна — відсоток від власної сукупності. Частка AI PR — "
-"це скільки зі змерджених в інтервалі pull request-ів детекція ШІ віднесла до "
-"когорти зі ШІ. Рівень розкриття — це скільки зі створених в інтервалі pull "
-"request-ів когорти зі ШІ мають часткове або суттєве розкриття, а не відсутнє "
-"чи неоднозначне: він показує, наскільки чесно декларують використання ШІ, а "
-"не скільки його є."
+"Частка AI PR у часі: частка pull request-ів, змерджених в інтервалі, які "
+"визначення AI віднесло до когорти AI."
 
-#: apps/dashboards/charts.py:426 apps/dashboards/exports/reports.py:225
+#: apps/dashboards/charts.py:418 apps/dashboards/exports/reports.py:216
 msgid "Latency"
 msgstr "Затримка"
 
-#: apps/dashboards/charts.py:432
+#: apps/dashboards/charts.py:424
 msgid ""
-"How long pull requests merged in each bucket took, as a median (p50) and a "
-"90th percentile (p90). Lead time runs from a pull request becoming ready for "
-"review to its merge; time to first review runs from that same start to the "
-"first review submitted on it. Both percentiles are computed from the pull "
-"requests of one bucket, so they describe that bucket only and never add up "
-"across buckets."
+"How long the slowest pull requests merged in each bucket took, as a 90th "
+"percentile (p90): nine in ten were faster. Lead time runs from a pull "
+"request becoming ready for review to its merge; time to first review runs "
+"from that same start to the first review submitted on it. The percentile is "
+"computed from the pull requests of one bucket, so it describes that bucket "
+"only and never adds up across buckets. The medians are on the KPI cards."
 msgstr ""
-"Скільки часу забирали pull request-и, змерджені в кожному інтервалі: медіана "
-"(p50) і 90-й процентиль (p90). Час виконання рахується від моменту, коли "
-"pull request став готовим до ревʼю, до мерджу; час до першого ревʼю — від "
-"того самого моменту до першого поданого ревʼю. Обидва процентилі "
-"обчислюються з pull request-ів одного інтервалу, тому описують лише його й "
-"не додаються між інтервалами."
+"Скільки часу забирали найповільніші pull request-и, змерджені в кожному "
+"інтервалі, — 90-й процентиль (p90): девʼять із десяти були швидшими. Час "
+"виконання рахується від моменту, коли pull request став готовим до ревʼю, до "
+"мерджу; час до першого ревʼю — від того самого моменту до першого поданого "
+"ревʼю. Процентиль обчислюється з pull request-ів одного інтервалу, тому "
+"описує лише його й не додається між інтервалами. Медіани — на KPI-картках."
 
-#: apps/dashboards/charts.py:441
+#: apps/dashboards/charts.py:434
 msgid "PR size distribution"
 msgstr "Розподіл розмірів PR"
 
-#: apps/dashboards/charts.py:447
+#: apps/dashboards/charts.py:440
 msgid ""
 "Pull requests merged in the whole period, grouped by effective lines changed "
 "— additions plus deletions, ignoring the files the exclusion rules drop, "
@@ -3078,11 +3073,11 @@ msgstr ""
 "кожної категорії. Зсув у бік L та XL — попередження про навантаження на "
 "ревʼю: великі pull request-и ревʼюють гірше."
 
-#: apps/dashboards/charts.py:456
+#: apps/dashboards/charts.py:449
 msgid "Churn & rework"
 msgstr "Churn і доопрацювання"
 
-#: apps/dashboards/charts.py:462
+#: apps/dashboards/charts.py:455
 msgid ""
 "Two quality shares for the whole period, AI cohort against non-AI. 21-day "
 "churn is the median share of a merged pull request's lines that were changed "
@@ -3097,12 +3092,12 @@ msgstr ""
 "request-ів, які потребували щонайменше ще одного коміту після першого ревʼю. "
 "Для обох менше — краще."
 
-#: apps/dashboards/charts.py:471 apps/metrics/calculators/adoption.py:426
+#: apps/dashboards/charts.py:464 apps/metrics/calculators/adoption.py:426
 #: apps/policy/templates/policy/partials/rule_chart.html:3
 msgid "Violations by rule"
 msgstr "Порушення за правилом"
 
-#: apps/dashboards/charts.py:477
+#: apps/dashboards/charts.py:470
 msgid ""
 "AI-policy violations created in each bucket, one stacked series per rule, so "
 "the full bar is every violation the period opened. A violation counts in the "
@@ -3118,12 +3113,12 @@ msgstr ""
 "порушень, а не зріз відкритих. Довгий діапазон групується грубішими "
 "інтервалами, щоб графік не перевищував 31 інтервал."
 
-#: apps/dashboards/charts.py:486
+#: apps/dashboards/charts.py:479
 #: apps/dashboards/templates/dashboards/partials/reviews_content.html:20
 msgid "Reviewer load"
 msgstr "Навантаження ревʼюерів"
 
-#: apps/dashboards/charts.py:492
+#: apps/dashboards/charts.py:485
 msgid ""
 "Two bars per reviewer for the period, for the twenty busiest reviewers in "
 "this scope: every review they submitted, and the number of distinct pull "
@@ -3171,7 +3166,7 @@ msgid "%(title)s (org-wide)"
 msgstr "%(title)s (по всій організації)"
 
 #: apps/dashboards/exports/columns.py:108
-#: apps/dashboards/templates/dashboards/partials/person_comparison.html:15
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:16
 #: apps/metrics/models.py:7 apps/policy/forms.py:472
 #: apps/policy/templates/policy/console.html:79
 #: apps/policy/templates/policy/partials/sensitive_paths_content.html:17
@@ -3223,54 +3218,54 @@ msgstr "Раунди ревʼю"
 msgid "Churn"
 msgstr "Churn"
 
-#: apps/dashboards/exports/reports.py:194
+#: apps/dashboards/exports/reports.py:188
 msgid "PRs merged (AI)"
 msgstr "Змерджені PR (ШІ)"
 
-#: apps/dashboards/exports/reports.py:198
+#: apps/dashboards/exports/reports.py:192
 msgid "PRs merged (Non-AI)"
 msgstr "Змерджені PR (не ШІ)"
 
-#: apps/dashboards/exports/reports.py:312
+#: apps/dashboards/exports/reports.py:303
 msgid "all, ai, non_ai"
 msgstr "усі, ai, non_ai"
 
-#: apps/dashboards/exports/reports.py:312
+#: apps/dashboards/exports/reports.py:303
 msgid "all only"
 msgstr "лише «усі»"
 
-#: apps/dashboards/exports/reports.py:335
-#: apps/dashboards/exports/reports.py:337
-#: apps/dashboards/exports/reports.py:339
+#: apps/dashboards/exports/reports.py:326
+#: apps/dashboards/exports/reports.py:328
+#: apps/dashboards/exports/reports.py:330
 #, python-format
 msgid "Filter: %(key)s"
 msgstr "Фільтр: %(key)s"
 
-#: apps/dashboards/exports/reports.py:346
+#: apps/dashboards/exports/reports.py:337
 msgid "Generated at"
 msgstr "Згенеровано"
 
-#: apps/dashboards/exports/reports.py:350
+#: apps/dashboards/exports/reports.py:341
 msgid "Last successful sync"
 msgstr "Остання успішна синхронізація"
 
-#: apps/dashboards/exports/reports.py:353
+#: apps/dashboards/exports/reports.py:344
 msgid "Never"
 msgstr "Ніколи"
 
-#: apps/dashboards/exports/reports.py:355
+#: apps/dashboards/exports/reports.py:346
 msgid "Tool version"
 msgstr "Версія інструмента"
 
-#: apps/dashboards/exports/reports.py:357
+#: apps/dashboards/exports/reports.py:348
 msgid "AI cohort includes suspected"
 msgstr "Когорта ШІ включає підозрювані"
 
-#: apps/dashboards/exports/reports.py:360
+#: apps/dashboards/exports/reports.py:351
 msgid "Report timezone"
 msgstr "Часовий пояс звіту"
 
-#: apps/dashboards/exports/reports.py:361
+#: apps/dashboards/exports/reports.py:352
 msgid "Report language"
 msgstr "Мова звіту"
 
@@ -3390,7 +3385,7 @@ msgstr[3] "%(lower)s–%(upper)s рядка"
 
 #: apps/dashboards/tables.py:79 apps/dashboards/tables.py:80
 #: apps/dashboards/templates/dashboards/partials/kpi_card.html:63
-#: apps/dashboards/templatetags/dashboards.py:222
+#: apps/dashboards/templatetags/dashboards.py:269
 msgid "Small sample"
 msgstr "Мала вибірка"
 
@@ -3430,6 +3425,119 @@ msgstr "Повернутися до моїх експортів"
 #: templates/partials/nav.html:48
 msgid "My exports"
 msgstr "Мої експорти"
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:9
+msgid "How a pull request gets into the AI cohort"
+msgstr "Як pull request потрапляє в когорту AI"
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:12
+msgid ""
+"Every AI metric — AI PR share, the AI and non-AI comparisons, the AI cohort "
+"filter — counts the pull requests in the AI cohort. Each pull request gets "
+"one AI status, checked in this order; the first that applies wins."
+msgstr ""
+"Кожна AI-метрика — частка AI PR, порівняння AI і не-AI, фільтр когорти AI — "
+"рахує pull request-и з когорти AI. Кожен pull request отримує один AI-"
+"статус; статуси перевіряються в такому порядку, і перший, що підходить, "
+"перемагає."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:21
+msgid ""
+"a high-confidence detection rule matched something an AI tool wrote itself: "
+"a co-author trailer or footer in a commit, a footer or marker in the "
+"description, a bot as the author, the tool's own file in the diff."
+msgstr ""
+"правило виявлення з високою впевненістю знайшло те, що AI-інструмент написав"
+" сам: трейлер co-author або футер у коміті, футер чи маркер в описі, бота як"
+" автора, власний файл інструмента в диффі."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:27
+#, python-format
+msgid "Tools the active rules recognise: %(tools)s."
+msgstr ""
+"Інструменти, які розпізнають активні правила: %(tools)s."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:31
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:39
+msgid "In the AI cohort."
+msgstr ""
+"У когорті AI."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:35
+msgid ""
+"the author ticked \"Partial\" or \"Substantial\" in the \"AI assistance\" "
+"section of the pull request template."
+msgstr ""
+"автор відмітив «Partial» або «Substantial» у секції «AI assistance» шаблону "
+"pull request."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:43
+#, python-format
+msgid ""
+"only medium- or low-confidence rules matched (a branch prefix, an AI "
+"reviewer account, the wording of the description), or at least %(count)s "
+"kind of structural signal did (a large change within two hours, a burst of "
+"commits, many new files)."
+msgid_plural ""
+"only medium- or low-confidence rules matched (a branch prefix, an AI "
+"reviewer account, the wording of the description), or at least %(count)s "
+"different kinds of structural signal did (a large change within two hours, a "
+"burst of commits, many new files)."
+msgstr[0] ""
+"лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
+"обліковий запис AI-рецензента, стиль опису) або спрацював щонайменше "
+"%(count)s вид структурного сигналу (велика зміна за дві години, серія "
+"комітів, багато нових файлів)."
+msgstr[1] ""
+"лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
+"обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
+"%(count)s різні види структурних сигналів (велика зміна за дві години, серія"
+" комітів, багато нових файлів)."
+msgstr[2] ""
+"лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
+"обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
+"%(count)s різних видів структурних сигналів (велика зміна за дві години, "
+"серія комітів, багато нових файлів)."
+msgstr[3] ""
+"лише правила з середньою чи низькою впевненістю спрацювали (префікс гілки, "
+"обліковий запис AI-рецензента, стиль опису) або спрацювали щонайменше "
+"%(count)s різні види структурних сигналів (велика зміна за дві години, серія"
+" комітів, багато нових файлів)."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:53
+msgid "In the AI cohort: this installation counts suspected pull requests."
+msgstr ""
+"У когорті AI: у цій інсталяції підозрювані pull request-и враховуються."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:55
+msgid "Not in the AI cohort: it counts as non-AI."
+msgstr ""
+"Не в когорті AI: рахується як не-AI."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:60
+msgid "the author ticked \"None\" and no rule matched."
+msgstr ""
+"автор відмітив «None», і жодне правило не спрацювало."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:64
+msgid "no rule matched and nothing was ticked."
+msgstr ""
+"жодне правило не спрацювало, і нічого не відмічено."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:65
+msgid "Neither is in the AI cohort; both count as non-AI."
+msgstr ""
+"Жоден із них не в когорті AI; обидва рахуються як не-AI."
+
+#: apps/dashboards/templates/dashboards/partials/ai_cohort_info.html:69
+msgid ""
+"Pull requests by bots and by people excluded from metrics are left out of "
+"every metric. A signal that does not change the status is still listed on "
+"the pull request's page as evidence."
+msgstr ""
+"Pull request-и ботів і людей, виключених із метрик, не входять у жодну "
+"метрику. Сигнал, який не змінює статус, усе одно показується на сторінці "
+"pull request як доказ."
 
 #: apps/dashboards/templates/dashboards/partials/ai_tooling.html:12
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:136
@@ -3764,9 +3872,140 @@ msgstr ""
 "Жоден pull request не відповідає цьому періоду та фільтру. Розширте період "
 "або очистіть фільтри."
 
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:34
+#, python-format
+msgid "%(deviation)s vs project"
+msgstr "%(deviation)s відносно проєкту"
+
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:42
+#, python-format
+msgid "%(deviation)s vs organization"
+msgstr "%(deviation)s відносно організації"
+
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:63
+msgid ""
+"<strong>Project</strong> is this person's primary project — the one where "
+"most of their pull requests in the period were opened. <strong>Organization</"
+"strong> is every project you can see."
+msgstr ""
+"<strong>Проєкт</strong> — основний проєкт цієї людини: той, у якому за "
+"період відкрито більшість її pull request-ів. <strong>Організація</strong> — "
+"усі проєкти, які ви бачите."
+
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:69
+msgid ""
+"Neither is an average of people. A median (times, size, churn) is the median "
+"over every pull request in the project or organization; a rate is the share "
+"of all its pull requests; pull requests merged and reviews given are the "
+"project's or organization's total."
+msgstr ""
+"Жодне з них не є середнім по людях. Медіана (час, розмір, churn) — це "
+"медіана по всіх pull request-ах проєкту чи організації; частка — частка від "
+"усіх їхніх pull request-ів; змерджені PR і надані ревʼю — загальна кількість "
+"по проєкту чи організації."
+
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:76
+#, python-format
+msgid ""
+"Under the person's value is the gap to each: in percentage points (pp) for a "
+"rate, as a relative change otherwise. Green is the better side, red the "
+"worse; grey means the metric has no better side, the gap is under 5%%, or "
+"the sample is small. Totals get no gap — they are not comparable with one "
+"person's number."
+msgstr ""
+"Під значенням людини — відхилення від кожного з них: у відсоткових пунктах "
+"(в. п.) для частки, у відносній зміні для решти. Зелений — кращий бік, "
+"червоний — гірший; сірий — у метрики немає кращого боку, відхилення менше "
+"5%% або вибірка мала. Для загальних кількостей відхилення немає — їх не "
+"можна порівнювати з числом однієї людини."
+
+#: apps/dashboards/templates/dashboards/partials/person_comparison.html:84
+#, python-format
+msgid ""
+"\"Small sample\": fewer than %(min_sample)s data point, so read it with "
+"care. A dash means no data."
+msgid_plural ""
+"\"Small sample\": fewer than %(min_sample)s data points, so read it with "
+"care. A dash means no data."
+msgstr[0] ""
+"«Мала вибірка»: менше ніж %(min_sample)s значення, тож читайте з "
+"обережністю. Прочерк означає, що даних немає."
+msgstr[1] ""
+"«Мала вибірка»: менше ніж %(min_sample)s значення, тож читайте з "
+"обережністю. Прочерк означає, що даних немає."
+msgstr[2] ""
+"«Мала вибірка»: менше ніж %(min_sample)s значень, тож читайте з обережністю. "
+"Прочерк означає, що даних немає."
+msgstr[3] ""
+"«Мала вибірка»: менше ніж %(min_sample)s значення, тож читайте з "
+"обережністю. Прочерк означає, що даних немає."
+
 #: apps/dashboards/templates/dashboards/partials/person_notes.html:8
 msgid "Private notes"
 msgstr "Приватні нотатки"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:8
+#: apps/policy/templates/policy/partials/violations.html:23
+msgid "Policy violations"
+msgstr "Порушення політики"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:11
+#, python-format
+msgid "Found on %(count)s pull request in this period."
+msgid_plural "Found on %(count)s pull requests in this period."
+msgstr[0] "Виявлено в %(count)s пул-реквесті за цей період."
+msgstr[1] "Виявлено в %(count)s пул-реквестах за цей період."
+msgstr[2] "Виявлено в %(count)s пул-реквестах за цей період."
+msgstr[3] "Виявлено в %(count)s пул-реквестах за цей період."
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:19
+msgid "Policy violations by rule for this person"
+msgstr "Порушення політики цієї людини за правилами"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:22
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:34
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:105
+#: apps/policy/templates/policy/console.html:61
+#: apps/policy/templates/policy/partials/rule_chart.html:21
+#: apps/policy/templates/policy/partials/violations.html:28
+msgid "Rule"
+msgstr "Правило"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:23
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:35
+#: apps/dashboards/templates/dashboards/partials/pr_violations.html:106
+#: apps/policy/templates/policy/console.html:67
+#: apps/policy/templates/policy/partials/violations.html:29
+msgid "Severity"
+msgstr "Серйозність"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:24
+msgid "Total"
+msgstr "Усього"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:26
+#: apps/policy/models.py:170
+msgid "Acknowledged"
+msgstr "Взято до відома"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:27
+#: apps/policy/models.py:171
+msgid "Waived"
+msgstr "Знято вимогу"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:28
+#: apps/policy/models.py:172
+msgid "Resolved"
+msgstr "Вирішено"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:46
+#: apps/policy/forms.py:46
+msgid "All rules"
+msgstr "Усі правила"
+
+#: apps/dashboards/templates/dashboards/partials/person_violations.html:57
+msgid "No policy violations on this person's pull requests in this period."
+msgstr "За цей період на pull request цієї людини немає порушень політики."
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:30
 msgid "Policy violations for this pull request"
@@ -3776,21 +4015,6 @@ msgstr "Порушення політики для цього pull request"
 #: apps/policy/templates/policy/partials/violations.html:26
 msgid "Select"
 msgstr "Вибрати"
-
-#: apps/dashboards/templates/dashboards/partials/pr_violations.html:34
-#: apps/dashboards/templates/dashboards/partials/pr_violations.html:105
-#: apps/policy/templates/policy/console.html:61
-#: apps/policy/templates/policy/partials/rule_chart.html:21
-#: apps/policy/templates/policy/partials/violations.html:28
-msgid "Rule"
-msgstr "Правило"
-
-#: apps/dashboards/templates/dashboards/partials/pr_violations.html:35
-#: apps/dashboards/templates/dashboards/partials/pr_violations.html:106
-#: apps/policy/templates/policy/console.html:67
-#: apps/policy/templates/policy/partials/violations.html:29
-msgid "Severity"
-msgstr "Серйозність"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:37
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:107
@@ -3867,7 +4091,11 @@ msgid ""
 "Cells count distinct pull requests. The number next to an author is their "
 "pull requests merged in the period; next to a reviewer, the pull requests by "
 "others they reviewed in the period."
-msgstr "Кожен рядок — автор пул-реквестів, кожен стовпець — один із його ревʼюерів. Клітинки рахують окремі пул-реквести. Число біля автора — його пул-реквести, змерджені за період; біля ревʼюера — пул-реквести інших авторів, які він переглянув за період."
+msgstr ""
+"Кожен рядок — автор пул-реквестів, кожен стовпець — один із його ревʼюерів. "
+"Клітинки рахують окремі пул-реквести. Число біля автора — його пул-реквести, "
+"змерджені за період; біля ревʼюера — пул-реквести інших авторів, які він "
+"переглянув за період."
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:20
 msgid "Reviews by author and reviewer"
@@ -3881,20 +4109,32 @@ msgid ""
 msgid_plural ""
 "%(name)s reviewed %(count)s pull requests by others in the period — very low "
 "review activity"
-msgstr[0] "%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період — дуже низька активність у ревʼю"
-msgstr[1] "%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період — дуже низька активність у ревʼю"
-msgstr[2] "%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період — дуже низька активність у ревʼю"
-msgstr[3] "%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період — дуже низька активність у ревʼю"
+msgstr[0] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період — "
+"дуже низька активність у ревʼю"
+msgstr[1] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період — "
+"дуже низька активність у ревʼю"
+msgstr[2] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період — "
+"дуже низька активність у ревʼю"
+msgstr[3] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період — "
+"дуже низька активність у ревʼю"
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:43
 #, python-format
 msgid "%(name)s reviewed %(count)s pull request by others in the period"
 msgid_plural ""
 "%(name)s reviewed %(count)s pull requests by others in the period"
-msgstr[0] "%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період"
-msgstr[1] "%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період"
-msgstr[2] "%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період"
-msgstr[3] "%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період"
+msgstr[0] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквест інших авторів за період"
+msgstr[1] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквести інших авторів за період"
+msgstr[2] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквестів інших авторів за період"
+msgstr[3] ""
+"%(name)s переглянув(-ла) %(count)s пул-реквеста інших авторів за період"
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:59
 msgid "very low review activity"
@@ -3908,10 +4148,18 @@ msgid ""
 msgid_plural ""
 "%(reviewed)s of %(merged)s pull requests %(author)s merged in the period had "
 "a review by someone else — rarely reviewed by others"
-msgstr[0] "%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
-msgstr[1] "%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
-msgstr[2] "%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
-msgstr[3] "%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[0] ""
+"%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось "
+"іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[1] ""
+"%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось "
+"іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[2] ""
+"%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось "
+"іншого отримали %(reviewed)s — рідко ревʼюється іншими"
+msgstr[3] ""
+"%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось "
+"іншого отримали %(reviewed)s — рідко ревʼюється іншими"
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:73
 #, python-format
@@ -3921,10 +4169,18 @@ msgid ""
 msgid_plural ""
 "%(reviewed)s of %(merged)s pull requests %(author)s merged in the period had "
 "a review by someone else"
-msgstr[0] "%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось іншого отримали %(reviewed)s"
-msgstr[1] "%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось іншого отримали %(reviewed)s"
-msgstr[2] "%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось іншого отримали %(reviewed)s"
-msgstr[3] "%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось іншого отримали %(reviewed)s"
+msgstr[0] ""
+"%(author)s: за період змерджено %(merged)s пул-реквест, ревʼю від когось "
+"іншого отримали %(reviewed)s"
+msgstr[1] ""
+"%(author)s: за період змерджено %(merged)s пул-реквести, ревʼю від когось "
+"іншого отримали %(reviewed)s"
+msgstr[2] ""
+"%(author)s: за період змерджено %(merged)s пул-реквестів, ревʼю від когось "
+"іншого отримали %(reviewed)s"
+msgstr[3] ""
+"%(author)s: за період змерджено %(merged)s пул-реквеста, ревʼю від когось "
+"іншого отримали %(reviewed)s"
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:90
 msgid "rarely reviewed by others"
@@ -3937,8 +4193,10 @@ msgid_plural ""
 "Self-review: %(author)s reviewed %(value)s of their own pull requests"
 msgstr[0] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власний пул-реквест"
 msgstr[1] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власні пул-реквести"
-msgstr[2] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власних пул-реквестів"
-msgstr[3] "Саморевʼю: %(author)s переглянув(-ла) %(value)s власного пул-реквеста"
+msgstr[2] ""
+"Саморевʼю: %(author)s переглянув(-ла) %(value)s власних пул-реквестів"
+msgstr[3] ""
+"Саморевʼю: %(author)s переглянув(-ла) %(value)s власного пул-реквеста"
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:106
 msgid "self-review"
@@ -3970,24 +4228,36 @@ msgid ""
 msgid_plural ""
 "%(count)s self-reviewed pull requests are not on the grid because their "
 "authors are grouped under “Other”."
-msgstr[0] "%(count)s пул-реквест із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
-msgstr[1] "%(count)s пул-реквести із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
-msgstr[2] "%(count)s пул-реквестів із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
-msgstr[3] "%(count)s пул-реквеста із саморевʼю не показано в таблиці, бо автори входять до групи «Інше»."
+msgstr[0] ""
+"%(count)s пул-реквест із саморевʼю не показано в таблиці, бо автори входять "
+"до групи «Інше»."
+msgstr[1] ""
+"%(count)s пул-реквести із саморевʼю не показано в таблиці, бо автори входять "
+"до групи «Інше»."
+msgstr[2] ""
+"%(count)s пул-реквестів із саморевʼю не показано в таблиці, бо автори "
+"входять до групи «Інше»."
+msgstr[3] ""
+"%(count)s пул-реквеста із саморевʼю не показано в таблиці, бо автори входять "
+"до групи «Інше»."
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:152
 #, python-format
 msgid ""
 "Reviewer: very low review activity — fewer pull requests reviewed than "
 "%(pct)s%% of the median active reviewer."
-msgstr "Ревʼюер: дуже низька активність у ревʼю — переглянуто менше пул-реквестів, ніж %(pct)s%% від медіани активних ревʼюерів."
+msgstr ""
+"Ревʼюер: дуже низька активність у ревʼю — переглянуто менше пул-реквестів, "
+"ніж %(pct)s%% від медіани активних ревʼюерів."
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:158
 #, python-format
 msgid ""
 "Author: rarely reviewed by others — fewer than %(pct)s%% of merged pull "
 "requests reviewed by someone else (at least %(min_sample)s merged)."
-msgstr "Автор: рідко ревʼюється іншими — ревʼю від когось іншого отримали менше ніж %(pct)s%% змерджених пул-реквестів (якщо їх щонайменше %(min_sample)s)."
+msgstr ""
+"Автор: рідко ревʼюється іншими — ревʼю від когось іншого отримали менше ніж "
+"%(pct)s%% змерджених пул-реквестів (якщо їх щонайменше %(min_sample)s)."
 
 #: apps/dashboards/templates/dashboards/partials/reviewer_heat_map.html:164
 msgid "Self-review: the author reviewed their own pull request."
@@ -4262,11 +4532,16 @@ msgstr ""
 msgid "Reviews"
 msgstr "Ревʼю"
 
-#: apps/dashboards/templatetags/dashboards.py:209
+#: apps/dashboards/templatetags/dashboards.py:146
+#, python-format
+msgid "%(points)s pp"
+msgstr "%(points)s в. п."
+
+#: apps/dashboards/templatetags/dashboards.py:256
 msgid "Higher is better."
 msgstr "Більше — краще."
 
-#: apps/dashboards/templatetags/dashboards.py:211
+#: apps/dashboards/templatetags/dashboards.py:258
 msgid "Lower is better."
 msgstr "Менше — краще."
 
@@ -4299,7 +4574,7 @@ msgstr "Обчислення churn перевищило час очікуван�
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:464 apps/policy/views.py:105
+#: apps/dashboards/views.py:466 apps/policy/views.py:105
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -4313,7 +4588,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:468 apps/policy/views.py:109
+#: apps/dashboards/views.py:470 apps/policy/views.py:109
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -4535,6 +4810,10 @@ msgstr ""
 "Pull request-и когорти AI, створені за період, згруповані за розкритим "
 "інструментом. PR без розкритого інструменту не враховується в жодній "
 "категорії."
+
+#: apps/metrics/calculators/adoption.py:223
+msgid "Disclosure rate"
+msgstr "Рівень розкриття"
 
 #: apps/metrics/calculators/adoption.py:225
 msgid ""
@@ -4763,11 +5042,11 @@ msgstr ""
 "Медіана ефективних змінених рядків (додано + видалено) для PR, змерджених за "
 "період."
 
-#: apps/metrics/calculators/flow.py:396
+#: apps/metrics/calculators/flow.py:397
 msgid "PR size buckets"
 msgstr "Розмірні категорії PR"
 
-#: apps/metrics/calculators/flow.py:398
+#: apps/metrics/calculators/flow.py:399
 msgid ""
 "PRs merged in the period, grouped by size bucket (XS/S/M/L/XL, boundaries "
 "from PR_SIZE_BUCKETS)."
@@ -4775,11 +5054,11 @@ msgstr ""
 "PR, змерджені за період, згруповані за розмірною категорією (XS/S/M/L/XL, "
 "межі з PR_SIZE_BUCKETS)."
 
-#: apps/metrics/calculators/flow.py:431
+#: apps/metrics/calculators/flow.py:432
 msgid "Review load share"
 msgstr "Частка навантаження ревʼю"
 
-#: apps/metrics/calculators/flow.py:433
+#: apps/metrics/calculators/flow.py:434
 msgid ""
 "Share of reviews given in the period that fall on the top REVIEW_LOAD_TOP_N "
 "reviewers by review count — a bottleneck-risk indicator."
@@ -4787,11 +5066,11 @@ msgstr ""
 "Частка ревʼю, наданих за період, що припадає на топ-REVIEW_LOAD_TOP_N "
 "рецензентів за кількістю ревʼю — індикатор ризику вузького місця."
 
-#: apps/metrics/calculators/flow.py:489
+#: apps/metrics/calculators/flow.py:490
 msgid "Reviewer response time (median)"
 msgstr "Час відповіді рецензента (медіана)"
 
-#: apps/metrics/calculators/flow.py:491
+#: apps/metrics/calculators/flow.py:492
 msgid ""
 "From the PR becoming ready for review (falling back to its creation) to this "
 "reviewer's review, for reviews given in the period — an approximation: no "
@@ -5027,10 +5306,6 @@ msgstr "Тестова метрика"
 #: apps/metrics/tests/test_registry.py:37
 msgid "A metric used only by test_registry.py."
 msgstr "Метрика, що використовується лише в test_registry.py."
-
-#: apps/policy/forms.py:46
-msgid "All rules"
-msgstr "Усі правила"
 
 #: apps/policy/forms.py:49
 msgid "All severities"
@@ -6170,18 +6445,6 @@ msgstr "Розповзання обсягу"
 msgid "Rubber-stamp approval of an AI PR"
 msgstr "Формальне затвердження AI-пул-реквеста"
 
-#: apps/policy/models.py:170
-msgid "Acknowledged"
-msgstr "Взято до відома"
-
-#: apps/policy/models.py:171
-msgid "Waived"
-msgstr "Знято вимогу"
-
-#: apps/policy/models.py:172
-msgid "Resolved"
-msgstr "Вирішено"
-
 #: apps/policy/models.py:180
 msgid "rule code"
 msgstr "код правила"
@@ -6383,10 +6646,6 @@ msgid "Add a rule to flag pull requests that touch sensitive paths."
 msgstr ""
 "Додайте правило, щоб позначати pull request-и, які торкаються чутливих "
 "шляхів."
-
-#: apps/policy/templates/policy/partials/violations.html:23
-msgid "Policy violations"
-msgstr "Порушення політики"
 
 #: apps/policy/templates/policy/partials/violations.html:63
 msgid "No policy violations."
@@ -6602,6 +6861,27 @@ msgstr "Електронна пошта"
 #: templates/registration/password_reset_form.html:17
 msgid "Send reset link"
 msgstr "Надіслати посилання"
+
+#~ msgid ""
+#~ "Two shares over time, both plotted as a percentage of their own "
+#~ "population. AI PR share is the portion of pull requests merged in the "
+#~ "bucket that AI detection put in the AI cohort. Disclosure rate is the "
+#~ "portion of AI-cohort pull requests created in the bucket whose disclosure "
+#~ "is partial or substantial, rather than missing or ambiguous — it says how "
+#~ "honestly AI use is declared, not how much of it there is."
+#~ msgstr ""
+#~ "Дві частки в часі, кожна — відсоток від власної сукупності. Частка AI PR "
+#~ "— це скільки зі змерджених в інтервалі pull request-ів детекція ШІ "
+#~ "віднесла до когорти зі ШІ. Рівень розкриття — це скільки зі створених в "
+#~ "інтервалі pull request-ів когорти зі ШІ мають часткове або суттєве "
+#~ "розкриття, а не відсутнє чи неоднозначне: він показує, наскільки чесно "
+#~ "декларують використання ШІ, а не скільки його є."
+
+#~ msgid "Lead time (p50)"
+#~ msgstr "Час виконання (p50)"
+
+#~ msgid "Time to first review (p50)"
+#~ msgstr "Час до першого ревʼю (p50)"
 
 #~ msgid ""
 #~ "Each row is a pull-request author, each column is one of their reviewers."

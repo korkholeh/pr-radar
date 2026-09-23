@@ -212,7 +212,8 @@ def test_person_page_query_count(client, lead_user, django_assert_num_queries):
     # +2 (phase 12, stage 8): `kpis.COMPLIANCE_ROW` joined `PERIOD_ROWS`. Its four ratio
     # metrics are batched like every other counter/ratio, so the row costs a fixed two
     # queries on the page rather than one per metric -- re-measured here, not derived.
-    with django_assert_num_queries(173):
+    # +1: `person.py::build_violation_stats()` -- one grouped query for the violations table.
+    with django_assert_num_queries(174):
         client.get(reverse("dashboards:person", args=[person.id]) + f"?{PERIOD_QS}")
 
 

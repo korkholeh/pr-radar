@@ -1,0 +1,59 @@
+{% load i18n policy_extras %}
+{% comment %}
+Per-rule violation statistics on the person page: violations on the person's pull requests recorded
+in the selected period (by the violation's `created_at`), one row per rule, split by each violation's current status
+(`person.build_violation_stats`).
+{% endcomment %}
+<section class="card card-body mt-6" data-testid="person-violations">
+  <h2 class="section-title mb-3">{% translate "Policy violations" %}</h2>
+  {% if violation_stats.rows %}
+    <p class="mb-3" data-testid="person-violations-summary">
+      {% blocktranslate trimmed count count=violation_stats.pull_requests %}
+        Found on {{ count }} pull request in this period.
+      {% plural %}
+        Found on {{ count }} pull requests in this period.
+      {% endblocktranslate %}
+    </p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="sr-only">{% translate "Policy violations by rule for this person" %}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{% translate "Rule" %}</th>
+            <th scope="col">{% translate "Severity" %}</th>
+            <th scope="col" class="num">{% translate "Total" %}</th>
+            <th scope="col" class="num">{% translate "Open" %}</th>
+            <th scope="col" class="num">{% translate "Acknowledged" %}</th>
+            <th scope="col" class="num">{% translate "Waived" %}</th>
+            <th scope="col" class="num">{% translate "Resolved" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in violation_stats.rows %}
+            <tr data-testid="person-violation-row" data-rule="{{ row.rule_code }}">
+              <td>{{ row.rule_code|rule_label }}</td>
+              <td>{{ row.severity_label }}</td>
+              <td class="num font-semibold">{{ row.total }}</td>
+              <td class="num">{{ row.open }}</td>
+              <td class="num">{{ row.acknowledged }}</td>
+              <td class="num">{{ row.waived }}</td>
+              <td class="num">{{ row.resolved }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="2">{% translate "All rules" %}</th>
+            <td class="num">{{ violation_stats.totals.total }}</td>
+            <td class="num">{{ violation_stats.totals.open }}</td>
+            <td class="num">{{ violation_stats.totals.acknowledged }}</td>
+            <td class="num">{{ violation_stats.totals.waived }}</td>
+            <td class="num">{{ violation_stats.totals.resolved }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% else %}
+    <p>{% translate "No policy violations on this person's pull requests in this period." %}</p>
+  {% endif %}
+</section>

@@ -131,6 +131,21 @@ def test_trends_sheet_has_native_excel_charts(seeded_org, django_user_model):
 
 
 @pytest.mark.django_db
+def test_trends_sheet_follows_the_charts_it_is_built_from(seeded_org, django_user_model):
+    """The sheet pivots the Throughput, AI adoption and Latency chart payloads by index, so a series
+    dropped from a chart (the Latency p50 lines, `disclosure_rate`) must leave the sheet too — or the
+    report fails on a missing dataset."""
+    scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
+    user = django_user_model.objects.create_user(username="lead", password="pw")
+
+    trends_sheet = _workbook(scope, _params(), user=user)["Trends"]
+
+    header = [cell.value for cell in trends_sheet[1]]
+    assert len(header) == 6
+    assert not any("p50" in str(title) or "isclosure" in str(title) for title in header)
+
+
+@pytest.mark.django_db
 def test_summary_value_matches_direct_compute_call(seeded_org, django_user_model):
     scope = Scope(scope_type=ScopeType.GLOBAL, scope_id=None, access=ScopeFilter(unrestricted=True))
     params = _params()

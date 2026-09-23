@@ -7,6 +7,7 @@ from apps.activity.factories import PullRequestFactory, ReviewFactory
 from apps.activity.models import PullRequest, SizeBucket
 from apps.catalog.factories import IdentityFactory, PersonFactory
 from apps.catalog.services import set_setting
+from apps.dashboards.formatting import format_duration
 from apps.metrics.calculators.base import PeriodContext
 from apps.metrics.models import Cohort, ScopeType
 from apps.metrics.registry import get_metric
@@ -18,6 +19,9 @@ UNRESTRICTED = ScopeFilter(unrestricted=True, project_ids=None)
 PERIOD_START = datetime.date(2026, 6, 1)
 PERIOD_END = datetime.date(2026, 6, 30)
 UTC = datetime.UTC
+# Every `unit="duration"` metric reports seconds — the unit `format_duration`, `charts.js` and the
+# exports all read it in. The oracles below are written in hours and scaled by this.
+HOUR = 3600.0
 
 
 def _scope(scope_type: str = ScopeType.GLOBAL, scope_id: int | None = None) -> Scope:
@@ -48,7 +52,7 @@ def test_lead_time_p50_is_the_hand_computed_median():
     )
 
     metric_def = get_metric("lead_time_p50")
-    assert metric_def.calculator.period(_period_ctx()) == MetricValue(20.0, 2)
+    assert metric_def.calculator.period(_period_ctx()) == MetricValue(20.0 * HOUR, 2)
 
 
 def test_lead_time_p90_is_the_hand_computed_p90_with_interpolation():
@@ -61,7 +65,7 @@ def test_lead_time_p90_is_the_hand_computed_p90_with_interpolation():
         )
 
     metric_def = get_metric("lead_time_p90")
-    assert metric_def.calculator.period(_period_ctx()) == MetricValue(46.0, 5)
+    assert metric_def.calculator.period(_period_ctx()) == MetricValue(46.0 * HOUR, 5)
 
 
 def test_lead_time_drops_prs_with_no_ready_for_review_at_and_is_none_when_all_lack_it():
@@ -78,7 +82,7 @@ def test_cycle_time_p50_from_first_commit_to_merge():
     )
 
     metric_def = get_metric("cycle_time_p50")
-    assert metric_def.calculator.period(_period_ctx()) == MetricValue(24.0, 1)
+    assert metric_def.calculator.period(_period_ctx()) == MetricValue(24.0 * HOUR, 1)
 
 
 def test_time_to_first_review_p50_from_ready_to_first_review():
@@ -88,7 +92,7 @@ def test_time_to_first_review_p50_from_ready_to_first_review():
     )
 
     metric_def = get_metric("time_to_first_review_p50")
-    assert metric_def.calculator.period(_period_ctx()) == MetricValue(5.0, 1)
+    assert metric_def.calculator.period(_period_ctx()) == MetricValue(5.0 * HOUR, 1)
 
 
 def test_time_to_first_review_p90_is_the_hand_computed_p90_with_interpolation():
@@ -100,7 +104,7 @@ def test_time_to_first_review_p90_is_the_hand_computed_p90_with_interpolation():
         )
 
     metric_def = get_metric("time_to_first_review_p90")
-    assert metric_def.calculator.period(_period_ctx()) == MetricValue(46.0, 5)
+    assert metric_def.calculator.period(_period_ctx()) == MetricValue(46.0 * HOUR, 5)
 
 
 def test_pr_size_p50_is_the_hand_computed_median_of_effective_lines():
@@ -148,7 +152,7 @@ def test_reviewer_response_p50_from_ready_for_review_at_to_the_reviewer_first_re
 
     metric_def = get_metric("reviewer_response_p50")
     person_scope = _scope(ScopeType.PERSON, reviewer.person_id)
-    assert metric_def.calculator.period(_period_ctx(person_scope)) == MetricValue(8.0, 1)
+    assert metric_def.calculator.period(_period_ctx(person_scope)) == MetricValue(8.0 * HOUR, 1)
 
 
 def test_reviewer_response_p50_falls_back_to_created_at_when_ready_for_review_at_is_missing():
@@ -160,7 +164,7 @@ def test_reviewer_response_p50_falls_back_to_created_at_when_ready_for_review_at
 
     metric_def = get_metric("reviewer_response_p50")
     person_scope = _scope(ScopeType.PERSON, reviewer.person_id)
-    assert metric_def.calculator.period(_period_ctx(person_scope)) == MetricValue(6.0, 1)
+    assert metric_def.calculator.period(_period_ctx(person_scope)) == MetricValue(6.0 * HOUR, 1)
 
 
 def test_reviewer_response_p50_is_person_level_only():
@@ -184,3 +188,19 @@ def test_review_load_share_with_three_reviewers_and_top_n_two():
     metric_def = get_metric("review_load_share")
     # top 2 (a=5, b=3) of 10 total -> 0.8
     assert metric_def.calculator.period(_period_ctx()) == MetricValue(0.8, 10)
+
+
+def test_duration_metrics_render_as_the_hours_they_measure():
+    """Regression: the calculators returned hours while every reader treats a duration as
+    seconds, so a 3-hour median lead time rendered as "3 seconds"."""
+    _merged_pr(
+        ready_for_review_at=datetime.datetime(2026, 6, 10, 0, tzinfo=UTC),
+        first_review_at=datetime.datetime(2026, 6, 10, 3, tzinfo=UTC),
+        merged_at=datetime.datetime(2026, 6, 10, 5, 30, tzinfo=UTC),
+    )
+
+    lead_time = get_metric("lead_time_p50").calculator.period(_period_ctx())
+    first_review = get_metric("time_to_first_review_p50").calculator.period(_period_ctx())
+
+    assert format_duration(lead_time.value, locale="en") == "5h 30m"
+    assert format_duration(first_review.value, locale="en") == "3h 0m"

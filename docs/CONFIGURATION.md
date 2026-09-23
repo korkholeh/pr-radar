@@ -43,7 +43,7 @@ missing.
 | sync | `SYNC_LOCK_STALE_MINUTES` | int | `360` | Minutes after which an unreleased sync lock is considered stale and stolen. |
 | sync | `TOKEN_EXPIRY_WARNING_DAYS` | int | `14` | Days before token expiry at which the admin banner starts warning. |
 | sync | `CONNECTION_RECHECK_MIN_MINUTES` | int | `60` | Minimum minutes between two non-forced verifications of the same connection. |
-| ai | `AI_COHORT_INCLUDE_SUSPECTED` | bool | `False` | Whether PRs with a merely suspected AI status count in the AI cohort. |
+| ai | `AI_COHORT_INCLUDE_SUSPECTED` | bool | `True` | Whether PRs with a merely suspected AI status count in the AI cohort. |
 | ai | `BOT_LOGIN_SUFFIXES` | list | `["[bot]"]` | Login suffixes that mark an account as a bot. |
 | ai | `BOT_LOGINS` | list | `["dependabot", "renovate", "github-actions", "copilot-pull-request-reviewer", "charliecreates", "charliehelps"]` | Exact logins that mark an account as a bot. |
 | ai | `AI_SUSPECTED_MIN_STRUCTURAL_KINDS` | int | `2` | How many distinct structural signal kinds a pull request needs before its AI status becomes 'suspected'. Counted over kinds, not rows: five commit bursts are one kind of evidence. No number of structural signals ever reaches 'explicit'. |

@@ -26,7 +26,7 @@ from apps.dashboards.exports.reports import build_report, report_filename
 from apps.dashboards.exports.xlsx import write_xlsx
 from apps.dashboards.kpis import KpiSpec, build_kpi_row
 from apps.dashboards.models import ExportJob
-from apps.dashboards.person import build_comparison
+from apps.dashboards.person import build_comparison, build_violation_stats
 from apps.dashboards.selectors import (
     no_repositories_configured,
     nothing_ever_synced,
@@ -115,6 +115,8 @@ def dashboard(
             {"definition": get_metric(row.metric), "row": row}
             for row in build_comparison(scope, params, scope_object)
         ]
+        context["min_sample"] = get_int("MIN_SAMPLE")
+        context["violation_stats"] = build_violation_stats(scope, params)
 
     if is_htmx(request):
         return render(request, "dashboards/partials/dashboard_content.html", context)

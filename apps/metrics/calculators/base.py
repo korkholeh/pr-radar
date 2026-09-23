@@ -105,6 +105,17 @@ def duration_hours(
     return hours
 
 
+def duration_seconds(
+    start: datetime.datetime | None, end: datetime.datetime | None, *, mode: str | None = None
+) -> float | None:
+    """`duration_hours()` in seconds — the unit every `unit="duration"` metric reports in, because
+    it is the unit every reader of one assumes: `metric_value`/`format_duration`, `charts.js`,
+    and the CSV/XLSX exports (which divide by 3600). A duration metric built on
+    `duration_hours()` renders 3 hours as "3 seconds"."""
+    hours = duration_hours(start, end, mode=mode)
+    return None if hours is None else hours * 3600
+
+
 def count_value(count: int) -> MetricValue:
     """A plain count as a `MetricValue`: `None` when the count is zero, applying the "no data ->
     None, never 0" rule (CLAUDE.md) uniformly to counters and state snapshots too, not only to

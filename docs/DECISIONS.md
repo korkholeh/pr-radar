@@ -579,6 +579,33 @@ rendered as links, not `<img>`: loading one would make the reader's browser call
 attachment in a private repository does not load without a GitHub session anyway. GitHub's own HTML-in-Markdown
 (`<details>`, `<img width=…>`) therefore shows as source — the price of never passing body HTML through.
 
+**`pr_size_p50` is lower-is-better, not neutral.** It shipped neutral, so its deltas were never coloured — which
+on the person page's gap to the team read as praise for a person whose pull requests were twice the project's
+median. Smaller pull requests are what the PLANEKS standards ask for (`AI_PR_TOO_LARGE` enforces a cap), so the
+metric now says so. `pr_size_buckets`, a distribution with no single value, stays neutral.
+
+**A `unit="duration"` metric reports seconds.** It is the unit `format_duration`, `charts.js` and the CSV/XLSX
+writers (which divide by 3600 for `EXPORT_DURATION_UNIT=hours`) all read one in. The flow calculators were built
+on `duration_hours()` and returned hours, which the unit tests then pinned — so the suite was green while every
+lead time on every page read as seconds. They now use `duration_seconds()`; `duration_hours()` stays for the
+single-PR facts (PR page, Reviews page) whose templates convert hours themselves. `compute()`'s cache key moved
+from `metrics:v1` to `metrics:v2` so no hour-valued entry is served after the upgrade.
+
+**`disclosure_rate` is computed but not shown.** Its numerator is the PR template's "AI assistance" section with
+one level ticked; on a live installation none of 299 pull requests carried that section, so all were `missing`
+and the rate was 0% on every surface — true, and read by leads as "nobody discloses" when it meant "nobody uses
+the template". Counting the tools' own markers (a `Co-Authored-By` trailer, "Generated with …") as disclosure was
+rejected: those markers are what puts a pull request in the AI cohort, so the rate would be ~100% by
+construction. The metric stays registered — `DISCLOSURE_MISSING`/`DISCLOSURE_MISMATCH` still read the parsed
+disclosure — and putting it back is a key in `kpis.py`, `rows.py`, `person.py` and the `ai_adoption` chart.
+
+**`ai_suspected` is in the AI cohort by default** (`AI_COHORT_INCLUDE_SUSPECTED=True`). The spec (§6.3) makes the
+cohort `ai_explicit ∪ ai_disclosed` with suspected as an opt-in; the author decided suspected pull requests are AI
+pull requests too — with teams not using the disclosure template, a pull request with only weaker evidence would
+otherwise always count as human. The trade-off is precision: the AI-specific policy rules now also fire on a pull
+request a low-confidence rule matched. The setting also bumps the metrics data version when changed, though it
+sits in the `ai` group — it decides the cohorts, so cached numbers must not outlive it.
+
 ## UI redesign
 
 **The UI is built from component classes, not ad-hoc utilities.** `static/css/src/input.css` defines a small

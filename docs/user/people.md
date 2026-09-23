@@ -11,7 +11,7 @@ dashboards.md`). Click a name to open that person's own page.
 
 ## The Person page (`/people/<id>/`)
 
-The same KPI cards, charts and filters as a project or repository page, plus four sections specific to a
+The same KPI cards, charts and filters as a project or repository page, plus five sections specific to a
 person:
 
 **Comparison.** Each metric in the comparison row shows the person's own value next to their *primary project*
@@ -21,8 +21,21 @@ median of per-person medians, which would overstate how typical any one person's
 on fewer than 5 data points is shown but greyed ("small sample"); a person with no PRs in the period shows an
 em dash, never a zero.
 
+Under the person's value, two lines say how far it sits from each baseline: in percentage points for a share
+("+12.9 pp vs project"), as a relative change for a duration or a size ("-42.1% vs organization"). The colour
+follows the metric's direction — green where the gap is the good way, red where it is not, grey for a metric
+with no better direction, for a gap under 5% and whenever the person's sample is small. Pull requests merged
+and reviews given get no such line: their baselines are totals for the whole project or organisation, and the
+number of pull requests a person produced is not a measure of that person.
+
 **Pull requests and violations.** The same PR list and violations you'd see filtered to this person elsewhere,
 scoped to the period.
+
+**Policy violations.** A table of the violations on this person's pull requests recorded in the period, one row per
+rule — highest severity first — with the total and how many are now open, acknowledged, waived or resolved, plus an
+"All rules" total. The line above the table says how many *distinct* pull requests the violations were found on —
+one pull request can break several rules. Violations are counted by the day they were recorded, the same window as
+the "Violations by rule" chart.
 
 **Review load.** How many reviews this person gave in the period, for context — this is workload, not a
 performance ranking.

@@ -45,27 +45,29 @@ def test_bot_and_excluded_people_are_out_of_the_population_and_in_excluded():
     }
 
 
-def test_ai_cohort_is_explicit_or_disclosed_by_default():
+def test_ai_cohort_is_explicit_disclosed_or_suspected_by_default():
     ai_explicit_pr = PullRequestFactory(ai_status=AIStatus.AI_EXPLICIT)
     ai_disclosed_pr = PullRequestFactory(ai_status=AIStatus.AI_DISCLOSED)
     ai_suspected_pr = PullRequestFactory(ai_status=AIStatus.AI_SUSPECTED)
     no_ai_pr = PullRequestFactory(ai_status=AIStatus.NO_AI)
 
     ai_ids = set(scoped_pull_requests(_global_scope(), cohort=Cohort.AI).values_list("id", flat=True))
-    assert ai_ids == {ai_explicit_pr.id, ai_disclosed_pr.id}
+    assert ai_ids == {ai_explicit_pr.id, ai_disclosed_pr.id, ai_suspected_pr.id}
 
     non_ai_ids = set(scoped_pull_requests(_global_scope(), cohort=Cohort.NON_AI).values_list("id", flat=True))
-    assert non_ai_ids == {ai_suspected_pr.id, no_ai_pr.id}
+    assert non_ai_ids == {no_ai_pr.id}
 
 
-def test_ai_cohort_gains_suspected_when_setting_is_on():
-    set_setting("AI_COHORT_INCLUDE_SUSPECTED", True)
+def test_ai_cohort_loses_suspected_when_setting_is_off():
+    set_setting("AI_COHORT_INCLUDE_SUSPECTED", False)
     ai_suspected_pr = PullRequestFactory(ai_status=AIStatus.AI_SUSPECTED)
     no_ai_pr = PullRequestFactory(ai_status=AIStatus.NO_AI)
 
     ai_ids = set(scoped_pull_requests(_global_scope(), cohort=Cohort.AI).values_list("id", flat=True))
-    assert ai_suspected_pr.id in ai_ids
+    assert ai_suspected_pr.id not in ai_ids
     assert no_ai_pr.id not in ai_ids
+    non_ai_ids = set(scoped_pull_requests(_global_scope(), cohort=Cohort.NON_AI).values_list("id", flat=True))
+    assert ai_suspected_pr.id in non_ai_ids
 
 
 def test_repo_in_two_projects_appears_once_at_project_scope():

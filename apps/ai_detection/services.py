@@ -28,6 +28,7 @@ from apps.ai_detection.models import (
     DetectionRule,
     SignalFamily,
     SignalRule,
+    Tool,
     kinds_in_family,
 )
 from apps.ai_detection.structural import StructuralMatch, load_structural_context, run_kind
@@ -109,6 +110,32 @@ def ai_cohort_statuses() -> frozenset[str]:
     if get_bool("AI_COHORT_INCLUDE_SUSPECTED"):
         statuses.add(AIStatus.AI_SUSPECTED)
     return frozenset(statuses)
+
+
+@dataclass(frozen=True)
+class CohortRules:
+    """What the dashboards' "how a pull request gets into the AI cohort" block states, read from
+    the live configuration so the explanation cannot drift from `resolve_ai_status()`."""
+
+    include_suspected: bool
+    min_structural_kinds: int
+    # Translated labels of the named tools an active high-confidence rule can detect; a rule for
+    # `Tool.OTHER` still counts, it just has no name worth listing.
+    high_confidence_tools: tuple[str, ...]
+
+
+def cohort_rules() -> CohortRules:
+    tools = (
+        DetectionRule.objects.filter(is_active=True, confidence=Confidence.HIGH)
+        .exclude(tool=Tool.OTHER)
+        .values_list("tool", flat=True)
+        .distinct()
+    )
+    return CohortRules(
+        include_suspected=get_bool("AI_COHORT_INCLUDE_SUSPECTED"),
+        min_structural_kinds=get_int("AI_SUSPECTED_MIN_STRUCTURAL_KINDS"),
+        high_confidence_tools=tuple(sorted(str(Tool(tool).label) for tool in tools if tool in Tool.values)),
+    )
 
 
 def _compile_active_rule_patterns(rules: list[DetectionRule]) -> list[tuple[DetectionRule, re.Pattern[str]]]:

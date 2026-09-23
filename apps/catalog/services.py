@@ -112,6 +112,11 @@ def get_dict(key: str) -> dict[str, Any]:
     return value
 
 
+# Lives in the "ai" group but decides which pull requests the metrics' AI/non-AI cohorts hold, so a
+# change must reach compute()'s cache as a metrics-group change does.
+_COHORT_SETTING_KEYS = frozenset({"AI_COHORT_INCLUDE_SUSPECTED"})
+
+
 def set_setting(key: str, value: object) -> AppSetting:
     setting_def = _DEFS_BY_KEY.get(key)
     if setting_def is None:
@@ -125,7 +130,7 @@ def set_setting(key: str, value: object) -> AppSetting:
         },
     )
     invalidate_settings_cache()
-    if setting_def.group == "metrics":
+    if setting_def.group == "metrics" or key in _COHORT_SETTING_KEYS:
         # A metrics-group setting (MIN_SAMPLE, AI_COHORT_INCLUDE_SUSPECTED, PR_SIZE_BUCKETS, ...)
         # is baked into compute()'s cache and, for the cohort/bucket-affecting ones, into stored
         # DailyRollup rows. Bumping here at least invalidates the cache immediately; existing

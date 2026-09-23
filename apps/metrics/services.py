@@ -386,7 +386,7 @@ def _cache_key(
     keys_digest = hashlib.sha1(",".join(sorted(set(metric_keys))).encode()).hexdigest()
     series_flag = "series" if include_series else "noseries"
     return (
-        f"metrics:v1:{data_version()}:{scope.scope_type}:{scope.scope_id}:"
+        f"metrics:v2:{data_version()}:{scope.scope_type}:{scope.scope_id}:"
         f"{_access_fingerprint(scope.access)}:{cohort}:{granularity}:"
         f"{date_from.isoformat()}:{date_to.isoformat()}:{keys_digest}:{series_flag}"
     )

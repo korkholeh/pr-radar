@@ -32,7 +32,7 @@ SETTING_DEFS: tuple[SettingDef, ...] = (
     SettingDef(
         "AI_COHORT_INCLUDE_SUSPECTED",
         "bool",
-        False,
+        True,
         _("Whether PRs with a merely suspected AI status count in the AI cohort."),
         "ai",
     ),

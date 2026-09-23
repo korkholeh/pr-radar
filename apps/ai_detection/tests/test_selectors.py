@@ -15,26 +15,26 @@ def unrestricted_scope():
 
 
 @pytest.mark.django_db
-def test_cohort_is_ai_explicit_and_ai_disclosed_by_default(unrestricted_scope):
+def test_cohort_is_ai_explicit_disclosed_and_suspected_by_default(unrestricted_scope):
     explicit = PullRequestFactory(ai_status=AIStatus.AI_EXPLICIT)
     disclosed = PullRequestFactory(ai_status=AIStatus.AI_DISCLOSED)
-    PullRequestFactory(ai_status=AIStatus.AI_SUSPECTED)
+    suspected = PullRequestFactory(ai_status=AIStatus.AI_SUSPECTED)
     PullRequestFactory(ai_status=AIStatus.NO_AI)
     PullRequestFactory(ai_status=AIStatus.UNKNOWN)
 
     cohort_ids = set(ai_cohort_pull_requests(unrestricted_scope).values_list("pk", flat=True))
 
-    assert cohort_ids == {explicit.pk, disclosed.pk}
+    assert cohort_ids == {explicit.pk, disclosed.pk, suspected.pk}
 
 
 @pytest.mark.django_db
-def test_cohort_gains_ai_suspected_when_setting_is_on(unrestricted_scope):
-    set_setting("AI_COHORT_INCLUDE_SUSPECTED", True)
+def test_cohort_loses_ai_suspected_when_setting_is_off(unrestricted_scope):
+    set_setting("AI_COHORT_INCLUDE_SUSPECTED", False)
     suspected = PullRequestFactory(ai_status=AIStatus.AI_SUSPECTED)
 
     cohort_ids = set(ai_cohort_pull_requests(unrestricted_scope).values_list("pk", flat=True))
 
-    assert suspected.pk in cohort_ids
+    assert suspected.pk not in cohort_ids
 
 
 @pytest.mark.django_db

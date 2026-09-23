@@ -303,6 +303,17 @@
     @apply bg-surface-2;
   }
 
+  .data-table tfoot th,
+  .data-table tfoot td {
+    @apply border-t border-border px-3 py-2 text-left font-semibold text-text;
+  }
+
+  /* A numeric column: header, cells and footer total all right-aligned on the same edge. Two
+     classes deep so it wins over the `thead th`/`tfoot td` left alignment above. */
+  .data-table .num {
+    @apply text-right tabular-nums;
+  }
+
   /* Author × reviewer heat map: a wide team scrolls sideways inside its own wrapper instead of
      widening the page, and the author column stays pinned while it does. `relative` makes the
      wrapper the containing block of the cells' `sr-only` spans, which are absolutely positioned

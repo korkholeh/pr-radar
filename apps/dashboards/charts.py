@@ -139,8 +139,10 @@ def _build_throughput(scope: Scope, params: DashboardParams) -> ChartPayload:
 
 
 def _build_ai_adoption(scope: Scope, params: DashboardParams) -> ChartPayload:
+    # `disclosure_rate` is not drawn: it counts the recommended PR template's "AI assistance"
+    # section, and until a team adopts that template it reads 0% for everyone (docs/DECISIONS.md).
     result_set = compute(
-        ["ai_pr_share", "disclosure_rate"],
+        ["ai_pr_share"],
         scope,
         params.date_from,
         params.date_to,
@@ -148,12 +150,10 @@ def _build_ai_adoption(scope: Scope, params: DashboardParams) -> ChartPayload:
         granularity=params.granularity,
     )
     share_series = result_set["ai_pr_share"].series
-    disclosure_series = result_set["disclosure_rate"].series
     datasets = [
         ChartDataset(gettext("AI PR share"), "--series-1", [point.value for point in share_series]),
-        ChartDataset(gettext("Disclosure rate"), "--series-2", [point.value for point in disclosure_series]),
     ]
-    empty = not any(point.value is not None for point in (*share_series, *disclosure_series))
+    empty = not any(point.value is not None for point in share_series)
     return ChartPayload(
         key="ai_adoption",
         type="line",
@@ -168,23 +168,18 @@ def _build_ai_adoption(scope: Scope, params: DashboardParams) -> ChartPayload:
     )
 
 
+# p90 only: the medians are already on the KPI cards above the chart, and four lines crowded it.
 _LATENCY_METRIC_KEYS = (
-    "lead_time_p50",
     "lead_time_p90",
-    "time_to_first_review_p50",
     "time_to_first_review_p90",
 )
 _LATENCY_LABELS = {
-    "lead_time_p50": _("Lead time (p50)"),
     "lead_time_p90": _("Lead time (p90)"),
-    "time_to_first_review_p50": _("Time to first review (p50)"),
     "time_to_first_review_p90": _("Time to first review (p90)"),
 }
 _LATENCY_COLOR_TOKENS = {
-    "lead_time_p50": "--series-1",
-    "lead_time_p90": "--series-2",
-    "time_to_first_review_p50": "--series-3",
-    "time_to_first_review_p90": "--series-4",
+    "lead_time_p90": "--series-1",
+    "time_to_first_review_p90": "--series-2",
 }
 
 
@@ -411,14 +406,11 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             _("AI adoption"),
             "line",
             False,
-            ("ai_pr_share", "disclosure_rate"),
+            ("ai_pr_share",),
             _build_ai_adoption,
             description=_(
-                "Two shares over time, both plotted as a percentage of their own population. AI PR "
-                "share is the portion of pull requests merged in the bucket that AI detection put "
-                "in the AI cohort. Disclosure rate is the portion of AI-cohort pull requests created "
-                "in the bucket whose disclosure is partial or substantial, rather than missing or "
-                "ambiguous — it says how honestly AI use is declared, not how much of it there is."
+                "AI PR share over time: the portion of pull requests merged in the bucket that AI "
+                "detection put in the AI cohort."
             ),
         ),
         ChartSpec(
@@ -429,11 +421,12 @@ CHART_REGISTRY: dict[str, ChartSpec] = {
             _LATENCY_METRIC_KEYS,
             _build_latency,
             description=_(
-                "How long pull requests merged in each bucket took, as a median (p50) and a 90th "
-                "percentile (p90). Lead time runs from a pull request becoming ready for review "
-                "to its merge; time to first review runs from that same start to the first review "
-                "submitted on it. Both percentiles are computed from the pull requests of one "
-                "bucket, so they describe that bucket only and never add up across buckets."
+                "How long the slowest pull requests merged in each bucket took, as a 90th "
+                "percentile (p90): nine in ten were faster. Lead time runs from a pull request "
+                "becoming ready for review to its merge; time to first review runs from that same "
+                "start to the first review submitted on it. The percentile is computed from the "
+                "pull requests of one bucket, so it describes that bucket only and never adds up "
+                "across buckets. The medians are on the KPI cards."
             ),
         ),
         ChartSpec(

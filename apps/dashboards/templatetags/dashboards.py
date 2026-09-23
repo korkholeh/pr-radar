@@ -17,11 +17,13 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.timezone import localtime
 from django.utils.translation import gettext
 
+from apps.ai_detection.services import cohort_rules
 from apps.dashboards.charts import ChartPayload
 from apps.dashboards.export_messages import render_export_error
 from apps.dashboards.formatting import EM_DASH
 from apps.dashboards.formatting import format_duration as _format_duration
 from apps.dashboards.params import DashboardParams
+from apps.dashboards.person import Deviation
 from apps.github_sync.models import SyncRun
 from apps.metrics.registry import MetricDef
 from apps.metrics.types import MetricResult, SeriesPoint
@@ -126,6 +128,38 @@ def direction_class(result: MetricResult) -> str:
     return _DIRECTION_CLASSES[sign]
 
 
+def _signed(value: float) -> str:
+    """One decimal, with a sign, formatted like `percent` so the two sit together in one cell; a
+    value that rounds to zero is plain "0.0", never "+0.0" or "-0.0"."""
+    text = f"{value:+.1f}"
+    return "0.0" if text in ("+0.0", "-0.0") else text
+
+
+@register.filter(name="deviation_text")
+def deviation_text(deviation: Deviation | None, unit: str) -> str:
+    """A person's distance from a baseline on the person page's comparison table: percentage
+    points for a ratio (a relative change of a share — "+50%" for 20% vs 30% — reads as nonsense),
+    a relative change for everything else. Signed, so the arrow beside it is not the only cue."""
+    if deviation is None:
+        return EM_DASH
+    if unit == "ratio":
+        return gettext("%(points)s pp") % {"points": _signed(deviation.delta * 100)}
+    if deviation.delta_ratio is None:
+        return EM_DASH
+    return f"{_signed(deviation.delta_ratio * 100)}%"
+
+
+@register.simple_tag(name="deviation_class")
+def deviation_class(
+    deviation: Deviation | None, definition: MetricDef, below_min_sample: bool = False
+) -> str:
+    """The same good/bad/neutral colour as a KPI card's delta, from the metric's own direction —
+    and neutral on a small sample, where the gap to a baseline is mostly noise."""
+    if deviation is None or below_min_sample:
+        return _DIRECTION_CLASSES["neutral"]
+    return _DIRECTION_CLASSES[_direction_sign(definition, deviation.delta, deviation.delta_ratio)]
+
+
 @register.simple_tag(name="sparkline_svg")
 def sparkline_svg(series: tuple[SeriesPoint, ...]) -> SafeString:
     """An inline SVG sparkline built server-side from `MetricResult.series` — no Chart.js, no
@@ -184,6 +218,19 @@ def data_as_of_banner() -> dict[str, object]:
         else None
     )
     return {"finished_at": finished_at}
+
+
+@register.inclusion_tag("dashboards/partials/ai_cohort_info.html", takes_context=True)
+def ai_cohort_info(context: template.Context) -> dict[str, object]:
+    """The dashboards' collapsible explanation of how a pull request gets into the AI cohort. An
+    inclusion tag, like `data_as_of_banner`, so every dashboard page and its htmx fragment carry it
+    without each view building its context; one query, for the tools the active rules cover."""
+    request = context.get("request")
+    user = getattr(request, "user", None)
+    return {
+        "rules": cohort_rules(),
+        "can_manage_rules": bool(user is not None and user.has_perm("catalog.manage_settings")),
+    }
 
 
 @register.simple_tag(name="metric_title")
