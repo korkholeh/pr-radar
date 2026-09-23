@@ -28,7 +28,7 @@
         <th scope="col">{% translate "Rule" %}</th>
         <th scope="col">{% translate "Severity" %}</th>
         <th scope="col">{% translate "Status" %}</th>
-        <th scope="col">{% translate "Age" %}</th>
+        <th scope="col">{% translate "PR opened" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -55,7 +55,14 @@
           </td>
           <td>{{ violation.get_severity_display }}</td>
           <td>{{ violation.get_status_display }}</td>
-          <td>{{ violation.created_at|timesince }}</td>
+          {# The violation's own `created_at` is when a sync or recompute wrote it, so a backfill gives #}
+          {# hundreds of rows the same value; the pull request's date is what tells them apart. #}
+          {% blocktranslate asvar recorded_title with date=violation.created_at|date:"SHORT_DATETIME_FORMAT" trimmed %}
+            Violation recorded on {{ date }}
+          {% endblocktranslate %}
+          <td class="whitespace-nowrap" title="{{ recorded_title }}">
+            {{ violation.pull_request.created_at|date:"SHORT_DATE_FORMAT" }}
+          </td>
         </tr>
       {% empty %}
         <tr>

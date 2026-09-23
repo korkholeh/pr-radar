@@ -116,6 +116,12 @@
 
 ### Fixed
 
+- **The Policy table's "Age" column is replaced by the pull request's date.** It showed the time since the
+  violation row was written, and a sync or recompute writes hundreds of rows in one run, so most rows read the
+  same "2 days, 3 hours". The column is now "PR opened" — the pull request's creation date, with the date the
+  violation was recorded in its tooltip — and the table lists the newest pull requests first. On the pull request
+  page the same column is now "Recorded", with the date and time instead of an elapsed duration.
+
 - **The Policy page's by-rule chart no longer disagrees with the table without saying why.** The chart counts
   every violation raised in the period, in any status; the table below lists open violations only by default. A
   rule whose violations had all been resolved showed a bar and an empty table. The chart is now titled "New

@@ -4048,7 +4048,7 @@ msgstr "Є відкриті порушення"
 
 #: apps/dashboards/templates/dashboards/partials/filter_bar.html:231
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:83
-#: apps/policy/templates/policy/partials/violations.html:85
+#: apps/policy/templates/policy/partials/violations.html:92
 msgid "Apply"
 msgstr "Застосувати"
 
@@ -4447,9 +4447,8 @@ msgstr "Вибрати"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:37
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:107
-#: apps/policy/templates/policy/partials/violations.html:31
-msgid "Age"
-msgstr "Вік"
+msgid "Recorded"
+msgstr "Записано"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:48
 #: apps/policy/templates/policy/partials/violations.html:42
@@ -4462,30 +4461,30 @@ msgstr "На цьому pull request немає порушень політик�
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:73
 #: apps/policy/forms.py:106
-#: apps/policy/templates/policy/partials/violations.html:75
+#: apps/policy/templates/policy/partials/violations.html:82
 msgid "Action"
 msgstr "Дія"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:74
 #: apps/policy/forms.py:99
-#: apps/policy/templates/policy/partials/violations.html:76
+#: apps/policy/templates/policy/partials/violations.html:83
 msgid "Acknowledge"
 msgstr "Взяти до відома"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:75
 #: apps/policy/forms.py:100
-#: apps/policy/templates/policy/partials/violations.html:77
+#: apps/policy/templates/policy/partials/violations.html:84
 msgid "Waive"
 msgstr "Прийняти ризик"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:79
 #: apps/policy/forms.py:108
-#: apps/policy/templates/policy/partials/violations.html:81
+#: apps/policy/templates/policy/partials/violations.html:88
 msgid "Comment"
 msgstr "Коментар"
 
 #: apps/dashboards/templates/dashboards/partials/pr_violations.html:80
-#: apps/policy/templates/policy/partials/violations.html:82
+#: apps/policy/templates/policy/partials/violations.html:89
 msgid "Comment (required)"
 msgstr "Коментар (обов'язково)"
 
@@ -5013,7 +5012,7 @@ msgstr "Обчислення churn перевищило час очікуван�
 msgid "A git error occurred while measuring churn."
 msgstr "Під час вимірювання churn сталася помилка git."
 
-#: apps/dashboards/views.py:469 apps/policy/views.py:106
+#: apps/dashboards/views.py:469 apps/policy/views.py:108
 #, python-format
 msgid "Updated %(updated)s violation; skipped %(skipped)s resolved violation."
 msgid_plural ""
@@ -5027,7 +5026,7 @@ msgstr[2] ""
 msgstr[3] ""
 "Оновлено %(updated)s порушення; пропущено %(skipped)s вирішеного порушення."
 
-#: apps/dashboards/views.py:473 apps/policy/views.py:110
+#: apps/dashboards/views.py:473 apps/policy/views.py:112
 #, python-format
 msgid "Updated %(updated)s violation."
 msgid_plural "Updated %(updated)s violations."
@@ -7136,11 +7135,20 @@ msgstr ""
 "Додайте правило, щоб позначати pull request-и, які торкаються чутливих "
 "шляхів."
 
-#: apps/policy/templates/policy/partials/violations.html:63
+#: apps/policy/templates/policy/partials/violations.html:31
+msgid "PR opened"
+msgstr "PR відкрито"
+
+#: apps/policy/templates/policy/partials/violations.html:60
+#, python-format
+msgid "Violation recorded on %(date)s"
+msgstr "Порушення записано %(date)s"
+
+#: apps/policy/templates/policy/partials/violations.html:70
 msgid "No policy violations."
 msgstr "Немає порушень політики."
 
-#: apps/policy/templates/policy/partials/violations.html:64
+#: apps/policy/templates/policy/partials/violations.html:71
 msgid ""
 "No policy violations match these filters. Widen the filters to see more."
 msgstr ""

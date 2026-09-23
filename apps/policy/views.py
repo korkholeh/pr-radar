@@ -63,7 +63,9 @@ def _filtered_violations(scope: ScopeFilter, cleaned: dict[str, Any]):
     queryset = (
         violations_in_scope(scope)
         .select_related("pull_request", "pull_request__repository", "resolved_by")
-        .order_by("-created_at")
+        # Newest pull request first: the violation's own `created_at` is when a sync wrote it, and
+        # a backfill writes hundreds in one run, so ordering by it is close to arbitrary.
+        .order_by("-pull_request__created_at", "-pk")
     )
     if cleaned.get("rule_code"):
         queryset = queryset.filter(rule_code=cleaned["rule_code"])

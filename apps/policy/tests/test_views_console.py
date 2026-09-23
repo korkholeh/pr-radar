@@ -151,3 +151,21 @@ def test_console_query_count_is_bounded(client, lead_user):
         response = client.get(reverse("policy:console"))
     assert response.status_code == 200
     assert len(ctx.captured_queries) < 20
+
+
+@freeze_time("2026-06-15T12:00:00Z")
+def test_table_shows_and_orders_by_the_pull_requests_date_not_the_recording_time(client, lead_user):
+    """A sync writes a whole backfill's violations in one run, so their own `created_at` is the
+    same for hundreds of rows; the pull request's opening date is what tells them apart."""
+    older_pr = PullRequestFactory(created_at=datetime.datetime(2026, 5, 2, 9, tzinfo=datetime.UTC))
+    newer_pr = PullRequestFactory(created_at=datetime.datetime(2026, 6, 10, 9, tzinfo=datetime.UTC))
+    older = PolicyViolationFactory(pull_request=older_pr)
+    newer = PolicyViolationFactory(pull_request=newer_pr)
+    client.force_login(lead_user)
+
+    response = client.get(reverse("policy:console"))
+
+    assert [violation.pk for violation in response.context["page_obj"]] == [newer.pk, older.pk]
+    content = response.content.decode()
+    row = re.search(rf'<tr id="violation-row-{older.pk}">.*?</tr>', content, re.DOTALL).group(0)
+    assert "05/02/2026" in row or "02.05.2026" in row

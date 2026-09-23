@@ -34,7 +34,7 @@ page) — CLAUDE.md's htmx contract.
             <th scope="col">{% translate "Rule" %}</th>
             <th scope="col">{% translate "Severity" %}</th>
             <th scope="col">{% translate "Status" %}</th>
-            <th scope="col">{% translate "Age" %}</th>
+            <th scope="col">{% translate "Recorded" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,7 +56,7 @@ page) — CLAUDE.md's htmx contract.
               </td>
               <td>{{ violation.get_severity_display }}</td>
               <td>{{ violation.get_status_display }}</td>
-              <td>{{ violation.created_at|timesince }}</td>
+              <td>{{ violation.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
             </tr>
           {% empty %}
             <tr>
@@ -104,7 +104,7 @@ page) — CLAUDE.md's htmx contract.
             <tr>
               <th scope="col">{% translate "Rule" %}</th>
               <th scope="col">{% translate "Severity" %}</th>
-              <th scope="col">{% translate "Age" %}</th>
+              <th scope="col">{% translate "Recorded" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -117,7 +117,7 @@ page) — CLAUDE.md's htmx contract.
                   </div>
                 </td>
                 <td>{{ violation.get_severity_display }}</td>
-                <td>{{ violation.created_at|timesince }}</td>
+                <td>{{ violation.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
               </tr>
             {% endfor %}
           </tbody>
