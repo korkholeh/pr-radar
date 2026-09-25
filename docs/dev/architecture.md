@@ -155,7 +155,7 @@ Two rules the rest of the code depends on:
 
 ## Ingestion
 
-`manage.py sync` (or the huey task, or the Sync page button) takes a DB lock row, walks the active connections
+`manage.py sync` (or the hourly huey task, or the Sync page button) takes a DB lock row, walks the active connections
 round-robin so one rate-limited connection does not stall the others, and for each repository pages GraphQL from
 its `last_synced_at` watermark minus `SYNC_OVERLAP`. Each PR's upserts run in one transaction;
 `process_pull_request` runs on commit.

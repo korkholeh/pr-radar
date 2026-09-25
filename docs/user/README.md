@@ -32,7 +32,7 @@ uv run python manage.py runserver 8000     # the web app
 uv run python manage.py run_huey           # the background worker
 ```
 
-Open <http://127.0.0.1:8000/> and log in. The full installation page — scheduling a nightly sync, backing up your
+Open <http://127.0.0.1:8000/> and log in. The full installation page — scheduling beyond the worker's built-in hourly sync, backing up your
 data, where the logs are — is [`../SETUP.md`](../SETUP.md).
 
 If you just want to see what the dashboards look like before connecting anything real, run

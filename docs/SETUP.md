@@ -74,8 +74,8 @@ in one run.
 
 ## Scheduling
 
-`run_huey` (see "Run" above) already runs `sync`, `compute_baselines` (01:00 server time), `compute_churn`
-(02:00 server time) and the export-cleanup task
+`run_huey` (see "Run" above) already runs `sync` (at the top of every hour), `compute_baselines` (01:00 server
+time), `compute_churn` (02:00 server time) and the export-cleanup task (03:00 server time)
 on its own internal scheduler as long as the process stays up — for most single-operator setups that is enough,
 and nothing below is required. Use an OS scheduler instead when you want the web process and the worker to
 survive a reboot unattended, or when you'd rather have `cron`/`launchd` retry a crashed run than rely on the

@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Sync runs by itself every hour.** The background worker (`run_huey`) now starts a sync at the top of every
+  hour, recorded on the Sync page with the "Schedule" trigger. Before, the worker only ran a sync when someone
+  pressed **Sync now**, even though the setup guide said otherwise. An hour whose run finds another sync still in
+  progress is skipped. A cron or launchd `manage.py sync` entry is no longer needed while the worker is running.
+
 - **The pull request list flags violations at a glance.** The Violations cell carries a traffic-light icon: a
   green check when the pull request has no open policy violations, an amber alert for exactly one and a red alert
   for two or more. The same icon shows in the pull request table on the dashboards. Exports are unchanged.
